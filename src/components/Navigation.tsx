@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, UserCircle } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, LogOut, UserCircle, Shield, GraduationCap, Building } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -11,12 +11,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, userProfile, signOut, isLoading } = useAuth();
+  const { user, userProfile, signOut, isLoading, updateUserRole } = useAuth();
   
   const isSlideViewerRoute = location.pathname === "/slides";
   const isDashboardRoute = location.pathname === "/dashboard";
@@ -27,14 +32,42 @@ const Navigation = () => {
   
   const userDisplayName = userProfile?.display_name || user?.email?.split('@')[0] || 'User';
   const userRole = userProfile?.role || 'guest';
+  const isDebugger = userRole === 'debugger';
+
+  const handleRoleChange = (value: string) => {
+    if (value !== userRole && (value === 'student' || value === 'business')) {
+      updateUserRole(value as 'student' | 'business');
+      toast.success(`ロールを ${value === 'student' ? '学生' : '企業'} に切り替えました`);
+    }
+  };
+  
+  const getRoleColor = (role: string) => {
+    switch(role) {
+      case 'student': return 'bg-blue-600';
+      case 'business': return 'bg-purple-600';
+      case 'debugger': return 'bg-red-600';
+      default: return 'bg-gray-600';
+    }
+  };
+  
+  const getRoleBadge = (role: string) => {
+    switch(role) {
+      case 'student': return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">学生</Badge>;
+      case 'business': return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">企業</Badge>;
+      case 'debugger': return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">デバッガー</Badge>;
+      default: return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">ゲスト</Badge>;
+    }
+  };
   
   const UserAvatar = () => (
-    <div className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-medium">
-      {userDisplayName.charAt(0).toUpperCase()}
-    </div>
+    <Avatar className={`h-8 w-8 ${getRoleColor(userRole)} text-white`}>
+      <AvatarFallback>
+        {userDisplayName.charAt(0).toUpperCase()}
+      </AvatarFallback>
+    </Avatar>
   );
   
-  return <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+  return <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
@@ -82,21 +115,62 @@ const Navigation = () => {
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative rounded-full p-0 h-8 w-8">
+                    <Button variant="ghost" className="relative rounded-full p-0 h-8 w-8 hover:bg-gray-100">
+                      {isDebugger && (
+                        <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        </span>
+                      )}
                       <UserAvatar />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-64">
                     <DropdownMenuLabel>
-                      <div className="font-medium">{userDisplayName}</div>
-                      <div className="text-xs text-muted-foreground">{user.email}</div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium">{userDisplayName}</div>
+                          <div className="text-xs text-muted-foreground">{user.email}</div>
+                        </div>
+                        {getRoleBadge(userRole)}
+                      </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-xs px-2 py-1 rounded-sm">
-                      ロール: <span className="ml-1 font-medium capitalize">{userRole}</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+                    
+                    {isDebugger && (
+                      <>
+                        <div className="px-2 py-1.5">
+                          <p className="text-xs font-medium text-muted-foreground mb-2">ロールを切り替える</p>
+                          <DropdownMenuRadioGroup 
+                            value={userRole !== 'debugger' ? userRole : 'student'} 
+                            onValueChange={handleRoleChange}
+                          >
+                            <DropdownMenuRadioItem value="student" className="cursor-pointer">
+                              <GraduationCap className="mr-2 h-4 w-4" />
+                              <span>学生として表示</span>
+                            </DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="business" className="cursor-pointer">
+                              <Building className="mr-2 h-4 w-4" />
+                              <span>企業として表示</span>
+                            </DropdownMenuRadioItem>
+                          </DropdownMenuRadioGroup>
+                        </div>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="bg-red-50 text-red-600">
+                          <Shield className="mr-2 h-4 w-4" />
+                          <span>デバッグモード有効</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    
+                    <Link to="/dashboard">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <span>ダッシュボード</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    
+                    <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50">
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>ログアウト</span>
                     </DropdownMenuItem>
@@ -159,16 +233,52 @@ const Navigation = () => {
               
               {user ? (
                 <>
-                  <div className="flex items-center space-x-3 px-3 py-2">
-                    <UserAvatar />
-                    <div>
-                      <p className="font-medium text-gray-800">{userDisplayName}</p>
-                      <p className="text-xs text-gray-500">ロール: {userRole}</p>
+                  <div className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <UserAvatar />
+                      <div>
+                        <p className="font-medium text-gray-800">{userDisplayName}</p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
                     </div>
+                    {getRoleBadge(userRole)}
                   </div>
+                  
+                  {isDebugger && (
+                    <div className="p-3 bg-red-50 rounded-lg border border-red-100">
+                      <p className="text-xs font-medium text-red-800 mb-2">デバッグモード: ロールを切り替える</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button 
+                          size="sm" 
+                          variant={userRole === 'student' ? 'default' : 'outline'}
+                          className={userRole === 'student' ? 'bg-blue-600 hover:bg-blue-700' : ''} 
+                          onClick={() => handleRoleChange('student')}
+                        >
+                          <GraduationCap className="mr-1 h-4 w-4" />
+                          学生として表示
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant={userRole === 'business' ? 'default' : 'outline'}
+                          className={userRole === 'business' ? 'bg-purple-600 hover:bg-purple-700' : ''} 
+                          onClick={() => handleRoleChange('business')}
+                        >
+                          <Building className="mr-1 h-4 w-4" />
+                          企業として表示
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <Link to="/dashboard">
+                    <Button variant="outline" className="w-full justify-start">
+                      ダッシュボード
+                    </Button>
+                  </Link>
+                  
                   <Button 
                     variant="outline"
-                    className="w-full justify-start text-red-600 border-red-200"
+                    className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
                     onClick={() => signOut()}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
