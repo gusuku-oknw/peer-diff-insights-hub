@@ -1,28 +1,37 @@
+
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
   return <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <h1 className="font-bold gradient-primary bg-clip-text text-transparent text-2xl">
-                PeerDiffX
-              </h1>
+              <Link to="/">
+                <h1 className="font-bold gradient-primary bg-clip-text text-transparent text-2xl">
+                  PeerDiffX
+                </h1>
+              </Link>
             </div>
           </div>
           
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <a href="#features" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <a href="/#features" className="text-gray-700 hover:text-blue-600 transition-colors">
                 機能
               </a>
-              <a href="#pricing" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <a href="/#pricing" className="text-gray-700 hover:text-blue-600 transition-colors">
                 料金
               </a>
-              <a href="#about" className="text-gray-700 hover:text-blue-600 transition-colors">
+              <Link to="/demo" className="text-gray-700 hover:text-blue-600 transition-colors">
+                デモ
+              </Link>
+              <a href="/#about" className="text-gray-700 hover:text-blue-600 transition-colors">
                 について
               </a>
             </div>
@@ -33,9 +42,11 @@ const Navigation = () => {
               <Button variant="ghost" className="text-gray-700">
                 ログイン
               </Button>
-              <Button className="gradient-primary text-white hover:opacity-90">
-                無料で始める
-              </Button>
+              <Link to="/demo">
+                <Button className="gradient-primary text-white hover:opacity-90">
+                  無料で始める
+                </Button>
+              </Link>
             </div>
           </div>
           
@@ -55,6 +66,9 @@ const Navigation = () => {
             <a href="#pricing" className="block px-3 py-2 text-gray-700">
               料金
             </a>
+            <Link to="/demo" className="block px-3 py-2 text-gray-700">
+              デモ
+            </Link>
             <a href="#about" className="block px-3 py-2 text-gray-700">
               について
             </a>
@@ -62,9 +76,11 @@ const Navigation = () => {
               <Button variant="ghost" className="w-full justify-start">
                 ログイン
               </Button>
-              <Button className="w-full gradient-primary text-white">
-                無料で始める
-              </Button>
+              <Link to="/demo">
+                <Button className="w-full gradient-primary text-white">
+                  無料で始める
+                </Button>
+              </Link>
             </div>
           </div>
         </div>}
