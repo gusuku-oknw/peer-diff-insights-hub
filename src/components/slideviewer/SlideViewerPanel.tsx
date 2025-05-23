@@ -122,27 +122,15 @@ const SlideViewerPanel = ({
           <EditToolbar currentSlide={currentSlide} toggleSidebar={toggleSidebar} />
         )}
         
-        {/* Slide content */}
+        {/* Slide content - DOM構造をシンプル化 */}
         <div className="flex flex-1 relative overflow-hidden">
-          <div className="flex-1 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-            {/* Slide canvas */}
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transform: `scale(${zoom / 100})`,
-                transition: "transform 0.3s ease",
-              }}
-            >
-              <FabricSlideCanvas
-                currentSlide={currentSlide}
-                zoomLevel={zoom}
-                editable={viewerMode === "edit"}
-              />
-            </div>
+          <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden">
+            {/* キャンバスコンポーネントを配置 - スケーリングはフック内で行うのでここでは行わない */}
+            <FabricSlideCanvas
+              currentSlide={currentSlide}
+              zoomLevel={zoom}
+              editable={viewerMode === "edit"}
+            />
             
             {/* Navigation controls in presentation mode */}
             {viewerMode === "presentation" && (
