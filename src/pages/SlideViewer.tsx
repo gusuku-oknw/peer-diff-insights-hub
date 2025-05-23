@@ -10,23 +10,7 @@ import HistorySidebar from "@/components/slideviewer/HistorySidebar";
 import SlideViewerPanel from "@/components/slideviewer/SlideViewerPanel";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import { CommitHistory } from "@/components/slideviewer/HistorySidebar";
-
-// Define the viewer modes
-type ViewerMode = "presentation" | "edit" | "review";
-
-// Define mock comments data
-const mockComments = {
-  1: [
-    { id: 1, author: "Student #2", text: "タイトルがもう少し具体的だと良いかも", position: { x: 120, y: 80 }, status: "pending" },
-    { id: 2, author: "Student #5", text: "このグラフの数値がわかりにくいです", position: { x: 320, y: 220 }, status: "in-progress" }
-  ],
-  2: [
-    { id: 3, author: "Student #1", text: "このスライドの背景色を変えた方が読みやすいです", position: { x: 200, y: 150 }, status: "completed" }
-  ],
-  4: [
-    { id: 4, author: "Student #3", text: "このデータの出典情報を追加した方が良いです", position: { x: 280, y: 190 }, status: "pending" }
-  ]
-};
+import { useSlideStore } from "@/stores/slideStore";
 
 // Define commented slides for student progress tracking
 const commentedSlides = [1, 2]; // Slides where the current student has already commented
@@ -35,19 +19,31 @@ const SlideViewer = () => {
   const { toast } = useToast();
   const { userProfile } = useAuth();
   
-  const [currentSlide, setCurrentSlide] = useState(1);
-  const [showComments, setShowComments] = useState(false);
-  const totalSlides = 5; // This would come from the actual slide data
-  const [zoom, setZoom] = useState(100);
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
-  const [showPresenterNotes, setShowPresenterNotes] = useState(false);
+  // Use Zustand store for state management
+  const { 
+    currentSlide, 
+    zoom, 
+    viewerMode, 
+    isFullScreen,
+    leftSidebarOpen,
+    showPresenterNotes,
+    presentationStartTime,
+    displayCount,
+    slides,
+    setCurrentSlide,
+    previousSlide,
+    nextSlide,
+    setZoom,
+    setViewerMode,
+    toggleLeftSidebar,
+    toggleFullScreen,
+    togglePresenterNotes,
+    startPresentation,
+    setDisplayCount
+  } = useSlideStore();
   
-  // New state for viewer mode (renamed from 'notes' to 'presentation')
-  const [viewerMode, setViewerMode] = useState<ViewerMode>("presentation");
-  
-  // Display count for multi-monitor support
-  const [displayCount, setDisplayCount] = useState(1);
+  const totalSlides = slides.length;
+  const [elapsedTime, setElapsedTime] = useState<string>("00:00");
 
   // Mock data for branch and commit history
   const [currentBranch, setCurrentBranch] = useState("main");
@@ -59,18 +55,10 @@ const SlideViewer = () => {
     { id: "m1n2o3p", message: "初回コミット", author: "山本さん", date: "2025年5月19日", reviewStatus: "approved" }
   ];
 
-  // Mock presenter notes
-  const presenterNotes = {
-    1: "このスライドでは、Q4の業績についての概要を説明します。市場予測よりも20%増の売上を記録したことを強調しましょう。",
-    2: "会社概要では、特に海外展開の強化について触れてください。アジア市場での成長率が前年比40%であることを強調。",
-    3: "財務結果では、営業利益率が業界平均を上回っていることにフォーカスしてください。昨年比で5ポイント改善。",
-    4: "将来戦略では、新製品開発のロードマップと市場投入時期について詳しく説明してください。特に第2四半期の新製品に注目。",
-    5: "質疑応答セクションでは、投資家から予想される質問への回答をあらかじめ準備しておきます。特に配当政策について。"
-  };
-
-  // プレゼンテーション開始時間
-  const [presentationStartTime, setPresentationStartTime] = useState<Date | null>(null);
-  const [elapsedTime, setElapsedTime] = useState<string>("00:00");
+  // Mock presenter notes from our slides data
+  const presenterNotes = Object.fromEntries(
+    slides.map(slide => [slide.id, slide.notes])
+  );
 
   // Detect number of displays
   useEffect(() => {
@@ -94,8 +82,9 @@ const SlideViewer = () => {
         window.removeEventListener('resize', checkDisplays);
       }
     };
-  }, []);
+  }, [setDisplayCount]);
 
+  // Calculate elapsed time during presentations
   useEffect(() => {
     let interval: NodeJS.Timeout;
     
@@ -118,7 +107,7 @@ const SlideViewer = () => {
 
   const handlePreviousSlide = () => {
     if (currentSlide > 1) {
-      setCurrentSlide(currentSlide - 1);
+      previousSlide();
     } else {
       toast({
         title: "最初のスライドです",
@@ -130,7 +119,7 @@ const SlideViewer = () => {
 
   const handleNextSlide = () => {
     if (currentSlide < totalSlides) {
-      setCurrentSlide(currentSlide + 1);
+      nextSlide();
     } else {
       toast({
         title: "最後のスライドです",
@@ -146,37 +135,30 @@ const SlideViewer = () => {
     }
   };
 
-  const toggleFullScreen = useCallback(() => {
+  const toggleFullScreenWithEffects = useCallback(() => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(e => {
         console.error(`Error attempting to enable full-screen mode: ${e.message}`);
       });
-      setIsFullScreen(true);
+      toggleFullScreen();
       
       // プレゼンテーション開始時の処理
       if (!presentationStartTime) {
-        setPresentationStartTime(new Date());
+        startPresentation();
         setViewerMode("presentation");
-        setShowPresenterNotes(displayCount >= 2); // Only show notes if multiple displays
+        togglePresenterNotes(); // Only show notes if multiple displays
       }
     } else {
       if (document.exitFullscreen) {
         document.exitFullscreen();
-        setIsFullScreen(false);
+        toggleFullScreen();
       }
     }
-  }, [presentationStartTime, displayCount]);
+  }, [presentationStartTime, toggleFullScreen, startPresentation, setViewerMode, togglePresenterNotes]);
 
   // Handle mode change with visual feedback
-  const handleModeChange = (mode: ViewerMode) => {
+  const handleModeChange = (mode: "presentation" | "edit" | "review") => {
     setViewerMode(mode);
-    
-    // Automatically show comments in review mode
-    if (mode === "review") {
-      setShowComments(true);
-    } else if (mode === "presentation") {
-      setShowComments(false);
-    }
     
     toast({
       title: mode === "presentation" 
@@ -203,7 +185,7 @@ const SlideViewer = () => {
 
   // Start presentation
   const handleStartPresentation = () => {
-    toggleFullScreen();
+    toggleFullScreenWithEffects();
     
     toast({
       title: "プレゼンテーションが開始されました",
@@ -235,9 +217,9 @@ const SlideViewer = () => {
             onNextSlide={handleNextSlide}
             onZoomChange={handleZoomChange}
             onModeChange={handleModeChange}
-            onLeftSidebarToggle={() => setLeftSidebarOpen(!leftSidebarOpen)}
-            onFullScreenToggle={toggleFullScreen}
-            onShowPresenterNotesToggle={() => setShowPresenterNotes(!showPresenterNotes)}
+            onLeftSidebarToggle={toggleLeftSidebar}
+            onFullScreenToggle={toggleFullScreenWithEffects}
+            onShowPresenterNotesToggle={togglePresenterNotes}
             onStartPresentation={handleStartPresentation}
             onSaveChanges={handleSaveChanges}
           />
@@ -274,7 +256,7 @@ const SlideViewer = () => {
                           branches={branches}
                           commitHistory={commitHistory}
                           onBranchChange={setCurrentBranch}
-                          onClose={() => setLeftSidebarOpen(false)}
+                          onClose={toggleLeftSidebar}
                         />
                       </ResizablePanel>
                       
@@ -308,7 +290,7 @@ const SlideViewer = () => {
                   currentSlide={currentSlide}
                   totalSlides={totalSlides}
                   commentedSlides={commentedSlides}
-                  mockComments={mockComments}
+                  mockComments={{}}
                   userType={userProfile?.role === "student" ? "student" : "enterprise"}
                   onSlideSelect={setCurrentSlide}
                 />

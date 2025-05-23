@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronLeft, ChevronRight, Presentation, Pencil, MessageCircle, Share, Play, History, Settings, Save, Filter, ChevronRight as ChevronDown } from "lucide-react";
@@ -8,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-type ViewerMode = "presentation" | "edit" | "review";
+import { ViewerMode } from "@/stores/slideStore";
+
 interface ViewerToolbarProps {
   currentSlide: number;
   totalSlides: number;
@@ -29,6 +29,7 @@ interface ViewerToolbarProps {
   onStartPresentation: () => void;
   onSaveChanges: () => void;
 }
+
 const ViewerToolbar = ({
   currentSlide,
   totalSlides,
@@ -245,4 +246,5 @@ const ViewerToolbar = ({
       </div>
     </div>;
 };
+
 export default ViewerToolbar;

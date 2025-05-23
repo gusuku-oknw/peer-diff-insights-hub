@@ -1,14 +1,15 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
-import SlideCanvas from "@/components/slideviewer/SlideCanvas";
+import FabricSlideCanvas from "@/components/slideviewer/FabricSlideCanvas";
 import SlideNotesPanel from "@/components/slideviewer/SlideNotesPanel";
 import CommentList from "@/components/slideviewer/CommentList";
 import AIReviewSummary from "@/components/slideviewer/AIReviewSummary";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSlideStore } from "@/stores/slideStore";
 
 interface SlideViewerPanelProps {
   currentSlide: number;
@@ -84,7 +85,7 @@ const SlideViewerPanel = ({
               </div>
             )}
             
-            <SlideCanvas 
+            <FabricSlideCanvas 
               currentSlide={currentSlide} 
               zoomLevel={zoom} 
               editable={false}
@@ -114,7 +115,7 @@ const SlideViewerPanel = ({
           </div>
         )}
         
-        <SlideCanvas 
+        <FabricSlideCanvas 
           currentSlide={currentSlide} 
           zoomLevel={zoom} 
           editable={false}
@@ -131,7 +132,7 @@ const SlideViewerPanel = ({
       <ResizablePanel id="slide-canvas" order={1} className="overflow-hidden">
         <div className="flex-grow flex items-center justify-center h-full p-4 relative bg-gradient-to-br from-slate-50 to-gray-100">
           <div className="w-4/5 h-full flex items-center justify-center relative">
-            <SlideCanvas 
+            <FabricSlideCanvas 
               currentSlide={currentSlide} 
               zoomLevel={zoom} 
               editable={viewerMode === "edit"}
