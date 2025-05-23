@@ -1,7 +1,8 @@
+
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as fabric from 'fabric';
-import { CustomFabricObject } from '@/components/slideviewer/editor/FabricObjects';
 import { SlideElement } from '@/stores/slideStore';
+import { CustomFabricObject } from '@/components/slideviewer/editor/FabricObjects';
 
 interface UseFabricCanvasProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -10,6 +11,7 @@ interface UseFabricCanvasProps {
   editable?: boolean;
   elements?: SlideElement[];
   onUpdateElement?: (elementId: string, updates: Partial<SlideElement>) => void;
+  onSelectElement?: (element: CustomFabricObject | null) => void;
 }
 
 interface UseFabricCanvasResult {
@@ -17,6 +19,7 @@ interface UseFabricCanvasResult {
   initialized: boolean;
   renderElements: (elements: SlideElement[]) => void;
   reset: () => void;
+  selectedObject: CustomFabricObject | null;
 }
 
 export const useFabricCanvas = ({
@@ -25,12 +28,14 @@ export const useFabricCanvas = ({
   zoomLevel = 100,
   editable = false,
   elements = [],
-  onUpdateElement
+  onUpdateElement,
+  onSelectElement
 }: UseFabricCanvasProps): UseFabricCanvasResult => {
   const canvasInstance = useRef<fabric.Canvas | null>(null);
   const [initialized, setInitialized] = useState(false);
   const containerRef = useRef<HTMLElement | null>(null);
   const initialRenderRef = useRef(false);
+  const selectedObjectRef = useRef<CustomFabricObject | null>(null);
 
   // Initialize Fabric canvas with better error handling
   useEffect(() => {
@@ -69,6 +74,8 @@ export const useFabricCanvas = ({
           height: 900,
           selection: editable, // Allow selection only in editable mode
           preserveObjectStacking: true,
+          selectionBorderColor: '#2563eb', // 青色のボーダー
+          selectionLineWidth: 2,
         });
 
         // Set proper dimensions based on parent container
@@ -80,6 +87,111 @@ export const useFabricCanvas = ({
           // but scale the display with CSS
           canvas.setWidth(1600);
           canvas.setHeight(900);
+        }
+        
+        // Setup selection events if in edit mode
+        if (editable) {
+          canvas.on('selection:created', (e) => {
+            if (e.selected && e.selected.length > 0) {
+              const obj = e.selected[0] as CustomFabricObject;
+              selectedObjectRef.current = obj;
+              if (onSelectElement) onSelectElement(obj);
+            }
+          });
+          
+          canvas.on('selection:updated', (e) => {
+            if (e.selected && e.selected.length > 0) {
+              const obj = e.selected[0] as CustomFabricObject;
+              selectedObjectRef.current = obj;
+              if (onSelectElement) onSelectElement(obj);
+            }
+          });
+          
+          canvas.on('selection:cleared', () => {
+            selectedObjectRef.current = null;
+            if (onSelectElement) onSelectElement(null);
+          });
+          
+          // Enhanced object modification events
+          canvas.on('object:modified', (e) => {
+            const obj = e.target as CustomFabricObject;
+            if (!obj || !obj.customData?.id) return;
+            
+            const updates: any = {};
+            
+            // Calculate real dimensions accounting for scaling
+            let width, height;
+            
+            if (obj.type === 'rect') {
+              width = obj.width! * (obj.scaleX || 1);
+              height = obj.height! * (obj.scaleY || 1);
+              
+              // Reset scale to avoid double scaling
+              obj.set({
+                width: width,
+                height: height,
+                scaleX: 1,
+                scaleY: 1
+              });
+            } else if (obj.type === 'circle') {
+              const radius = obj.radius || 0;
+              const scale = obj.scaleX || 1; // アスペクト比を維持するため、X軸のみを考慮
+              width = radius * 2 * scale;
+              height = radius * 2 * scale;
+              
+              // Reset scale to avoid double scaling
+              obj.set({
+                radius: width / 2,
+                scaleX: 1,
+                scaleY: 1
+              });
+            } else if (obj.type === 'text') {
+              width = obj.width! * (obj.scaleX || 1);
+              height = obj.height! * (obj.scaleY || 1);
+              
+              // Reset scale to avoid double scaling
+              obj.set({
+                width: width,
+                scaleX: 1,
+                scaleY: 1
+              });
+            } else if (obj.type === 'image') {
+              width = obj.width! * (obj.scaleX || 1);
+              height = obj.height! * (obj.scaleY || 1);
+            } else {
+              width = obj.width || 0;
+              height = obj.height || 0;
+            }
+            
+            updates.position = { 
+              x: obj.left || 0, 
+              y: obj.top || 0 
+            };
+            
+            updates.size = { width, height };
+            updates.angle = obj.angle || 0;
+            
+            // Update the object in our store
+            if (onUpdateElement) {
+              onUpdateElement(obj.customData.id, updates);
+            }
+            
+            canvas.renderAll();
+          });
+          
+          // Text editing events
+          canvas.on('text:changed', (e) => {
+            const textObj = e.target as fabric.IText & CustomFabricObject;
+            if (!textObj || !textObj.customData?.id) return;
+            
+            if (onUpdateElement) {
+              onUpdateElement(textObj.customData.id, {
+                props: {
+                  text: textObj.text
+                }
+              });
+            }
+          });
         }
 
         canvasInstance.current = canvas;
@@ -104,7 +216,7 @@ export const useFabricCanvas = ({
         setInitialized(false);
       }
     };
-  }, [canvasRef, editable]);
+  }, [canvasRef, editable, onUpdateElement, onSelectElement]);
 
   // Improved zoom implementation using CSS transforms instead of canvas scaling
   useEffect(() => {
@@ -130,49 +242,11 @@ export const useFabricCanvas = ({
         containerRef.current.style.height = `${originalHeight * scaleFactor}px`;
       }
       
-      // No need to call setZoom which would affect internal coordinates
       canvas.renderAll();
     } catch (error) {
       console.error("Error applying zoom:", error);
     }
   }, [zoomLevel, initialized]);
-
-  // Set up object modification events when editable
-  useEffect(() => {
-    const canvas = canvasInstance.current;
-    if (!canvas || !initialized || !editable || !onUpdateElement) return;
-
-    try {
-      // Use a more generic type for the event handler that works with fabric.js v6
-      const handleObjectModified = (options: fabric.TOptions<fabric.TEvent>) => {
-        // Get the modified object either from the target or first selected object
-        const modifiedObject = options.target as CustomFabricObject;
-        if (!modifiedObject || !modifiedObject.customData?.id) return;
-        
-        // Calculate real dimensions accounting for scaling
-        const width = modifiedObject.width! * (modifiedObject.scaleX || 1);
-        const height = modifiedObject.height! * (modifiedObject.scaleY || 1);
-        
-        // Update the object in our store
-        onUpdateElement(modifiedObject.customData.id, {
-          position: { 
-            x: modifiedObject.left || 0, 
-            y: modifiedObject.top || 0 
-          },
-          size: { width, height },
-          angle: modifiedObject.angle || 0,
-        });
-      };
-
-      canvas.on('object:modified', handleObjectModified);
-      
-      return () => {
-        canvas.off('object:modified', handleObjectModified);
-      };
-    } catch (error) {
-      console.error("Error setting up modification events:", error);
-    }
-  }, [initialized, editable, onUpdateElement]);
 
   // Function to render elements to the canvas
   const renderElements = useCallback((elementsToRender: SlideElement[]) => {
@@ -205,10 +279,14 @@ export const useFabricCanvas = ({
                 fill: props.color || '#000000',
                 fontFamily: props.fontFamily || 'Arial',
                 fontWeight: props.fontWeight || 'normal',
+                fontStyle: props.fontStyle || 'normal',
+                textAlign: props.textAlign || 'left',
+                underline: props.underline || false,
                 angle: angle || 0,
                 originX: 'center',
                 originY: 'center',
                 selectable: editable,
+                editable: editable,
               }) as CustomFabricObject;
               
               text.customData = { id };
@@ -308,6 +386,7 @@ export const useFabricCanvas = ({
       canvas.clear();
       canvas.backgroundColor = '#ffffff';
       canvas.renderAll();
+      selectedObjectRef.current = null;
     } catch (error) {
       console.error("Error resetting canvas:", error);
     }
@@ -317,7 +396,8 @@ export const useFabricCanvas = ({
     canvas: canvasInstance.current, 
     initialized,
     renderElements,
-    reset
+    reset,
+    selectedObject: selectedObjectRef.current
   };
 };
 

@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import CommentList from "@/components/slideviewer/CommentList";
 import AIReviewSummary from "@/components/slideviewer/AIReviewSummary";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSlideStore } from "@/stores/slideStore";
+import EditToolbar from "@/components/slideviewer/editor/EditToolbar";
+import EditSidebar from "@/components/slideviewer/editor/EditSidebar";
 
 interface SlideViewerPanelProps {
   currentSlide: number;
@@ -39,6 +41,7 @@ const SlideViewerPanel = ({
   onSlideChange
 }: SlideViewerPanelProps) => {
   const { userProfile } = useAuth();
+  const [editSidebarOpen, setEditSidebarOpen] = useState(true);
   
   // Handle keyboard navigation
   useEffect(() => {
@@ -69,6 +72,10 @@ const SlideViewerPanel = ({
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [currentSlide, totalSlides, isFullScreen, onSlideChange]);
+  
+  const toggleEditSidebar = () => {
+    setEditSidebarOpen(prev => !prev);
+  };
   
   // If in full screen presentation mode, show a different layout
   if (viewerMode === "presentation" && isFullScreen) {
@@ -125,7 +132,39 @@ const SlideViewerPanel = ({
     );
   }
 
-  // Default layout (not in fullscreen presentation mode)
+  // Edit mode with enhanced UI
+  if (viewerMode === "edit") {
+    return (
+      <div className="h-full flex flex-col">
+        {/* Edit toolbar */}
+        <EditToolbar currentSlide={currentSlide} toggleSidebar={toggleEditSidebar} />
+        
+        {/* Main content */}
+        <div className="flex-grow flex">
+          {/* Edit sidebar - conditional rendering */}
+          {editSidebarOpen && (
+            <div className="w-64 border-r border-gray-200 bg-white">
+              <EditSidebar currentSlide={currentSlide} />
+            </div>
+          )}
+          
+          {/* Canvas area */}
+          <div className="flex-grow bg-gray-50 p-4">
+            <div className="h-full flex items-center justify-center">
+              <FabricSlideCanvas 
+                currentSlide={currentSlide} 
+                zoomLevel={zoom} 
+                editable={true} 
+                userType={userProfile?.role === "student" ? "student" : "enterprise"}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default layout (review mode or non-fullscreen presentation mode)
   return (
     <ResizablePanelGroup direction="horizontal" className="h-full">
       {/* Slide canvas */}
