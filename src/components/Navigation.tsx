@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, UserCircle, Shield, GraduationCap, Building } from "lucide-react";
 import { useState } from "react";
@@ -39,8 +38,13 @@ const Navigation = () => {
 
   const handleRoleChange = (value: string) => {
     if (value !== userRole && (value === 'student' || value === 'business')) {
-      updateUserRole(value as 'student' | 'business');
-      toast.success(`ロールを ${value === 'student' ? '学生' : '企業'} に切り替えました`);
+      // For debuggers, we don't want to actually update the role in the database
+      // Just show a toast notification for the UI change
+      if (isDebugger) {
+        toast.success(`ロールを ${value === 'student' ? '学生' : '企業'} に切り替えました`);
+      } else {
+        updateUserRole(value as 'student' | 'business');
+      }
     }
   };
   

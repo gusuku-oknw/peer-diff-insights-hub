@@ -14,14 +14,16 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Card, CardContent } from "@/components/ui/card";
 
 const Dashboard = () => {
-  const { userProfile, updateUserRole } = useAuth();
-  const [activeTab, setActiveTab] = useState<"student" | "business" | "debugger">("student");
+  const { userProfile } = useAuth();
+  const [activeTab, setActiveTab] = useState<"student" | "business">("student");
 
   // Set the default tab based on user role when the component mounts or userProfile changes
   useEffect(() => {
     if (userProfile && userProfile.role) {
-      if (userProfile.role === "student" || userProfile.role === "business" || userProfile.role === "debugger") {
-        setActiveTab(userProfile.role === "debugger" ? "student" : userProfile.role);
+      if (userProfile.role === "student" || userProfile.role === "business") {
+        setActiveTab(userProfile.role);
+      } else if (userProfile.role === "debugger") {
+        setActiveTab("student"); // Default to student view for debuggers
       }
     }
   }, [userProfile]);
@@ -32,9 +34,8 @@ const Dashboard = () => {
     const role = value as "student" | "business";
     setActiveTab(role);
     
-    // If the user has switched to a different role, update their profile
-    if (userProfile && userProfile.role === "debugger") {
-      updateUserRole(role);
+    // Show toast notification for debuggers when switching views
+    if (userProfile?.role === "debugger") {
       toast(`${role === 'student' ? '学生' : '企業'}ビューに切り替えました`, {
         icon: role === 'student' ? <GraduationCap className="h-5 w-5" /> : 
               <Building className="h-5 w-5" />
