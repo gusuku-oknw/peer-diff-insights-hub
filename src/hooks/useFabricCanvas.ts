@@ -77,9 +77,10 @@ export const useFabricCanvas = ({
     const canvas = canvasInstance.current;
     if (!canvas || !initialized || !editable || !onUpdateElement) return;
 
-    // Use the correct type for object:modified event in Fabric.js v6
-    const handleObjectModified = (options: fabric.ModifiedEvent<fabric.TPointerEvent>) => {
-      const modifiedObject = options.selected?.[0] || options.target as CustomFabricObject;
+    // Fix: Use a more generic type for the event handler that works with fabric.js v6
+    const handleObjectModified = (options: fabric.TOptions<fabric.TEvent>) => {
+      // Get the modified object either from the target or first selected object
+      const modifiedObject = options.target as CustomFabricObject;
       if (!modifiedObject || !modifiedObject.customData?.id) return;
       
       // Calculate real dimensions accounting for scaling

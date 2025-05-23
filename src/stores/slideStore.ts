@@ -57,8 +57,8 @@ interface SlideState {
 }
 
 // Correctly define the types for Zustand's SetState and GetState
-type SetState = StateCreator<SlideState>['setState'];
-type GetState = StateCreator<SlideState>['getState'];
+type SetState = (fn: (state: SlideState) => Partial<SlideState>) => void;
+type GetState = () => SlideState;
 
 // Mock slide data similar to what you have
 const mockSlides: Slide[] = [
