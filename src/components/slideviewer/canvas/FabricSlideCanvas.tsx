@@ -1,5 +1,5 @@
 
-import React, { useRef, useCallback, useMemo, memo, useEffect } from "react";
+import React, { useRef, useCallback, useMemo, memo, useEffect, useState } from "react";
 import { useSlideStore } from "@/stores/slideStore";
 import { useCanvas } from "@/hooks/fabric/useCanvas";
 import { CustomFabricObject } from '@/utils/types/canvas.types';
@@ -23,10 +23,9 @@ const FabricSlideCanvas = ({
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const slides = useSlideStore(state => state.slides);
   const updateElement = useSlideStore(state => state.updateElement);
-  const prevEditableRef = useRef(editable);
-  const prevSlideRef = useRef(currentSlide);
+  const [renderKey, setRenderKey] = useState(0);
   
-  // 現在のスライドの要素を取得 - useMemoでパフォーマンスを最適化
+  // 現在のスライドの要素を取得
   const currentSlideData = useMemo(() => {
     return slides.find(slide => slide.id === currentSlide);
   }, [slides, currentSlide]);
@@ -35,28 +34,25 @@ const FabricSlideCanvas = ({
     return currentSlideData?.elements || [];
   }, [currentSlideData]);
 
-  // 要素更新ハンドラ - メモ化して再レンダリングを防止
+  // モードが変更された場合は強制的に再レンダリング
+  useEffect(() => {
+    setRenderKey(prevKey => prevKey + 1);
+    console.log(`FabricSlideCanvas mode changed, forcing re-render. Editable: ${editable}`);
+  }, [editable]);
+
+  // 要素更新ハンドラ
   const handleUpdateElement = useCallback((elementId: string, updates: any) => {
     updateElement(currentSlide, elementId, updates);
   }, [updateElement, currentSlide]);
   
-  // 要素選択ハンドラもメモ化
+  // 要素選択ハンドラ
   const handleSelectElement = useCallback((element: CustomFabricObject | null) => {
     if (element) {
       console.log("Selected element:", element.customData?.id);
     }
   }, []);
-
-  // editableの変更を検出して強制的にキャンバスを再レンダリング
-  useEffect(() => {
-    if (prevEditableRef.current !== editable || prevSlideRef.current !== currentSlide) {
-      console.log(`Canvas state changed: editable=${prevEditableRef.current}->${editable}, slide=${prevSlideRef.current}->${currentSlide}`);
-      prevEditableRef.current = editable;
-      prevSlideRef.current = currentSlide;
-    }
-  }, [editable, currentSlide]);
   
-  // useCanvas フックを使用したキャンバス管理
+  // useCanvas フックを使用したキャンバス管理 (renderKeyを依存関係に追加)
   const { canvasReady, loadingError } = useCanvas({
     canvasRef,
     currentSlide,
@@ -67,7 +63,7 @@ const FabricSlideCanvas = ({
     onSelectElement: handleSelectElement
   });
   
-  // キャンバスコンテナのスタイル - useMemoで再計算を防止
+  // キャンバスコンテナのスタイル
   const containerStyle = useMemo(() => ({
     position: 'relative' as const,
     transformStyle: 'preserve-3d' as const,
@@ -82,6 +78,7 @@ const FabricSlideCanvas = ({
         ref={canvasContainerRef} 
         className="will-change-transform"
         style={containerStyle}
+        key={`container-${renderKey}`}
       >
         <canvas 
           ref={canvasRef} 
@@ -89,6 +86,7 @@ const FabricSlideCanvas = ({
           data-testid="fabric-canvas"
           data-editable={editable ? "true" : "false"}
           data-slide={currentSlide}
+          key={`canvas-${renderKey}`}
         />
         
         {!canvasReady && <CanvasLoadingIndicator />}
@@ -123,22 +121,26 @@ const CanvasErrorDisplay = ({ error }: { error: string }) => (
   </div>
 );
 
-// より厳密なメモ化条件
+// メモ化条件を修正
 export default memo(FabricSlideCanvas, (prevProps, nextProps) => {
-  // editable状態の変更を必ず検知するように修正
-  const unchanged = 
-    prevProps.currentSlide === nextProps.currentSlide &&
-    prevProps.zoomLevel === nextProps.zoomLevel &&
-    prevProps.editable === nextProps.editable &&
-    prevProps.userType === nextProps.userType;
-    
+  // 一貫性のために変数に格納
+  const slideUnchanged = prevProps.currentSlide === nextProps.currentSlide;
+  const zoomUnchanged = prevProps.zoomLevel === nextProps.zoomLevel;
+  const editableUnchanged = prevProps.editable === nextProps.editable;
+  const userTypeUnchanged = prevProps.userType === nextProps.userType;
+  
+  // すべてのプロパティが変更されていない場合のみtrueを返す
+  const allUnchanged = slideUnchanged && zoomUnchanged && editableUnchanged && userTypeUnchanged;
+  
   // 変更があった場合は再レンダリング
-  if (!unchanged) {
+  if (!allUnchanged) {
     console.log('FabricSlideCanvas props changed, re-rendering', {
-      prevProps,
-      nextProps
+      slideChanged: !slideUnchanged,
+      zoomChanged: !zoomUnchanged,
+      editableChanged: !editableUnchanged,
+      userTypeChanged: !userTypeUnchanged
     });
   }
   
-  return unchanged;
+  return allUnchanged;
 });

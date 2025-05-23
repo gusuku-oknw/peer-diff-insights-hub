@@ -37,6 +37,15 @@ export const useCanvas = ({
   const prevEditableRef = useRef<boolean>(editable);
   const [forceRender, setForceRender] = useState(0);
 
+  // モード変更を検出して強制的に再レンダリング
+  useEffect(() => {
+    if (prevEditableRef.current !== editable) {
+      console.log(`Mode changed in useCanvas: ${prevEditableRef.current} -> ${editable}, forcing render`);
+      prevEditableRef.current = editable;
+      setForceRender(prev => prev + 1);
+    }
+  }, [editable]);
+
   // メモ化したonSelectElement関数
   const handleSelectElement = useCallback((obj: CustomFabricObject | null) => {
     selectedObjectRef.current = obj;
@@ -48,15 +57,6 @@ export const useCanvas = ({
       if (onSelectElement) onSelectElement(null);
     }
   }, [onSelectElement]);
-
-  // 編集可能状態が変更された場合に強制的に再レンダリング
-  useEffect(() => {
-    if (prevEditableRef.current !== editable) {
-      console.log(`Canvas editable mode changed in useCanvas: ${prevEditableRef.current} -> ${editable}, forcing render`);
-      prevEditableRef.current = editable;
-      setForceRender(prev => prev + 1);
-    }
-  }, [editable]);
 
   // キャンバス初期化フック
   const { canvas, initialized, containerRef } = useCanvasInitialization({
@@ -81,7 +81,7 @@ export const useCanvas = ({
     onUpdateElement
   });
 
-  // 要素レンダリングフック - メモ化した依存関係で再レンダリングを最適化
+  // 要素レンダリングフック
   const { renderElements, reset } = useElementsRenderer({
     canvas,
     initialized,
@@ -94,18 +94,15 @@ export const useCanvas = ({
     if (initialized && canvas) {
       setCanvasReady(true);
       setLoadingError(null);
+    } else {
+      setCanvasReady(false);
     }
   }, [initialized, canvas]);
 
-  // スライドが変更されたときに要素をレンダリング
+  // スライドが変更されたときや、モードが変更されたときに要素をレンダリング
   useEffect(() => {
     if (!canvas || !initialized) {
       console.log("Canvas not ready for rendering elements");
-      return;
-    }
-
-    if (!canvasReady) {
-      console.log("Canvas not in ready state yet");
       return;
     }
 
@@ -117,10 +114,10 @@ export const useCanvas = ({
     const elementsChanged = JSON.stringify(previousElementsRef.current) !== JSON.stringify(elements);
     previousElementsRef.current = [...elements];
 
-    // 強制レンダリングフラグまたは変更があった場合のみレンダリング
+    // モード変更、スライド変更、要素変更があった場合のみレンダリング
     if (slideChanged || elementsChanged || forceRender > 0) {
-      const maxRenderAttempts = 3;
       renderAttemptRef.current += 1;
+      const maxRenderAttempts = 3;
 
       console.log(`Rendering slide content for slide ${currentSlide}, attempt ${renderAttemptRef.current}, editable: ${editable}`);
       
@@ -146,7 +143,7 @@ export const useCanvas = ({
         }
       }
     }
-  }, [currentSlide, initialized, canvasReady, canvas, renderElements, elements, forceRender, editable]);
+  }, [currentSlide, initialized, canvas, renderElements, elements, forceRender, editable]);
 
   // 戻り値をメモ化して安定させる
   return useMemo(() => ({

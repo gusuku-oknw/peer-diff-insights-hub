@@ -37,40 +37,26 @@ export const useCanvasInitialization = ({
   }), [editable]);
 
   useEffect(() => {
-    // モードが変更された場合は再初期化の必要がある
+    // モードが変更された場合は再初期化が必要
     const modeChanged = prevEditableRef.current !== editable;
-    if (modeChanged) {
-      console.log(`Canvas editable mode changed: ${prevEditableRef.current} -> ${editable}, reinitializing`);
-      prevEditableRef.current = editable;
-      
-      // 既存のキャンバスがある場合は破棄して再初期化
-      if (canvasInstance.current) {
-        try {
-          canvasInstance.current.dispose();
-          canvasInstance.current = null;
-          setInitialized(false);
-        } catch (e) {
-          console.error("Error disposing canvas on mode change:", e);
-        }
-      }
-    }
-
+    prevEditableRef.current = editable;
+    
     // DOMがマウントされていることを確認
-    if (!document.body.contains(canvasRef.current)) {
-      console.log("Canvas element is not in DOM yet, waiting...");
+    if (!canvasRef.current || !document.body.contains(canvasRef.current)) {
+      console.log("Canvas element is not in DOM yet or not available, waiting...");
       return;
     }
 
-    // キャンバス要素が使用可能か確認
-    if (!canvasRef.current) {
-      console.log("Canvas reference is not available");
-      setInitialized(false);
-      return;
-    }
-
-    // 既に初期化されていて、モードも変更されていない場合はスキップ
-    if (initialized && canvasInstance.current && !modeChanged) {
-      return;
+    // 既存のキャンバスがある場合は破棄して再初期化
+    if (canvasInstance.current) {
+      try {
+        console.log(`Canvas disposal: editable=${editable}, modeChanged=${modeChanged}`);
+        canvasInstance.current.dispose();
+        canvasInstance.current = null;
+        setInitialized(false);
+      } catch (e) {
+        console.error("Error disposing canvas on mode change:", e);
+      }
     }
 
     // 初期化カウントを追跡
@@ -138,13 +124,13 @@ export const useCanvasInitialization = ({
           // unmount時の再初期化を防ぐためにフラグを設定
           setInitialized(false);
           canvasInstance.current.dispose();
+          canvasInstance.current = null;
         } catch (e) {
           console.error("Error disposing canvas:", e);
         }
-        canvasInstance.current = null;
       }
     };
-  }, [canvasRef, editable, onSelectElement, canvasConfig, initialized]);
+  }, [canvasRef, editable, onSelectElement, canvasConfig]);
 
   return {
     canvas: canvasInstance.current,

@@ -38,9 +38,18 @@ const SlideViewerPanel = ({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showDragTip, setShowDragTip] = useState(true);
   
+  // コンポーネントのレンダリングキー（モード変更時に強制的に再レンダリング）
+  const [renderKey, setRenderKey] = useState(0);
+  
   const { handlePreviousSlide, handleNextSlide } = useSlideNavigation({
     totalSlides
   });
+  
+  // モードが変更されたときに強制的に再レンダリング
+  useEffect(() => {
+    setRenderKey(prev => prev + 1);
+    console.log(`ViewerMode changed to: ${viewerMode}, forcing re-render`);
+  }, [viewerMode]);
   
   // Handle keyboard navigation
   useEffect(() => {
@@ -107,6 +116,7 @@ const SlideViewerPanel = ({
         <div className="flex flex-1 relative overflow-hidden">
           <div className="flex-1 flex items-center justify-center bg-slate-100 h-full">
             <FabricSlideCanvas
+              key={`slide-canvas-${renderKey}-${viewerMode}-${currentSlide}`}
               currentSlide={currentSlide}
               zoomLevel={zoom}
               editable={viewerMode === "edit"}
@@ -134,14 +144,16 @@ const SlideViewerPanel = ({
             )}
           </div>
           
-          {/* Right sidebar */}
-          <RightSidebar
-            shouldShowNotes={shouldShowNotes}
-            shouldShowReviewPanel={shouldShowReviewPanel}
-            currentSlide={currentSlide}
-            totalSlides={totalSlides}
-            presenterNotes={presenterNotes}
-          />
+          {/* Right sidebar - 条件を調整 */}
+          {(shouldShowNotes || shouldShowReviewPanel) && (
+            <RightSidebar
+              shouldShowNotes={shouldShowNotes}
+              shouldShowReviewPanel={shouldShowReviewPanel}
+              currentSlide={currentSlide}
+              totalSlides={totalSlides}
+              presenterNotes={presenterNotes}
+            />
+          )}
         </div>
       </div>
     </div>

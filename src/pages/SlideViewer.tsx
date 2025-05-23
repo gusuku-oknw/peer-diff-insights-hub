@@ -9,7 +9,6 @@ import MainLayout from "@/components/slideviewer/layout/MainLayout";
 import { useSlideStore } from "@/stores/slideStore";
 import useSlideNavigation from "@/hooks/slideviewer/useSlideNavigation";
 import usePresentationMode from "@/hooks/slideviewer/usePresentationMode";
-import { debounce } from "lodash";
 
 // Define commented slides for student progress tracking
 const commentedSlides = [1, 2]; // Slides where the current student has already commented
@@ -100,9 +99,16 @@ const SlideViewer = () => {
     }
   };
 
-  // メモ化されたモード切替ハンドラ（デバウンス処理も追加）
-  const handleModeChange = useMemo(() => debounce((mode: "presentation" | "edit" | "review") => {
-    console.log(`Mode change requested: ${mode}`);
+  // モード切替をデバウンスなしで即時適用するように変更
+  const handleModeChange = (mode: "presentation" | "edit" | "review") => {
+    console.log(`Mode change requested: ${mode} (current: ${viewerMode})`);
+    
+    // 同じモードの場合はスキップ
+    if (mode === viewerMode) {
+      console.log("Same mode selected, skipping update");
+      return;
+    }
+    
     setViewerMode(mode);
     
     toast({
@@ -117,7 +123,7 @@ const SlideViewer = () => {
           ? "スライドの編集が可能になります"
           : "コメントやフィードバックに集中できます",
     });
-  }, 300), [setViewerMode, toast]);
+  };
 
   // Save changes functionality
   const handleSaveChanges = () => {
