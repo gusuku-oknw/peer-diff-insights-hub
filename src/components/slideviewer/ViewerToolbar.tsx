@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -223,7 +224,13 @@ const ViewerToolbar = ({
           
           <div className="flex items-center">
             {/* Role indicator badge */}
-            {userProfile}
+            {userProfile && (
+              <Badge variant="outline" className="mr-3 text-xs">
+                {userProfile.role === "business" ? "企業ユーザー" : 
+                 userProfile.role === "student" ? "学生ユーザー" : 
+                 userProfile.role === "debugger" ? "デバッガー" : "ゲスト"}
+              </Badge>
+            )}
             
             {/* Mode-specific controls on the right */}
             {renderModeSpecificUI()}
