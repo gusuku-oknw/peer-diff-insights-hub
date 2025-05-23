@@ -1,26 +1,13 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  ChevronLeft, ChevronRight, Presentation, Pencil, MessageCircle, 
-  Share, Play, History, Settings, Save, Filter, ChevronRight as ChevronDown 
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Presentation, Pencil, MessageCircle, Share, Play, History, Settings, Save, Filter, ChevronRight as ChevronDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-
 type ViewerMode = "presentation" | "edit" | "review";
-
 interface ViewerToolbarProps {
   currentSlide: number;
   totalSlides: number;
@@ -31,7 +18,6 @@ interface ViewerToolbarProps {
   showPresenterNotes: boolean;
   presentationStartTime: Date | null;
   displayCount: number;
-  
   onPreviousSlide: () => void;
   onNextSlide: () => void;
   onZoomChange: (newZoom: number) => void;
@@ -42,7 +28,6 @@ interface ViewerToolbarProps {
   onStartPresentation: () => void;
   onSaveChanges: () => void;
 }
-
 const ViewerToolbar = ({
   currentSlide,
   totalSlides,
@@ -63,110 +48,74 @@ const ViewerToolbar = ({
   onStartPresentation,
   onSaveChanges
 }: ViewerToolbarProps) => {
-  const { toast } = useToast();
-  const { userProfile } = useAuth();
-  
+  const {
+    toast
+  } = useToast();
+  const {
+    userProfile
+  } = useAuth();
+
   // Mode-specific UI elements
   const renderModeSpecificUI = () => {
     switch (viewerMode) {
       case "edit":
-        return (
-          <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <span className="hidden lg:inline">テンプレート</span>
-            </Button>
+        return <div className="flex items-center space-x-3">
+            
             <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={onSaveChanges}>
               <Save className="h-4 w-4 mr-2" />
               保存
             </Button>
-          </div>
-        );
+          </div>;
       case "review":
-        return (
-          <div className="flex items-center space-x-3">
+        return <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm" className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
               <span className="hidden lg:inline">フィルター</span>
             </Button>
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="bg-purple-600 hover:bg-purple-700 text-white"
-              onClick={() => toast({
-                title: "フィードバックが送信されました",
-                description: "レビュー担当者にフィードバックが送信されました。",
-                variant: "default"
-              })}
-            >
+            <Button variant="default" size="sm" className="bg-purple-600 hover:bg-purple-700 text-white" onClick={() => toast({
+            title: "フィードバックが送信されました",
+            description: "レビュー担当者にフィードバックが送信されました。",
+            variant: "default"
+          })}>
               フィードバック送信
             </Button>
-          </div>
-        );
+          </div>;
       case "presentation":
-        return (
-          <div className="flex items-center space-x-3">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex items-center gap-2" 
-              onClick={onShowPresenterNotesToggle}
-              disabled={displayCount < 2 && isFullScreen}
-            >
+        return <div className="flex items-center space-x-3">
+            <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={onShowPresenterNotesToggle} disabled={displayCount < 2 && isFullScreen}>
               <Presentation className="h-4 w-4" />
               <span className="hidden lg:inline">
                 発表者メモ {showPresenterNotes ? '非表示' : '表示'}
                 {displayCount < 2 && isFullScreen && " (2画面必要)"}
               </span>
             </Button>
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={onStartPresentation}
-            >
+            <Button variant="default" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={onStartPresentation}>
               <Play className="h-4 w-4 mr-2" />
               プレゼン開始（全画面）
             </Button>
-          </div>
-        );
+          </div>;
       default:
         return null;
     }
   };
-
-  return (
-    <div className="bg-white border-b border-gray-200 py-3 shadow-sm flex-shrink-0 z-10">
+  return <div className="bg-white border-b border-gray-200 py-3 shadow-sm flex-shrink-0 z-10">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {/* Mode switcher tabs */}
-            <Tabs 
-              defaultValue={viewerMode} 
-              value={viewerMode} 
-              className="w-auto" 
-              onValueChange={(value) => onModeChange(value as ViewerMode)}
-            >
+            <Tabs defaultValue={viewerMode} value={viewerMode} className="w-auto" onValueChange={value => onModeChange(value as ViewerMode)}>
               <TabsList className="bg-slate-100 p-1">
-                <TabsTrigger 
-                  value="presentation" 
-                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white"
-                >
+                <TabsTrigger value="presentation" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
                   <Presentation className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">プレゼンテーション</span>
                 </TabsTrigger>
                 
-                <TabsTrigger 
-                  value="edit" 
-                  className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
-                >
+                <TabsTrigger value="edit" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">
                   <Pencil className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">編集</span>
                 </TabsTrigger>
                 
-                <TabsTrigger 
-                  value="review" 
-                  className="data-[state=active]:bg-purple-500 data-[state=active]:text-white"
-                >
+                <TabsTrigger value="review" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white">
                   <MessageCircle className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">レビュー</span>
                 </TabsTrigger>
@@ -179,13 +128,7 @@ const ViewerToolbar = ({
             <div className="flex items-center space-x-1">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={onPreviousSlide} 
-                    disabled={currentSlide === 1} 
-                    className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50"
-                  >
+                  <Button variant="ghost" size="icon" onClick={onPreviousSlide} disabled={currentSlide === 1} className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50">
                     <ChevronLeft className="h-5 w-5" />
                   </Button>
                 </TooltipTrigger>
@@ -198,13 +141,7 @@ const ViewerToolbar = ({
               
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={onNextSlide} 
-                    disabled={currentSlide === totalSlides} 
-                    className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50"
-                  >
+                  <Button variant="ghost" size="icon" onClick={onNextSlide} disabled={currentSlide === totalSlides} className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50">
                     <ChevronRight className="h-5 w-5" />
                   </Button>
                 </TooltipTrigger>
@@ -286,11 +223,7 @@ const ViewerToolbar = ({
           
           <div className="flex items-center">
             {/* Role indicator badge */}
-            {userProfile && (
-              <Badge variant="secondary" className={userProfile.role === "student" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800 mr-3"}>
-                {userProfile.role === "student" ? "学生" : "企業"}
-              </Badge>
-            )}
+            {userProfile}
             
             {/* Mode-specific controls on the right */}
             {renderModeSpecificUI()}
@@ -303,8 +236,6 @@ const ViewerToolbar = ({
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ViewerToolbar;
