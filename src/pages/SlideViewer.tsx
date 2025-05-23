@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -132,7 +131,7 @@ const SlideViewer = () => {
     toast({
       title: "変更が保存されました",
       description: "すべての変更が正常に保存されました。",
-      variant: "success"
+      variant: "default"
     });
   };
 

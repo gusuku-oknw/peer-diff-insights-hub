@@ -1,9 +1,8 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, Plus, Tag, ThumbsUp, AlertCircle } from "lucide-react";
+import { MessageSquare, Plus, Tag, ThumbsUp, AlertCircle, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Select,
