@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,7 +12,6 @@ import SlideCanvas from "@/components/slideviewer/SlideCanvas";
 import CommentList from "@/components/slideviewer/CommentList";
 import { useToast } from "@/hooks/use-toast";
 import { Drawer, DrawerTrigger, DrawerContent, DrawerClose } from "@/components/ui/drawer";
-
 const SlideViewer = () => {
   const {
     toast
@@ -50,7 +48,6 @@ const SlideViewer = () => {
     author: "山本さん",
     date: "2025年5月19日"
   }];
-
   const handlePreviousSlide = () => {
     if (currentSlide > 1) {
       setCurrentSlide(currentSlide - 1);
@@ -62,7 +59,6 @@ const SlideViewer = () => {
       });
     }
   };
-
   const handleNextSlide = () => {
     if (currentSlide < totalSlides) {
       setCurrentSlide(currentSlide + 1);
@@ -74,19 +70,16 @@ const SlideViewer = () => {
       });
     }
   };
-
   const handleZoomIn = () => {
     if (zoom < 200) {
       setZoom(zoom + 10);
     }
   };
-
   const handleZoomOut = () => {
     if (zoom > 50) {
       setZoom(zoom - 10);
     }
   };
-
   const toggleFullScreen = useCallback(() => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(e => {
@@ -100,9 +93,7 @@ const SlideViewer = () => {
       }
     }
   }, []);
-  
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       <Navigation />
       <div className="flex-grow pt-16 pb-16 bg-gray-100">
         {/* Top toolbar */}
@@ -150,14 +141,7 @@ const SlideViewer = () => {
               </div>
               
               <div className="flex items-center space-x-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
-                >
-                  <History className="h-4 w-4 mr-1" />
-                  {leftSidebarOpen ? "履歴閉じる" : "履歴表示"}
-                </Button>
+                
                 <Button variant="outline" size="sm">
                   <Share className="h-4 w-4 mr-1" />
                   共有
@@ -173,19 +157,13 @@ const SlideViewer = () => {
         <div className="flex h-[calc(100vh-15rem)]">
           {/* Left sidebar for branch and commit history */}
           <div className={`bg-white border-r border-gray-200 ${leftSidebarOpen ? 'w-64' : 'w-0'} transition-all duration-300 overflow-hidden`}>
-            {leftSidebarOpen && (
-              <div className="h-full flex flex-col">
+            {leftSidebarOpen && <div className="h-full flex flex-col">
                 <div className="p-2 border-b border-gray-200 flex justify-between items-center">
                   <h3 className="font-medium text-sm flex items-center">
                     <History className="h-4 w-4 mr-2" />
                     履歴
                   </h3>
-                  <Button 
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setLeftSidebarOpen(false)}
-                    className="h-6 w-6 p-0"
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => setLeftSidebarOpen(false)} className="h-6 w-6 p-0">
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                 </div>
@@ -212,19 +190,13 @@ const SlideViewer = () => {
                       </div>
                       <ScrollArea className="h-[calc(100vh-20rem)]">
                         <div className="p-2 space-y-1">
-                          {branches.map(branch => (
-                            <div 
-                              key={branch} 
-                              className={`p-2 rounded-lg cursor-pointer hover:bg-gray-100 flex items-center ${branch === currentBranch ? 'bg-blue-50 text-blue-700' : ''}`} 
-                              onClick={() => setCurrentBranch(branch)}
-                            >
+                          {branches.map(branch => <div key={branch} className={`p-2 rounded-lg cursor-pointer hover:bg-gray-100 flex items-center ${branch === currentBranch ? 'bg-blue-50 text-blue-700' : ''}`} onClick={() => setCurrentBranch(branch)}>
                               <GitBranch className="h-4 w-4 mr-2" />
                               <span className="text-sm">{branch}</span>
                               {branch === currentBranch && <span className="ml-auto text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
                                   現在
                                 </span>}
-                            </div>
-                          ))}
+                            </div>)}
                         </div>
                       </ScrollArea>
                     </TabsContent>
@@ -238,8 +210,7 @@ const SlideViewer = () => {
                       </div>
                       <ScrollArea className="h-[calc(100vh-20rem)]">
                         <div className="p-2 space-y-2">
-                          {commitHistory.map(commit => (
-                            <div key={commit.id} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                          {commitHistory.map(commit => <div key={commit.id} className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                               <div className="flex items-center justify-between mb-1">
                                 <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded">{commit.id.substring(0, 7)}</span>
                                 <span className="text-xs text-gray-500">{commit.date}</span>
@@ -248,15 +219,13 @@ const SlideViewer = () => {
                               <div className="flex items-center text-xs text-gray-500">
                                 <span>作成者: {commit.author}</span>
                               </div>
-                            </div>
-                          ))}
+                            </div>)}
                         </div>
                       </ScrollArea>
                     </TabsContent>
                   </Tabs>
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
           
           {/* Main content with slide viewer */}
@@ -280,20 +249,16 @@ const SlideViewer = () => {
               <ScrollArea className="h-[110px]" orientation="horizontal">
                 <div className="p-2">
                   <div className="flex flex-row gap-2">
-                    {Array.from({length: totalSlides}).map((_, index) => (
-                      <div 
-                        key={index} 
-                        className={`p-2 border rounded-lg cursor-pointer hover:bg-gray-100 ${currentSlide === index + 1 ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`} 
-                        onClick={() => setCurrentSlide(index + 1)}
-                      >
+                    {Array.from({
+                    length: totalSlides
+                  }).map((_, index) => <div key={index} className={`p-2 border rounded-lg cursor-pointer hover:bg-gray-100 ${currentSlide === index + 1 ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`} onClick={() => setCurrentSlide(index + 1)}>
                         <div className="w-28 aspect-video bg-gray-200 rounded flex items-center justify-center mb-1">
                           <span className="text-xs text-gray-500">スライド {index + 1}</span>
                         </div>
                         <p className="text-xs truncate w-28">
                           {index === 0 ? 'Q4 Presentation' : `Slide ${index + 1}`}
                         </p>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </div>
               </ScrollArea>
@@ -302,8 +267,6 @@ const SlideViewer = () => {
         </div>
       </div>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default SlideViewer;
