@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,8 +13,11 @@ import {
   Code, 
   FileText,
   Maximize,
-  Percent
+  Percent,
+  ToggleLeft,
+  ToggleRight
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SlideCanvas from "@/components/slideviewer/SlideCanvas";
@@ -186,25 +188,26 @@ const SlideViewer = () => {
               </div>
             </div>
             
-            {/* Right sidebar - toggle button */}
+            {/* Right sidebar - toggle switch */}
             <div className="fixed right-4 top-24">
-              <div className="bg-white rounded-lg shadow-md">
-                <Button 
-                  variant={viewMode === "canvas" ? "default" : "ghost"} 
-                  className="flex items-center gap-1 py-3 w-full"
-                  onClick={() => setViewMode("canvas")}
-                >
-                  <Eye className="h-4 w-4" />
-                  <span className="hidden lg:inline">スライドのみ</span>
-                </Button>
-                <Button 
-                  variant={viewMode === "all" ? "default" : "ghost"} 
-                  className="flex items-center gap-1 py-3 w-full"
-                  onClick={() => setViewMode("all")}
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  <span className="hidden lg:inline">コメント表示</span>
-                </Button>
+              <div className="bg-white rounded-lg shadow-md p-3 flex flex-col items-center gap-2">
+                <div className="flex items-center space-x-2">
+                  <Switch 
+                    id="comment-mode"
+                    checked={viewMode === "all"}
+                    onCheckedChange={(checked) => setViewMode(checked ? "all" : "canvas")}
+                  />
+                  <span className="text-sm font-medium">
+                    {viewMode === "all" ? (
+                      <MessageSquare className="h-4 w-4 inline mr-1" />
+                    ) : (
+                      <Eye className="h-4 w-4 inline mr-1" />
+                    )}
+                    <span className="hidden lg:inline">
+                      {viewMode === "all" ? "コメント表示" : "スライドのみ"}
+                    </span>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
