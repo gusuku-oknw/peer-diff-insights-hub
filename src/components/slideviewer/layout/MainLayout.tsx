@@ -1,17 +1,12 @@
 
 import React, { useState, useEffect } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
-import CommitHistory from "@/components/slideviewer/history/CommitHistory";
-import BranchSelector from "@/components/slideviewer/history/BranchSelector";
 import SidePanel from "@/components/slideviewer/panels/SidePanel";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useSlideStore } from "@/stores/slideStore";
+import LeftSidebar from "./LeftSidebar";
+import MainContent from "./MainContent";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MainLayoutProps {
   currentBranch: string;
@@ -61,10 +56,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const { toast } = useToast();
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState(mockComments[currentSlide] || []);
-  const [isCommenting, setIsCommenting] = useState(false);
   const [isNotesPanelOpen, setIsNotesPanelOpen] = useState(false);
   const slides = useSlideStore(state => state.slides);
+  const isMobile = useIsMobile();
 
+  // Update comments when current slide changes
   useEffect(() => {
     setComments(mockComments[currentSlide] || []);
   }, [currentSlide, mockComments]);
@@ -94,105 +90,42 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     setIsNotesPanelOpen(!isNotesPanelOpen);
   };
 
-  // 右サイドパネル表示ロジック - 明確な条件設定
+  // Determine if we should show the right side panel
   const shouldShowRightSidePanel = (
     viewerMode === "review" || 
     (showPresenterNotes && viewerMode !== "edit")
-  );
-  
-  console.log("MainLayout: Right panel logic:", {
-    viewerMode,
-    showPresenterNotes,
-    shouldShowRightSidePanel
-  });
+  ) && !isMobile; // Don't show on mobile by default
   
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
       {/* Main horizontal layout */}
       <div className="flex flex-grow overflow-hidden">
         {/* Left Sidebar */}
-        <aside className={`w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 transition-transform duration-300 transform ${leftSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:block`}>
-          <div className="h-full flex flex-col">
-            <div className="p-4">
-              <h2 className="text-lg font-semibold text-gray-800">スライド管理</h2>
-            </div>
-
-            {/* Branch Selector */}
-            <div className="px-4 mb-4">
-              <BranchSelector
-                currentBranch={currentBranch}
-                branches={branches}
-                onBranchChange={onBranchChange}
-              />
-            </div>
-
-            {/* Commit History */}
-            <div className="flex-grow p-4">
-              <CommitHistory commitHistory={commitHistory} />
-            </div>
-          </div>
-        </aside>
+        <LeftSidebar
+          leftSidebarOpen={leftSidebarOpen}
+          currentBranch={currentBranch}
+          branches={branches}
+          commitHistory={commitHistory}
+          onBranchChange={onBranchChange}
+        />
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col h-full">
-          {/* Slide Viewer - 正しいSlideCanvasを使用 */}
-          <div className="flex-grow flex items-center justify-center bg-gray-100 overflow-hidden">
-            <SlideCanvas
-              currentSlide={currentSlide}
-              zoomLevel={zoom}
-              editable={viewerMode === "edit"}
-              userType={userType}
-            />
-          </div>
+        <MainContent
+          currentSlide={currentSlide}
+          zoom={zoom}
+          viewerMode={viewerMode}
+          userType={userType}
+          isNotesPanelOpen={isNotesPanelOpen}
+          comments={comments}
+          commentText={commentText}
+          setCommentText={setCommentText}
+          handleAddComment={handleAddComment}
+          toggleNotesPanel={toggleNotesPanel}
+        />
 
-          {/* Review Mode UI */}
-          {viewerMode === "review" && userType === "student" && (
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-gray-700">
-                  スライドへのコメント
-                </h3>
-                <Button variant="ghost" size="sm" onClick={toggleNotesPanel}>
-                  {isNotesPanelOpen ? "コメントを閉じる" : "コメントを開く"}
-                </Button>
-              </div>
-
-              {isNotesPanelOpen ? (
-                <div className="space-y-2">
-                  {comments.map((comment) => (
-                    <div key={comment.id} className="bg-white shadow-sm border rounded-md p-3">
-                      <p className="text-sm text-gray-700">{comment.text}</p>
-                    </div>
-                  ))}
-
-                  <div className="flex items-end space-x-2">
-                    <div className="flex-grow">
-                      <Label htmlFor="comment" className="text-xs text-gray-600">コメントを追加:</Label>
-                      <Textarea
-                        id="comment"
-                        placeholder="スライドに関するコメントを入力してください"
-                        value={commentText}
-                        onChange={(e) => setCommentText(e.target.value)}
-                        className="text-sm"
-                      />
-                    </div>
-                    <Button size="sm" onClick={handleAddComment}>
-                      コメントする
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-gray-500">
-                  コメントは非表示です。
-                </div>
-              )}
-            </div>
-          )}
-        </main>
-
-        {/* Right Sidebar - 条件付き表示 */}
+        {/* Right Sidebar - Conditional display */}
         {shouldShowRightSidePanel && (
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 side-panel-container" data-testid="right-side-panel">
             <SidePanel
               shouldShowNotes={showPresenterNotes}
               shouldShowReviewPanel={viewerMode === "review"}

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +8,7 @@ import MainLayout from "@/components/slideviewer/layout/MainLayout";
 import { useSlideStore } from "@/stores/slideStore";
 import useSlideNavigation from "@/hooks/slideviewer/useSlideNavigation";
 import usePresentationMode from "@/hooks/slideviewer/usePresentationMode";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Define commented slides for student progress tracking
 const commentedSlides = [1, 2]; // Slides where the current student has already commented
@@ -144,6 +144,8 @@ const SlideViewer = () => {
       variant: "default"
     });
   };
+
+  const isMobile = useIsMobile();
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">

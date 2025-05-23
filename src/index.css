@@ -132,3 +132,26 @@
 canvas:focus {
   outline: none;
 }
+
+/* レスポンシブレイアウト改善 */
+@media (max-width: 768px) {
+  .side-panel-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50; /* サイドパネルを前面に */
+    width: 100%; /* モバイルでは全幅 */
+    max-width: 320px; /* 最大幅を制限 */
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* サイドパネルを常に固定サイズに保つ */
+.side-panel-container {
+  min-width: 320px;
+  max-width: 320px;
+  height: 100%;
+  overflow: hidden;
+}
+
