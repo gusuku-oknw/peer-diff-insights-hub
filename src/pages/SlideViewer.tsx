@@ -9,6 +9,7 @@ import ViewerToolbar from "@/components/slideviewer/ViewerToolbar";
 import HistorySidebar from "@/components/slideviewer/HistorySidebar";
 import SlideViewerPanel from "@/components/slideviewer/SlideViewerPanel";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
+import { CommitHistory } from "@/components/slideviewer/HistorySidebar";
 
 // Define the viewer modes
 type ViewerMode = "notes" | "edit" | "review";
@@ -52,7 +53,7 @@ const SlideViewer = () => {
   // Mock data for branch and commit history
   const [currentBranch, setCurrentBranch] = useState("main");
   const branches = ["main", "feature/new-slides", "hotfix/typo"];
-  const commitHistory = [
+  const commitHistory: CommitHistory[] = [
     { id: "a1b2c3d", message: "スライド5を追加", author: "田中さん", date: "2025年5月22日", reviewStatus: "reviewing" },
     { id: "e4f5g6h", message: "グラフのデータを更新", author: "佐藤さん", date: "2025年5月21日", reviewStatus: "approved" },
     { id: "i7j8k9l", message: "タイトルのフォント修正", author: "鈴木さん", date: "2025年5月20日", reviewStatus: "approved" },

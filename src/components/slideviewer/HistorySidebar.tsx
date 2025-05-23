@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, History, GitBranch, GitCommit } from "lucide-react";
 
-interface CommitHistory {
+export interface CommitHistory {
   id: string;
   message: string;
   author: string;
