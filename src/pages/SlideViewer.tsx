@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,9 +12,10 @@ import SlideCanvas from "@/components/slideviewer/SlideCanvas";
 import CommentList from "@/components/slideviewer/CommentList";
 import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
 const SlideViewer = () => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [currentSlide, setCurrentSlide] = useState(1);
   const [viewMode, setViewMode] = useState<"all" | "canvas">("canvas");
   const totalSlides = 5; // This would come from the actual slide data
@@ -28,33 +28,27 @@ const SlideViewer = () => {
   // Mock data for branch and commit history
   const [currentBranch, setCurrentBranch] = useState("main");
   const branches = ["main", "feature/new-slides", "hotfix/typo"];
-  const commitHistory = [
-    {
-      id: "a1b2c3d",
-      message: "スライド5を追加",
-      author: "田中さん",
-      date: "2025年5月22日"
-    },
-    {
-      id: "e4f5g6h",
-      message: "グラフのデータを更新",
-      author: "佐藤さん",
-      date: "2025年5月21日"
-    },
-    {
-      id: "i7j8k9l",
-      message: "タイトルのフォント修正",
-      author: "鈴木さん",
-      date: "2025年5月20日"
-    },
-    {
-      id: "m1n2o3p",
-      message: "初回コミット",
-      author: "山本さん",
-      date: "2025年5月19日"
-    }
-  ];
-
+  const commitHistory = [{
+    id: "a1b2c3d",
+    message: "スライド5を追加",
+    author: "田中さん",
+    date: "2025年5月22日"
+  }, {
+    id: "e4f5g6h",
+    message: "グラフのデータを更新",
+    author: "佐藤さん",
+    date: "2025年5月21日"
+  }, {
+    id: "i7j8k9l",
+    message: "タイトルのフォント修正",
+    author: "鈴木さん",
+    date: "2025年5月20日"
+  }, {
+    id: "m1n2o3p",
+    message: "初回コミット",
+    author: "山本さん",
+    date: "2025年5月19日"
+  }];
   const handlePreviousSlide = () => {
     if (currentSlide > 1) {
       setCurrentSlide(currentSlide - 1);
@@ -66,7 +60,6 @@ const SlideViewer = () => {
       });
     }
   };
-
   const handleNextSlide = () => {
     if (currentSlide < totalSlides) {
       setCurrentSlide(currentSlide + 1);
@@ -78,19 +71,16 @@ const SlideViewer = () => {
       });
     }
   };
-
   const handleZoomIn = () => {
     if (zoom < 200) {
       setZoom(zoom + 10);
     }
   };
-
   const handleZoomOut = () => {
     if (zoom > 50) {
       setZoom(zoom - 10);
     }
   };
-
   const toggleFullScreen = useCallback(() => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(e => {
@@ -104,9 +94,7 @@ const SlideViewer = () => {
       }
     }
   }, []);
-
-  return (
-    <div className="flex flex-col h-screen overflow-hidden">
+  return <div className="flex flex-col h-screen overflow-hidden">
       <Navigation />
       
       {/* Main content area with fixed positioning to avoid layout issues */}
@@ -118,12 +106,7 @@ const SlideViewer = () => {
               <div className="flex items-center space-x-4">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button 
-                      variant={leftSidebarOpen ? "secondary" : "ghost"} 
-                      size="sm" 
-                      onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
-                      className="flex items-center gap-2 font-medium"
-                    >
+                    <Button variant={leftSidebarOpen ? "secondary" : "ghost"} size="sm" onClick={() => setLeftSidebarOpen(!leftSidebarOpen)} className="flex items-center gap-2 font-medium">
                       <History className="h-4 w-4" />
                       <span className="hidden sm:inline">{leftSidebarOpen ? "履歴を隠す" : "履歴を表示"}</span>
                     </Button>
@@ -136,13 +119,7 @@ const SlideViewer = () => {
                 <div className="flex items-center space-x-1">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={handlePreviousSlide} 
-                        disabled={currentSlide === 1}
-                        className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50"
-                      >
+                      <Button variant="ghost" size="icon" onClick={handlePreviousSlide} disabled={currentSlide === 1} className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50">
                         <ChevronLeft className="h-5 w-5" />
                       </Button>
                     </TooltipTrigger>
@@ -155,13 +132,7 @@ const SlideViewer = () => {
                   
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={handleNextSlide} 
-                        disabled={currentSlide === totalSlides}
-                        className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50"
-                      >
+                      <Button variant="ghost" size="icon" onClick={handleNextSlide} disabled={currentSlide === totalSlides} className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50">
                         <ChevronRight className="h-5 w-5" />
                       </Button>
                     </TooltipTrigger>
@@ -174,12 +145,7 @@ const SlideViewer = () => {
                 <div className="flex items-center space-x-1">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button 
-                        onClick={handleZoomOut} 
-                        variant="ghost" 
-                        size="icon"
-                        className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50"
-                      >
+                      <Button onClick={handleZoomOut} variant="ghost" size="icon" className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50">
                         <span className="font-medium">-</span>
                       </Button>
                     </TooltipTrigger>
@@ -192,12 +158,7 @@ const SlideViewer = () => {
                   
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button 
-                        onClick={handleZoomIn} 
-                        variant="ghost" 
-                        size="icon"
-                        className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50"
-                      >
+                      <Button onClick={handleZoomIn} variant="ghost" size="icon" className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50">
                         <span className="font-medium">+</span>
                       </Button>
                     </TooltipTrigger>
@@ -211,13 +172,8 @@ const SlideViewer = () => {
                   <TooltipTrigger asChild>
                     <div className="flex items-center gap-2">
                       <MessageCircle className={`h-4 w-4 ${viewMode === "all" ? "text-blue-600" : "text-gray-400"}`} />
-                      <Switch 
-                        id="comment-mode" 
-                        checked={viewMode === "all"}
-                        onCheckedChange={checked => setViewMode(checked ? "all" : "canvas")}
-                        className="focus-visible:ring-offset-0 data-[state=checked]:bg-blue-600"
-                      />
-                      <span className="text-sm text-gray-600">{viewMode === "all" ? "コメント表示" : "編集のみ"}</span>
+                      <Switch id="comment-mode" checked={viewMode === "all"} onCheckedChange={checked => setViewMode(checked ? "all" : "canvas")} className="focus-visible:ring-offset-0 data-[state=checked]:bg-blue-600" />
+                      
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>{viewMode === "all" ? "コメントを非表示" : "コメントを表示"}</TooltipContent>
@@ -237,17 +193,8 @@ const SlideViewer = () => {
                 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={toggleFullScreen}
-                      className="flex items-center gap-2 text-gray-700 hover:bg-blue-50"
-                    >
-                      {isFullScreen ? (
-                        <><Minimize2 className="h-4 w-4" /><span className="hidden lg:inline">フルスクリーン終了</span></>
-                      ) : (
-                        <><Maximize className="h-4 w-4" /><span className="hidden lg:inline">全画面</span></>
-                      )}
+                    <Button variant="ghost" size="sm" onClick={toggleFullScreen} className="flex items-center gap-2 text-gray-700 hover:bg-blue-50">
+                      {isFullScreen ? <><Minimize2 className="h-4 w-4" /><span className="hidden lg:inline">フルスクリーン終了</span></> : <><Maximize className="h-4 w-4" /><span className="hidden lg:inline">全画面</span></>}
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>{isFullScreen ? "フルスクリーンを終了" : "フルスクリーンで表示"}</TooltipContent>
@@ -269,47 +216,20 @@ const SlideViewer = () => {
         
         {/* Main content area with fixed height calculation to ensure all elements are visible */}
         <div className="flex flex-grow overflow-hidden h-[calc(100vh-10rem)]">
-          <ResizablePanelGroup 
-            direction="vertical" 
-            className="h-full w-full" 
-            id="slide-layout-vertical"
-          >
+          <ResizablePanelGroup direction="vertical" className="h-full w-full" id="slide-layout-vertical">
             {/* Main content panel with explicit sizing */}
-            <ResizablePanel 
-              defaultSize={80} 
-              minSize={50} 
-              id="main-content" 
-              order={1}
-              className="flex-grow"
-            >
-              <ResizablePanelGroup 
-                direction="horizontal" 
-                className="h-full" 
-                id="slide-layout-horizontal"
-              >
+            <ResizablePanel defaultSize={80} minSize={50} id="main-content" order={1} className="flex-grow">
+              <ResizablePanelGroup direction="horizontal" className="h-full" id="slide-layout-horizontal">
                 {/* Left sidebar with improved visual design */}
-                {leftSidebarOpen && (
-                  <>
-                    <ResizablePanel 
-                      defaultSize={30} 
-                      minSize={20} 
-                      maxSize={50} 
-                      id="history-sidebar" 
-                      order={1}
-                      className="bg-white border-r border-gray-100 shadow-sm"
-                    >
+                {leftSidebarOpen && <>
+                    <ResizablePanel defaultSize={30} minSize={20} maxSize={50} id="history-sidebar" order={1} className="bg-white border-r border-gray-100 shadow-sm">
                       <div className="h-full flex flex-col">
                         <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
                           <h3 className="font-medium flex items-center text-blue-800">
                             <History className="h-4 w-4 mr-2 text-blue-600" />
                             スライド履歴
                           </h3>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setLeftSidebarOpen(false)}
-                            className="h-7 w-7 p-0 rounded-full hover:bg-gray-200"
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => setLeftSidebarOpen(false)} className="h-7 w-7 p-0 rounded-full hover:bg-gray-200">
                             <ChevronLeft className="h-4 w-4" />
                           </Button>
                         </div>
@@ -339,23 +259,13 @@ const SlideViewer = () => {
                               </div>
                               <ScrollArea className="flex-grow h-[calc(100%-5rem)]" orientation="vertical">
                                 <div className="p-3 space-y-1">
-                                  {branches.map(branch => (
-                                    <div
-                                      key={branch}
-                                      className={`p-2 rounded-md cursor-pointer hover:bg-gray-100 flex items-center transition-colors ${
-                                        branch === currentBranch ? 'bg-blue-50 text-blue-700 border border-blue-100' : ''
-                                      }`}
-                                      onClick={() => setCurrentBranch(branch)}
-                                    >
+                                  {branches.map(branch => <div key={branch} className={`p-2 rounded-md cursor-pointer hover:bg-gray-100 flex items-center transition-colors ${branch === currentBranch ? 'bg-blue-50 text-blue-700 border border-blue-100' : ''}`} onClick={() => setCurrentBranch(branch)}>
                                       <GitBranch className={`h-4 w-4 mr-2 ${branch === currentBranch ? 'text-blue-500' : 'text-gray-500'}`} />
                                       <span className="text-sm">{branch}</span>
-                                      {branch === currentBranch && (
-                                        <span className="ml-auto text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                                      {branch === currentBranch && <span className="ml-auto text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
                                           現在
-                                        </span>
-                                      )}
-                                    </div>
-                                  ))}
+                                        </span>}
+                                    </div>)}
                                 </div>
                               </ScrollArea>
                             </TabsContent>
@@ -369,17 +279,9 @@ const SlideViewer = () => {
                               </div>
                               <ScrollArea className="flex-grow h-[calc(100%-5rem)]" orientation="vertical">
                                 <div className="p-3 space-y-2">
-                                  {commitHistory.map((commit, index) => (
-                                    <div 
-                                      key={commit.id} 
-                                      className={`p-3 border rounded-md hover:bg-gray-50 transition-colors ${
-                                        index === 0 ? 'bg-blue-50 border-blue-100' : 'border-gray-200'
-                                      }`}
-                                    >
+                                  {commitHistory.map((commit, index) => <div key={commit.id} className={`p-3 border rounded-md hover:bg-gray-50 transition-colors ${index === 0 ? 'bg-blue-50 border-blue-100' : 'border-gray-200'}`}>
                                       <div className="flex items-center justify-between mb-1">
-                                        <span className={`text-xs font-mono px-2 py-0.5 rounded ${
-                                          index === 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                        }`}>
+                                        <span className={`text-xs font-mono px-2 py-0.5 rounded ${index === 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
                                           {commit.id.substring(0, 7)}
                                         </span>
                                         <span className="text-xs text-gray-500">{commit.date}</span>
@@ -390,8 +292,7 @@ const SlideViewer = () => {
                                       <div className="flex items-center text-xs text-gray-500">
                                         <span>作成者: {commit.author}</span>
                                       </div>
-                                    </div>
-                                  ))}
+                                    </div>)}
                                 </div>
                               </ScrollArea>
                             </TabsContent>
@@ -401,8 +302,7 @@ const SlideViewer = () => {
                     </ResizablePanel>
                     
                     <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />
-                  </>
-                )}
+                  </>}
                 
                 {/* Main slide viewer with improved UI */}
                 <ResizablePanel id="slide-viewer" order={2} className="bg-slate-100">
@@ -417,8 +317,7 @@ const SlideViewer = () => {
                     </ResizablePanel>
                     
                     {/* Comment sidebar with improved styling */}
-                    {viewMode === "all" && (
-                      <>
+                    {viewMode === "all" && <>
                         <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />
                         <ResizablePanel defaultSize={30} minSize={20} id="comment-sidebar" order={2} className="overflow-hidden">
                           <div className="h-full bg-white shadow-sm">
@@ -431,8 +330,7 @@ const SlideViewer = () => {
                             <CommentList currentSlide={currentSlide} />
                           </div>
                         </ResizablePanel>
-                      </>
-                    )}
+                      </>}
                   </ResizablePanelGroup>
                 </ResizablePanel>
               </ResizablePanelGroup>
@@ -440,13 +338,7 @@ const SlideViewer = () => {
             
             {/* Slide thumbnails with consistent height and improved scrolling */}
             <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />
-            <ResizablePanel 
-              defaultSize={20} 
-              minSize={15} 
-              id="thumbnails" 
-              order={2} 
-              className="min-h-[180px]"
-            >
+            <ResizablePanel defaultSize={20} minSize={15} id="thumbnails" order={2} className="min-h-[180px]">
               <div className="bg-white shadow-sm h-full flex flex-col border-t border-gray-200">
                 <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200 bg-gray-50">
                   <h3 className="font-medium flex items-center text-sm text-blue-800">
@@ -458,32 +350,18 @@ const SlideViewer = () => {
                 <ScrollArea className="flex-grow h-[calc(100%-3rem)]" orientation="horizontal">
                   <div className="p-4 h-full flex items-center">
                     <div className="flex flex-row gap-4">
-                      {Array.from({length: totalSlides}).map((_, index) => (
-                        <div
-                          key={index}
-                          className={`border rounded-lg cursor-pointer transition-all duration-200 ${
-                            currentSlide === index + 1 
-                              ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50 shadow-md scale-105' 
-                              : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                          }`}
-                          onClick={() => setCurrentSlide(index + 1)}
-                        >
+                      {Array.from({
+                      length: totalSlides
+                    }).map((_, index) => <div key={index} className={`border rounded-lg cursor-pointer transition-all duration-200 ${currentSlide === index + 1 ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50 shadow-md scale-105' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}`} onClick={() => setCurrentSlide(index + 1)}>
                           <div className="w-36 aspect-video bg-white rounded-t-md flex items-center justify-center overflow-hidden">
-                            <img 
-                              src={`https://placehold.co/1600x900/e2e8f0/1e293b?text=Slide+${index + 1}`} 
-                              alt={`スライド ${index + 1}`}
-                              className="object-cover w-full h-full"
-                            />
+                            <img src={`https://placehold.co/1600x900/e2e8f0/1e293b?text=Slide+${index + 1}`} alt={`スライド ${index + 1}`} className="object-cover w-full h-full" />
                           </div>
                           <div className="p-3">
-                            <p className={`text-sm font-medium truncate w-32 ${
-                              currentSlide === index + 1 ? 'text-blue-700' : ''
-                            }`}>
+                            <p className={`text-sm font-medium truncate w-32 ${currentSlide === index + 1 ? 'text-blue-700' : ''}`}>
                               {index === 0 ? 'Q4 Presentation' : `Slide ${index + 1}`}
                             </p>
                           </div>
-                        </div>
-                      ))}
+                        </div>)}
                     </div>
                   </div>
                 </ScrollArea>
@@ -493,8 +371,6 @@ const SlideViewer = () => {
         </div>
       </div>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default SlideViewer;
