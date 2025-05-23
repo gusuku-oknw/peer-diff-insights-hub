@@ -104,8 +104,11 @@ export const useElementsRenderer = ({
               break;
               
             case 'image':
-              // Fix: Using the correct approach for Image.fromURL with LoadImageOptions parameter
-              Image.fromURL(props.src, (img) => {
+              // Fix: Using the proper approach for Image.fromURL with Fabric.js v6
+              Image.fromURL(props.src, {
+                crossOrigin: 'anonymous',
+                // Additional options can be added here
+              }).then((img) => {
                 if (!canvas) return;
 
                 img.set({
@@ -122,7 +125,9 @@ export const useElementsRenderer = ({
                 (img as unknown as CustomFabricObject).customData = { id };
                 canvas.add(img);
                 canvas.renderAll();
-              }, { crossOrigin: 'anonymous' });
+              }).catch(err => {
+                console.error("Error loading image:", err);
+              });
               break;
           }
         }

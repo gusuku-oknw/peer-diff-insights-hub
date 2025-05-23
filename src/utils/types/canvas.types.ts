@@ -15,7 +15,7 @@ export interface CustomFabricObject extends FabricObject {
   top: number;
   scaleX: number;
   scaleY: number;
-  angle?: number;
+  angle: number; // Changed from optional to required
   set?: (options: any) => CustomFabricObject;
 }
 
