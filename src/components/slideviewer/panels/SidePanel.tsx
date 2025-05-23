@@ -23,27 +23,19 @@ const SidePanel = ({
   // サイドパネルを表示するかどうかをチェック
   const shouldDisplay = shouldShowNotes || shouldShowReviewPanel;
   
-  useEffect(() => {
-    console.log("SidePanel: Component mounted/updated with: ", {
-      shouldShowNotes,
-      shouldShowReviewPanel,
-      shouldDisplay,
-      currentSlide
-    });
-  }, [shouldShowNotes, shouldShowReviewPanel, shouldDisplay, currentSlide]);
+  console.log("SidePanel: Rendering with conditions:", {
+    shouldShowNotes,
+    shouldShowReviewPanel,
+    shouldDisplay
+  });
   
   // 表示条件が満たされない場合は何も表示しない
   if (!shouldDisplay) {
-    console.log("SidePanel: Display conditions not met, returning null");
     return null;
   }
 
   // デフォルトのタブを決定
   const defaultTab = shouldShowNotes ? "notes" : "reviews";
-  
-  console.log("SidePanel: Rendering panel with defaultTab:", defaultTab, 
-    "shouldShowNotes:", shouldShowNotes, 
-    "shouldShowReviewPanel:", shouldShowReviewPanel);
 
   return (
     <div className="w-80 h-full bg-gray-50 border-l border-gray-200 overflow-hidden flex flex-col">

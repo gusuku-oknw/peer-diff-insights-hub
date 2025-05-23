@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
@@ -93,23 +94,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     setIsNotesPanelOpen(!isNotesPanelOpen);
   };
 
-  // 右サイドパネル表示ロジックを完全に統制する
+  // 右サイドパネル表示ロジック - 明確な条件設定
   const shouldShowRightSidePanel = (
-    (viewerMode === "review") || 
-    (showPresenterNotes === true && viewerMode !== "edit")
+    viewerMode === "review" || 
+    (showPresenterNotes && viewerMode !== "edit")
   );
   
-  // デバッグログを強化
-  useEffect(() => {
-    console.log("MainLayout DEBUG: Right panel visibility calculation:", {
-      viewerMode,
-      showPresenterNotes,
-      isEditMode: viewerMode === "edit",
-      isReviewMode: viewerMode === "review", 
-      notesVisibleAndNotEdit: showPresenterNotes === true && viewerMode !== "edit",
-      finalDecision: shouldShowRightSidePanel
-    });
-  }, [viewerMode, showPresenterNotes, shouldShowRightSidePanel]);
+  console.log("MainLayout: Right panel logic:", {
+    viewerMode,
+    showPresenterNotes,
+    shouldShowRightSidePanel
+  });
   
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
@@ -140,7 +135,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
         {/* Main Content */}
         <main className="flex-1 flex flex-col h-full">
-          {/* Slide Viewer */}
+          {/* Slide Viewer - 正しいSlideCanvasを使用 */}
           <div className="flex-grow flex items-center justify-center bg-gray-100 overflow-hidden">
             <SlideCanvas
               currentSlide={currentSlide}
@@ -195,14 +190,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           )}
         </main>
 
-        {/* Right Sidebar - 厳格な表示制御 */}
+        {/* Right Sidebar - 条件付き表示 */}
         {shouldShowRightSidePanel && (
-          <div 
-            className="flex-shrink-0" 
-            data-testid="right-sidebar"
-            data-view-mode={viewerMode}
-            data-notes-visible={showPresenterNotes}
-          >
+          <div className="flex-shrink-0">
             <SidePanel
               shouldShowNotes={showPresenterNotes}
               shouldShowReviewPanel={viewerMode === "review"}
