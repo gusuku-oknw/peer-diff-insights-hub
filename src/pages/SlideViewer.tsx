@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +13,10 @@ import { useSlideStore } from "@/stores/slideStore";
 
 // Define commented slides for student progress tracking
 const commentedSlides = [1, 2]; // Slides where the current student has already commented
+const mockComments = {
+  1: [{ id: 1, text: "とても分かりやすいスライドです！" }],
+  3: [{ id: 2, text: "この数値の根拠は？" }]
+};
 
 const SlideViewer = () => {
   const { toast } = useToast();
@@ -39,11 +42,17 @@ const SlideViewer = () => {
     toggleFullScreen,
     togglePresenterNotes,
     startPresentation,
-    setDisplayCount
+    setDisplayCount,
+    generateThumbnails
   } = useSlideStore();
   
   const totalSlides = slides.length;
   const [elapsedTime, setElapsedTime] = useState<string>("00:00");
+
+  // Generate thumbnails when the page loads
+  useEffect(() => {
+    generateThumbnails();
+  }, [generateThumbnails]);
 
   // Mock data for branch and commit history
   const [currentBranch, setCurrentBranch] = useState("main");
@@ -146,7 +155,9 @@ const SlideViewer = () => {
       if (!presentationStartTime) {
         startPresentation();
         setViewerMode("presentation");
-        togglePresenterNotes(); // Only show notes if multiple displays
+        if (displayCount >= 2) {
+          togglePresenterNotes(); // Only show notes if multiple displays
+        }
       }
     } else {
       if (document.exitFullscreen) {
@@ -154,7 +165,7 @@ const SlideViewer = () => {
         toggleFullScreen();
       }
     }
-  }, [presentationStartTime, toggleFullScreen, startPresentation, setViewerMode, togglePresenterNotes]);
+  }, [presentationStartTime, toggleFullScreen, startPresentation, setViewerMode, togglePresenterNotes, displayCount]);
 
   // Handle mode change with visual feedback
   const handleModeChange = (mode: "presentation" | "edit" | "review") => {
@@ -290,7 +301,7 @@ const SlideViewer = () => {
                   currentSlide={currentSlide}
                   totalSlides={totalSlides}
                   commentedSlides={commentedSlides}
-                  mockComments={{}}
+                  mockComments={mockComments}
                   userType={userProfile?.role === "student" ? "student" : "enterprise"}
                   onSlideSelect={setCurrentSlide}
                 />

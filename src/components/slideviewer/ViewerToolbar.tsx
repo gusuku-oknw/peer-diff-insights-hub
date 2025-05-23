@@ -1,13 +1,14 @@
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft, ChevronRight, Presentation, Pencil, MessageCircle, Share, Play, History, Settings, Save, Filter, ChevronRight as ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, Presentation, Pencil, MessageCircle, Share, Play, History, Settings, Save, Filter, ChevronRight as ChevronDown, FileDown } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { ViewerMode } from "@/stores/slideStore";
+import { useSlideStore } from "@/stores/slideStore";
 
 interface ViewerToolbarProps {
   currentSlide: number;
@@ -50,158 +51,204 @@ const ViewerToolbar = ({
   onStartPresentation,
   onSaveChanges
 }: ViewerToolbarProps) => {
-  const {
-    toast
-  } = useToast();
-  const {
-    userProfile
-  } = useAuth();
+  const { toast } = useToast();
+  const { userProfile } = useAuth();
+  const exportToPPTX = useSlideStore(state => state.exportToPPTX);
 
   // Mode-specific UI elements
   const renderModeSpecificUI = () => {
     switch (viewerMode) {
       case "edit":
-        return <div className="flex items-center space-x-3">
-            
-            <Button variant="default" size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={onSaveChanges}>
-              <Save className="h-4 w-4 mr-2" />
+        return (
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="bg-green-600 hover:bg-green-700 text-white" 
+              onClick={onSaveChanges}
+            >
+              <Save className="h-4 w-4 mr-2 hidden sm:inline" />
               保存
             </Button>
-          </div>;
+          </div>
+        );
       case "review":
-        return <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
+        return (
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1 sm:gap-2 p-1 sm:p-2"
+            >
               <Filter className="h-4 w-4" />
-              <span className="hidden lg:inline">フィルター</span>
+              <span className="hidden md:inline">フィルター</span>
             </Button>
-            <Button variant="default" size="sm" className="bg-purple-600 hover:bg-purple-700 text-white" onClick={() => toast({
-            title: "フィードバックが送信されました",
-            description: "レビュー担当者にフィードバックが送信されました。",
-            variant: "default"
-          })}>
-              フィードバック送信
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="bg-purple-600 hover:bg-purple-700 text-white p-1 sm:p-2" 
+              onClick={() => toast({
+                title: "フィードバックが送信されました",
+                description: "レビュー担当者にフィードバックが送信されました。",
+                variant: "default"
+              })}
+            >
+              <span className="text-xs sm:text-sm">フィードバック送信</span>
             </Button>
-          </div>;
+          </div>
+        );
       case "presentation":
-        return <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={onShowPresenterNotesToggle} disabled={displayCount < 2 && isFullScreen}>
+        return (
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex items-center gap-1 sm:gap-2 p-1 sm:p-2" 
+              onClick={onShowPresenterNotesToggle} 
+              disabled={displayCount < 2 && isFullScreen}
+            >
               <Presentation className="h-4 w-4" />
-              <span className="hidden lg:inline">
+              <span className="hidden md:inline">
                 発表者メモ {showPresenterNotes ? '非表示' : '表示'}
-                {displayCount < 2 && isFullScreen && " (2画面必要)"}
               </span>
             </Button>
-            <Button variant="default" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white" onClick={onStartPresentation}>
-              <Play className="h-4 w-4 mr-2" />
-              プレゼン開始（全画面）
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="bg-blue-600 hover:bg-blue-700 text-white p-1 sm:p-2" 
+              onClick={onStartPresentation}
+            >
+              <Play className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">プレゼン開始</span>
             </Button>
-          </div>;
+          </div>
+        );
       default:
         return null;
     }
   };
-  return <div className="bg-white border-b border-gray-200 py-3 shadow-sm flex-shrink-0 z-10">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+  
+  return (
+    <div className="bg-white border-b border-gray-200 py-2 sm:py-3 shadow-sm flex-shrink-0 z-10">
+      <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto scrollbar-hide">
             {/* Mode switcher tabs */}
             <Tabs defaultValue={viewerMode} value={viewerMode} className="w-auto" onValueChange={value => onModeChange(value as ViewerMode)}>
-              <TabsList className="bg-slate-100 p-1">
-                <TabsTrigger value="presentation" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white">
-                  <Presentation className="h-4 w-4 mr-2" />
+              <TabsList className="bg-slate-100 p-0.5 sm:p-1">
+                <TabsTrigger value="presentation" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white px-2 sm:px-3 py-1">
+                  <Presentation className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
                   <span className="hidden sm:inline">プレゼンテーション</span>
                 </TabsTrigger>
                 
-                <TabsTrigger value="edit" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">
-                  <Pencil className="h-4 w-4 mr-2" />
+                <TabsTrigger value="edit" className="data-[state=active]:bg-green-500 data-[state=active]:text-white px-2 sm:px-3 py-1">
+                  <Pencil className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
                   <span className="hidden sm:inline">編集</span>
                 </TabsTrigger>
                 
-                <TabsTrigger value="review" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white">
-                  <MessageCircle className="h-4 w-4 mr-2" />
+                <TabsTrigger value="review" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white px-2 sm:px-3 py-1">
+                  <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
                   <span className="hidden sm:inline">レビュー</span>
                 </TabsTrigger>
               </TabsList>
             </Tabs>
 
-            <div className="h-6 border-r border-gray-200 mx-2" />
+            <div className="h-6 border-r border-gray-200 mx-1 sm:mx-2 hidden sm:block" />
 
             {/* Primary controls - always visible */}
             <div className="flex items-center space-x-1">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={onPreviousSlide} disabled={currentSlide === 1} className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50">
-                    <ChevronLeft className="h-5 w-5" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={onPreviousSlide} 
+                    disabled={currentSlide === 1} 
+                    className="rounded-full h-6 w-6 sm:h-8 sm:w-8 flex items-center justify-center hover:bg-blue-50"
+                  >
+                    <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>前のスライド (←)</TooltipContent>
               </Tooltip>
               
-              <span className="text-sm font-medium bg-blue-50 text-blue-700 px-3 py-1 rounded-md border border-blue-100 min-w-[60px] text-center">
+              <span className="text-xs sm:text-sm font-medium bg-blue-50 text-blue-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-md border border-blue-100 min-w-[50px] sm:min-w-[60px] text-center">
                 {currentSlide} / {totalSlides}
               </span>
               
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={onNextSlide} disabled={currentSlide === totalSlides} className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50">
-                    <ChevronRight className="h-5 w-5" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={onNextSlide} 
+                    disabled={currentSlide === totalSlides} 
+                    className="rounded-full h-6 w-6 sm:h-8 sm:w-8 flex items-center justify-center hover:bg-blue-50"
+                  >
+                    <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>次のスライド (→)</TooltipContent>
               </Tooltip>
             </div>
             
-            <div className="h-6 border-r border-gray-200 mx-2" />
+            <div className="h-6 border-r border-gray-200 mx-1 sm:mx-2 hidden sm:block" />
             
             {/* Zoom controls */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{zoom}%</span>
-                  <ChevronDown className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                >
+                  <span className="font-medium">{zoom}%</span>
+                  <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
                 <DropdownMenuLabel>ズーム設定</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => onZoomChange(50)}>
-                  50%
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onZoomChange(75)}>
-                  75%
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onZoomChange(100)}>
-                  100% (デフォルト)
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onZoomChange(125)}>
-                  125%
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onZoomChange(150)}>
-                  150%
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onZoomChange(200)}>
-                  200%
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onZoomChange(50)}>50%</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onZoomChange(75)}>75%</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onZoomChange(100)}>100% (デフォルト)</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onZoomChange(125)}>125%</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onZoomChange(150)}>150%</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onZoomChange(200)}>200%</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             
-            <Button onClick={() => onZoomChange(zoom - 10)} variant="ghost" size="icon" className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50">
+            <Button 
+              onClick={() => onZoomChange(zoom - 10)} 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full h-6 w-6 sm:h-8 sm:w-8 flex items-center justify-center hover:bg-blue-50"
+            >
               <span className="font-medium">-</span>
             </Button>
             
-            <Button onClick={() => onZoomChange(zoom + 10)} variant="ghost" size="icon" className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-blue-50">
+            <Button 
+              onClick={() => onZoomChange(zoom + 10)} 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full h-6 w-6 sm:h-8 sm:w-8 flex items-center justify-center hover:bg-blue-50"
+            >
               <span className="font-medium">+</span>
             </Button>
             
             {/* Secondary tools dropdown (advanced features) */}
-            <div className="h-6 border-r border-gray-200 mx-2" />
+            <div className="h-6 border-r border-gray-200 mx-1 sm:mx-2 hidden sm:block" />
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+                >
+                  <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span className="hidden md:inline">詳細ツール</span>
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56">
@@ -212,8 +259,9 @@ const ViewerToolbar = ({
                 <DropdownMenuItem>
                   <span className="mr-2">XML Diffビュー</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span className="mr-2">エクスポート</span>
+                <DropdownMenuItem onClick={exportToPPTX}>
+                  <FileDown className="h-4 w-4 mr-2" />
+                  <span>PPTXとしてエクスポート</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onFullScreenToggle}>
@@ -226,7 +274,7 @@ const ViewerToolbar = ({
           <div className="flex items-center">
             {/* Role indicator badge */}
             {userProfile && (
-              <Badge variant="outline" className="mr-3 text-xs">
+              <Badge variant="outline" className="mr-2 sm:mr-3 text-[10px] sm:text-xs">
                 {userProfile.role === "business" ? "企業ユーザー" : 
                  userProfile.role === "student" ? "学生ユーザー" : 
                  userProfile.role === "debugger" ? "デバッガー" : "ゲスト"}
@@ -236,15 +284,30 @@ const ViewerToolbar = ({
             {/* Mode-specific controls on the right */}
             {renderModeSpecificUI()}
             
-            {/* Share button always available */}
-            <Button variant="outline" size="sm" className="ml-3 hidden sm:flex items-center gap-2 border-blue-200 hover:bg-blue-50 hover:border-blue-300">
-              <Share className="h-4 w-4 text-blue-600" />
-              <span className="text-blue-700">共有</span>
+            {/* Share button always available (hidden on small screens) */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="ml-2 sm:ml-3 hidden sm:flex items-center gap-1 sm:gap-2 border-blue-200 hover:bg-blue-50 hover:border-blue-300"
+            >
+              <Share className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+              <span className="text-blue-700 text-xs sm:text-sm">共有</span>
+            </Button>
+            
+            {/* Export to PPTX button (visible on small screens only) */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={exportToPPTX}
+              className="ml-2 sm:hidden p-1"
+            >
+              <FileDown className="h-4 w-4 text-blue-600" />
             </Button>
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default ViewerToolbar;

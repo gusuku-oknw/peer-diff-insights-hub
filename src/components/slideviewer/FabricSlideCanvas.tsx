@@ -1,5 +1,6 @@
+
 import { useEffect, useRef, useState } from "react";
-import * as fabric from 'fabric'; // The correct import
+import * as fabric from 'fabric';
 import { useSlideStore } from "@/stores/slideStore";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
@@ -97,8 +98,11 @@ const FabricSlideCanvas = ({
               fontSize: element.props.fontSize || 24,
               fill: element.props.color || '#000000',
               fontFamily: element.props.fontFamily || 'Arial',
+              fontWeight: element.props.fontWeight || 'normal',
               angle: element.angle,
               selectable: editable,
+              originX: 'center',
+              originY: 'center',
             }) as CustomFabricObject;
             
             // Add custom data
@@ -117,6 +121,8 @@ const FabricSlideCanvas = ({
                 strokeWidth: element.props.strokeWidth || 0,
                 angle: element.angle,
                 selectable: editable,
+                originX: 'center',
+                originY: 'center',
               }) as CustomFabricObject;
               
               // Add custom data
@@ -131,6 +137,8 @@ const FabricSlideCanvas = ({
                 strokeWidth: element.props.strokeWidth || 0,
                 angle: element.angle,
                 selectable: editable,
+                originX: 'center',
+                originY: 'center',
               }) as CustomFabricObject;
               
               // Add custom data
@@ -151,6 +159,8 @@ const FabricSlideCanvas = ({
                 scaleY: element.size.height / img.height! || 1,
                 angle: element.angle,
                 selectable: editable,
+                originX: 'center',
+                originY: 'center',
               });
               
               // Add custom data
@@ -255,6 +265,99 @@ const FabricSlideCanvas = ({
     });
   };
 
+  const handleAddRectElement = () => {
+    if (!editable || !fabricCanvasRef.current) return;
+    
+    const canvas = fabricCanvasRef.current;
+    const newRect = new fabric.Rect({
+      left: canvas.width! / 2,
+      top: canvas.height! / 2,
+      width: 150,
+      height: 100,
+      fill: '#4287f5',
+      stroke: '#2054a8',
+      strokeWidth: 2,
+      originX: 'center',
+      originY: 'center',
+      selectable: true,
+    }) as fabric.Rect & CustomFabricObject;
+    
+    const newId = `rect-${Date.now()}`;
+    newRect.customData = { id: newId };
+    
+    canvas.add(newRect);
+    canvas.setActiveObject(newRect);
+    canvas.renderAll();
+    
+    // Add to store
+    addElement(currentSlide, {
+      id: newId,
+      type: 'shape',
+      props: { 
+        shape: 'rect',
+        fill: '#4287f5',
+        stroke: '#2054a8',
+        strokeWidth: 2,
+      },
+      position: { 
+        x: canvas.width! / 2, 
+        y: canvas.height! / 2 
+      },
+      size: { 
+        width: 150, 
+        height: 100 
+      },
+      angle: 0,
+      zIndex: 1,
+    });
+  };
+
+  const handleAddCircleElement = () => {
+    if (!editable || !fabricCanvasRef.current) return;
+    
+    const canvas = fabricCanvasRef.current;
+    const newCircle = new fabric.Circle({
+      left: canvas.width! / 2,
+      top: canvas.height! / 2,
+      radius: 50,
+      fill: '#f54242',
+      stroke: '#8a2727',
+      strokeWidth: 2,
+      originX: 'center',
+      originY: 'center',
+      selectable: true,
+    }) as fabric.Circle & CustomFabricObject;
+    
+    const newId = `circle-${Date.now()}`;
+    newCircle.customData = { id: newId };
+    
+    canvas.add(newCircle);
+    canvas.setActiveObject(newCircle);
+    canvas.renderAll();
+    
+    // Add to store
+    addElement(currentSlide, {
+      id: newId,
+      type: 'shape',
+      props: { 
+        shape: 'circle',
+        fill: '#f54242',
+        stroke: '#8a2727',
+        strokeWidth: 2,
+      },
+      position: { 
+        x: canvas.width! / 2, 
+        y: canvas.height! / 2 
+      },
+      size: { 
+        width: 100, 
+        height: 100 
+      },
+      angle: 0,
+      zIndex: 1,
+    });
+  };
+
   return (
     <div className="relative bg-white rounded-lg shadow-md overflow-hidden">
       <div 
@@ -288,7 +391,7 @@ const FabricSlideCanvas = ({
 
           {/* Edit toolbar for adding elements */}
           {editable && (
-            <div className="absolute top-2 left-2 bg-white p-2 rounded-md shadow-lg flex gap-2">
+            <div className="absolute top-2 left-2 bg-white p-2 rounded-md shadow-lg flex gap-2 flex-wrap">
               <Button 
                 size="sm" 
                 variant="outline" 
@@ -297,7 +400,22 @@ const FabricSlideCanvas = ({
               >
                 テキスト追加
               </Button>
-              {/* Other tools can be added here */}
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={handleAddRectElement}
+                className="bg-white"
+              >
+                四角形追加
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={handleAddCircleElement}
+                className="bg-white"
+              >
+                円追加
+              </Button>
             </div>
           )}
         </div>

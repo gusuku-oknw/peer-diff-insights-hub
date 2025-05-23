@@ -1,5 +1,7 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSlideStore } from "@/stores/slideStore";
+import { useEffect } from "react";
 
 interface SlideThumbnailsProps {
   currentSlide: number;
@@ -18,6 +20,14 @@ const SlideThumbnails = ({
   userType,
   onSlideSelect
 }: SlideThumbnailsProps) => {
+  const slides = useSlideStore(state => state.slides);
+  const generateThumbnails = useSlideStore(state => state.generateThumbnails);
+  
+  // Generate thumbnails when component mounts
+  useEffect(() => {
+    generateThumbnails();
+  }, [generateThumbnails]);
+  
   return (
     <div className="bg-white shadow-sm h-full flex flex-col border-t border-gray-200">
       <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200 bg-gray-50">
@@ -29,8 +39,8 @@ const SlideThumbnails = ({
       <ScrollArea className="flex-grow h-[calc(100%-3rem)]" orientation="horizontal">
         <div className="p-4 h-full flex items-center">
           <div className="flex flex-row gap-4">
-            {Array.from({length: totalSlides}).map((_, index) => {
-              const slideIndex = index + 1;
+            {slides.map((slide, index) => {
+              const slideIndex = slide.id;
               const hasComments = (mockComments[slideIndex] || []).length > 0;
               const needsComment = userType === "student" && !commentedSlides?.includes(slideIndex);
               
@@ -45,11 +55,17 @@ const SlideThumbnails = ({
                   onClick={() => onSlideSelect(slideIndex)}
                 >
                   <div className="w-36 aspect-video bg-white rounded-t-md flex items-center justify-center overflow-hidden">
-                    <img 
-                      src={`https://placehold.co/1600x900/e2e8f0/1e293b?text=Slide+${slideIndex}`} 
-                      alt={`スライド ${slideIndex}`} 
-                      className="object-cover w-full h-full" 
-                    />
+                    {slide.thumbnail ? (
+                      <img 
+                        src={slide.thumbnail} 
+                        alt={`スライド ${slideIndex}`} 
+                        className="object-cover w-full h-full" 
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <span className="text-gray-500 text-xs">No Preview</span>
+                      </div>
+                    )}
                   </div>
                   <div className="p-3">
                     <p className={`text-sm font-medium truncate w-32 ${currentSlide === slideIndex ? 'text-blue-700' : ''}`}>
