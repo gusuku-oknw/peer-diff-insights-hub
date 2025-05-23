@@ -23,6 +23,13 @@ const SidePanel = ({
   // サイドパネルを表示するかどうかをチェック
   const shouldDisplay = shouldShowNotes || shouldShowReviewPanel;
   
+  console.log("SidePanel: Display check", {
+    shouldShowNotes,
+    shouldShowReviewPanel,
+    shouldDisplay,
+    currentSlide
+  });
+  
   // 表示条件が満たされない場合は何も表示しない
   if (!shouldDisplay) {
     console.log("SidePanel: Display conditions not met, returning null");

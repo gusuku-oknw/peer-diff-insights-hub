@@ -4,7 +4,6 @@ import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
 import EditToolbar from "@/components/slideviewer/editor/EditToolbar";
 import EditSidebar from "@/components/slideviewer/editor/EditSidebar";
 import PresentationControls from "@/components/slideviewer/panel/PresentationControls";
-import SidePanel from "@/components/slideviewer/panels/SidePanel";
 import useSlideNavigation from "@/hooks/slideviewer/useSlideNavigation";
 import type { ViewerMode } from "@/stores/slideStore";
 
@@ -92,9 +91,6 @@ const SlideViewerPanel = ({
 
   console.log(`SlideViewerPanel: Rendering mode=${viewerMode}, slide=${currentSlide}, showNotes=${showPresenterNotes}`);
   
-  // 明示的に右サイドパネルの表示条件をチェック
-  const shouldShowRightSidePanel = viewerMode === "review" || (showPresenterNotes === true);
-  
   return (
     <div className="flex h-full">
       {/* Edit sidebar (visible only in edit mode) */}
@@ -143,16 +139,7 @@ const SlideViewerPanel = ({
             )}
           </div>
           
-          {/* Right sidebar - 表示条件をより厳格にチェック */}
-          {shouldShowRightSidePanel && (
-            <SidePanel
-              shouldShowNotes={!!showPresenterNotes}
-              shouldShowReviewPanel={viewerMode === "review"}
-              currentSlide={currentSlide}
-              totalSlides={totalSlides}
-              presenterNotes={presenterNotes}
-            />
-          )}
+          {/* 右サイドパネルの表示をMainLayoutに統一するため、ここからは削除 */}
         </div>
       </div>
     </div>

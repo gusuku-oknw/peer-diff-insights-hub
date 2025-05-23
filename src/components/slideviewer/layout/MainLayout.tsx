@@ -94,8 +94,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     setIsNotesPanelOpen(!isNotesPanelOpen);
   };
 
-  // 明示的に右サイドパネルの表示条件をチェック
-  const shouldShowRightSidePanel = viewerMode === "review" || showPresenterNotes;
+  // 右サイドパネルの表示条件を厳格にチェック
+  const shouldShowRightSidePanel = viewerMode === "review" || (showPresenterNotes === true);
+  
+  console.log("MainLayout: Right side panel conditions:", {
+    viewerMode,
+    showPresenterNotes,
+    shouldShowRightSidePanel
+  });
   
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
@@ -181,7 +187,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           )}
         </main>
 
-        {/* Right Sidebar - 表示条件を厳格化 */}
+        {/* Right Sidebar - 一箇所での制御に統一 */}
         {shouldShowRightSidePanel && (
           <SidePanel
             shouldShowNotes={showPresenterNotes}
