@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import SidePanel from "@/components/slideviewer/panels/SidePanel";
@@ -57,6 +58,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState(mockComments[currentSlide] || []);
   const [isNotesPanelOpen, setIsNotesPanelOpen] = useState(false);
+  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
   const slides = useSlideStore(state => state.slides);
   const isMobile = useIsMobile();
 
@@ -90,11 +92,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     setIsNotesPanelOpen(!isNotesPanelOpen);
   };
 
+  const toggleRightPanelCollapse = () => {
+    setIsRightPanelCollapsed(!isRightPanelCollapsed);
+  };
+
   // Determine if we should show the right side panel
   const shouldShowRightSidePanel = (
     viewerMode === "review" || 
     (showPresenterNotes && viewerMode !== "edit")
-  ) && !isMobile; // Don't show on mobile by default
+  );
   
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
@@ -119,10 +125,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
         {/* Main Content Area with Resizable Panels */}
         <div className={`flex-1 flex transition-all duration-300 ${leftSidebarOpen && !isMobile ? 'ml-64' : 'ml-0'}`}>
-          {shouldShowRightSidePanel ? (
+          {shouldShowRightSidePanel && !isMobile ? (
             <ResizablePanelGroup direction="horizontal" className="flex-1">
               {/* Main Content Panel */}
-              <ResizablePanel defaultSize={70} minSize={50}>
+              <ResizablePanel 
+                defaultSize={isRightPanelCollapsed ? 95 : 70} 
+                minSize={50}
+                maxSize={isRightPanelCollapsed ? 95 : 85}
+              >
                 <div className="flex flex-col h-full">
                   <MainContent
                     currentSlide={currentSlide}
@@ -139,17 +149,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 </div>
               </ResizablePanel>
 
-              {/* Resizable Handle */}
-              <ResizableHandle withHandle />
+              {/* Resizable Handle - only show when panel is not collapsed */}
+              {!isRightPanelCollapsed && <ResizableHandle withHandle />}
 
               {/* Right Side Panel */}
-              <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
+              <ResizablePanel 
+                defaultSize={isRightPanelCollapsed ? 5 : 30} 
+                minSize={isRightPanelCollapsed ? 5 : 20} 
+                maxSize={isRightPanelCollapsed ? 5 : 50}
+              >
                 <SidePanel
                   shouldShowNotes={showPresenterNotes}
                   shouldShowReviewPanel={viewerMode === "review"}
                   currentSlide={currentSlide}
                   totalSlides={totalSlides}
                   presenterNotes={presenterNotes}
+                  isCollapsed={isRightPanelCollapsed}
+                  onToggleCollapse={toggleRightPanelCollapse}
                 />
               </ResizablePanel>
             </ResizablePanelGroup>
@@ -167,6 +183,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 handleAddComment={handleAddComment}
                 toggleNotesPanel={toggleNotesPanel}
               />
+              
+              {/* Show SidePanel for mobile */}
+              {shouldShowRightSidePanel && isMobile && (
+                <SidePanel
+                  shouldShowNotes={showPresenterNotes}
+                  shouldShowReviewPanel={viewerMode === "review"}
+                  currentSlide={currentSlide}
+                  totalSlides={totalSlides}
+                  presenterNotes={presenterNotes}
+                />
+              )}
             </div>
           )}
         </div>

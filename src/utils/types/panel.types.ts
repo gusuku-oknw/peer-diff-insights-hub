@@ -22,6 +22,8 @@ export interface SidePanelProps extends BasePanelProps {
   shouldShowNotes: boolean;
   shouldShowReviewPanel: boolean;
   presenterNotes: Record<number, string>;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 // Panel visibility state
@@ -30,4 +32,13 @@ export interface PanelVisibility {
   rightSidebar: boolean;
   presenterNotes: boolean;
   reviewPanel: boolean;
+  rightPanelCollapsed?: boolean;
+}
+
+// Panel layout configuration
+export interface PanelLayoutConfig {
+  showLeftSidebar: boolean;
+  showRightSidebar: boolean;
+  rightPanelCollapsed: boolean;
+  mobileSheetMode: boolean;
 }
