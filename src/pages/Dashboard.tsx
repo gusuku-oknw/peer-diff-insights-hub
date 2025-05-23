@@ -5,6 +5,9 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import StudentDashboard from "@/components/dashboard/StudentDashboard";
 import BusinessDashboard from "@/components/dashboard/BusinessDashboard";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 
 const Dashboard = () => {
   const [userType, setUserType] = useState<"student" | "business">("student");
@@ -21,6 +24,14 @@ const Dashboard = () => {
             <p className="mt-2 text-lg text-gray-600">
               あなたのレビュー状況とタスクを管理
             </p>
+            <div className="mt-4">
+              <Link to="/slides">
+                <Button className="gradient-primary">
+                  <FileText className="mr-2 h-5 w-5" />
+                  スライドビューを開く
+                </Button>
+              </Link>
+            </div>
           </div>
 
           <div className="mb-8 flex justify-center">

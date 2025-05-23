@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import DemoPage from "./pages/DemoPage";
 import Dashboard from "./pages/Dashboard";
+import SlideViewer from "./pages/SlideViewer";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/demo" element={<DemoPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/slides" element={<SlideViewer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
