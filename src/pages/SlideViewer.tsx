@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,7 +23,6 @@ import {
   Download,
   Settings,
   Tag,
-  Git,
   GitBranch,
   GitCommit,
   GitPullRequest
