@@ -104,7 +104,7 @@ export const useElementsRenderer = ({
               break;
               
             case 'image':
-              // Fix: Using the correct approach for Image.fromURL in Fabric.js v6
+              // Fix: Using the correct approach for Image.fromURL with LoadImageOptions parameter
               Image.fromURL(props.src, (img) => {
                 if (!canvas) return;
 

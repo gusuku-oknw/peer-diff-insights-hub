@@ -8,14 +8,14 @@ export interface CustomFabricObject extends FabricObject {
     id: string;
     [key: string]: any;
   };
-  type: string; // Changed from optional to required
-  width: number; // Changed from optional to required
-  height: number; // Changed from optional to required
-  left: number; // Changed from optional to required
-  top: number; // Changed from optional to required
+  type: string;
+  width: number;
+  height: number;
+  left: number;
+  top: number;
+  scaleX: number;
+  scaleY: number;
   angle?: number;
-  scaleX?: number;
-  scaleY?: number;
   set?: (options: any) => CustomFabricObject;
 }
 
