@@ -27,7 +27,7 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
         w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 
         transition-transform duration-300 ease-in-out
         ${leftSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        ${isMobile ? 'fixed top-0 left-0 h-full z-40' : 'relative'}
+        ${isMobile ? 'fixed top-0 left-0 h-full z-40' : 'absolute h-full'}
       `}
     >
       <div className="h-full flex flex-col">
