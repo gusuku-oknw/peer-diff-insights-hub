@@ -139,7 +139,7 @@ const SlideViewerPanel = ({
             )}
           </div>
           
-          {/* 右サイドパネルの表示をMainLayoutに統一するため、ここからは削除 */}
+          {/* 右サイドパネルは完全に削除 - MainLayoutに統一 */}
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import NotesPanel from "./NotesPanel";
 import ReviewPanel from "./ReviewPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,12 +23,14 @@ const SidePanel = ({
   // サイドパネルを表示するかどうかをチェック
   const shouldDisplay = shouldShowNotes || shouldShowReviewPanel;
   
-  console.log("SidePanel: Display check", {
-    shouldShowNotes,
-    shouldShowReviewPanel,
-    shouldDisplay,
-    currentSlide
-  });
+  useEffect(() => {
+    console.log("SidePanel: Component mounted/updated with: ", {
+      shouldShowNotes,
+      shouldShowReviewPanel,
+      shouldDisplay,
+      currentSlide
+    });
+  }, [shouldShowNotes, shouldShowReviewPanel, shouldDisplay, currentSlide]);
   
   // 表示条件が満たされない場合は何も表示しない
   if (!shouldDisplay) {

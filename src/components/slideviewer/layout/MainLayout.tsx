@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
@@ -94,23 +93,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     setIsNotesPanelOpen(!isNotesPanelOpen);
   };
 
-  // 右サイドパネルの表示条件をより厳格にチェック
-  const shouldShowRightSidePanel = (viewerMode === "review") || (showPresenterNotes === true && viewerMode !== "edit");
+  // 右サイドパネル表示ロジックを完全に統制する
+  const shouldShowRightSidePanel = (
+    (viewerMode === "review") || 
+    (showPresenterNotes === true && viewerMode !== "edit")
+  );
   
-  console.log("MainLayout: Right side panel conditions:", {
-    viewerMode,
-    showPresenterNotes,
-    shouldShowRightSidePanel
-  });
-  
-  // 追加デバッグ: 実際にレンダリングされるコンポーネントの確認
+  // デバッグログを強化
   useEffect(() => {
-    console.log("MainLayout: Panel visibility updated:", {
-      shouldShowRightSidePanel,
+    console.log("MainLayout DEBUG: Right panel visibility calculation:", {
       viewerMode,
-      showPresenterNotes
+      showPresenterNotes,
+      isEditMode: viewerMode === "edit",
+      isReviewMode: viewerMode === "review", 
+      notesVisibleAndNotEdit: showPresenterNotes === true && viewerMode !== "edit",
+      finalDecision: shouldShowRightSidePanel
     });
-  }, [shouldShowRightSidePanel, viewerMode, showPresenterNotes]);
+  }, [viewerMode, showPresenterNotes, shouldShowRightSidePanel]);
   
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
@@ -196,9 +195,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           )}
         </main>
 
-        {/* Right Sidebar - 表示条件を強化 */}
+        {/* Right Sidebar - 厳格な表示制御 */}
         {shouldShowRightSidePanel && (
-          <div className="flex-shrink-0">
+          <div 
+            className="flex-shrink-0" 
+            data-testid="right-sidebar"
+            data-view-mode={viewerMode}
+            data-notes-visible={showPresenterNotes}
+          >
             <SidePanel
               shouldShowNotes={showPresenterNotes}
               shouldShowReviewPanel={viewerMode === "review"}
