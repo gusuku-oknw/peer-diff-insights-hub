@@ -4,15 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import { ChevronLeft, ChevronRight, Eye, List, History, Share, Code, FileText, Maximize, Minimize2, Percent, Calendar, Download, Settings, Tag, GitBranch, GitCommit, GitPullRequest } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, List, History, Share, Code, FileText, Maximize, Minimize2, Percent, Calendar, Download, Settings, Tag, GitBranch, GitCommit, GitPullRequest, MessageCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SlideCanvas from "@/components/slideviewer/SlideCanvas";
 import CommentList from "@/components/slideviewer/CommentList";
 import { useToast } from "@/hooks/use-toast";
-import { Drawer, DrawerTrigger, DrawerContent, DrawerClose } from "@/components/ui/drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const SlideViewer = () => {
@@ -109,12 +108,12 @@ const SlideViewer = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
-      <div className="flex-grow pt-16 pb-16 bg-gray-100">
-        {/* Top toolbar - 改良されたUI */}
-        <div className="bg-white border-b border-gray-200 py-3 shadow-sm">
+      <div className="flex-grow flex flex-col pt-16 pb-16 bg-gray-100">
+        {/* トップツールバー - 改良されたUI */}
+        <div className="bg-white border-b border-gray-200 py-3 shadow-sm flex-shrink-0">
           <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-4">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button 
@@ -171,37 +170,49 @@ const SlideViewer = () => {
                 <div className="h-6 border-r border-gray-200 mx-2" />
                 
                 <div className="flex items-center space-x-1">
-                  <Button 
-                    onClick={handleZoomOut} 
-                    variant="ghost" 
-                    size="icon"
-                    className="rounded-full h-8 w-8 flex items-center justify-center" 
-                  >
-                    <span className="font-medium">-</span>
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        onClick={handleZoomOut} 
+                        variant="ghost" 
+                        size="icon"
+                        className="rounded-full h-8 w-8 flex items-center justify-center"
+                      >
+                        <span className="font-medium">-</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>縮小</TooltipContent>
+                  </Tooltip>
+                  
                   <span className="text-sm font-medium bg-gray-50 px-3 py-1 rounded-md border border-gray-200 min-w-[60px] text-center">
                     {zoom}%
                   </span>
-                  <Button 
-                    onClick={handleZoomIn} 
-                    variant="ghost" 
-                    size="icon"
-                    className="rounded-full h-8 w-8 flex items-center justify-center"
-                  >
-                    <span className="font-medium">+</span>
-                  </Button>
+                  
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        onClick={handleZoomIn} 
+                        variant="ghost" 
+                        size="icon"
+                        className="rounded-full h-8 w-8 flex items-center justify-center"
+                      >
+                        <span className="font-medium">+</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>拡大</TooltipContent>
+                  </Tooltip>
                 </div>
                 
                 <div className="h-6 border-r border-gray-200 mx-2" />
                 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className={`h-4 w-4 ${viewMode === "all" ? "text-blue-500" : "text-gray-400"}`} />
                       <Switch 
                         id="comment-mode" 
                         checked={viewMode === "all"}
                         onCheckedChange={checked => setViewMode(checked ? "all" : "canvas")}
-                        variant="comment-slash"
                         className="focus-visible:ring-offset-0"
                       />
                     </div>
@@ -253,195 +264,202 @@ const SlideViewer = () => {
           </div>
         </div>
         
-        {/* Main content with resizable panels - 改良されたレイアウト */}
-        <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-15rem)]">
-          {/* Left sidebar for branch and commit history - 改良されたUI */}
-          {leftSidebarOpen && (
-            <>
-              <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
-                <div className="h-full bg-white shadow-sm rounded-r-lg">
-                  <div className="h-full flex flex-col">
-                    <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                      <h3 className="font-medium flex items-center">
-                        <History className="h-4 w-4 mr-2" />
-                        スライド履歴
-                      </h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setLeftSidebarOpen(false)}
-                        className="h-7 w-7 p-0 rounded-full hover:bg-gray-100"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                    </div>
+        {/* メインコンテンツエリア - 高さを調整 */}
+        <div className="flex-grow flex flex-col overflow-hidden">
+          {/* メインコンテンツとスライド一覧のパネル - 高さを適切に設定 */}
+          <ResizablePanelGroup direction="vertical" className="h-full">
+            {/* メインコンテンツパネル */}
+            <ResizablePanel defaultSize={80} minSize={50}>
+              <ResizablePanelGroup direction="horizontal" className="h-full">
+                {/* 左サイドバー（ブランチ・コミット履歴） */}
+                {leftSidebarOpen && (
+                  <>
+                    <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
+                      <div className="h-full bg-white shadow-sm rounded-r-lg">
+                        <div className="h-full flex flex-col">
+                          <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                            <h3 className="font-medium flex items-center">
+                              <History className="h-4 w-4 mr-2" />
+                              スライド履歴
+                            </h3>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setLeftSidebarOpen(false)}
+                              className="h-7 w-7 p-0 rounded-full hover:bg-gray-100"
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          
+                          <div className="flex-grow">
+                            <Tabs defaultValue="branches" className="h-full flex flex-col">
+                              <TabsList className="w-full grid grid-cols-2 px-4 py-2 bg-gray-50">
+                                <TabsTrigger value="branches" className="text-sm">
+                                  <GitBranch className="h-4 w-4 mr-1" />
+                                  ブランチ
+                                </TabsTrigger>
+                                <TabsTrigger value="commits" className="text-sm">
+                                  <GitCommit className="h-4 w-4 mr-1" />
+                                  コミット
+                                </TabsTrigger>
+                              </TabsList>
+                              
+                              <TabsContent value="branches" className="flex-grow overflow-hidden">
+                                <div className="p-4 border-b border-gray-100">
+                                  <div className="rounded-lg bg-blue-50 border border-blue-100 px-3 py-2">
+                                    <h4 className="text-sm font-medium flex items-center text-blue-800">
+                                      <GitBranch className="h-4 w-4 mr-2 text-blue-600" />
+                                      現在のブランチ
+                                    </h4>
+                                    <p className="mt-1 font-bold text-blue-700">{currentBranch}</p>
+                                  </div>
+                                </div>
+                                <ScrollArea className="flex-grow" orientation="vertical">
+                                  <div className="p-3 space-y-1">
+                                    {branches.map(branch => (
+                                      <div
+                                        key={branch}
+                                        className={`p-2 rounded-md cursor-pointer hover:bg-gray-100 flex items-center ${
+                                          branch === currentBranch ? 'bg-blue-50 text-blue-700 border border-blue-100' : ''
+                                        }`}
+                                        onClick={() => setCurrentBranch(branch)}
+                                      >
+                                        <GitBranch className={`h-4 w-4 mr-2 ${branch === currentBranch ? 'text-blue-500' : 'text-gray-500'}`} />
+                                        <span className="text-sm">{branch}</span>
+                                        {branch === currentBranch && (
+                                          <span className="ml-auto text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                                            現在
+                                          </span>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </ScrollArea>
+                              </TabsContent>
+                              
+                              <TabsContent value="commits" className="flex-grow overflow-hidden">
+                                <div className="p-4 border-b border-gray-100">
+                                  <h4 className="text-sm font-medium flex items-center">
+                                    <GitCommit className="h-4 w-4 mr-2 text-gray-600" />
+                                    コミット履歴
+                                  </h4>
+                                </div>
+                                <ScrollArea className="flex-grow" orientation="vertical">
+                                  <div className="p-3 space-y-2">
+                                    {commitHistory.map((commit, index) => (
+                                      <div 
+                                        key={commit.id} 
+                                        className={`p-3 border rounded-md hover:bg-gray-50 ${
+                                          index === 0 ? 'bg-blue-50 border-blue-100' : 'border-gray-200'
+                                        }`}
+                                      >
+                                        <div className="flex items-center justify-between mb-1">
+                                          <span className={`text-xs font-mono px-2 py-0.5 rounded ${
+                                            index === 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                                          }`}>
+                                            {commit.id.substring(0, 7)}
+                                          </span>
+                                          <span className="text-xs text-gray-500">{commit.date}</span>
+                                        </div>
+                                        <p className={`text-sm font-medium mb-1 ${index === 0 ? 'text-blue-800' : ''}`}>
+                                          {commit.message}
+                                        </p>
+                                        <div className="flex items-center text-xs text-gray-500">
+                                          <span>作成者: {commit.author}</span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </ScrollArea>
+                              </TabsContent>
+                            </Tabs>
+                          </div>
+                        </div>
+                      </div>
+                    </ResizablePanel>
                     
-                    <div className="flex-grow">
-                      <Tabs defaultValue="branches" className="h-full flex flex-col">
-                        <TabsList className="w-full grid grid-cols-2 px-4 py-2 bg-gray-50">
-                          <TabsTrigger value="branches" className="text-sm">
-                            <GitBranch className="h-4 w-4 mr-1" />
-                            ブランチ
-                          </TabsTrigger>
-                          <TabsTrigger value="commits" className="text-sm">
-                            <GitCommit className="h-4 w-4 mr-1" />
-                            コミット
-                          </TabsTrigger>
-                        </TabsList>
-                        
-                        <TabsContent value="branches" className="flex-grow overflow-hidden">
-                          <div className="p-4 border-b border-gray-100">
-                            <div className="rounded-lg bg-blue-50 border border-blue-100 px-3 py-2">
-                              <h4 className="text-sm font-medium flex items-center text-blue-800">
-                                <GitBranch className="h-4 w-4 mr-2 text-blue-600" />
-                                現在のブランチ
-                              </h4>
-                              <p className="mt-1 font-bold text-blue-700">{currentBranch}</p>
-                            </div>
-                          </div>
-                          <ScrollArea className="h-[calc(100vh-22rem)]" orientation="vertical">
-                            <div className="p-3 space-y-1">
-                              {branches.map(branch => (
-                                <div
-                                  key={branch}
-                                  className={`p-2 rounded-md cursor-pointer hover:bg-gray-100 flex items-center ${
-                                    branch === currentBranch ? 'bg-blue-50 text-blue-700 border border-blue-100' : ''
-                                  }`}
-                                  onClick={() => setCurrentBranch(branch)}
-                                >
-                                  <GitBranch className={`h-4 w-4 mr-2 ${branch === currentBranch ? 'text-blue-500' : 'text-gray-500'}`} />
-                                  <span className="text-sm">{branch}</span>
-                                  {branch === currentBranch && (
-                                    <span className="ml-auto text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                                      現在
-                                    </span>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </ScrollArea>
-                        </TabsContent>
-                        
-                        <TabsContent value="commits" className="flex-grow overflow-hidden">
-                          <div className="p-4 border-b border-gray-100">
-                            <h4 className="text-sm font-medium flex items-center">
-                              <GitCommit className="h-4 w-4 mr-2 text-gray-600" />
-                              コミット履歴
-                            </h4>
-                          </div>
-                          <ScrollArea className="h-[calc(100vh-22rem)]" orientation="vertical">
-                            <div className="p-3 space-y-2">
-                              {commitHistory.map((commit, index) => (
-                                <div 
-                                  key={commit.id} 
-                                  className={`p-3 border rounded-md hover:bg-gray-50 ${
-                                    index === 0 ? 'bg-blue-50 border-blue-100' : 'border-gray-200'
-                                  }`}
-                                >
-                                  <div className="flex items-center justify-between mb-1">
-                                    <span className={`text-xs font-mono px-2 py-0.5 rounded ${
-                                      index === 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                    }`}>
-                                      {commit.id.substring(0, 7)}
-                                    </span>
-                                    <span className="text-xs text-gray-500">{commit.date}</span>
-                                  </div>
-                                  <p className={`text-sm font-medium mb-1 ${index === 0 ? 'text-blue-800' : ''}`}>
-                                    {commit.message}
-                                  </p>
-                                  <div className="flex items-center text-xs text-gray-500">
-                                    <span>作成者: {commit.author}</span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </ScrollArea>
-                        </TabsContent>
-                      </Tabs>
-                    </div>
-                  </div>
-                </div>
-              </ResizablePanel>
-              
-              <ResizableHandle withHandle className="bg-gray-200" />
-            </>
-          )}
-          
-          {/* Main content with slide viewer - 改良されたUI */}
-          <ResizablePanel>
-            <ResizablePanelGroup direction="horizontal">
-              {/* Centered slide canvas - 改良されたUI */}
-              <ResizablePanel>
-                <div className="flex-grow flex items-center justify-center bg-gray-50 h-full p-4 relative">
-                  <div className="w-4/5 h-full flex items-center justify-center">
-                    <SlideCanvas currentSlide={currentSlide} zoomLevel={zoom} />
-                  </div>
-                </div>
-              </ResizablePanel>
-              
-              {/* Right sidebar for comments - 改良されたUI */}
-              {viewMode === "all" && (
-                <>
-                  <ResizableHandle withHandle className="bg-gray-200" />
-                  <ResizablePanel defaultSize={30} minSize={20}>
-                    <div className="h-full bg-white shadow-sm rounded-l-lg">
-                      <div className="px-4 py-3 border-b border-gray-200">
-                        <h3 className="font-medium text-sm flex items-center">
-                          コメント管理
-                        </h3>
+                    <ResizableHandle withHandle className="bg-gray-200" />
+                  </>
+                )}
+                
+                {/* メインスライドビューワー */}
+                <ResizablePanel>
+                  <ResizablePanelGroup direction="horizontal" className="h-full">
+                    {/* スライドキャンバス */}
+                    <ResizablePanel>
+                      <div className="flex-grow flex items-center justify-center bg-gray-50 h-full p-4 relative">
+                        <div className="w-4/5 h-full flex items-center justify-center">
+                          <SlideCanvas currentSlide={currentSlide} zoomLevel={zoom} />
+                        </div>
                       </div>
-                      <CommentList currentSlide={currentSlide} />
+                    </ResizablePanel>
+                    
+                    {/* コメントサイドバー */}
+                    {viewMode === "all" && (
+                      <>
+                        <ResizableHandle withHandle className="bg-gray-200" />
+                        <ResizablePanel defaultSize={30} minSize={20}>
+                          <div className="h-full bg-white shadow-sm rounded-l-lg">
+                            <div className="px-4 py-3 border-b border-gray-200">
+                              <h3 className="font-medium text-sm flex items-center">
+                                <MessageCircle className="h-4 w-4 mr-2 text-blue-600" />
+                                コメント管理
+                              </h3>
+                            </div>
+                            <CommentList currentSlide={currentSlide} />
+                          </div>
+                        </ResizablePanel>
+                      </>
+                    )}
+                  </ResizablePanelGroup>
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </ResizablePanel>
+            
+            {/* スライドサムネイル一覧 - 下部 */}
+            <ResizableHandle withHandle className="bg-gray-300" />
+            <ResizablePanel defaultSize={20} minSize={15} className="flex-shrink-0">
+              <div className="bg-white shadow-sm h-full flex flex-col">
+                <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200 flex-shrink-0">
+                  <h3 className="font-medium flex items-center text-sm">
+                    <List className="h-4 w-4 mr-2" />
+                    スライド一覧
+                  </h3>
+                </div>
+                
+                <ScrollArea className="flex-grow" orientation="horizontal">
+                  <div className="p-3 h-full flex items-center">
+                    <div className="flex flex-row gap-3">
+                      {Array.from({length: totalSlides}).map((_, index) => (
+                        <div
+                          key={index}
+                          className={`border rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-200 ${
+                            currentSlide === index + 1 ? 'border-blue-500 bg-blue-50 shadow-sm scale-105' : 'border-gray-200'
+                          }`}
+                          onClick={() => setCurrentSlide(index + 1)}
+                        >
+                          <div className="w-32 aspect-video bg-white rounded-t-md flex items-center justify-center overflow-hidden">
+                            <img 
+                              src={`https://placehold.co/1600x900/e2e8f0/1e293b?text=Slide+${index + 1}`} 
+                              alt={`スライド ${index + 1}`}
+                              className="object-cover w-full h-full"
+                            />
+                          </div>
+                          <div className="p-2">
+                            <p className="text-xs font-medium truncate w-28">
+                              {index === 0 ? 'Q4 Presentation' : `Slide ${index + 1}`}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </ResizablePanel>
-                </>
-              )}
-            </ResizablePanelGroup>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-        
-        {/* Bottom slide thumbnails - always visible and resizable - 改良されたUI */}
-        <ResizablePanelGroup direction="vertical" className="h-[150px]">
-          <ResizableHandle withHandle className="bg-gray-300 -mt-1" />
-          <ResizablePanel minSize={10} defaultSize={100}>
-            <div className="bg-white shadow-sm h-full">
-              <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200">
-                <h3 className="font-medium flex items-center text-sm">
-                  <List className="h-4 w-4 mr-2" />
-                  スライド一覧
-                </h3>
+                  </div>
+                </ScrollArea>
               </div>
-              
-              <ScrollArea className="h-[calc(100%-40px)]" orientation="horizontal">
-                <div className="p-3">
-                  <div className="flex flex-row gap-3">
-                    {Array.from({length: totalSlides}).map((_, index) => (
-                      <div
-                        key={index}
-                        className={`border rounded-lg cursor-pointer hover:bg-gray-50 transition-all duration-200 ${
-                          currentSlide === index + 1 ? 'border-blue-500 bg-blue-50 shadow-sm scale-105' : 'border-gray-200'
-                        }`}
-                        onClick={() => setCurrentSlide(index + 1)}
-                      >
-                        <div className="w-32 aspect-video bg-white rounded-t-md flex items-center justify-center overflow-hidden">
-                          <img 
-                            src={`https://placehold.co/1600x900/e2e8f0/1e293b?text=Slide+${index + 1}`} 
-                            alt={`スライド ${index + 1}`}
-                            className="object-cover w-full h-full"
-                          />
-                        </div>
-                        <div className="p-2">
-                          <p className="text-xs font-medium truncate w-28">
-                            {index === 0 ? 'Q4 Presentation' : `Slide ${index + 1}`}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </ScrollArea>
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
       </div>
       <Footer />
     </div>
