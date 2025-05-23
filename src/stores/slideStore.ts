@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { StateCreator } from 'zustand';
+import { PPTXImportSlice, createPPTXImportSlice } from './slideStoreExtensions';
 
 // Define our slide element types
 export type SlideElement = {
@@ -54,6 +55,7 @@ interface SlideState {
   setDisplayCount: (count: number) => void;
   generateThumbnails: () => void;
   exportToPPTX: () => void;
+  importSlidesFromPPTX: (slides: any[]) => void;
 }
 
 // Mock slide data similar to what you have
@@ -849,7 +851,7 @@ const createSampleSlides = (): Slide[] => [
 ];
 
 // Create the slide store with proper types
-const createSlideStore: StateCreator<SlideState> = (set, get) => ({
+const createSlideStore: StateCreator<SlideState & PPTXImportSlice> = (set, get) => ({
   slides: createSampleSlides(),
   currentSlide: 1,
   zoom: 100,
@@ -942,11 +944,21 @@ const createSlideStore: StateCreator<SlideState> = (set, get) => ({
       const exportHandler = module.default;
       exportHandler(get().slides);
     });
+  },
+  
+  importSlidesFromPPTX: (slidesData) => {
+    // Convert the PPTX slides data to our application's slide format
+    // and update the store
+    set({
+      slides: slidesData,
+      isPPTXImported: true,
+      currentSlide: 1
+    });
   }
 });
 
 // Now, add thumbnail generation and PPTX export functions
-export const useSlideStore = create<SlideState>()(
+export const useSlideStore = create<SlideState & PPTXImportSlice>()(
   persist(
     createSlideStore,
     {

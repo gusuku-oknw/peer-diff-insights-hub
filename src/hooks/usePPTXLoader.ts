@@ -7,7 +7,7 @@ import { useSlideStore } from '@/stores/slideStore';
 export function usePPTXLoader() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { setSlides } = useSlideStore();
+  const { importSlidesFromPPTX } = useSlideStore();
   
   const loadPPTXFile = useCallback(async (file: File) => {
     try {
@@ -23,7 +23,7 @@ export function usePPTXLoader() {
       const slides = convertPPTXToSlides(pptxSlides);
       
       // Update store
-      setSlides(slides);
+      importSlidesFromPPTX(slides);
       
       toast({
         title: "プレゼンテーションが読み込まれました",
@@ -42,7 +42,7 @@ export function usePPTXLoader() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast, setSlides]);
+  }, [toast, importSlidesFromPPTX]);
   
   return {
     loadPPTXFile,

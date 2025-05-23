@@ -6,7 +6,7 @@ export interface PPTXImportSlice {
   isPPTXImported: boolean;
   pptxFilename: string | null;
   setPPTXImported: (imported: boolean, filename?: string) => void;
-  setSlides: (slides: any[]) => void;
+  importSlidesFromPPTX: (slides: any[]) => void;
 }
 
 export const createPPTXImportSlice: StateCreator<
@@ -14,13 +14,18 @@ export const createPPTXImportSlice: StateCreator<
   [], 
   [], 
   PPTXImportSlice
-> = (set) => ({
+> = (set, get) => ({
   isPPTXImported: false,
   pptxFilename: null,
   setPPTXImported: (imported, filename = null) => set({ isPPTXImported: imported, pptxFilename: filename }),
-  setSlides: (slides) => set({ 
-    slides,
-    isPPTXImported: true,
-    currentSlide: 1
-  })
+  importSlidesFromPPTX: (slidesData) => {
+    // Convert the PPTX slides data to our application's slide format
+    // and update the store
+    set(state => ({
+      ...state,
+      slides: slidesData,
+      isPPTXImported: true,
+      currentSlide: 1
+    }))
+  }
 });
