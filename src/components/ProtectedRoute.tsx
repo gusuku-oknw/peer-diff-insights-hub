@@ -1,11 +1,11 @@
 
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
-  allowedRoles?: Array<"student" | "business" | "debugger">;
+  allowedRoles?: Array<UserRole>;
 }
 
 const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {

@@ -1,9 +1,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, UserCircle, Shield, GraduationCap, Building } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, UserRole } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +33,9 @@ const Navigation = () => {
   const userDisplayName = userProfile?.display_name || user?.email?.split('@')[0] || 'User';
   const userRole = userProfile?.role || 'guest';
   const isDebugger = userRole === 'debugger';
+
+  // For debugger display mode - determine which role to show in the UI
+  const displayRole = isDebugger ? ('student' as const) : userRole;
 
   const handleRoleChange = (value: string) => {
     if (value !== userRole && (value === 'student' || value === 'business')) {
@@ -142,7 +145,7 @@ const Navigation = () => {
                         <div className="px-2 py-1.5">
                           <p className="text-xs font-medium text-muted-foreground mb-2">ロールを切り替える</p>
                           <DropdownMenuRadioGroup 
-                            value={userRole === 'debugger' ? 'student' : userRole} 
+                            value={displayRole} 
                             onValueChange={handleRoleChange}
                           >
                             <DropdownMenuRadioItem value="student" className="cursor-pointer">
@@ -250,8 +253,8 @@ const Navigation = () => {
                       <div className="grid grid-cols-2 gap-2">
                         <Button 
                           size="sm" 
-                          variant={userRole === 'student' ? 'default' : 'outline'} 
-                          className={userRole === 'student' ? 'bg-blue-600 hover:bg-blue-700' : ''} 
+                          variant={displayRole === 'student' ? 'default' : 'outline'} 
+                          className={displayRole === 'student' ? 'bg-blue-600 hover:bg-blue-700' : ''} 
                           onClick={() => handleRoleChange('student')}
                         >
                           <GraduationCap className="mr-1 h-4 w-4" />
@@ -259,8 +262,8 @@ const Navigation = () => {
                         </Button>
                         <Button 
                           size="sm" 
-                          variant={userRole === 'business' ? 'default' : 'outline'}
-                          className={userRole === 'business' ? 'bg-purple-600 hover:bg-purple-700' : ''} 
+                          variant={displayRole === 'business' ? 'default' : 'outline'}
+                          className={displayRole === 'business' ? 'bg-purple-600 hover:bg-purple-700' : ''} 
                           onClick={() => handleRoleChange('business')}
                         >
                           <Building className="mr-1 h-4 w-4" />

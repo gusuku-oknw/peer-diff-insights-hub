@@ -7,7 +7,7 @@ import BusinessDashboard from "@/components/dashboard/BusinessDashboard";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { FileText, GraduationCap, Building, Shield } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +19,9 @@ const Dashboard = () => {
   // Set the default tab based on user role when the component mounts or userProfile changes
   useEffect(() => {
     if (userProfile && userProfile.role) {
-      setActiveTab(userProfile.role);
+      if (userProfile.role === "student" || userProfile.role === "business" || userProfile.role === "debugger") {
+        setActiveTab(userProfile.role);
+      }
     }
   }, [userProfile]);
 
