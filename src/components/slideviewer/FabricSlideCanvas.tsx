@@ -12,6 +12,13 @@ interface FabricSlideCanvasProps {
   userType?: "student" | "enterprise";
 }
 
+// Define type for custom properties we want to add to fabric objects
+interface CustomFabricObject extends fabric.Object {
+  customData?: {
+    id: string;
+  };
+}
+
 const FabricSlideCanvas = ({ 
   currentSlide, 
   zoomLevel = 100, 
@@ -68,7 +75,9 @@ const FabricSlideCanvas = ({
 
     // Clear canvas
     canvas.clear();
-    canvas.setBackgroundColor('#ffffff', canvas.renderAll.bind(canvas));
+    // Update background color instead of using setBackgroundColor
+    canvas.backgroundColor = '#ffffff';
+    canvas.renderAll();
 
     // Get current slide data
     const slideData = slides.find(slide => slide.id === currentSlide);
@@ -90,7 +99,10 @@ const FabricSlideCanvas = ({
               fontFamily: element.props.fontFamily || 'Arial',
               angle: element.angle,
               selectable: editable,
-            });
+            }) as CustomFabricObject;
+            
+            // Add custom data
+            fabricObject.customData = { id: element.id };
             break;
             
           case 'shape':
@@ -105,7 +117,10 @@ const FabricSlideCanvas = ({
                 strokeWidth: element.props.strokeWidth || 0,
                 angle: element.angle,
                 selectable: editable,
-              });
+              }) as CustomFabricObject;
+              
+              // Add custom data
+              fabricObject.customData = { id: element.id };
             } else if (element.props.shape === 'circle') {
               fabricObject = new fabric.Circle({
                 left: element.position.x,
@@ -116,24 +131,34 @@ const FabricSlideCanvas = ({
                 strokeWidth: element.props.strokeWidth || 0,
                 angle: element.angle,
                 selectable: editable,
-              });
+              }) as CustomFabricObject;
+              
+              // Add custom data
+              fabricObject.customData = { id: element.id };
             }
             break;
             
           case 'image':
-            // We'll handle images separately since they need to be loaded asynchronously
-            fabric.Image.fromURL(element.props.src, (img) => {
-              img.set({
+            // Fixed the image loading API to match Fabric.js v6
+            fabric.Image.fromURL(
+              element.props.src, 
+              { crossOrigin: 'anonymous' }
+            ).then((img) => {
+              (img as CustomFabricObject).set({
                 left: element.position.x,
                 top: element.position.y,
-                scaleX: element.size.width / img.width || 1,
-                scaleY: element.size.height / img.height || 1,
+                scaleX: element.size.width / img.width! || 1,
+                scaleY: element.size.height / img.height! || 1,
                 angle: element.angle,
                 selectable: editable,
               });
+              
+              // Add custom data
+              (img as CustomFabricObject).customData = { id: element.id };
+              
               canvas.add(img);
               canvas.renderAll();
-            });
+            }).catch(error => console.error("Error loading image:", error));
             break;
         }
 
@@ -158,13 +183,13 @@ const FabricSlideCanvas = ({
     // Set up fabric object modification events when editable
     if (editable) {
       canvas.on('object:modified', (e) => {
-        const modifiedObject = e.target;
+        const modifiedObject = e.target as CustomFabricObject;
         if (!modifiedObject) return;
         
-        // Update the object in our store
+        // Update the object in our store using customData instead of data
         updateElement(
           currentSlide,
-          modifiedObject.data?.id || 'temp-id',
+          modifiedObject.customData?.id || 'temp-id',
           {
             position: { 
               x: modifiedObject.left || 0, 
@@ -198,10 +223,11 @@ const FabricSlideCanvas = ({
       originY: 'center',
       selectable: true,
       editable: true,
-    });
+    }) as fabric.IText & CustomFabricObject;
     
     const newId = `text-${Date.now()}`;
-    newText.data = { id: newId }; // Store id in the Fabric object
+    // Use customData instead of data
+    newText.customData = { id: newId };
     
     canvas.add(newText);
     canvas.setActiveObject(newText);
