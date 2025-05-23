@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -264,17 +263,17 @@ const SlideViewer = () => {
           </div>
         </div>
         
-        {/* メインコンテンツエリア - 高さを調整 */}
-        <div className="flex-grow flex flex-col overflow-hidden">
-          {/* メインコンテンツとスライド一覧のパネル - 高さを適切に設定 */}
-          <ResizablePanelGroup direction="vertical" className="h-full">
+        {/* メインコンテンツエリア - 修正された高さ設定 */}
+        <div className="flex-grow flex overflow-hidden">
+          {/* ResizablePanelGroupをネストして適切なレイアウトを構築 */}
+          <ResizablePanelGroup direction="vertical" className="h-full w-full" id="slide-layout-vertical">
             {/* メインコンテンツパネル */}
-            <ResizablePanel defaultSize={80} minSize={50}>
-              <ResizablePanelGroup direction="horizontal" className="h-full">
+            <ResizablePanel defaultSize={80} minSize={50} id="main-content" order={1}>
+              <ResizablePanelGroup direction="horizontal" className="h-full" id="slide-layout-horizontal">
                 {/* 左サイドバー（ブランチ・コミット履歴） */}
                 {leftSidebarOpen && (
                   <>
-                    <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
+                    <ResizablePanel defaultSize={30} minSize={20} maxSize={50} id="history-sidebar" order={1}>
                       <div className="h-full bg-white shadow-sm rounded-r-lg">
                         <div className="h-full flex flex-col">
                           <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
@@ -292,7 +291,7 @@ const SlideViewer = () => {
                             </Button>
                           </div>
                           
-                          <div className="flex-grow">
+                          <div className="flex-grow overflow-hidden">
                             <Tabs defaultValue="branches" className="h-full flex flex-col">
                               <TabsList className="w-full grid grid-cols-2 px-4 py-2 bg-gray-50">
                                 <TabsTrigger value="branches" className="text-sm">
@@ -384,10 +383,10 @@ const SlideViewer = () => {
                 )}
                 
                 {/* メインスライドビューワー */}
-                <ResizablePanel>
+                <ResizablePanel id="slide-viewer" order={2}>
                   <ResizablePanelGroup direction="horizontal" className="h-full">
                     {/* スライドキャンバス */}
-                    <ResizablePanel>
+                    <ResizablePanel id="slide-canvas" order={1}>
                       <div className="flex-grow flex items-center justify-center bg-gray-50 h-full p-4 relative">
                         <div className="w-4/5 h-full flex items-center justify-center">
                           <SlideCanvas currentSlide={currentSlide} zoomLevel={zoom} />
@@ -399,7 +398,7 @@ const SlideViewer = () => {
                     {viewMode === "all" && (
                       <>
                         <ResizableHandle withHandle className="bg-gray-200" />
-                        <ResizablePanel defaultSize={30} minSize={20}>
+                        <ResizablePanel defaultSize={30} minSize={20} id="comment-sidebar" order={2}>
                           <div className="h-full bg-white shadow-sm rounded-l-lg">
                             <div className="px-4 py-3 border-b border-gray-200">
                               <h3 className="font-medium text-sm flex items-center">
@@ -417,9 +416,9 @@ const SlideViewer = () => {
               </ResizablePanelGroup>
             </ResizablePanel>
             
-            {/* スライドサムネイル一覧 - 下部 */}
+            {/* スライドサムネイル一覧 - 下部（修正版） */}
             <ResizableHandle withHandle className="bg-gray-300" />
-            <ResizablePanel defaultSize={20} minSize={15} className="flex-shrink-0">
+            <ResizablePanel defaultSize={20} minSize={15} className="flex-shrink-0 min-h-[150px]" id="thumbnails" order={2}>
               <div className="bg-white shadow-sm h-full flex flex-col">
                 <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200 flex-shrink-0">
                   <h3 className="font-medium flex items-center text-sm">
@@ -428,7 +427,7 @@ const SlideViewer = () => {
                   </h3>
                 </div>
                 
-                <ScrollArea className="flex-grow" orientation="horizontal">
+                <ScrollArea className="flex-grow h-full overflow-auto" orientation="horizontal">
                   <div className="p-3 h-full flex items-center">
                     <div className="flex flex-row gap-3">
                       {Array.from({length: totalSlides}).map((_, index) => (
