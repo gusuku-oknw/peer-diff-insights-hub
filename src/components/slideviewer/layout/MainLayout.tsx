@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
-import SlideThumbnails from "@/components/slideviewer/navigation/SlideThumbnails";
+import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import CommitHistory from "@/components/slideviewer/history/CommitHistory";
 import BranchSelector from "@/components/slideviewer/history/BranchSelector";
 import SidePanel from "@/components/slideviewer/panels/SidePanel";
@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useSlideStore } from "@/stores/slideStore";
-import ReviewPanel from "../panels/ReviewPanel";
 
 interface MainLayoutProps {
   currentBranch: string;
