@@ -1,16 +1,14 @@
 
-import { useState, useCallback, useEffect, useMemo } from "react";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ViewerToolbar from "@/components/slideviewer/ViewerToolbar";
-import HistorySidebar from "@/components/slideviewer/HistorySidebar";
-import SlideViewerPanel from "@/components/slideviewer/SlideViewerPanel";
-import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
-import { CommitHistory } from "@/components/slideviewer/HistorySidebar";
+import MainLayout from "@/components/slideviewer/layout/MainLayout";
 import { useSlideStore } from "@/stores/slideStore";
+import useSlideNavigation from "@/hooks/slideviewer/useSlideNavigation";
+import usePresentationMode from "@/hooks/slideviewer/usePresentationMode";
 import { debounce } from "lodash";
 
 // Define commented slides for student progress tracking
@@ -35,21 +33,20 @@ const SlideViewer = () => {
     presentationStartTime,
     displayCount,
     slides,
-    setCurrentSlide,
-    previousSlide,
-    nextSlide,
     setZoom,
     setViewerMode,
     toggleLeftSidebar,
-    toggleFullScreen,
     togglePresenterNotes,
-    startPresentation,
-    setDisplayCount,
-    generateThumbnails
+    generateThumbnails,
+    setDisplayCount
   } = useSlideStore();
   
+  const { elapsedTime, toggleFullScreenWithEffects } = usePresentationMode();
+  const { handlePreviousSlide, handleNextSlide } = useSlideNavigation({
+    totalSlides: slides.length
+  });
+  
   const totalSlides = slides.length;
-  const [elapsedTime, setElapsedTime] = useState<string>("00:00");
 
   // Generate thumbnails when the page loads
   useEffect(() => {
@@ -59,7 +56,7 @@ const SlideViewer = () => {
   // Mock data for branch and commit history
   const [currentBranch, setCurrentBranch] = useState("main");
   const branches = ["main", "feature/new-slides", "hotfix/typo"];
-  const commitHistory: CommitHistory[] = [
+  const commitHistory = [
     { id: "a1b2c3d", message: "スライド5を追加", author: "田中さん", date: "2025年5月22日", reviewStatus: "reviewing" },
     { id: "e4f5g6h", message: "グラフのデータを更新", author: "佐藤さん", date: "2025年5月21日", reviewStatus: "approved" },
     { id: "i7j8k9l", message: "タイトルのフォント修正", author: "鈴木さん", date: "2025年5月20日", reviewStatus: "approved" },
@@ -97,76 +94,11 @@ const SlideViewer = () => {
     };
   }, [setDisplayCount]);
 
-  // Calculate elapsed time during presentations
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (presentationStartTime) {
-      interval = setInterval(() => {
-        const now = new Date();
-        const elapsed = now.getTime() - presentationStartTime.getTime();
-        
-        const minutes = Math.floor(elapsed / 60000);
-        const seconds = Math.floor((elapsed % 60000) / 1000);
-        
-        setElapsedTime(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-      }, 1000);
-    }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [presentationStartTime]);
-
-  const handlePreviousSlide = () => {
-    if (currentSlide > 1) {
-      previousSlide();
-    } else {
-      toast({
-        title: "最初のスライドです",
-        description: "これ以上前のスライドはありません。",
-        variant: "default"
-      });
-    }
-  };
-
-  const handleNextSlide = () => {
-    if (currentSlide < totalSlides) {
-      nextSlide();
-    } else {
-      toast({
-        title: "最後のスライドです",
-        description: "これ以上次のスライドはありません。",
-        variant: "default"
-      });
-    }
-  };
-
   const handleZoomChange = (newZoom: number) => {
     if (newZoom >= 50 && newZoom <= 200) {
       setZoom(newZoom);
     }
   };
-
-  const toggleFullScreenWithEffects = useCallback(() => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(e => {
-        console.error(`Error attempting to enable full-screen mode: ${e.message}`);
-      });
-      toggleFullScreen();
-      
-      // プレゼンテーション開始時の処理
-      if (!presentationStartTime) {
-        startPresentation();
-        setViewerMode("presentation");
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-        toggleFullScreen();
-      }
-    }
-  }, [presentationStartTime, toggleFullScreen, startPresentation, setViewerMode]);
 
   // メモ化されたモード切替ハンドラ（デバウンス処理も追加）
   const handleModeChange = useMemo(() => debounce((mode: "presentation" | "edit" | "review") => {
@@ -207,14 +139,6 @@ const SlideViewer = () => {
     });
   };
 
-  // デバッグ用のログ追加
-  console.log("SlideViewer render state:", { 
-    showPresenterNotes, 
-    viewerMode, 
-    isFullScreen,
-    rerender: Math.random() // レンダリング追跡用
-  });
-
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Hide navigation when in presentation mode and fullscreen */}
@@ -246,78 +170,30 @@ const SlideViewer = () => {
           />
         )}
         
-        {/* Main content area */}
+        {/* Main content area with responsive layout */}
         <div className={`flex flex-grow overflow-hidden ${!(viewerMode === "presentation" && isFullScreen) ? "h-[calc(100vh-10rem)]" : "h-full"}`}>
-          {/* In presentation fullscreen mode, just show the slide viewer panel */}
-          {viewerMode === "presentation" && isFullScreen ? (
-            <SlideViewerPanel
-              currentSlide={currentSlide}
-              zoom={zoom}
-              viewerMode={viewerMode}
-              showPresenterNotes={showPresenterNotes}
-              isFullScreen={isFullScreen}
-              presentationStartTime={presentationStartTime}
-              presenterNotes={presenterNotes}
-              totalSlides={totalSlides}
-              elapsedTime={elapsedTime}
-              displayCount={displayCount}
-              onSlideChange={setCurrentSlide}
-            />
-          ) : (
-            <ResizablePanelGroup direction="vertical" className="h-full w-full" id="slide-layout-vertical">
-              {/* Main content panel */}
-              <ResizablePanel defaultSize={80} minSize={50} id="main-content" order={1} className="flex-grow">
-                <ResizablePanelGroup direction="horizontal" className="h-full" id="slide-layout-horizontal">
-                  {/* Left sidebar with history (conditionally displayed) */}
-                  {leftSidebarOpen && (
-                    <>
-                      <ResizablePanel defaultSize={30} minSize={20} maxSize={50} id="history-sidebar" order={1} className="bg-white border-r border-gray-100 shadow-sm">
-                        <HistorySidebar 
-                          currentBranch={currentBranch}
-                          branches={branches}
-                          commitHistory={commitHistory}
-                          onBranchChange={setCurrentBranch}
-                          onClose={toggleLeftSidebar}
-                        />
-                      </ResizablePanel>
-                      
-                      <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />
-                    </>
-                  )}
-                  
-                  {/* Main slide viewer with improved UI */}
-                  <ResizablePanel id="slide-viewer" order={2} className="bg-slate-100">
-                    <SlideViewerPanel
-                      currentSlide={currentSlide}
-                      zoom={zoom}
-                      viewerMode={viewerMode}
-                      showPresenterNotes={showPresenterNotes}
-                      isFullScreen={isFullScreen}
-                      presentationStartTime={presentationStartTime}
-                      presenterNotes={presenterNotes}
-                      totalSlides={totalSlides}
-                      elapsedTime={elapsedTime}
-                      displayCount={displayCount}
-                      onSlideChange={setCurrentSlide}
-                    />
-                  </ResizablePanel>
-                </ResizablePanelGroup>
-              </ResizablePanel>
-              
-              {/* Slide thumbnails */}
-              <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />
-              <ResizablePanel defaultSize={20} minSize={15} id="thumbnails" order={2} className="min-h-[180px]">
-                <SlideThumbnails
-                  currentSlide={currentSlide}
-                  totalSlides={totalSlides}
-                  commentedSlides={commentedSlides}
-                  mockComments={mockComments}
-                  userType={userProfile?.role === "student" ? "student" : "enterprise"}
-                  onSlideSelect={setCurrentSlide}
-                />
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          )}
+          <MainLayout
+            currentBranch={currentBranch}
+            branches={branches}
+            commitHistory={commitHistory}
+            currentSlide={currentSlide}
+            totalSlides={totalSlides}
+            zoom={zoom}
+            viewerMode={viewerMode}
+            leftSidebarOpen={leftSidebarOpen}
+            showPresenterNotes={showPresenterNotes}
+            isFullScreen={isFullScreen}
+            presentationStartTime={presentationStartTime}
+            presenterNotes={presenterNotes}
+            elapsedTime={elapsedTime}
+            displayCount={displayCount}
+            commentedSlides={commentedSlides}
+            mockComments={mockComments}
+            userType={userProfile?.role === "student" ? "student" : "enterprise"}
+            onBranchChange={setCurrentBranch}
+            onToggleLeftSidebar={toggleLeftSidebar}
+            onSlideChange={currentSlide => useSlideStore.getState().setCurrentSlide(currentSlide)}
+          />
         </div>
       </div>
       {/* Hide footer when in presentation mode and fullscreen */}

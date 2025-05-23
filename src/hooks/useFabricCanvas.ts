@@ -1,5 +1,6 @@
 
-import { useCanvas } from './fabric/useCanvas';
+// このファイルは新しい構造に移行されました。
+// Canvas関連のフックは hooks/fabric ディレクトリに整理されています。
 
-// このファイルは単に別の場所に移動したフックをエクスポートするための橋渡しです
+import { useCanvas } from './fabric/useCanvas';
 export default useCanvas;
