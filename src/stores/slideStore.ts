@@ -36,7 +36,7 @@ export interface SlideStore {
   isFullScreen: boolean;
   leftSidebarOpen: boolean;
   showPresenterNotes: boolean;
-  presentationStartTime: Date | null;
+  presentationStartTime: number | null;
   displayCount: number;
   isPPTXImported: boolean;
   pptxFilename: string | null;
@@ -661,7 +661,7 @@ const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get
     },
     
     startPresentation: () => {
-      set({ presentationStartTime: new Date() });
+      set({ presentationStartTime: Date.now() });
     },
     
     endPresentation: () => {

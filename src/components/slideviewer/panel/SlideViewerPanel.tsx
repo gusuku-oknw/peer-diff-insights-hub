@@ -14,7 +14,7 @@ interface SlideViewerPanelProps {
   viewerMode: ViewerMode;
   showPresenterNotes: boolean;
   isFullScreen: boolean;
-  presentationStartTime: Date | null;
+  presentationStartTime: number | null;
   presenterNotes: Record<number, string>;
   totalSlides: number;
   elapsedTime: string;
