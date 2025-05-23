@@ -1,40 +1,34 @@
 
-import { Canvas, Object as FabricObject } from 'fabric';
-import { SlideElement } from './slide.types';
+import { FabricObject } from 'fabric';
 
-// Fabric用のカスタムオブジェクト型定義
+// Custom Fabric.js object with additional data
 export interface CustomFabricObject extends FabricObject {
   customData?: {
     id: string;
-    [key: string]: any;
+    type?: string;
+    originalProps?: any;
   };
-  type: string;
+}
+
+// Canvas dimensions and viewport
+export interface CanvasViewport {
   width: number;
   height: number;
-  left: number;
-  top: number;
-  scaleX: number;
-  scaleY: number;
-  angle: number;
-  // Remove the set method definition to inherit the correct one from FabricObject
+  zoom: number;
 }
 
-// キャンバスフックのプロパティ型
-export interface UseFabricCanvasProps {
-  canvasRef: React.RefObject<HTMLCanvasElement>;
-  currentSlide: number;
-  zoomLevel?: number;
-  editable?: boolean;
-  elements?: SlideElement[];
-  onUpdateElement?: (elementId: string, updates: Partial<SlideElement>) => void;
-  onSelectElement?: (element: CustomFabricObject | null) => void;
+// Canvas event handlers
+export interface CanvasEventHandlers {
+  onObjectModified?: (obj: CustomFabricObject) => void;
+  onObjectSelected?: (obj: CustomFabricObject | null) => void;
+  onTextChanged?: (obj: CustomFabricObject) => void;
 }
 
-// キャンバスフックの戻り値型
-export interface UseFabricCanvasResult {
-  canvas: Canvas | null;
-  initialized: boolean;
-  renderElements: (elements: SlideElement[]) => void;
-  reset: () => void;
-  selectedObject: CustomFabricObject | null;
+// Canvas initialization options
+export interface CanvasInitOptions {
+  width?: number;
+  height?: number;
+  backgroundColor?: string;
+  selection?: boolean;
+  preserveObjectStacking?: boolean;
 }

@@ -3,13 +3,13 @@ import { Book, ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 
-interface SlideNotesPanelProps {
+interface NotesPanelProps {
   currentSlide: number;
   totalSlides: number;
   presenterNotes: Record<number, string>;
 }
 
-const SlideNotesPanel = ({ currentSlide, totalSlides, presenterNotes }: SlideNotesPanelProps) => {
+const NotesPanel = ({ currentSlide, totalSlides, presenterNotes }: NotesPanelProps) => {
   const { userProfile } = useAuth();
   
   return (
@@ -110,4 +110,4 @@ const SlideNotesPanel = ({ currentSlide, totalSlides, presenterNotes }: SlideNot
   );
 };
 
-export default SlideNotesPanel;
+export default NotesPanel;

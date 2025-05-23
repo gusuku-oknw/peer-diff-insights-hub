@@ -1,11 +1,11 @@
 
 import React from "react";
-import SlideNotesPanel from "@/components/slideviewer/SlideNotesPanel";
-import ReviewPanel from "@/components/slideviewer/ReviewPanel";
+import NotesPanel from "./NotesPanel";
+import ReviewPanel from "./ReviewPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, MessageSquare } from "lucide-react";
 
-interface RightSidebarProps {
+interface SidePanelProps {
   shouldShowNotes: boolean;
   shouldShowReviewPanel: boolean;
   currentSlide: number;
@@ -13,14 +13,14 @@ interface RightSidebarProps {
   presenterNotes: Record<number, string>;
 }
 
-const RightSidebar = ({
+const SidePanel = ({
   shouldShowNotes,
   shouldShowReviewPanel,
   currentSlide,
   totalSlides,
   presenterNotes,
-}: RightSidebarProps) => {
-  // サイドバーを表示するかどうかをチェック
+}: SidePanelProps) => {
+  // サイドパネルを表示するかどうかをチェック
   const shouldDisplay = shouldShowNotes || shouldShowReviewPanel;
   
   if (!shouldDisplay) {
@@ -56,7 +56,7 @@ const RightSidebar = ({
         
         <TabsContent value="notes" className="flex-grow overflow-hidden m-0 p-0">
           {shouldShowNotes && (
-            <SlideNotesPanel 
+            <NotesPanel 
               currentSlide={currentSlide}
               totalSlides={totalSlides}
               presenterNotes={presenterNotes}
@@ -77,4 +77,4 @@ const RightSidebar = ({
   );
 };
 
-export default RightSidebar;
+export default SidePanel;

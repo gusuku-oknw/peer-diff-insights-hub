@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from "react";
-import FabricSlideCanvas from "@/components/slideviewer/FabricSlideCanvas";
+import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
 import EditToolbar from "@/components/slideviewer/editor/EditToolbar";
 import EditSidebar from "@/components/slideviewer/editor/EditSidebar";
 import PresentationControls from "@/components/slideviewer/panel/PresentationControls";
-import RightSidebar from "@/components/slideviewer/panel/RightSidebar";
+import SidePanel from "@/components/slideviewer/panels/SidePanel";
 import useSlideNavigation from "@/hooks/slideviewer/useSlideNavigation";
 import type { ViewerMode } from "@/stores/slideStore";
 
@@ -111,7 +111,7 @@ const SlideViewerPanel = ({
         {/* Slide content */}
         <div className="flex flex-1 relative overflow-hidden">
           <div className="flex-1 flex items-center justify-center bg-slate-100 h-full">
-            <FabricSlideCanvas
+            <SlideCanvas
               key={renderKey}
               currentSlide={currentSlide}
               zoomLevel={zoom}
@@ -141,7 +141,7 @@ const SlideViewerPanel = ({
           </div>
           
           {/* Right sidebar */}
-          <RightSidebar
+          <SidePanel
             shouldShowNotes={showPresenterNotes}
             shouldShowReviewPanel={viewerMode === "review"}
             currentSlide={currentSlide}
