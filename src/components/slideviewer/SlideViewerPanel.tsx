@@ -107,6 +107,9 @@ const SlideViewerPanel = ({
     setSidebarOpen(prev => !prev);
   }, []);
 
+  // デバッグ用のログを追加
+  console.log("SlideViewerPanel render:", { showPresenterNotes, displayCount, viewerMode });
+
   return (
     <div className="flex h-full">
       {/* Edit sidebar (visible only in edit mode) */}
@@ -178,8 +181,8 @@ const SlideViewerPanel = ({
             )}
           </div>
           
-          {/* Presenter notes panel */}
-          {showPresenterNotes && displayCount >= 2 && (
+          {/* Presenter notes panel - 修正: 条件を調整 */}
+          {showPresenterNotes && (
             <div className="w-80 h-full bg-gray-50 border-l border-gray-200 overflow-hidden">
               <SlideNotesPanel 
                 currentSlide={currentSlide}

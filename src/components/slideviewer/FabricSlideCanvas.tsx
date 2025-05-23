@@ -60,7 +60,8 @@ const FabricSlideCanvas = ({
     transformStyle: 'preserve-3d' as const,
     backfaceVisibility: 'hidden' as const,
     perspective: '1000px' as const,
-    imageRendering: 'optimizeQuality' as const
+    // TypeScriptの型エラー修正
+    imageRendering: 'auto' as const  // optimizeQualityから修正
   }), []);
   
   // より効率的な構造でレンダリング

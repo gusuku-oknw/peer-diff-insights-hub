@@ -36,7 +36,7 @@ export const createNavigationSlice: StateCreator<
   viewerMode: "edit",
   isFullScreen: false,
   leftSidebarOpen: false,
-  showPresenterNotes: false,
+  showPresenterNotes: false,  // デフォルトは非表示
   displayCount: 1,
   
   setCurrentSlide: (index) => {
@@ -77,6 +77,7 @@ export const createNavigationSlice: StateCreator<
   
   togglePresenterNotes: () => {
     const { showPresenterNotes } = get();
+    console.log("Toggling presenter notes:", { current: showPresenterNotes, new: !showPresenterNotes });
     set({ showPresenterNotes: !showPresenterNotes });
   },
   

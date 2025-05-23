@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { useToast } from "@/hooks/use-toast";
@@ -155,9 +156,6 @@ const SlideViewer = () => {
       if (!presentationStartTime) {
         startPresentation();
         setViewerMode("presentation");
-        if (displayCount >= 2) {
-          togglePresenterNotes(); // Only show notes if multiple displays
-        }
       }
     } else {
       if (document.exitFullscreen) {
@@ -165,7 +163,7 @@ const SlideViewer = () => {
         toggleFullScreen();
       }
     }
-  }, [presentationStartTime, toggleFullScreen, startPresentation, setViewerMode, togglePresenterNotes, displayCount]);
+  }, [presentationStartTime, toggleFullScreen, startPresentation, setViewerMode]);
 
   // Handle mode change with visual feedback
   const handleModeChange = (mode: "presentation" | "edit" | "review") => {
@@ -204,6 +202,9 @@ const SlideViewer = () => {
       variant: "default"
     });
   };
+
+  // デバッグ用のログ追加
+  console.log("SlideViewer render state:", { showPresenterNotes, viewerMode, isFullScreen });
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
