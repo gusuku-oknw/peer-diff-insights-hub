@@ -10,7 +10,7 @@ export interface SlideStore {
   isFullScreen: boolean;
   leftSidebarOpen: boolean;
   showPresenterNotes: boolean;
-  presentationStartTime: Date | null;
+  presentationStartTime: number | null; // Changed from Date to number | null
   displayCount: number;
   isPPTXImported: boolean;
   pptxFilename: string | null;

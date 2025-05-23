@@ -8,7 +8,7 @@ interface PresentationControlsProps {
   totalSlides: number;
   isFullScreen: boolean;
   elapsedTime: string;
-  presentationStartTime: Date | null;
+  presentationStartTime: number | null;
   onPreviousSlide: () => void;
   onNextSlide: () => void;
 }

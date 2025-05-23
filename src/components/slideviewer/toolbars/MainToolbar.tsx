@@ -30,7 +30,7 @@ interface MainToolbarProps {
   isFullScreen: boolean;
   leftSidebarOpen: boolean;
   showPresenterNotes: boolean;
-  presentationStartTime: Date | null;
+  presentationStartTime: number | null;
   displayCount: number;
   onPreviousSlide: () => void;
   onNextSlide: () => void;

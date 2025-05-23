@@ -4,7 +4,7 @@ import { SlideStore } from './types';
 
 // プレゼンテーション関連のスライス
 export interface PresentationSlice {
-  presentationStartTime: Date | null;
+  presentationStartTime: number | null;
   
   startPresentation: () => void;
   endPresentation: () => void;
@@ -22,7 +22,7 @@ export const createPresentationSlice: StateCreator<
   presentationStartTime: null,
   
   startPresentation: () => {
-    set({ presentationStartTime: new Date() });
+    set({ presentationStartTime: Date.now() });
   },
   
   endPresentation: () => {

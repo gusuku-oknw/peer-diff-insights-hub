@@ -162,7 +162,7 @@ const SlideViewer = () => {
             isFullScreen={isFullScreen}
             leftSidebarOpen={leftSidebarOpen}
             showPresenterNotes={showPresenterNotes}
-            presentationStartTime={presentationStartTime?.getTime() || null}
+            presentationStartTime={presentationStartTime}
             displayCount={displayCount}
             onPreviousSlide={handlePreviousSlide}
             onNextSlide={handleNextSlide}
@@ -189,7 +189,7 @@ const SlideViewer = () => {
             leftSidebarOpen={leftSidebarOpen}
             showPresenterNotes={false}
             isFullScreen={isFullScreen}
-            presentationStartTime={presentationStartTime?.getTime() || null}
+            presentationStartTime={presentationStartTime}
             presenterNotes={presenterNotes}
             elapsedTime={elapsedTime}
             displayCount={displayCount}
