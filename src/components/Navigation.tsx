@@ -48,7 +48,15 @@ const Navigation = () => {
           
           <div className="hidden md:block">
             <div className="ml-4 flex items-center space-x-4">
-              {(!isSlideViewerRoute || isDashboardRoute) && (
+              {isSlideViewerRoute && (
+                <Link to="/dashboard">
+                  <Button className="gradient-primary text-white hover:opacity-90">
+                    ダッシュボードに戻る
+                  </Button>
+                </Link>
+              )}
+              
+              {isDashboardRoute && (
                 <>
                   <Button variant="ghost" className="text-gray-700">
                     ログイン
@@ -61,12 +69,17 @@ const Navigation = () => {
                 </>
               )}
               
-              {isSlideViewerRoute && (
-                <Link to="/dashboard">
-                  <Button className="gradient-primary text-white hover:opacity-90">
-                    ダッシュボードに戻る
+              {!isSlideViewerRoute && !isDashboardRoute && (
+                <>
+                  <Button variant="ghost" className="text-gray-700">
+                    ログイン
                   </Button>
-                </Link>
+                  <Link to="/demo">
+                    <Button className="gradient-primary text-white hover:opacity-90">
+                      無料で始める
+                    </Button>
+                  </Link>
+                </>
               )}
             </div>
           </div>
@@ -101,7 +114,15 @@ const Navigation = () => {
               </>
             )}
             <div className="pt-4 space-y-2">
-              {(!isSlideViewerRoute || isDashboardRoute) && (
+              {isSlideViewerRoute && (
+                <Link to="/dashboard">
+                  <Button className="w-full gradient-primary text-white">
+                    ダッシュボードに戻る
+                  </Button>
+                </Link>
+              )}
+              
+              {(isDashboardRoute || !isSlideViewerRoute) && (
                 <>
                   <Button variant="ghost" className="w-full justify-start">
                     ログイン
@@ -112,14 +133,6 @@ const Navigation = () => {
                     </Button>
                   </Link>
                 </>
-              )}
-              
-              {isSlideViewerRoute && (
-                <Link to="/dashboard">
-                  <Button className="w-full gradient-primary text-white">
-                    ダッシュボードに戻る
-                  </Button>
-                </Link>
               )}
             </div>
           </div>

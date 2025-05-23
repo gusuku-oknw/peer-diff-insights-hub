@@ -17,15 +17,16 @@ interface CommentMarker {
 
 interface SlideCanvasProps {
   currentSlide: number;
+  zoomLevel?: number;
 }
 
 // Mock slide images for demonstration purposes
 const slideMockImages = [
-  "https://placehold.co/1600x900/e2e8f0/1e293b?text=スライド+1",
-  "https://placehold.co/1600x900/e2e8f0/1e293b?text=スライド+2",
-  "https://placehold.co/1600x900/e2e8f0/1e293b?text=スライド+3",
-  "https://placehold.co/1600x900/e2e8f0/1e293b?text=スライド+4",
-  "https://placehold.co/1600x900/e2e8f0/1e293b?text=スライド+5",
+  "https://placehold.co/1600x900/e2e8f0/1e293b?text=Q4+Presentation",
+  "https://placehold.co/1600x900/e2e8f0/1e293b?text=Company+Overview",
+  "https://placehold.co/1600x900/e2e8f0/1e293b?text=Financial+Results",
+  "https://placehold.co/1600x900/e2e8f0/1e293b?text=Future+Strategy",
+  "https://placehold.co/1600x900/e2e8f0/1e293b?text=Q%26A",
 ];
 
 // Mock comment data
@@ -44,7 +45,7 @@ const mockComments: Record<number, CommentMarker[]> = {
   5: [],
 };
 
-const SlideCanvas = ({ currentSlide }: SlideCanvasProps) => {
+const SlideCanvas = ({ currentSlide, zoomLevel = 100 }: SlideCanvasProps) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [comments, setComments] = useState<CommentMarker[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -128,101 +129,119 @@ const SlideCanvas = ({ currentSlide }: SlideCanvasProps) => {
     <div className="relative bg-white">
       <div 
         ref={canvasRef} 
-        className="relative w-full aspect-video bg-gray-100 cursor-pointer" 
+        className="relative w-full aspect-video bg-gray-50 cursor-pointer overflow-auto" 
         onClick={handleCanvasClick}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "2rem"
+        }}
       >
-        {/* Slide image */}
-        <img
-          src={slideMockImages[currentSlide - 1]}
-          alt={`スライド ${currentSlide}`}
-          className="w-full h-full object-contain"
-        />
-        
-        {/* Comment markers */}
-        {comments.map((comment) => (
-          <Popover 
-            key={comment.id} 
-            open={openPopoverId === comment.id} 
-            onOpenChange={(open) => {
-              if (open) {
-                setOpenPopoverId(comment.id);
-                setSelectedComment(comment);
-              } else if (openPopoverId === comment.id) {
-                handlePopoverClose();
-              }
+        {/* Slide image with zoom */}
+        <div style={{
+          transform: `scale(${zoomLevel / 100})`,
+          transformOrigin: "center center",
+          transition: "transform 0.2s ease-in-out",
+          width: "100%",
+          maxWidth: "1200px",
+          position: "relative"
+        }}>
+          <img
+            src={slideMockImages[currentSlide - 1]}
+            alt={`スライド ${currentSlide}`}
+            className="w-full h-auto object-contain shadow-lg"
+            style={{
+              borderRadius: "4px"
             }}
-          >
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="absolute rounded-full w-8 h-8 p-0 bg-blue-500 hover:bg-blue-600 text-white border-2 border-white shadow-md"
-                style={{
-                  left: `${comment.x}%`,
-                  top: `${comment.y}%`,
-                  transform: "translate(-50%, -50%)"
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCommentClick(comment);
-                }}
-              >
-                <MessageSquare className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80">
-              <div className="space-y-2">
-                <div className="text-sm font-medium">{comment.author}</div>
-                <div className="text-sm text-gray-500">{comment.timestamp}</div>
-                <p className="pt-2 border-t">{comment.text}</p>
-              </div>
-            </PopoverContent>
-          </Popover>
-        ))}
-        
-        {/* New comment popover */}
-        {selectedComment && !selectedComment.text && (
-          <Popover 
-            open={openPopoverId === selectedComment.id} 
-            onOpenChange={(open) => {
-              if (!open) handlePopoverClose();
-            }}
-          >
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="absolute rounded-full w-8 h-8 p-0 bg-green-500 hover:bg-green-600 text-white border-2 border-white shadow-md"
-                style={{
-                  left: `${selectedComment.x}%`,
-                  top: `${selectedComment.y}%`,
-                  transform: "translate(-50%, -50%)"
-                }}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80">
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm">新しいコメント</h4>
-                <Textarea
-                  placeholder="コメントを入力してください..."
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  className="min-h-[100px]"
-                />
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" size="sm" onClick={handlePopoverClose}>
-                    キャンセル
-                  </Button>
-                  <Button size="sm" onClick={handleCommentSubmit}>
-                    保存
-                  </Button>
+          />
+          
+          {/* Comment markers */}
+          {comments.map((comment) => (
+            <Popover 
+              key={comment.id} 
+              open={openPopoverId === comment.id} 
+              onOpenChange={(open) => {
+                if (open) {
+                  setOpenPopoverId(comment.id);
+                  setSelectedComment(comment);
+                } else if (openPopoverId === comment.id) {
+                  handlePopoverClose();
+                }
+              }}
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="absolute rounded-full w-8 h-8 p-0 bg-blue-500 hover:bg-blue-600 text-white border-2 border-white shadow-md"
+                  style={{
+                    left: `${comment.x}%`,
+                    top: `${comment.y}%`,
+                    transform: "translate(-50%, -50%)"
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCommentClick(comment);
+                  }}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 z-50">
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">{comment.author}</div>
+                  <div className="text-sm text-gray-500">{comment.timestamp}</div>
+                  <p className="pt-2 border-t">{comment.text}</p>
                 </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-        )}
+              </PopoverContent>
+            </Popover>
+          ))}
+          
+          {/* New comment popover */}
+          {selectedComment && !selectedComment.text && (
+            <Popover 
+              open={openPopoverId === selectedComment.id} 
+              onOpenChange={(open) => {
+                if (!open) handlePopoverClose();
+              }}
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="absolute rounded-full w-8 h-8 p-0 bg-green-500 hover:bg-green-600 text-white border-2 border-white shadow-md"
+                  style={{
+                    left: `${selectedComment.x}%`,
+                    top: `${selectedComment.y}%`,
+                    transform: "translate(-50%, -50%)"
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 z-50">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-sm">新しいコメント</h4>
+                  <Textarea
+                    placeholder="コメントを入力してください..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" size="sm" onClick={handlePopoverClose}>
+                      キャンセル
+                    </Button>
+                    <Button size="sm" onClick={handleCommentSubmit}>
+                      保存
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+        </div>
       </div>
     </div>
   );

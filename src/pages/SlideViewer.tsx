@@ -3,7 +3,19 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronLeft, ChevronRight, MessageSquare, Eye, List } from "lucide-react";
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  MessageSquare, 
+  Eye, 
+  List, 
+  History, 
+  Share,
+  Code, 
+  FileText,
+  Maximize,
+  Percent
+} from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SlideCanvas from "@/components/slideviewer/SlideCanvas";
@@ -15,6 +27,7 @@ const SlideViewer = () => {
   const [currentSlide, setCurrentSlide] = useState(1);
   const [viewMode, setViewMode] = useState<"all" | "canvas">("canvas");
   const totalSlides = 5; // This would come from the actual slide data
+  const [zoom, setZoom] = useState(100);
 
   const handlePreviousSlide = () => {
     if (currentSlide > 1) {
@@ -40,79 +53,162 @@ const SlideViewer = () => {
     }
   };
 
+  const handleZoomIn = () => {
+    if (zoom < 200) {
+      setZoom(zoom + 10);
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (zoom > 50) {
+      setZoom(zoom - 10);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
-      <div className="flex-grow pt-24 pb-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-6 flex justify-between items-center">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-              プレゼンテーションレビュー
-            </h1>
-            <div className="flex items-center gap-2">
-              <Tabs 
-                value={viewMode} 
-                onValueChange={(v) => setViewMode(v as "all" | "canvas")}
-                className="mr-4"
-              >
-                <TabsList>
-                  <TabsTrigger value="canvas" className="flex items-center gap-1">
-                    <Eye className="h-4 w-4" />
-                    スライドのみ
-                  </TabsTrigger>
-                  <TabsTrigger value="all" className="flex items-center gap-1">
-                    <List className="h-4 w-4" />
-                    スライド＆コメント
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <Button 
-                variant="outline" 
-                onClick={handlePreviousSlide}
-                disabled={currentSlide === 1}
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" /> 前へ
-              </Button>
-              <span className="text-sm font-medium mx-2">
-                {currentSlide} / {totalSlides}
-              </span>
-              <Button 
-                variant="outline"
-                onClick={handleNextSlide}
-                disabled={currentSlide === totalSlides}
-              >
-                次へ <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
+      <div className="flex-grow pt-16 pb-16 bg-gray-100">
+        {/* Top toolbar */}
+        <div className="bg-white border-b border-gray-200 py-2">
+          <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 border-r border-gray-200 pr-4">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handlePreviousSlide}
+                    disabled={currentSlide === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm font-medium">
+                    スライド {currentSlide}/{totalSlides}
+                  </span>
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={handleNextSlide}
+                    disabled={currentSlide === totalSlides}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Button onClick={handleZoomOut} variant="ghost" size="sm" className="text-gray-700">-</Button>
+                  <span className="text-sm font-medium">{zoom}%</span>
+                  <Button onClick={handleZoomIn} variant="ghost" size="sm" className="text-gray-700">+</Button>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Button variant="ghost" size="sm">
+                    <FileText className="h-4 w-4 mr-1" />
+                    XML Diff
+                  </Button>
+                  <Button variant="ghost" size="sm">
+                    <Maximize className="h-4 w-4 mr-1" />
+                    全画面
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Button variant="secondary" size="sm" className="bg-blue-100 hover:bg-blue-200 text-blue-700">
+                  <History className="h-4 w-4 mr-1" />
+                  履歴
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Share className="h-4 w-4 mr-1" />
+                  共有
+                </Button>
+                <Button variant="secondary" size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                  コミット
+                </Button>
+              </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className={viewMode === "canvas" ? "lg:col-span-3" : "lg:col-span-2"}>
-              <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <SlideCanvas currentSlide={currentSlide} />
+        </div>
+        
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+          <div className="flex space-x-4">
+            {/* Left sidebar - slide thumbnails */}
+            <div className="hidden lg:block w-56 bg-white rounded-lg shadow-lg overflow-hidden">
+              <div className="p-4 border-b border-gray-200">
+                <h3 className="font-medium">スライド</h3>
+              </div>
+              <ScrollArea className="h-[70vh]">
+                <div className="p-2 space-y-2">
+                  {Array.from({length: totalSlides}).map((_, index) => (
+                    <div 
+                      key={index} 
+                      className={`p-2 border rounded-lg cursor-pointer hover:bg-gray-100 ${currentSlide === index + 1 ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                      onClick={() => setCurrentSlide(index + 1)}
+                    >
+                      <div className="aspect-video bg-gray-200 rounded flex items-center justify-center mb-1">
+                        <span className="text-xs text-gray-500">スライド {index + 1}</span>
+                      </div>
+                      <p className="text-xs truncate">
+                        {index === 0 ? 'Q4 Presentation' : `Slide ${index + 1}`}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            
+            {/* Main content area */}
+            <div className="flex-1">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div className={viewMode === "canvas" ? "lg:col-span-3" : "lg:col-span-2"}>
+                  <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <SlideCanvas currentSlide={currentSlide} zoomLevel={zoom} />
+                  </div>
+                </div>
+                
+                {viewMode === "all" && (
+                  <div className="lg:col-span-1">
+                    <div className="bg-white rounded-lg shadow-lg h-full">
+                      <div className="p-4 border-b flex items-center justify-between">
+                        <h2 className="font-semibold text-lg flex items-center gap-1">
+                          <MessageSquare className="h-5 w-5 text-blue-500" />
+                          コメント一覧
+                        </h2>
+                        <span className="text-sm text-gray-500">スライド {currentSlide}</span>
+                      </div>
+                      <ScrollArea className="h-[600px]">
+                        <CommentList slideId={currentSlide} />
+                      </ScrollArea>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             
-            {viewMode === "all" && (
-              <div className="lg:col-span-1">
-                <div className="bg-white rounded-lg shadow-lg h-full">
-                  <div className="p-4 border-b flex items-center justify-between">
-                    <h2 className="font-semibold text-lg flex items-center gap-1">
-                      <MessageSquare className="h-5 w-5 text-blue-500" />
-                      コメント一覧
-                    </h2>
-                    <span className="text-sm text-gray-500">スライド {currentSlide}</span>
-                  </div>
-                  <ScrollArea className="h-[600px]">
-                    <CommentList slideId={currentSlide} />
-                  </ScrollArea>
-                </div>
-              </div>
-            )}
+            {/* Right sidebar - toggle button */}
+            <div className="fixed right-4 top-24">
+              <Tabs 
+                value={viewMode} 
+                onValueChange={(v) => setViewMode(v as "all" | "canvas")}
+                orientation="vertical"
+                className="bg-white rounded-lg shadow-md"
+              >
+                <TabsList className="flex-col">
+                  <TabsTrigger value="canvas" className="flex items-center gap-1 py-3">
+                    <Eye className="h-4 w-4" />
+                    <span className="hidden lg:inline">スライドのみ</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="all" className="flex items-center gap-1 py-3">
+                    <MessageSquare className="h-4 w-4" />
+                    <span className="hidden lg:inline">コメント表示</span>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };
