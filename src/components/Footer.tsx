@@ -1,14 +1,11 @@
-
 import { GitBranch, Mail, MessageSquare, Users } from "lucide-react";
-
 const Footer = () => {
-  return (
-    <footer className="bg-gray-900 text-white py-16">
+  return <footer className="bg-gray-900 text-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <h3 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
+              <h3 className="font-bold gradient-primary bg-clip-text text-transparent text-2xl">
                 PeerDiffX
               </h3>
             </div>
@@ -61,8 +58,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
