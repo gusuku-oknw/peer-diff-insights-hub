@@ -1,7 +1,7 @@
 
 import * as React from "react"
 import * as SwitchPrimitives from "@radix-ui/react-switch"
-import { CommentSlash } from "lucide-react"
+import { MessageSquareOff } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -27,7 +27,7 @@ const Switch = React.forwardRef<
         )}
       />
     ) : (
-      <CommentSlash className={cn(
+      <MessageSquareOff className={cn(
         "h-5 w-5 transition-colors",
         props.checked ? "text-blue-600" : "text-gray-500"
       )} />

@@ -1,9 +1,8 @@
-
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Edit, ThumbsUp, ThumbsDown } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Comment {
   id: number;
@@ -17,7 +16,7 @@ interface Comment {
 }
 
 interface CommentListProps {
-  slideId: number;
+  currentSlide: number;
 }
 
 // Mock comments data
@@ -84,11 +83,14 @@ const mockAllComments: Comment[] = [
   }
 ];
 
-const CommentList = ({ slideId }: CommentListProps) => {
-  const [comments, setComments] = useState<Comment[]>(
-    mockAllComments.filter(comment => comment.slideId === slideId)
-  );
+const CommentList = ({ currentSlide }: CommentListProps) => {
+  const [comments, setComments] = useState<Comment[]>([]);
   const [viewMode, setViewMode] = useState<"all" | "own">("all");
+  
+  // Update comments when currentSlide changes
+  useEffect(() => {
+    setComments(mockAllComments.filter(comment => comment.slideId === currentSlide));
+  }, [currentSlide]);
   
   // Filter comments based on view mode
   const filteredComments = viewMode === "own" 
