@@ -41,9 +41,6 @@ const SlideViewerPanel = ({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showDragTip, setShowDragTip] = useState(true);
   
-  // Get current slide note
-  const currentNotes = presenterNotes[currentSlide] || "";
-  
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -80,7 +77,7 @@ const SlideViewerPanel = ({
     }
   }, [showDragTip]);
 
-  // Get current slide position text
+  // Get slide position text
   const slidePosition = `${currentSlide} / ${totalSlides}`;
   
   const handlePrevious = () => {
@@ -195,7 +192,11 @@ const SlideViewerPanel = ({
           {/* Presenter notes panel */}
           {showPresenterNotes && displayCount >= 2 && (
             <div className="w-80 h-full bg-gray-50 border-l border-gray-200 overflow-hidden">
-              <SlideNotesPanel notes={currentNotes} slideNumber={currentSlide} />
+              <SlideNotesPanel 
+                currentSlide={currentSlide}
+                totalSlides={totalSlides}
+                presenterNotes={presenterNotes}
+              />
             </div>
           )}
         </div>

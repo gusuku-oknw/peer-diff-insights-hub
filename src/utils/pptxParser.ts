@@ -1,266 +1,252 @@
 
-import * as JSZip from 'jszip';
+import JSZip from 'jszip';
+import { Slide } from '@/stores/slideStore';
 import { xml2js } from 'xml-js';
-import { SlideElement, Slide } from '@/stores/slideStore';
 
-// Function to parse a PPTX file
-export async function parsePPTX(fileData: ArrayBuffer): Promise<any[]> {
+// Parse a PPTX file and extract slides
+export async function parsePPTX(buffer: ArrayBuffer): Promise<any[]> {
   try {
-    // Load the PPTX file with JSZip
-    const zip = new JSZip();
-    const pptx = await zip.loadAsync(fileData);
+    // Use JSZip to unzip the PPTX file
+    const zip = await JSZip.loadAsync(buffer);
     
-    // Parse presentation.xml to get global information
-    const presentationXml = await pptx.file("ppt/presentation.xml")?.async("string");
-    if (!presentationXml) throw new Error("Presentation file not found in PPTX");
-    
-    // Convert XML to JS object
-    const presentation = xml2js(presentationXml, { compact: false, spaces: 4 });
-    
-    // Find the number of slides
-    const presentationElement = presentation.elements?.[0];
-    const sldIdLst = presentationElement?.elements?.find((el: any) => 
-      el.name === 'p:sldIdLst' || el.name === 'sldIdLst'
-    );
-    
-    if (!sldIdLst?.elements) {
-      throw new Error("No slides found in presentation");
+    // Extract presentation.xml for metadata
+    const presentationXml = await zip.file('ppt/presentation.xml')?.async('text');
+    if (!presentationXml) {
+      throw new Error('Could not find presentation.xml in the PPTX file');
     }
     
-    // Get all slide IDs
-    const slideIds = sldIdLst.elements
-      .filter((el: any) => el.name === 'p:sld' || el.name === 'sld')
-      .map((el: any) => el.attributes?.id || el.attributes?.['r:id']);
+    // Parse presentation XML
+    const presentationData = xml2js(presentationXml, {
+      compact: false,
+      ignoreComment: true,
+      ignoreDeclaration: true
+    });
     
-    // Load each slide
-    const slides = [];
+    // Extract slide information
+    const slides: any[] = [];
+    const slideFiles: string[] = [];
     
-    for (let i = 0; i < slideIds.length; i++) {
-      const slideIndex = i + 1;
-      const slideFile = await pptx.file(`ppt/slides/slide${slideIndex}.xml`)?.async("string");
+    // Get presentation element
+    const presentationEl = findElement(presentationData, 'p:presentation');
+    if (!presentationEl) {
+      throw new Error('Could not find p:presentation element');
+    }
+    
+    // Get sldIdLst element that contains slide references
+    const slideIdList = findElement(presentationEl, 'p:sldIdLst');
+    if (!slideIdList && slideIdList.elements) {
+      throw new Error('Could not find slide list');
+    }
+    
+    // Extract each slide
+    const slidePromises = [];
+    
+    // Process each slide file
+    for (let i = 1; i <= 20; i++) { // Try up to 20 slides (arbitrary limit)
+      const slideFilePath = `ppt/slides/slide${i}.xml`;
+      const slideFile = zip.file(slideFilePath);
       
       if (slideFile) {
-        const slideXml = xml2js(slideFile, { compact: false, spaces: 4 });
-        const slideElement = slideXml.elements?.[0];
-        
-        // Basic slide data
-        const slideData = {
-          id: slideIndex,
-          elements: [],
-          notes: "",
-          title: `Slide ${slideIndex}`
-        };
-        
-        // Try to extract slide content - this is a simplified version
-        // Real implementation would need to handle shapes, text boxes, images, etc.
-        const cSld = slideElement?.elements?.find((el: any) => 
-          el.name === 'p:cSld' || el.name === 'cSld'
-        );
-        
-        if (cSld) {
-          // Extract title if available
-          const titleElement = extractTitleFromSlide(cSld);
-          if (titleElement) {
-            slideData.title = titleElement;
-          }
+        const slidePromise = slideFile.async('text').then(slideXml => {
+          // Parse slide XML
+          const slideData = xml2js(slideXml, {
+            compact: false,
+            ignoreComment: true,
+            ignoreDeclaration: true
+          });
           
-          // In a real implementation, you'd extract more elements here
-        }
+          // Get slide content and add to slides array
+          const slideContent = extractSlideContent(slideData);
+          slides.push({
+            id: i,
+            content: slideContent,
+            notes: '' // We would need to extract notes from notesMaster XML
+          });
+        });
         
-        // Try to get notes if available
-        try {
-          const notesFile = await pptx.file(`ppt/notesSlides/notesSlide${slideIndex}.xml`)?.async("string");
-          if (notesFile) {
-            const notesText = extractNotesFromXml(notesFile);
-            if (notesText) {
-              slideData.notes = notesText;
-            }
-          }
-        } catch (e) {
-          console.log(`No notes found for slide ${slideIndex}`);
-        }
-        
-        slides.push(slideData);
+        slidePromises.push(slidePromise);
       }
     }
+    
+    await Promise.all(slidePromises);
+    
+    // Sort slides by ID
+    slides.sort((a, b) => a.id - b.id);
     
     return slides;
+    
   } catch (error) {
-    console.error("Error parsing PPTX:", error);
-    throw error;
+    console.error('Error parsing PPTX:', error);
+    throw new Error('Failed to parse PPTX file');
   }
 }
 
-// Function to extract title from slide
-function extractTitleFromSlide(cSld: any): string | null {
-  try {
-    // Find shape tree
-    const spTree = cSld.elements?.find((el: any) => 
-      el.name === 'p:spTree' || el.name === 'spTree'
-    );
-    
-    if (!spTree?.elements) return null;
-    
-    // Find title shape
-    for (const shape of spTree.elements) {
-      if (shape.name === 'p:sp' || shape.name === 'sp') {
-        // Look for nvSpPr > nvPr > ph with type="title"
-        const nvSpPr = shape.elements?.find((el: any) => 
-          el.name === 'p:nvSpPr' || el.name === 'nvSpPr'
-        );
-        
-        if (nvSpPr) {
-          const nvPr = nvSpPr.elements?.find((el: any) => 
-            el.name === 'p:nvPr' || el.name === 'nvPr'
-          );
-          
-          if (nvPr) {
-            const ph = nvPr.elements?.find((el: any) => 
-              el.name === 'p:ph' || el.name === 'ph'
-            );
-            
-            if (ph && ph.attributes?.type === 'title') {
-              // This is a title shape, find the text
-              const txBody = shape.elements?.find((el: any) => 
-                el.name === 'p:txBody' || el.name === 'txBody'
-              );
-              
-              if (txBody) {
-                return extractTextFromTxBody(txBody);
-              }
-            }
-          }
-        }
-      }
+// Helper function to find an element by name in XML parsed data
+function findElement(data: any, name: string): any {
+  if (!data || !data.elements) return null;
+  
+  for (const element of data.elements) {
+    if (element.name === name) {
+      return element;
     }
     
-    return null;
-  } catch (e) {
-    console.error("Error extracting title:", e);
-    return null;
+    const found = findElement(element, name);
+    if (found) return found;
   }
+  
+  return null;
 }
 
-// Extract text from txBody element
-function extractTextFromTxBody(txBody: any): string {
-  try {
-    const textParts: string[] = [];
+// Extract content from a slide XML
+function extractSlideContent(slideData: any): any {
+  const slideEl = findElement(slideData, 'p:sld');
+  if (!slideEl) return {};
+  
+  // Extract text content
+  const texts = extractTexts(slideEl);
+  
+  // Extract shapes
+  const shapes = extractShapes(slideEl);
+  
+  // Extract images (would need to handle embedded images)
+  
+  return {
+    texts,
+    shapes,
+    // Additional content would go here
+  };
+}
+
+// Extract text elements from slide
+function extractTexts(slideEl: any): any[] {
+  const texts: any[] = [];
+  
+  // Find all text elements (usually in p:txBody elements)
+  const textBodies = findAllElements(slideEl, 'p:txBody');
+  
+  textBodies.forEach((textBody: any, index: number) => {
+    const paragraphs = findAllElements(textBody, 'a:p');
+    let fullText = '';
     
-    // Find all paragraph elements
-    const paragraphs = txBody.elements?.filter((el: any) => 
-      el.name === 'a:p' || el.name === 'p'
-    );
-    
-    if (!paragraphs) return "";
-    
-    // Extract text runs from each paragraph
-    for (const paragraph of paragraphs) {
-      const runs = paragraph.elements?.filter((el: any) => 
-        el.name === 'a:r' || el.name === 'r'
-      );
+    paragraphs.forEach((para: any) => {
+      const runs = findAllElements(para, 'a:r');
       
-      if (runs) {
-        for (const run of runs) {
-          const textElement = run.elements?.find((el: any) => 
-            el.name === 'a:t' || el.name === 't'
-          );
-          
-          if (textElement && textElement.elements?.[0]?.text) {
-            textParts.push(textElement.elements[0].text);
-          }
+      runs.forEach((run: any) => {
+        const textEl = findElement(run, 'a:t');
+        if (textEl && textEl.elements && textEl.elements[0] && textEl.elements[0].text) {
+          fullText += textEl.elements[0].text + ' ';
         }
-      }
-    }
-    
-    return textParts.join(" ");
-  } catch (e) {
-    console.error("Error extracting text:", e);
-    return "";
-  }
-}
-
-// Extract notes from notes XML
-function extractNotesFromXml(notesXml: string): string {
-  try {
-    const notesObj = xml2js(notesXml, { compact: false, spaces: 4 });
-    const notesElement = notesObj.elements?.[0];
-    
-    // Find the notes text container
-    const cSld = notesElement?.elements?.find((el: any) => 
-      el.name === 'p:cSld' || el.name === 'cSld'
-    );
-    
-    if (!cSld) return "";
-    
-    const spTree = cSld.elements?.find((el: any) => 
-      el.name === 'p:spTree' || el.name === 'spTree'
-    );
-    
-    if (!spTree) return "";
-    
-    // Look for shapes that contain notes text
-    const shapes = spTree.elements?.filter((el: any) => 
-      el.name === 'p:sp' || el.name === 'sp'
-    );
-    
-    if (!shapes) return "";
-    
-    // Extract text from all shapes
-    const notesTextParts: string[] = [];
-    
-    for (const shape of shapes) {
-      const txBody = shape.elements?.find((el: any) => 
-        el.name === 'p:txBody' || el.name === 'txBody'
-      );
+      });
       
-      if (txBody) {
-        const text = extractTextFromTxBody(txBody);
-        if (text) {
-          notesTextParts.push(text);
-        }
-      }
-    }
+      fullText += '\n';
+    });
     
-    return notesTextParts.join("\n");
-  } catch (e) {
-    console.error("Error extracting notes:", e);
-    return "";
-  }
+    if (fullText.trim()) {
+      texts.push({
+        id: `text-${index}`,
+        type: 'text',
+        content: fullText.trim(),
+        // Would extract position, size, formatting, etc. from XML
+        position: { x: 400, y: 300 + index * 50 },
+        size: { width: 400, height: 50 }
+      });
+    }
+  });
+  
+  return texts;
 }
 
-// Convert PPTX slides to our application's slide format
+// Extract shape elements from slide
+function extractShapes(slideEl: any): any[] {
+  const shapes: any[] = [];
+  
+  // Find shape elements
+  const spPrs = findAllElements(slideEl, 'a:spPr');
+  
+  spPrs.forEach((spPr: any, index: number) => {
+    // Extract shape type, position, size, etc.
+    shapes.push({
+      id: `shape-${index}`,
+      type: 'shape',
+      // Would extract actual shape type, position, size from XML
+      position: { x: 200, y: 300 + index * 50 },
+      size: { width: 100, height: 100 }
+    });
+  });
+  
+  return shapes;
+}
+
+// Helper to find all elements with a specific name
+function findAllElements(data: any, name: string): any[] {
+  const results: any[] = [];
+  
+  function search(node: any) {
+    if (!node || !node.elements) return;
+    
+    for (const element of node.elements) {
+      if (element.name === name) {
+        results.push(element);
+      }
+      search(element);
+    }
+  }
+  
+  search(data);
+  return results;
+}
+
+// Convert parsed PPTX data to our application's slide format
 export function convertPPTXToSlides(pptxSlides: any[]): Slide[] {
   return pptxSlides.map((pptxSlide, index) => {
-    // Create a basic slide with minimal content
-    const slide: Slide = {
-      id: pptxSlide.id || index + 1,
-      title: pptxSlide.title || `Slide ${index + 1}`,
-      elements: [],
-      notes: pptxSlide.notes || ""
-    };
+    const slideElements = [];
     
-    // If the PPTX slide has a title, add it as a text element
-    if (pptxSlide.title) {
-      slide.elements.push({
-        id: `title-${slide.id}`,
-        type: 'text',
-        props: { 
-          text: pptxSlide.title,
-          fontSize: 40,
-          color: '#1e40af',
-          fontFamily: 'Arial',
-          fontWeight: 'bold',
-        },
-        position: { x: 800, y: 100 },
-        size: { width: 600, height: 60 },
-        angle: 0,
-        zIndex: 1,
+    // Convert texts to slide elements
+    if (pptxSlide.content && pptxSlide.content.texts) {
+      pptxSlide.content.texts.forEach((text: any, i: number) => {
+        slideElements.push({
+          id: `imported-text-${index}-${i}`,
+          type: 'text',
+          props: {
+            text: text.content || 'Imported Text',
+            fontSize: 24,
+            color: '#000000',
+            fontFamily: 'Arial',
+          },
+          position: text.position || { x: 800, y: 200 + i * 80 },
+          size: text.size || { width: 400, height: 50 },
+          angle: 0,
+          zIndex: i + 1
+        });
       });
     }
     
-    // In a real implementation, you would convert all elements from the PPTX
-    // slide format to your application's format
+    // Convert shapes to slide elements
+    if (pptxSlide.content && pptxSlide.content.shapes) {
+      pptxSlide.content.shapes.forEach((shape: any, i: number) => {
+        slideElements.push({
+          id: `imported-shape-${index}-${i}`,
+          type: 'shape',
+          props: {
+            shape: 'rect', // Default to rectangle
+            fill: '#3b82f6',
+            stroke: '',
+            strokeWidth: 0
+          },
+          position: shape.position || { x: 400, y: 400 + i * 80 },
+          size: shape.size || { width: 100, height: 100 },
+          angle: 0,
+          zIndex: pptxSlide.content.texts?.length + i + 1 || i + 1
+        });
+      });
+    }
     
-    return slide;
+    return {
+      id: index + 1,
+      title: `Imported Slide ${index + 1}`,
+      elements: slideElements,
+      notes: pptxSlide.notes || '',
+      thumbnail: null
+    };
   });
 }

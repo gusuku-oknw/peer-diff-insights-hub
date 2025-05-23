@@ -37,6 +37,10 @@ export interface SlideStore {
   showPresenterNotes: boolean;
   presentationStartTime: Date | null;
   displayCount: number;
+  isPPTXImported: boolean;
+  pptxFilename: string | null;
+  setPPTXImported: (imported: boolean, filename?: string | null) => void;
+  importSlidesFromPPTX: (slidesData: Slide[]) => void;
   
   // Actions
   setCurrentSlide: (index: number) => void;
@@ -253,7 +257,7 @@ const createSampleSlides = (): Slide[] => [
           text: "営業利益: 5.2億円（前年比+22%）",
           fontSize: 28,
           color: "#334155",
-          fontFamily: "Arial",
+8          fontFamily: "Arial",
           fontWeight: "bold",
         },
         position: { x: 800, y: 350 },
@@ -596,160 +600,159 @@ const createSampleSlides = (): Slide[] => [
 ];
 
 // Create the basic slide state creator
-const createSlideStore: StateCreator<SlideStore & PPTXImportSlice, [], [], SlideStore> = (set, get, api) => ({
-  slides: createSampleSlides(),
-  currentSlide: 1,
-  zoom: 100,
-  viewerMode: "edit" as ViewerMode,
-  isFullScreen: false,
-  leftSidebarOpen: false,
-  showPresenterNotes: false,
-  presentationStartTime: null,
-  displayCount: 1,
-  
-  setCurrentSlide: (index) => {
-    set({ currentSlide: index });
-  },
-  
-  previousSlide: () => {
-    const { currentSlide } = get();
-    if (currentSlide > 1) {
-      set({ currentSlide: currentSlide - 1 });
-    }
-  },
-  
-  nextSlide: () => {
-    const { currentSlide, slides } = get();
-    if (currentSlide < slides.length) {
-      set({ currentSlide: currentSlide + 1 });
-    }
-  },
-  
-  setZoom: (zoom) => {
-    set({ zoom });
-  },
-  
-  setViewerMode: (mode) => {
-    set({ viewerMode: mode });
-  },
-  
-  toggleLeftSidebar: () => {
-    const { leftSidebarOpen } = get();
-    set({ leftSidebarOpen: !leftSidebarOpen });
-  },
-  
-  toggleFullScreen: () => {
-    const { isFullScreen } = get();
-    set({ isFullScreen: !isFullScreen });
-  },
-  
-  togglePresenterNotes: () => {
-    const { showPresenterNotes } = get();
-    set({ showPresenterNotes: !showPresenterNotes });
-  },
-  
-  startPresentation: () => {
-    set({ presentationStartTime: new Date() });
-  },
-  
-  endPresentation: () => {
-    set({ presentationStartTime: null });
-  },
-  
-  updateElement: (slideId, elementId, updates) => {
-    const { slides } = get();
+const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get) => {
+  // Create the PPTX import slice
+  const pptxImportSlice = createPPTXImportSlice(set, get);
+
+  return {
+    slides: createSampleSlides(),
+    currentSlide: 1,
+    zoom: 100,
+    viewerMode: "edit" as ViewerMode,
+    isFullScreen: false,
+    leftSidebarOpen: false,
+    showPresenterNotes: false,
+    presentationStartTime: null,
+    displayCount: 1,
     
-    const updatedSlides = slides.map(slide => {
-      if (slide.id !== slideId) return slide;
+    // Add PPTX import slice properties
+    ...pptxImportSlice,
+    
+    setCurrentSlide: (index) => {
+      set({ currentSlide: index });
+    },
+    
+    previousSlide: () => {
+      const { currentSlide } = get();
+      if (currentSlide > 1) {
+        set({ currentSlide: currentSlide - 1 });
+      }
+    },
+    
+    nextSlide: () => {
+      const { currentSlide, slides } = get();
+      if (currentSlide < slides.length) {
+        set({ currentSlide: currentSlide + 1 });
+      }
+    },
+    
+    setZoom: (zoom) => {
+      set({ zoom });
+    },
+    
+    setViewerMode: (mode) => {
+      set({ viewerMode: mode });
+    },
+    
+    toggleLeftSidebar: () => {
+      const { leftSidebarOpen } = get();
+      set({ leftSidebarOpen: !leftSidebarOpen });
+    },
+    
+    toggleFullScreen: () => {
+      const { isFullScreen } = get();
+      set({ isFullScreen: !isFullScreen });
+    },
+    
+    togglePresenterNotes: () => {
+      const { showPresenterNotes } = get();
+      set({ showPresenterNotes: !showPresenterNotes });
+    },
+    
+    startPresentation: () => {
+      set({ presentationStartTime: new Date() });
+    },
+    
+    endPresentation: () => {
+      set({ presentationStartTime: null });
+    },
+    
+    updateElement: (slideId, elementId, updates) => {
+      const { slides } = get();
       
-      const updatedElements = slide.elements.map(element => {
-        if (element.id !== elementId) return element;
+      const updatedSlides = slides.map(slide => {
+        if (slide.id !== slideId) return slide;
+        
+        const updatedElements = slide.elements.map(element => {
+          if (element.id !== elementId) return element;
+          
+          return {
+            ...element,
+            ...updates,
+            props: updates.props ? { ...element.props, ...updates.props } : element.props,
+            position: updates.position ? { ...element.position, ...updates.position } : element.position,
+            size: updates.size ? { ...element.size, ...updates.size } : element.size
+          };
+        });
+        
+        return { ...slide, elements: updatedElements };
+      });
+      
+      set({ slides: updatedSlides });
+    },
+    
+    addElement: (slideId, element) => {
+      const { slides } = get();
+      
+      const updatedSlides = slides.map(slide => {
+        if (slide.id !== slideId) return slide;
         
         return {
-          ...element,
-          ...updates,
-          props: updates.props ? { ...element.props, ...updates.props } : element.props,
-          position: updates.position ? { ...element.position, ...updates.position } : element.position,
-          size: updates.size ? { ...element.size, ...updates.size } : element.size
+          ...slide,
+          elements: [...slide.elements, element]
         };
       });
       
-      return { ...slide, elements: updatedElements };
-    });
+      set({ slides: updatedSlides });
+    },
     
-    set({ slides: updatedSlides });
-  },
-  
-  addElement: (slideId, element) => {
-    const { slides } = get();
-    
-    const updatedSlides = slides.map(slide => {
-      if (slide.id !== slideId) return slide;
+    removeElement: (slideId, elementId) => {
+      const { slides } = get();
       
-      return {
-        ...slide,
-        elements: [...slide.elements, element]
-      };
-    });
-    
-    set({ slides: updatedSlides });
-  },
-  
-  removeElement: (slideId, elementId) => {
-    const { slides } = get();
-    
-    const updatedSlides = slides.map(slide => {
-      if (slide.id !== slideId) return slide;
+      const updatedSlides = slides.map(slide => {
+        if (slide.id !== slideId) return slide;
+        
+        return {
+          ...slide,
+          elements: slide.elements.filter(el => el.id !== elementId)
+        };
+      });
       
-      return {
+      set({ slides: updatedSlides });
+    },
+    
+    setDisplayCount: (count) => {
+      set({ displayCount: count });
+    },
+    
+    generateThumbnails: () => {
+      console.log("Generating thumbnails for slides");
+      // In a real implementation, this would create thumbnails for each slide
+      // For now, we'll just add a placeholder
+      const { slides } = get();
+      
+      const updatedSlides = slides.map(slide => ({
         ...slide,
-        elements: slide.elements.filter(el => el.id !== elementId)
-      };
-    });
+        thumbnail: slide.thumbnail || `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="113" viewBox="0 0 200 113"><rect width="200" height="113" fill="%23f0f0f0"/><text x="100" y="60" font-family="Arial" font-size="16" text-anchor="middle" fill="%23666">Slide ${slide.id}</text></svg>`
+      }));
+      
+      set({ slides: updatedSlides });
+    },
     
-    set({ slides: updatedSlides });
-  },
-  
-  setDisplayCount: (count) => {
-    set({ displayCount: count });
-  },
-  
-  generateThumbnails: () => {
-    console.log("Generating thumbnails for slides");
-    // In a real implementation, this would create thumbnails for each slide
-    // For now, we'll just add a placeholder
-    const { slides } = get();
-    
-    const updatedSlides = slides.map(slide => ({
-      ...slide,
-      thumbnail: slide.thumbnail || `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="113" viewBox="0 0 200 113"><rect width="200" height="113" fill="%23f0f0f0"/><text x="100" y="60" font-family="Arial" font-size="16" text-anchor="middle" fill="%23666">Slide ${slide.id}</text></svg>`
-    }));
-    
-    set({ slides: updatedSlides });
-  },
-  
-  exportToPPTX: () => {
-    console.log("Exporting presentation to PPTX format");
-    // This would be implemented with a library like JSZip, PptxGenJS, etc.
-    alert("PPTX export functionality is coming soon!");
-  }
-});
+    exportToPPTX: () => {
+      console.log("Exporting presentation to PPTX format");
+      // This would be implemented with a library like JSZip, PptxGenJS, etc.
+      alert("PPTX export functionality is coming soon!");
+    }
+  };
+};
 
 // Create the slide store with proper types
-export const useSlideStore = create<SlideStore & PPTXImportSlice>()(
+export const useSlideStore = create<SlideStore>()(
   persist(
     (set, get, api) => {
-      // First, get the basic slide state creator
-      const basicSlideState = createSlideStore(set, get, api);
-      
-      // Now create the PPTX import slice
-      const pptxImportSlice = createPPTXImportSlice(set, get, api);
-      
       // Return the combined state
-      return {
-        ...basicSlideState,
-        ...pptxImportSlice
-      };
+      return createSlideStore(set, get, api);
     },
     {
       name: 'slide-storage',

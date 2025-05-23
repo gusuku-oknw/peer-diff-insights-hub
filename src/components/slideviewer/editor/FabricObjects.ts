@@ -1,17 +1,26 @@
 
-import { fabric } from 'fabric';
+import { Canvas, IText, Rect, Circle, Object as FabricObject } from 'fabric';
 
 // Define a custom type that extends fabric.Object to include our customData
-export interface CustomFabricObject extends fabric.Object {
+export interface CustomFabricObject extends FabricObject {
   customData?: {
     id: string;
     [key: string]: any;
   };
+  type?: string;
+  width?: number;
+  height?: number;
+  left?: number;
+  top?: number;
+  angle?: number;
+  scaleX?: number;
+  scaleY?: number;
+  set?: (options: any) => CustomFabricObject;
 }
 
 // Helper function to create a text element
-export function createTextElement(options: any): fabric.IText & CustomFabricObject {
-  const text = new fabric.IText(options.text || 'New Text', {
+export function createTextElement(options: any): IText & CustomFabricObject {
+  const text = new IText(options.text || 'New Text', {
     left: options.left || 0,
     top: options.top || 0,
     fontSize: options.fontSize || 24,
@@ -20,7 +29,7 @@ export function createTextElement(options: any): fabric.IText & CustomFabricObje
     originX: 'center',
     originY: 'center',
     ...options
-  }) as fabric.IText & CustomFabricObject;
+  }) as IText & CustomFabricObject;
   
   if (options.customData) {
     text.customData = options.customData;
@@ -30,8 +39,8 @@ export function createTextElement(options: any): fabric.IText & CustomFabricObje
 }
 
 // Helper function to create a rectangle element
-export function createRectElement(options: any): fabric.Rect & CustomFabricObject {
-  const rect = new fabric.Rect({
+export function createRectElement(options: any): Rect & CustomFabricObject {
+  const rect = new Rect({
     left: options.left || 0,
     top: options.top || 0,
     width: options.width || 100,
@@ -42,7 +51,7 @@ export function createRectElement(options: any): fabric.Rect & CustomFabricObjec
     originX: 'center',
     originY: 'center',
     ...options
-  }) as fabric.Rect & CustomFabricObject;
+  }) as Rect & CustomFabricObject;
   
   if (options.customData) {
     rect.customData = options.customData;
@@ -52,8 +61,8 @@ export function createRectElement(options: any): fabric.Rect & CustomFabricObjec
 }
 
 // Helper function to create a circle element
-export function createCircleElement(options: any): fabric.Circle & CustomFabricObject {
-  const circle = new fabric.Circle({
+export function createCircleElement(options: any): Circle & CustomFabricObject {
+  const circle = new Circle({
     left: options.left || 0,
     top: options.top || 0,
     radius: options.radius || 50,
@@ -63,7 +72,7 @@ export function createCircleElement(options: any): fabric.Circle & CustomFabricO
     originX: 'center',
     originY: 'center',
     ...options
-  }) as fabric.Circle & CustomFabricObject;
+  }) as Circle & CustomFabricObject;
   
   if (options.customData) {
     circle.customData = options.customData;
@@ -73,7 +82,7 @@ export function createCircleElement(options: any): fabric.Circle & CustomFabricO
 }
 
 // Helper function to add customData to any Fabric object
-export function addCustomDataToObject(obj: fabric.Object, customData: any): CustomFabricObject {
+export function addCustomDataToObject(obj: FabricObject, customData: any): CustomFabricObject {
   const customObj = obj as CustomFabricObject;
   customObj.customData = customData;
   return customObj;

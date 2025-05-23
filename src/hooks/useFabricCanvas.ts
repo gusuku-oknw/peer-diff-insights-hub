@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { fabric } from 'fabric';
+import { Canvas, IText, Rect, Circle, Image, Object as FabricObject } from 'fabric';
 import { SlideElement } from '@/stores/slideStore';
 import { CustomFabricObject } from '@/components/slideviewer/editor/FabricObjects';
 
@@ -15,7 +15,7 @@ interface UseFabricCanvasProps {
 }
 
 interface UseFabricCanvasResult {
-  canvas: fabric.Canvas | null;
+  canvas: Canvas | null;
   initialized: boolean;
   renderElements: (elements: SlideElement[]) => void;
   reset: () => void;
@@ -31,7 +31,7 @@ export const useFabricCanvas = ({
   onUpdateElement,
   onSelectElement
 }: UseFabricCanvasProps): UseFabricCanvasResult => {
-  const canvasInstance = useRef<fabric.Canvas | null>(null);
+  const canvasInstance = useRef<Canvas | null>(null);
   const [initialized, setInitialized] = useState(false);
   const containerRef = useRef<HTMLElement | null>(null);
   const initialRenderRef = useRef(false);
@@ -68,7 +68,7 @@ export const useFabricCanvas = ({
           return;
         }
 
-        const canvas = new fabric.Canvas(canvasRef.current, {
+        const canvas = new Canvas(canvasRef.current, {
           backgroundColor: '#ffffff',
           width: 1600,
           height: 900,
@@ -123,9 +123,9 @@ export const useFabricCanvas = ({
             let width, height;
             
             if (obj.type === 'rect') {
-              const rect = obj as unknown as fabric.Rect;
-              width = (rect.width || 0) * (rect.scaleX || 1);
-              height = (rect.height || 0) * (rect.scaleY || 1);
+              const rect = obj as unknown as Rect;
+              width = (rect.width || 0) * (obj.scaleX || 1);
+              height = (rect.height || 0) * (obj.scaleY || 1);
               
               // Reset scale to avoid double scaling
               obj.set({
@@ -135,7 +135,7 @@ export const useFabricCanvas = ({
                 scaleY: 1
               });
             } else if (obj.type === 'circle') {
-              const circle = obj as unknown as fabric.Circle;
+              const circle = obj as unknown as Circle;
               const radius = (circle as any).radius || 0;
               const scale = obj.scaleX || 1; // アスペクト比を維持するため、X軸のみを考慮
               width = radius * 2 * scale;
@@ -148,7 +148,7 @@ export const useFabricCanvas = ({
                 scaleY: 1
               });
             } else if (obj.type === 'text') {
-              const text = obj as unknown as fabric.Text;
+              const text = obj as unknown as IText;
               width = (text.width || 0) * (obj.scaleX || 1);
               height = (text.height || 0) * (obj.scaleY || 1);
               
@@ -159,7 +159,7 @@ export const useFabricCanvas = ({
                 scaleY: 1
               });
             } else if (obj.type === 'image') {
-              const img = obj as unknown as fabric.Image;
+              const img = obj as unknown as Image;
               width = (img.width || 0) * (obj.scaleX || 1);
               height = (img.height || 0) * (obj.scaleY || 1);
             } else {
@@ -185,7 +185,7 @@ export const useFabricCanvas = ({
           
           // Text editing events
           canvas.on('text:changed', (e) => {
-            const textObj = e.target as unknown as fabric.IText & CustomFabricObject;
+            const textObj = e.target as unknown as IText & CustomFabricObject;
             if (!textObj || !textObj.customData?.id) return;
             
             if (onUpdateElement) {
@@ -275,7 +275,7 @@ export const useFabricCanvas = ({
           
           switch (type) {
             case 'text':
-              const text = new fabric.IText(props.text || "New Text", {
+              const text = new IText(props.text || "New Text", {
                 left: position.x,
                 top: position.y,
                 width: size.width,
@@ -299,7 +299,7 @@ export const useFabricCanvas = ({
               
             case 'shape':
               if (props.shape === 'rect') {
-                const rect = new fabric.Rect({
+                const rect = new Rect({
                   left: position.x,
                   top: position.y,
                   width: size.width,
@@ -316,7 +316,7 @@ export const useFabricCanvas = ({
                 (rect as unknown as CustomFabricObject).customData = { id };
                 canvas.add(rect);
               } else if (props.shape === 'circle') {
-                const circle = new fabric.Circle({
+                const circle = new Circle({
                   left: position.x,
                   top: position.y,
                   radius: size.width / 2,
@@ -335,7 +335,7 @@ export const useFabricCanvas = ({
               break;
               
             case 'image':
-              fabric.Image.fromURL(
+              Image.fromURL(
                 props.src, 
                 (img) => {
                   if (!canvas) return;
@@ -363,7 +363,7 @@ export const useFabricCanvas = ({
         }
       } else {
         // If there are no elements, use a placeholder text
-        const slideNumberText = new fabric.Text(`スライド ${currentSlide}`, {
+        const slideNumberText = new IText(`スライド ${currentSlide}`, {
           left: canvas.width! / 2,
           top: canvas.height! / 2,
           fontSize: 36,

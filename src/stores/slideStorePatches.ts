@@ -1,25 +1,18 @@
 
 import { create } from 'zustand';
 import { useSlideStore } from './slideStore';
-import { createPPTXImportSlice, PPTXImportSlice } from './slideStoreExtensions';
+import { PPTXImportSlice } from './slideStoreExtensions';
 
 // Extend the existing store with new functionality
 const extendSlideStore = () => {
   const originalStore = useSlideStore;
   
-  // Create a new store function with the extended state
-  const createExtendedStore = create<PPTXImportSlice>()((set, get, api) => ({
-    ...createPPTXImportSlice(set, get, api)
-  }));
-  
   // Create a combined hook that merges both stores
   return () => {
     const originalState = originalStore();
-    const extensionState = createExtendedStore();
     
     return {
-      ...originalState,
-      ...extensionState
+      ...originalState
     };
   };
 };

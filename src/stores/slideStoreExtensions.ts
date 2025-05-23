@@ -10,11 +10,11 @@ export interface PPTXImportSlice {
 }
 
 export const createPPTXImportSlice: StateCreator<
-  SlideStore & PPTXImportSlice, 
+  SlideStore, 
   [], 
   [], 
   PPTXImportSlice
-> = (set, get, api) => ({
+> = (set, get) => ({
   isPPTXImported: false,
   pptxFilename: null,
   setPPTXImported: (imported, filename = null) => set({ isPPTXImported: imported, pptxFilename: filename }),
