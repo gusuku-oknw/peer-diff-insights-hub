@@ -17,7 +17,10 @@ import {
   Award, 
   Bell, 
   ChevronRight,
-  Clock
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Timer
 } from "lucide-react";
 
 // Mock data for the student dashboard
@@ -75,42 +78,58 @@ const notifications = [
   },
 ];
 
+// Helper function to get status icon
+const getStatusIcon = (status: string) => {
+  switch(status) {
+    case "完了": 
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case "進行中": 
+      return <Timer className="h-4 w-4 text-blue-500" />;
+    default: 
+      return <AlertCircle className="h-4 w-4 text-gray-400" />;
+  }
+};
+
 const StudentDashboard = () => {
   return (
-    <div className="space-y-8">
+    <div className="p-6 space-y-8">
       {/* 割り当てタスク一覧 */}
       <section>
         <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center gap-2">
-          <FileText className="h-5 w-5 text-blue-500" />
+          <FileText className="h-5 w-5 text-blue-600" />
           割り当てタスク一覧
         </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {assignedTasks.map((task) => (
-            <Card key={task.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-2">
+            <Card key={task.id} className="overflow-hidden hover:shadow-md transition-shadow border-gray-100">
+              <CardHeader className="pb-2 bg-gray-50 border-b">
                 <div className="flex justify-between items-start">
-                  <CardTitle className="text-lg">{task.title}</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-800">{task.title}</CardTitle>
                   <Badge
-                    variant={
+                    variant="secondary"
+                    className={
                       task.status === "完了"
-                        ? "default"
+                        ? "bg-green-100 text-green-800 hover:bg-green-200"
                         : task.status === "進行中"
-                        ? "secondary"
-                        : "outline"
+                        ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }
                   >
-                    {task.status}
+                    <span className="flex items-center gap-1">
+                      {getStatusIcon(task.status)}
+                      {task.status}
+                    </span>
                   </Badge>
                 </div>
-                <CardDescription className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> 期限: {task.deadline}
+                <CardDescription className="flex items-center gap-1 mt-1 text-gray-600">
+                  <Clock className="h-3.5 w-3.5" /> 期限: {task.deadline}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>進捗状況</span>
-                    <span className="font-medium">
+                    <span className="text-gray-600">進捗状況</span>
+                    <span className="font-medium text-gray-900">
                       {task.completedSlides}/{task.totalSlides} スライド
                     </span>
                   </div>
@@ -118,16 +137,16 @@ const StudentDashboard = () => {
                     value={task.progress} 
                     className={
                       task.progress >= 100 
-                        ? "bg-blue-100 [&>div]:bg-green-500" 
+                        ? "h-2 bg-green-100 [&>div]:bg-green-500" 
                         : task.progress >= 50
-                        ? "bg-blue-100 [&>div]:bg-blue-500"
-                        : "bg-blue-100 [&>div]:bg-blue-400"
+                        ? "h-2 bg-blue-100 [&>div]:bg-blue-600"
+                        : "h-2 bg-gray-100 [&>div]:bg-blue-400"
                     }
                   />
                 </div>
               </CardContent>
-              <CardFooter>
-                <Button variant="outline" className="w-full flex items-center justify-center gap-1">
+              <CardFooter className="pt-0">
+                <Button variant="outline" className="w-full flex items-center justify-center gap-1 text-blue-700 hover:bg-blue-50 hover:text-blue-800 transition-colors">
                   詳細を見る <ChevronRight className="h-4 w-4" />
                 </Button>
               </CardFooter>
@@ -136,107 +155,115 @@ const StudentDashboard = () => {
         </div>
       </section>
 
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-2 gap-6">
         {/* 貢献メトリクス */}
         <section>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <BarChartHorizontal className="h-5 w-5 text-blue-500" /> 貢献メトリクス
+          <Card className="border-gray-100 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b pb-4">
+              <CardTitle className="text-lg flex items-center gap-2 text-blue-900">
+                <BarChartHorizontal className="h-5 w-5 text-blue-600" /> 貢献メトリクス
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 rounded-lg p-4 text-center">
-                  <div className="text-sm text-gray-500">累計コメント数</div>
-                  <div className="text-3xl font-bold text-gray-800 flex items-center justify-center gap-1">
-                    <MessageSquare className="h-5 w-5 text-blue-500" />
+                <div className="bg-gray-50 rounded-lg p-4 text-center border border-gray-100">
+                  <div className="text-sm text-gray-600 mb-1">累計コメント数</div>
+                  <div className="text-3xl font-bold text-gray-800 flex items-center justify-center gap-2">
+                    <MessageSquare className="h-5 w-5 text-blue-600" />
                     {contributionMetrics.totalComments}
                   </div>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 text-center">
-                  <div className="text-sm text-gray-500">承認率</div>
+                <div className="bg-gray-50 rounded-lg p-4 text-center border border-gray-100">
+                  <div className="text-sm text-gray-600 mb-1">承認率</div>
                   <div className="text-3xl font-bold text-gray-800">
                     {contributionMetrics.approvalRate}%
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 flex items-center justify-center flex-col">
+              <div className="mt-6 flex items-center justify-center flex-col bg-blue-50 p-4 rounded-lg border border-blue-100">
                 <div className="flex items-center gap-2 mb-2">
                   <Award className={
                     contributionMetrics.rank === "ゴールド" ? "text-amber-500 h-6 w-6" : 
                     contributionMetrics.rank === "シルバー" ? "text-gray-400 h-6 w-6" : 
                     "text-amber-700 h-6 w-6"
                   } />
-                  <span className="font-semibold text-lg">
+                  <span className="font-semibold text-lg text-blue-900">
                     {contributionMetrics.rank}ランク
                   </span>
                 </div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-700 mb-2">
                   ゴールドランクまで、あと{contributionMetrics.nextRankComments}コメント！
                 </p>
-                <Progress value={85} className="mt-2 w-full bg-gray-200 [&>div]:bg-amber-500" />
+                <Progress value={85} className="mt-2 w-full h-2 bg-blue-200 [&>div]:bg-amber-500" />
               </div>
             </CardContent>
           </Card>
         </section>
 
         {/* クイックスタートと通知 */}
-        <section className="space-y-4">
+        <section className="space-y-5">
           {/* クイックスタート */}
-          <Card>
-            <CardHeader>
+          <Card className="border-gray-100 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white pb-4">
               <CardTitle className="text-lg">クイックスタート</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <Button className="w-full gradient-primary">最新PPTXを開く</Button>
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1">チェックリスト</Button>
-                <Button variant="outline" className="flex-1">ヘルプ</Button>
+            <CardContent className="pt-4 space-y-4">
+              <Button className="w-full gradient-primary shadow-md shadow-blue-500/10 hover:shadow-blue-500/20 transition-all">
+                最新PPTXを開く
+              </Button>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1 border-gray-200 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                  チェックリスト
+                </Button>
+                <Button variant="outline" className="flex-1 border-gray-200 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                  ヘルプ
+                </Button>
               </div>
             </CardContent>
           </Card>
 
           {/* 通知／バッジ */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Bell className="h-5 w-5 text-blue-500" /> 通知
+          <Card className="border-gray-100 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50 border-b pb-4">
+              <CardTitle className="text-lg flex items-center gap-2 text-gray-900">
+                <Bell className="h-5 w-5 text-purple-600" /> 通知
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-4">
               <div className="space-y-3">
                 {notifications.map((notification) => (
                   <div 
                     key={notification.id} 
-                    className="bg-gray-50 p-3 rounded-lg flex justify-between items-center"
+                    className="bg-gray-50 border border-gray-100 p-3 rounded-lg flex justify-between items-center hover:bg-gray-100 transition-colors"
                   >
                     <div>
-                      <p className="text-sm font-medium">{notification.message}</p>
+                      <p className="text-sm font-medium text-gray-800">{notification.message}</p>
                       <p className="text-xs text-gray-500">{notification.time}</p>
                     </div>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-blue-700 hover:bg-blue-50">
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
               </div>
             </CardContent>
-            <CardFooter>
-              <Button variant="ghost" className="w-full text-gray-500">全ての通知を見る</Button>
+            <CardFooter className="border-t bg-gray-50">
+              <Button variant="ghost" className="w-full text-gray-600 hover:text-blue-700">全ての通知を見る</Button>
             </CardFooter>
           </Card>
         </section>
       </div>
 
       {/* キャンペーンバナー */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-4 text-white flex justify-between items-center">
-        <div>
-          <h3 className="font-bold text-lg">レビュアーコンテスト開催中！</h3>
-          <p className="text-white/90">今月のトップレビュアーには特別ボーナスが贈られます。</p>
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-5 text-white shadow-lg flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="text-center sm:text-left">
+          <h3 className="font-bold text-xl mb-1">レビュアーコンテスト開催中！</h3>
+          <p className="text-white/90">今月のトップレビュアーには特別ボーナスが贈られます。積極的に参加しましょう！</p>
         </div>
-        <Button variant="secondary">詳細を見る</Button>
+        <Button variant="secondary" className="whitespace-nowrap shadow-md hover:shadow-lg">
+          詳細を見る
+        </Button>
       </div>
     </div>
   );
