@@ -1,6 +1,7 @@
 
 import React from "react";
 import SlideNotesPanel from "@/components/slideviewer/SlideNotesPanel";
+import ReviewPanel from "@/components/slideviewer/ReviewPanel";
 
 interface RightSidebarProps {
   shouldShowNotes: boolean;
@@ -38,12 +39,10 @@ const RightSidebar = ({
       
       {/* レビューパネルはプレゼンターノートより優先度を下げる */}
       {shouldShowReviewPanel && !shouldShowNotes && (
-        <div className="h-full flex items-center justify-center">
-          <div className="text-center p-4">
-            <h3 className="text-lg font-medium text-gray-700 mb-2">レビューパネル</h3>
-            <p className="text-sm text-gray-500">このスライドへのコメントやフィードバックが表示されます</p>
-          </div>
-        </div>
+        <ReviewPanel
+          currentSlide={currentSlide}
+          totalSlides={totalSlides}
+        />
       )}
     </div>
   );
