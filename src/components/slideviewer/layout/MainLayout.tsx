@@ -1,10 +1,17 @@
-
-import React from "react";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import SlideViewerPanel from "@/components/slideviewer/panel/SlideViewerPanel";
-import HistorySidebar from "@/components/slideviewer/HistorySidebar";
-import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
-import type { ViewerMode } from "@/stores/slideStore";
+import React, { useState, useEffect, useCallback } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
+import SlideThumbnails from "@/components/slideviewer/navigation/SlideThumbnails";
+import CommitHistory from "@/components/slideviewer/history/CommitHistory";
+import BranchSelector from "@/components/slideviewer/history/BranchSelector";
+import SidePanel from "@/components/slideviewer/panels/SidePanel";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { useSlideStore } from "@/stores/slideStore";
+import ReviewPanel from "../panels/ReviewPanel";
 
 interface MainLayoutProps {
   currentBranch: string;
@@ -13,23 +20,23 @@ interface MainLayoutProps {
   currentSlide: number;
   totalSlides: number;
   zoom: number;
-  viewerMode: ViewerMode;
+  viewerMode: "presentation" | "edit" | "review";
   leftSidebarOpen: boolean;
   showPresenterNotes: boolean;
   isFullScreen: boolean;
-  presentationStartTime: Date | null;
+  presentationStartTime: number | null;
   presenterNotes: Record<number, string>;
   elapsedTime: string;
   displayCount: number;
   commentedSlides: number[];
-  mockComments: Record<number, any[]>;
+  mockComments: any;
   userType: "student" | "enterprise";
   onBranchChange: (branch: string) => void;
   onToggleLeftSidebar: () => void;
-  onSlideChange: (slide: number) => void;
+  onSlideChange: (currentSlide: number) => void;
 }
 
-const MainLayout = ({
+const MainLayout: React.FC<MainLayoutProps> = ({
   currentBranch,
   branches,
   commitHistory,
@@ -50,81 +57,148 @@ const MainLayout = ({
   onBranchChange,
   onToggleLeftSidebar,
   onSlideChange
-}: MainLayoutProps) => {
-  // プレゼンテーションモードでフルスクリーン時は特別なレイアウト
-  if (viewerMode === "presentation" && isFullScreen) {
-    return (
-      <SlideViewerPanel
-        currentSlide={currentSlide}
-        zoom={zoom}
-        viewerMode={viewerMode}
-        showPresenterNotes={showPresenterNotes}
-        isFullScreen={isFullScreen}
-        presentationStartTime={presentationStartTime}
-        presenterNotes={presenterNotes}
-        totalSlides={totalSlides}
-        elapsedTime={elapsedTime}
-        displayCount={displayCount}
-        onSlideChange={onSlideChange}
-      />
-    );
-  }
+}) => {
+  const { toast } = useToast();
+  const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState(mockComments[currentSlide] || []);
+  const [isCommenting, setIsCommenting] = useState(false);
+  const [isNotesPanelOpen, setIsNotesPanelOpen] = useState(false);
+  const slides = useSlideStore(state => state.slides);
 
-  // 通常のエディターレイアウト
+  useEffect(() => {
+    setComments(mockComments[currentSlide] || []);
+  }, [currentSlide, mockComments]);
+
+  const handleAddComment = () => {
+    if (commentText.trim() !== "") {
+      const newComment = {
+        id: Date.now(),
+        text: commentText,
+      };
+
+      setComments(prevComments => [...prevComments, newComment]);
+      setCommentText("");
+
+      toast({
+        title: "コメントが追加されました",
+        description: "コメントありがとうございます！",
+      });
+    }
+  };
+
+  const handleSlideClick = (slideNumber: number) => {
+    onSlideChange(slideNumber);
+  };
+
+  const toggleNotesPanel = () => {
+    setIsNotesPanelOpen(!isNotesPanelOpen);
+  };
+
+  const isReviewMode = viewerMode === "review";
+  const isEditMode = viewerMode === "edit";
+
   return (
-    <ResizablePanelGroup direction="vertical" className="h-full w-full" id="slide-layout-vertical">
-      {/* Main content panel */}
-      <ResizablePanel defaultSize={80} minSize={50} id="main-content" order={1} className="flex-grow">
-        <ResizablePanelGroup direction="horizontal" className="h-full" id="slide-layout-horizontal">
-          {/* Left sidebar with history (conditionally displayed) */}
-          {leftSidebarOpen && (
-            <>
-              <ResizablePanel defaultSize={30} minSize={20} maxSize={50} id="history-sidebar" order={1} className="bg-white border-r border-gray-100 shadow-sm">
-                <HistorySidebar 
-                  currentBranch={currentBranch}
-                  branches={branches}
-                  commitHistory={commitHistory}
-                  onBranchChange={onBranchChange}
-                  onClose={onToggleLeftSidebar}
-                />
-              </ResizablePanel>
-              
-              <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />
-            </>
-          )}
-          
-          {/* Main slide viewer */}
-          <ResizablePanel id="slide-viewer" order={2} className="bg-slate-100">
-            <SlideViewerPanel
-              currentSlide={currentSlide}
-              zoom={zoom}
-              viewerMode={viewerMode}
-              showPresenterNotes={showPresenterNotes}
-              isFullScreen={isFullScreen}
-              presentationStartTime={presentationStartTime}
-              presenterNotes={presenterNotes}
-              totalSlides={totalSlides}
-              elapsedTime={elapsedTime}
-              displayCount={displayCount}
-              onSlideChange={onSlideChange}
+    <div className="flex h-full w-full overflow-hidden">
+      {/* Left Sidebar */}
+      <aside className={`w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 transition-transform duration-300 transform ${leftSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:block`}>
+        <div className="h-full flex flex-col">
+          <div className="p-4">
+            <h2 className="text-lg font-semibold text-gray-800">スライド管理</h2>
+          </div>
+
+          {/* Branch Selector */}
+          <div className="px-4">
+            <BranchSelector
+              currentBranch={currentBranch}
+              branches={branches}
+              onBranchChange={onBranchChange}
             />
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </ResizablePanel>
-      
-      {/* Slide thumbnails */}
-      <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />
-      <ResizablePanel defaultSize={20} minSize={15} id="thumbnails" order={2} className="min-h-[180px]">
-        <SlideThumbnails
+          </div>
+
+          {/* Slide Thumbnails */}
+          <div className="flex-grow overflow-y-auto">
+            <SlideThumbnails
+              slides={slides}
+              currentSlide={currentSlide}
+              onSlideClick={handleSlideClick}
+            />
+          </div>
+
+          {/* Commit History */}
+          <div className="p-4 border-t border-gray-200">
+            <CommitHistory commitHistory={commitHistory} />
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col h-full">
+        {/* Slide Viewer */}
+        <div className="flex-grow flex items-center justify-center bg-gray-100 overflow-hidden">
+          <SlideCanvas
+            currentSlide={currentSlide}
+            zoomLevel={zoom}
+            editable={isEditMode}
+            userType={userType}
+          />
+        </div>
+
+        {/* Review Mode UI */}
+        {isReviewMode && userType === "student" && (
+          <div className="p-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-700">
+                スライドへのコメント
+              </h3>
+              <Button variant="ghost" size="sm" onClick={toggleNotesPanel}>
+                {isNotesPanelOpen ? "コメントを閉じる" : "コメントを開く"}
+              </Button>
+            </div>
+
+            {isNotesPanelOpen ? (
+              <div className="space-y-2">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="bg-white shadow-sm border rounded-md p-3">
+                    <p className="text-sm text-gray-700">{comment.text}</p>
+                  </div>
+                ))}
+
+                <div className="flex items-end space-x-2">
+                  <div className="flex-grow">
+                    <Label htmlFor="comment" className="text-xs text-gray-600">コメントを追加:</Label>
+                    <Textarea
+                      id="comment"
+                      placeholder="スライドに関するコメントを入力してください"
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                  <Button size="sm" onClick={handleAddComment}>
+                    コメントする
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center text-gray-500">
+                コメントは非表示です。
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* Right Sidebar */}
+      {(viewerMode === "review" || showPresenterNotes) && (
+        <SidePanel
+          shouldShowNotes={showPresenterNotes}
+          shouldShowReviewPanel={viewerMode === "review"}
           currentSlide={currentSlide}
           totalSlides={totalSlides}
-          commentedSlides={commentedSlides}
-          mockComments={mockComments}
-          userType={userType}
-          onSlideSelect={onSlideChange}
+          presenterNotes={presenterNotes}
         />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+      )}
+    </div>
   );
 };
 
