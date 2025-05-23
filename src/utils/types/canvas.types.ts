@@ -15,8 +15,8 @@ export interface CustomFabricObject extends FabricObject {
   top: number;
   scaleX: number;
   scaleY: number;
-  angle: number; // Changed from optional to required
-  set?: (options: any) => CustomFabricObject;
+  angle: number;
+  // Remove the set method definition to inherit the correct one from FabricObject
 }
 
 // キャンバスフックのプロパティ型

@@ -7,15 +7,15 @@ export interface CustomFabricObject extends FabricObject {
     id: string;
     [key: string]: any;
   };
-  type: string; 
+  type: string;
   width: number; 
   height: number; 
   left: number; 
   top: number; 
   scaleX: number; 
   scaleY: number; 
-  angle: number; // Changed from optional to required
-  set?: (options: any) => CustomFabricObject;
+  angle: number;
+  // Remove the set method definition to inherit the correct one from FabricObject
 }
 
 // Helper function to create a text element
