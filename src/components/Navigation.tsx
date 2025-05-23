@@ -142,7 +142,7 @@ const Navigation = () => {
                         <div className="px-2 py-1.5">
                           <p className="text-xs font-medium text-muted-foreground mb-2">ロールを切り替える</p>
                           <DropdownMenuRadioGroup 
-                            value={userRole !== 'debugger' ? userRole : 'student'} 
+                            value={userRole === 'debugger' ? 'student' : userRole} 
                             onValueChange={handleRoleChange}
                           >
                             <DropdownMenuRadioItem value="student" className="cursor-pointer">
@@ -250,7 +250,7 @@ const Navigation = () => {
                       <div className="grid grid-cols-2 gap-2">
                         <Button 
                           size="sm" 
-                          variant={userRole === 'student' ? 'default' : 'outline'}
+                          variant={userRole === 'student' ? 'default' : 'outline'} 
                           className={userRole === 'student' ? 'bg-blue-600 hover:bg-blue-700' : ''} 
                           onClick={() => handleRoleChange('student')}
                         >
