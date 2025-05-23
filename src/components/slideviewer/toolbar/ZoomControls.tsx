@@ -1,8 +1,8 @@
 
 import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useCallback } from "react";
+import { useCallback, memo } from "react";
 
 interface ZoomControlsProps {
   zoom: number;
@@ -12,8 +12,8 @@ interface ZoomControlsProps {
 const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
   // Memoized zoom change handler with bounds checking
   const handleZoomChange = useCallback((newZoom: number) => {
-    // Ensure zoom stays between 50% and 200%
-    const boundedZoom = Math.min(Math.max(newZoom, 50), 200);
+    // Ensure zoom stays between 25% and 200%
+    const boundedZoom = Math.min(Math.max(newZoom, 25), 200);
     onZoomChange(boundedZoom);
   }, [onZoomChange]);
 
@@ -26,6 +26,11 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
   const decrementZoom = useCallback(() => {
     handleZoomChange(zoom - 10);
   }, [zoom, handleZoomChange]);
+  
+  // Reset zoom to 100%
+  const resetZoom = useCallback(() => {
+    handleZoomChange(100);
+  }, [handleZoomChange]);
 
   return (
     <div className="flex items-center space-x-2">
@@ -35,6 +40,8 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
             variant="ghost" 
             size="sm" 
             className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+            onClick={resetZoom}
+            title="クリックして100%に戻す"
           >
             <span className="font-medium">{zoom}%</span>
             <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 rotate-90" />
@@ -43,6 +50,7 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
         <DropdownMenuContent align="start" className="w-48">
           <DropdownMenuLabel>ズーム設定</DropdownMenuLabel>
           <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => handleZoomChange(25)}>25%</DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleZoomChange(50)}>50%</DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleZoomChange(75)}>75%</DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleZoomChange(100)}>100% (デフォルト)</DropdownMenuItem>
@@ -57,8 +65,9 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
         variant="ghost" 
         size="icon" 
         className="rounded-full h-6 w-6 sm:h-8 sm:w-8 flex items-center justify-center hover:bg-blue-50"
+        title="縮小"
       >
-        <span className="font-medium">-</span>
+        <ZoomOut className="h-4 w-4 sm:h-5 sm:w-5" />
       </Button>
       
       <Button 
@@ -66,11 +75,12 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
         variant="ghost" 
         size="icon" 
         className="rounded-full h-6 w-6 sm:h-8 sm:w-8 flex items-center justify-center hover:bg-blue-50"
+        title="拡大"
       >
-        <span className="font-medium">+</span>
+        <ZoomIn className="h-4 w-4 sm:h-5 sm:w-5" />
       </Button>
     </div>
   );
 };
 
-export default ZoomControls;
+export default memo(ZoomControls);
