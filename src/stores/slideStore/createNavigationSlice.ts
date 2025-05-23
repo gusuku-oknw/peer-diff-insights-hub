@@ -36,7 +36,7 @@ export const createNavigationSlice: StateCreator<
   viewerMode: "edit",
   isFullScreen: false,
   leftSidebarOpen: false,
-  showPresenterNotes: false,  // デフォルトは非表示
+  showPresenterNotes: false,  // 確実に初期値はfalse
   displayCount: 1,
   
   setCurrentSlide: (index) => {
@@ -63,6 +63,11 @@ export const createNavigationSlice: StateCreator<
   
   setViewerMode: (mode) => {
     set({ viewerMode: mode });
+    
+    // 編集モードに切り替えたときは、常にノートパネルを非表示にする
+    if (mode === "edit") {
+      set({ showPresenterNotes: false });
+    }
   },
   
   toggleLeftSidebar: () => {

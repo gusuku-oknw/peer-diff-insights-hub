@@ -90,7 +90,10 @@ const SlideViewerPanel = ({
     setSidebarOpen(prev => !prev);
   };
 
-  console.log(`Rendering SlideViewerPanel: mode=${viewerMode}, slide=${currentSlide}, showNotes=${showPresenterNotes}, renderKey=${renderKey}`);
+  console.log(`SlideViewerPanel: Rendering mode=${viewerMode}, slide=${currentSlide}, showNotes=${showPresenterNotes}`);
+  
+  // 明示的に右サイドパネルの表示条件をチェック
+  const shouldShowRightSidePanel = viewerMode === "review" || (showPresenterNotes === true);
   
   return (
     <div className="flex h-full">
@@ -140,10 +143,10 @@ const SlideViewerPanel = ({
             )}
           </div>
           
-          {/* Right sidebar - 表示条件を厳格にチェック */}
-          {(showPresenterNotes || viewerMode === "review") && (
+          {/* Right sidebar - 表示条件をより厳格にチェック */}
+          {shouldShowRightSidePanel && (
             <SidePanel
-              shouldShowNotes={showPresenterNotes}
+              shouldShowNotes={!!showPresenterNotes}
               shouldShowReviewPanel={viewerMode === "review"}
               currentSlide={currentSlide}
               totalSlides={totalSlides}

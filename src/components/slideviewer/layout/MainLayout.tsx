@@ -94,9 +94,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     setIsNotesPanelOpen(!isNotesPanelOpen);
   };
 
-  const isReviewMode = viewerMode === "review";
-  const isEditMode = viewerMode === "edit";
-
+  // 明示的に右サイドパネルの表示条件をチェック
+  const shouldShowRightSidePanel = viewerMode === "review" || showPresenterNotes;
+  
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
       {/* Main horizontal layout */}
@@ -131,13 +131,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             <SlideCanvas
               currentSlide={currentSlide}
               zoomLevel={zoom}
-              editable={isEditMode}
+              editable={viewerMode === "edit"}
               userType={userType}
             />
           </div>
 
           {/* Review Mode UI */}
-          {isReviewMode && userType === "student" && (
+          {viewerMode === "review" && userType === "student" && (
             <div className="p-4 border-t border-gray-200 bg-gray-50">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-medium text-gray-700">
@@ -181,8 +181,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           )}
         </main>
 
-        {/* Right Sidebar - Only show when explicitly enabled */}
-        {(viewerMode === "review" || showPresenterNotes) && (
+        {/* Right Sidebar - 表示条件を厳格化 */}
+        {shouldShowRightSidePanel && (
           <SidePanel
             shouldShowNotes={showPresenterNotes}
             shouldShowReviewPanel={viewerMode === "review"}
