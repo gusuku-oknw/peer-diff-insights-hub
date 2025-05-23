@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import NotesPanel from "./NotesPanel";
 import ReviewPanel from "./ReviewPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,6 +29,26 @@ const SidePanel = ({
 }: SidePanelProps) => {
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [panelWidth, setPanelWidth] = useState(0);
+  const panelRef = useRef<HTMLDivElement>(null);
+  
+  // Track panel width changes
+  useEffect(() => {
+    const updateWidth = () => {
+      if (panelRef.current) {
+        setPanelWidth(panelRef.current.offsetWidth);
+      }
+    };
+
+    updateWidth();
+    
+    const resizeObserver = new ResizeObserver(updateWidth);
+    if (panelRef.current) {
+      resizeObserver.observe(panelRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, []);
   
   // Determine if we should display the panel at all
   const shouldDisplay = shouldShowNotes || shouldShowReviewPanel;
@@ -40,6 +60,10 @@ const SidePanel = ({
 
   // Default to the tab that's enabled
   const defaultTab = shouldShowNotes ? "notes" : "reviews";
+  
+  // Determine layout mode based on width
+  const isNarrow = panelWidth > 0 && panelWidth < 250;
+  const isVeryNarrow = panelWidth > 0 && panelWidth < 180;
 
   // Panel content component
   const PanelContent = () => (
@@ -53,7 +77,7 @@ const SidePanel = ({
               data-testid="notes-tab"
             >
               <BookOpen className="h-4 w-4" />
-              <span>メモ</span>
+              {!isVeryNarrow && <span>メモ</span>}
             </TabsTrigger>
           )}
           {shouldShowReviewPanel && (
@@ -63,7 +87,7 @@ const SidePanel = ({
               data-testid="reviews-tab"
             >
               <MessageSquare className="h-4 w-4" />
-              <span>レビュー</span>
+              {!isVeryNarrow && <span>レビュー</span>}
             </TabsTrigger>
           )}
         </TabsList>
@@ -99,6 +123,9 @@ const SidePanel = ({
             currentSlide={currentSlide}
             totalSlides={totalSlides}
             presenterNotes={presenterNotes}
+            panelWidth={panelWidth}
+            isNarrow={isNarrow}
+            isVeryNarrow={isVeryNarrow}
           />
         )}
       </TabsContent>
@@ -108,6 +135,9 @@ const SidePanel = ({
           <ReviewPanel
             currentSlide={currentSlide}
             totalSlides={totalSlides}
+            panelWidth={panelWidth}
+            isNarrow={isNarrow}
+            isVeryNarrow={isVeryNarrow}
           />
         )}
       </TabsContent>
@@ -135,7 +165,7 @@ const SidePanel = ({
           </Button>
         </SheetTrigger>
         <SheetContent side="right" className="w-full max-w-md p-0">
-          <div className="h-full bg-gray-50">
+          <div className="h-full bg-gray-50" ref={panelRef}>
             <PanelContent />
           </div>
         </SheetContent>
@@ -180,7 +210,7 @@ const SidePanel = ({
   }
 
   return (
-    <div className="w-80 h-full bg-gray-50 border-l border-gray-200 overflow-hidden flex flex-col">
+    <div className="w-80 h-full bg-gray-50 border-l border-gray-200 overflow-hidden flex flex-col" ref={panelRef}>
       <PanelContent />
     </div>
   );

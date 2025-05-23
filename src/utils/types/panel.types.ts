@@ -5,6 +5,9 @@ import type { ViewerMode } from "@/stores/slideStore";
 export interface BasePanelProps {
   currentSlide: number;
   totalSlides: number;
+  panelWidth?: number;
+  isNarrow?: boolean;
+  isVeryNarrow?: boolean;
 }
 
 // Notes panel specific props
@@ -41,4 +44,15 @@ export interface PanelLayoutConfig {
   showRightSidebar: boolean;
   rightPanelCollapsed: boolean;
   mobileSheetMode: boolean;
+}
+
+// Panel responsive states
+export interface PanelResponsiveState {
+  panelWidth: number;
+  isNarrow: boolean;
+  isVeryNarrow: boolean;
+  breakpoints: {
+    narrow: number;
+    veryNarrow: number;
+  };
 }
