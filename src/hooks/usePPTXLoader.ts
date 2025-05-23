@@ -7,7 +7,7 @@ import { useSlideStore } from '@/stores/slideStore';
 export function usePPTXLoader() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { importSlidesFromPPTX } = useSlideStore();
+  const { importSlidesFromPPTX, setPPTXImported } = useSlideStore();
   
   const loadPPTXFile = useCallback(async (file: File) => {
     try {
@@ -22,7 +22,10 @@ export function usePPTXLoader() {
       // Convert to application's slide format
       const slides = convertPPTXToSlides(pptxSlides);
       
-      // Update store
+      // Set the PPTX as imported with the filename
+      setPPTXImported(true, file.name);
+      
+      // Update store with slides
       importSlidesFromPPTX(slides);
       
       toast({
@@ -42,7 +45,7 @@ export function usePPTXLoader() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast, importSlidesFromPPTX]);
+  }, [toast, importSlidesFromPPTX, setPPTXImported]);
   
   return {
     loadPPTXFile,

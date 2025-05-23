@@ -21,11 +21,11 @@ export const createPPTXImportSlice: StateCreator<
   importSlidesFromPPTX: (slidesData) => {
     // Convert the PPTX slides data to our application's slide format
     // and update the store
-    set(state => ({
-      ...state,
+    set({
       slides: slidesData,
       isPPTXImported: true,
-      currentSlide: 1
-    }))
+      currentSlide: 1,
+      pptxFilename: get().pptxFilename || "imported-presentation.pptx"
+    });
   }
 });
