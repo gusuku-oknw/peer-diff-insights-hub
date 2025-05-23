@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -5,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { ChevronLeft, ChevronRight, Eye, Pencil, MessageCircle, Layout, 
   Share, Play, Code, FileText, Maximize, Minimize2, History, Calendar,
-  GitBranch, GitCommit, Download, Settings, Save, Filter } from "lucide-react";
+  GitBranch, GitCommit, Download, Settings, Save, Filter, Book, Clock } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar";
 import Navigation from "@/components/Navigation";
@@ -14,6 +15,7 @@ import SlideCanvas from "@/components/slideviewer/SlideCanvas";
 import CommentList from "@/components/slideviewer/CommentList";
 import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -25,7 +27,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 // Define the viewer modes
-type ViewerMode = "presentation" | "edit" | "review";
+type ViewerMode = "notes" | "edit" | "review";
+
+// Define the user types
+type UserType = "student" | "enterprise";
 
 const SlideViewer = () => {
   const { toast } = useToast();
@@ -37,19 +42,62 @@ const SlideViewer = () => {
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [defaultLayout, setDefaultLayout] = useState([30, 70]);
   const [sidebarLayout, setSlidebarLayout] = useState([70, 30]);
+  const [showPresenterNotes, setShowPresenterNotes] = useState(false);
   
-  // New state for viewer mode
+  // New state for viewer mode (renamed from 'presentation' to 'notes')
   const [viewerMode, setViewerMode] = useState<ViewerMode>("review");
+  
+  // User type (student or enterprise)
+  const [userType, setUserType] = useState<UserType>("enterprise");
 
   // Mock data for branch and commit history
   const [currentBranch, setCurrentBranch] = useState("main");
   const branches = ["main", "feature/new-slides", "hotfix/typo"];
   const commitHistory = [
-    { id: "a1b2c3d", message: "スライド5を追加", author: "田中さん", date: "2025年5月22日" },
-    { id: "e4f5g6h", message: "グラフのデータを更新", author: "佐藤さん", date: "2025年5月21日" },
-    { id: "i7j8k9l", message: "タイトルのフォント修正", author: "鈴木さん", date: "2025年5月20日" },
-    { id: "m1n2o3p", message: "初回コミット", author: "山本さん", date: "2025年5月19日" }
+    { id: "a1b2c3d", message: "スライド5を追加", author: "田中さん", date: "2025年5月22日", reviewStatus: "reviewing" },
+    { id: "e4f5g6h", message: "グラフのデータを更新", author: "佐藤さん", date: "2025年5月21日", reviewStatus: "approved" },
+    { id: "i7j8k9l", message: "タイトルのフォント修正", author: "鈴木さん", date: "2025年5月20日", reviewStatus: "approved" },
+    { id: "m1n2o3p", message: "初回コミット", author: "山本さん", date: "2025年5月19日", reviewStatus: "approved" }
   ];
+
+  // Mock presenter notes
+  const presenterNotes = {
+    1: "このスライドでは、Q4の業績についての概要を説明します。市場予測よりも20%増の売上を記録したことを強調しましょう。",
+    2: "会社概要では、特に海外展開の強化について触れてください。アジア市場での成長率が前年比40%であることを強調。",
+    3: "財務結果では、営業利益率が業界平均を上回っていることにフォーカスしてください。昨年比で5ポイント改善。",
+    4: "将来戦略では、新製品開発のロードマップと市場投入時期について詳しく説明してください。特に第2四半期の新製品に注目。",
+    5: "質疑応答セクションでは、投資家から予想される質問への回答をあらかじめ準備しておきます。特に配当政策について。"
+  };
+
+  // プレゼンテーション開始時間
+  const [presentationStartTime, setPresentationStartTime] = useState<Date | null>(null);
+  const [elapsedTime, setElapsedTime] = useState<string>("00:00");
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (presentationStartTime) {
+      interval = setInterval(() => {
+        const now = new Date();
+        const elapsed = now.getTime() - presentationStartTime.getTime();
+        
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        
+        setElapsedTime(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+      }, 1000);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [presentationStartTime]);
+
+  // コミット履歴に基づくレビュー状態の取得
+  const getCurrentCommitReviewStatus = () => {
+    const currentCommit = commitHistory[0];
+    return currentCommit?.reviewStatus || "none";
+  };
 
   const handlePreviousSlide = () => {
     if (currentSlide > 1) {
@@ -93,13 +141,20 @@ const SlideViewer = () => {
         console.error(`Error attempting to enable full-screen mode: ${e.message}`);
       });
       setIsFullScreen(true);
+      
+      // プレゼンテーション開始時の処理
+      if (!presentationStartTime) {
+        setPresentationStartTime(new Date());
+        setViewerMode("notes");
+        setShowPresenterNotes(true);
+      }
     } else {
       if (document.exitFullscreen) {
         document.exitFullscreen();
         setIsFullScreen(false);
       }
     }
-  }, []);
+  }, [presentationStartTime]);
 
   // Handle mode change with visual feedback
   const handleModeChange = (mode: ViewerMode) => {
@@ -108,18 +163,18 @@ const SlideViewer = () => {
     // Automatically show comments in review mode
     if (mode === "review") {
       setShowComments(true);
-    } else if (mode === "presentation") {
+    } else if (mode === "notes") {
       setShowComments(false);
     }
     
     toast({
-      title: mode === "presentation" 
-        ? "プレゼンテーションモードに切り替えました" 
+      title: mode === "notes" 
+        ? "メモ・台本モードに切り替えました" 
         : mode === "edit" 
           ? "編集モードに切り替えました" 
           : "レビューモードに切り替えました",
-      description: mode === "presentation" 
-        ? "すべてのコントロールを最小化します" 
+      description: mode === "notes" 
+        ? "発表用のメモを確認できます" 
         : mode === "edit" 
           ? "スライドの編集が可能になります"
           : "コメントやフィードバックに集中できます",
@@ -131,6 +186,28 @@ const SlideViewer = () => {
     toast({
       title: "変更が保存されました",
       description: "すべての変更が正常に保存されました。",
+      variant: "default"
+    });
+  };
+
+  // Start presentation
+  const handleStartPresentation = () => {
+    toggleFullScreen();
+    
+    toast({
+      title: "プレゼンテーションが開始されました",
+      description: "ESCキーで終了、矢印キーでスライド移動ができます",
+      variant: "default"
+    });
+  };
+
+  // Toggle user type for demonstration
+  const toggleUserType = () => {
+    setUserType(userType === "student" ? "enterprise" : "student");
+    
+    toast({
+      title: `${userType === "student" ? "企業" : "学生"}ユーザーモードに切り替えました`,
+      description: "UIが変更されました",
       variant: "default"
     });
   };
@@ -165,30 +242,28 @@ const SlideViewer = () => {
               onClick={() => toast({
                 title: "フィードバックが送信されました",
                 description: "レビュー担当者にフィードバックが送信されました。",
+                variant: "default"
               })}
             >
               フィードバック送信
             </Button>
           </div>
         );
-      case "presentation":
+      case "notes":
         return (
           <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="sm" onClick={toggleFullScreen} className="flex items-center gap-2">
-              {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-              <span className="hidden lg:inline">{isFullScreen ? "終了" : "全画面"}</span>
+            <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={() => setShowPresenterNotes(!showPresenterNotes)}>
+              <Book className="h-4 w-4" />
+              <span className="hidden lg:inline">発表者メモ {showPresenterNotes ? '非表示' : '表示'}</span>
             </Button>
             <Button 
               variant="default" 
               size="sm" 
               className="bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => toast({
-                title: "プレゼンテーション中",
-                description: "発表モード。前後のスライドに矢印キーで移動できます。",
-              })}
+              onClick={handleStartPresentation}
             >
               <Play className="h-4 w-4 mr-2" />
-              スタート
+              プレゼン開始（全画面）
             </Button>
           </div>
         );
@@ -217,11 +292,11 @@ const SlideViewer = () => {
                 >
                   <TabsList className="bg-slate-100 p-1">
                     <TabsTrigger 
-                      value="presentation" 
+                      value="notes" 
                       className="data-[state=active]:bg-blue-500 data-[state=active]:text-white"
                     >
-                      <Eye className="h-4 w-4 mr-2" />
-                      <span className="hidden sm:inline">プレゼン</span>
+                      <Book className="h-4 w-4 mr-2" />
+                      <span className="hidden sm:inline">メモ・台本</span>
                     </TabsTrigger>
                     
                     <TabsTrigger 
@@ -311,27 +386,22 @@ const SlideViewer = () => {
                   <span className="font-medium">+</span>
                 </Button>
                 
-                {/* Only show comment toggle in edit and review modes */}
-                {viewerMode !== "presentation" && (
-                  <>
-                    <div className="h-6 border-r border-gray-200 mx-2" />
-                    
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="flex items-center gap-2">
-                          <MessageCircle className={`h-4 w-4 ${showComments ? "text-purple-600" : "text-gray-400"}`} />
-                          <Switch 
-                            id="comment-mode" 
-                            checked={showComments} 
-                            onCheckedChange={setShowComments} 
-                            className="focus-visible:ring-offset-0 data-[state=checked]:bg-purple-600" 
-                          />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>{showComments ? "コメントを非表示" : "コメントを表示"}</TooltipContent>
-                    </Tooltip>
-                  </>
-                )}
+                {/* User type switch for demo purposes */}
+                <div className="h-6 border-r border-gray-200 mx-2" />
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleUserType}
+                  className="flex items-center gap-2"
+                >
+                  <span className="text-xs font-medium">
+                    {userType === "student" ? "学生" : "企業"} UI
+                  </span>
+                  <Badge variant="secondary" className={userType === "student" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}>
+                    {userType === "student" ? "学生" : "企業"}
+                  </Badge>
+                </Button>
                 
                 {/* Secondary tools dropdown (advanced features) */}
                 <div className="h-6 border-r border-gray-200 mx-2" />
@@ -468,8 +538,26 @@ const SlideViewer = () => {
                                       <p className={`text-sm font-medium mb-1 ${index === 0 ? 'text-blue-800' : ''}`}>
                                         {commit.message}
                                       </p>
-                                      <div className="flex items-center text-xs text-gray-500">
-                                        <span>作成者: {commit.author}</span>
+                                      <div className="flex items-center justify-between text-xs">
+                                        <span className="text-gray-500">作成者: {commit.author}</span>
+                                        <Badge 
+                                          variant="secondary" 
+                                          className={
+                                            commit.reviewStatus === "approved" 
+                                              ? "bg-green-100 text-green-800" 
+                                              : commit.reviewStatus === "reviewing" 
+                                                ? "bg-amber-100 text-amber-800" 
+                                                : "bg-gray-100 text-gray-800"
+                                          }
+                                        >
+                                          {
+                                            commit.reviewStatus === "approved" 
+                                              ? "レビュー済" 
+                                              : commit.reviewStatus === "reviewing" 
+                                                ? "レビュー中" 
+                                                : "未レビュー"
+                                          }
+                                        </Badge>
                                       </div>
                                     </div>
                                   ))}
@@ -490,19 +578,68 @@ const SlideViewer = () => {
                   <ResizablePanelGroup direction="horizontal" className="h-full">
                     {/* Slide canvas */}
                     <ResizablePanel id="slide-canvas" order={1} className="overflow-hidden">
-                      <div className={`flex-grow flex items-center justify-center h-full p-4 relative ${viewerMode === "presentation" ? "bg-gray-900" : "bg-gradient-to-br from-slate-50 to-gray-100"}`}>
-                        <div className={`w-4/5 h-full flex items-center justify-center relative ${viewerMode === "presentation" ? "w-full max-w-none" : ""}`}>
+                      <div className={`flex-grow flex items-center justify-center h-full p-4 relative ${viewerMode === "notes" && isFullScreen ? "bg-gray-900" : "bg-gradient-to-br from-slate-50 to-gray-100"}`}>
+                        <div className={`w-4/5 h-full flex items-center justify-center relative ${viewerMode === "notes" && isFullScreen ? "w-full max-w-none" : ""}`}>
+                          {/* プレゼン時間表示（フルスクリーン時のみ） */}
+                          {isFullScreen && presentationStartTime && (
+                            <div className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full flex items-center space-x-2 z-30">
+                              <Clock className="h-4 w-4" />
+                              <span>{elapsedTime}</span>
+                            </div>
+                          )}
+                          
                           <SlideCanvas 
                             currentSlide={currentSlide} 
                             zoomLevel={zoom} 
                             editable={viewerMode === "edit"}
+                            userType={userType}
                           />
                         </div>
                       </div>
                     </ResizablePanel>
                     
-                    {/* Comment sidebar with improved styling */}
-                    {showComments && (
+                    {/* Notes sidebar (conditionally displayed) */}
+                    {showPresenterNotes && viewerMode === "notes" && (
+                      <>
+                        <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />
+                        <ResizablePanel defaultSize={30} minSize={20} id="notes-sidebar" order={2} className="overflow-hidden">
+                          <div className="h-full bg-white shadow-sm">
+                            <div className="px-4 py-3 border-b border-gray-200 bg-blue-50">
+                              <h3 className="font-medium text-sm flex items-center text-blue-800">
+                                <Book className="h-4 w-4 mr-2 text-blue-600" />
+                                発表者メモ
+                              </h3>
+                            </div>
+                            <div className="p-4">
+                              <div className="p-3 rounded-lg border border-blue-100 bg-blue-50 mb-4">
+                                <p className="text-sm font-medium text-blue-900">スライド {currentSlide}</p>
+                              </div>
+                              
+                              <p className="text-sm leading-relaxed">
+                                {presenterNotes[currentSlide as keyof typeof presenterNotes] || "このスライドにはメモがありません"}
+                              </p>
+                              
+                              <div className="mt-6 pt-4 border-t border-gray-200">
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">次のスライド:</h4>
+                                {currentSlide < totalSlides ? (
+                                  <>
+                                    <p className="text-xs text-gray-500 mb-2">スライド {currentSlide + 1}</p>
+                                    <p className="text-xs text-gray-600 italic">
+                                      {presenterNotes[(currentSlide + 1) as keyof typeof presenterNotes]?.substring(0, 100)}...
+                                    </p>
+                                  </>
+                                ) : (
+                                  <p className="text-xs text-gray-500">最終スライドです</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </ResizablePanel>
+                      </>
+                    )}
+                    
+                    {/* Comment sidebar */}
+                    {viewerMode === "review" && (
                       <>
                         <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />
                         <ResizablePanel defaultSize={30} minSize={20} id="comment-sidebar" order={2} className="overflow-hidden">
@@ -517,6 +654,78 @@ const SlideViewer = () => {
                           </div>
                         </ResizablePanel>
                       </>
+                    )}
+                    
+                    {/* AI要約パネル（企業ユーザーのみ） */}
+                    {userType === "enterprise" && viewerMode === "review" && (
+                      <Sheet>
+                        <SheetTrigger asChild>
+                          <Button
+                            className="absolute top-4 right-4 z-20 bg-purple-600 hover:bg-purple-700 text-white"
+                            size="sm"
+                          >
+                            AI要約
+                          </Button>
+                        </SheetTrigger>
+                        <SheetContent className="w-[400px]">
+                          <SheetHeader>
+                            <SheetTitle>AI要約</SheetTitle>
+                            <SheetDescription>
+                              すべてのコメントの要約と傾向分析
+                            </SheetDescription>
+                          </SheetHeader>
+                          <div className="py-4">
+                            <div className="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-100">
+                              <h4 className="font-medium text-purple-900 mb-2">要点まとめ</h4>
+                              <p className="text-sm text-purple-800">
+                                このスライドに対する主なフィードバックはタイトルの表現と図表のわかりやすさについてです。特に、タイトルをより具体的にすること、図表の数値表現の改善が提案されています。
+                              </p>
+                            </div>
+                            
+                            <h4 className="font-medium text-gray-900 mb-2">カテゴリ分布</h4>
+                            <div className="flex mb-6">
+                              <div className="flex-1 text-center p-2">
+                                <div className="inline-block w-3 h-3 rounded-full bg-blue-500 mb-1"></div>
+                                <p className="text-xs">内容</p>
+                                <p className="font-bold">50%</p>
+                              </div>
+                              <div className="flex-1 text-center p-2">
+                                <div className="inline-block w-3 h-3 rounded-full bg-purple-500 mb-1"></div>
+                                <p className="text-xs">デザイン</p>
+                                <p className="font-bold">50%</p>
+                              </div>
+                              <div className="flex-1 text-center p-2">
+                                <div className="inline-block w-3 h-3 rounded-full bg-green-500 mb-1"></div>
+                                <p className="text-xs">誤字・脱字</p>
+                                <p className="font-bold">0%</p>
+                              </div>
+                            </div>
+                            
+                            <h4 className="font-medium text-gray-900 mb-2">キーワード</h4>
+                            <div className="flex flex-wrap gap-2 mb-6">
+                              <Badge className="bg-gray-100 text-gray-800">タイトル</Badge>
+                              <Badge className="bg-gray-100 text-gray-800">表現</Badge>
+                              <Badge className="bg-gray-100 text-gray-800">図表</Badge>
+                              <Badge className="bg-gray-100 text-gray-800">数値</Badge>
+                              <Badge className="bg-gray-100 text-gray-800">わかりにくい</Badge>
+                            </div>
+                            
+                            <h4 className="font-medium text-gray-900 mb-2">感情分析</h4>
+                            <div className="p-4 rounded-lg border border-gray-200">
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-gray-500">非常にネガティブ</span>
+                                <span className="text-xs text-gray-500">非常にポジティブ</span>
+                              </div>
+                              <div className="mt-1 h-2 w-full bg-gray-200 rounded-full">
+                                <div className="h-2 bg-amber-400 rounded-full" style={{width: "45%"}}></div>
+                              </div>
+                              <p className="text-center text-xs mt-2 text-gray-600">
+                                中立的なフィードバック
+                              </p>
+                            </div>
+                          </div>
+                        </SheetContent>
+                      </Sheet>
                     )}
                   </ResizablePanelGroup>
                 </ResizablePanel>
@@ -536,30 +745,50 @@ const SlideViewer = () => {
                 <ScrollArea className="flex-grow h-[calc(100%-3rem)]" orientation="horizontal">
                   <div className="p-4 h-full flex items-center">
                     <div className="flex flex-row gap-4">
-                      {Array.from({length: totalSlides}).map((_, index) => (
-                        <div 
-                          key={index} 
-                          className={`border rounded-lg cursor-pointer transition-all duration-200 ${
-                            currentSlide === index + 1 
-                              ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50 shadow-md scale-105' 
-                              : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                          }`} 
-                          onClick={() => setCurrentSlide(index + 1)}
-                        >
-                          <div className="w-36 aspect-video bg-white rounded-t-md flex items-center justify-center overflow-hidden">
-                            <img 
-                              src={`https://placehold.co/1600x900/e2e8f0/1e293b?text=Slide+${index + 1}`} 
-                              alt={`スライド ${index + 1}`} 
-                              className="object-cover w-full h-full" 
-                            />
+                      {Array.from({length: totalSlides}).map((_, index) => {
+                        const slideIndex = index + 1;
+                        const hasComments = (mockComments[slideIndex] || []).length > 0;
+                        const needsComment = userType === "student" && !commentedSlides?.includes(slideIndex);
+                        
+                        return (
+                          <div 
+                            key={index} 
+                            className={`border rounded-lg cursor-pointer transition-all duration-200 ${
+                              currentSlide === slideIndex 
+                                ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50 shadow-md scale-105' 
+                                : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                            } relative`} 
+                            onClick={() => setCurrentSlide(slideIndex)}
+                          >
+                            <div className="w-36 aspect-video bg-white rounded-t-md flex items-center justify-center overflow-hidden">
+                              <img 
+                                src={`https://placehold.co/1600x900/e2e8f0/1e293b?text=Slide+${slideIndex}`} 
+                                alt={`スライド ${slideIndex}`} 
+                                className="object-cover w-full h-full" 
+                              />
+                            </div>
+                            <div className="p-3">
+                              <p className={`text-sm font-medium truncate w-32 ${currentSlide === slideIndex ? 'text-blue-700' : ''}`}>
+                                {slideIndex === 1 ? 'Q4 Presentation' : `Slide ${slideIndex}`}
+                              </p>
+                            </div>
+                            
+                            {/* コメント数バッジ */}
+                            {hasComments && (
+                              <div className="absolute top-1 right-1 bg-purple-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+                                {(mockComments[slideIndex] || []).length}
+                              </div>
+                            )}
+                            
+                            {/* 学生向け：未コメントバッジ */}
+                            {needsComment && (
+                              <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-xs border-2 border-white">
+                                !
+                              </div>
+                            )}
                           </div>
-                          <div className="p-3">
-                            <p className={`text-sm font-medium truncate w-32 ${currentSlide === index + 1 ? 'text-blue-700' : ''}`}>
-                              {index === 0 ? 'Q4 Presentation' : `Slide ${index + 1}`}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 </ScrollArea>

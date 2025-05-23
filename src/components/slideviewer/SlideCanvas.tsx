@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ interface SlideCanvasProps {
   currentSlide: number;
   zoomLevel?: number;
   editable?: boolean;
+  userType?: "student" | "enterprise";
 }
 
 // Mock slide images for demonstration purposes
@@ -120,7 +122,7 @@ const getCategoryLabel = (category?: string) => {
   }
 };
 
-const SlideCanvas = ({ currentSlide, zoomLevel = 100, editable = false }: SlideCanvasProps) => {
+const SlideCanvas = ({ currentSlide, zoomLevel = 100, editable = false, userType = "enterprise" }: SlideCanvasProps) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [comments, setComments] = useState<CommentMarker[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -129,6 +131,9 @@ const SlideCanvas = ({ currentSlide, zoomLevel = 100, editable = false }: SlideC
   const [openPopoverId, setOpenPopoverId] = useState<number | null>(null);
   const { toast } = useToast();
   const [highlightedArea, setHighlightedArea] = useState<{x: number, y: number, width: number, height: number} | null>(null);
+  
+  // 学生ユーザーのための進捗状況
+  const [commentedSlides, setCommentedSlides] = useState<number[]>([]);
 
   // Load comments for the current slide
   useEffect(() => {
@@ -136,6 +141,17 @@ const SlideCanvas = ({ currentSlide, zoomLevel = 100, editable = false }: SlideC
     setOpenPopoverId(null);
     setHighlightedArea(null);
   }, [currentSlide]);
+
+  // Track which slides the student has commented on
+  useEffect(() => {
+    if (userType === "student") {
+      const studentCommentedSlides = Object.keys(mockComments).filter(slideId => {
+        return mockComments[Number(slideId)].some(comment => comment.author === "あなた");
+      }).map(Number);
+      
+      setCommentedSlides(studentCommentedSlides);
+    }
+  }, [userType]);
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (canvasRef.current) {
@@ -149,7 +165,7 @@ const SlideCanvas = ({ currentSlide, zoomLevel = 100, editable = false }: SlideC
         x,
         y,
         text: "",
-        author: "自分",
+        author: userType === "student" ? "あなた" : "企業ユーザー",
         timestamp: new Date().toLocaleString("ja-JP", {
           year: "numeric",
           month: "long", 
@@ -185,6 +201,11 @@ const SlideCanvas = ({ currentSlide, zoomLevel = 100, editable = false }: SlideC
       const updatedComments = [...comments, updatedComment];
       setComments(updatedComments);
       mockComments[currentSlide] = updatedComments;
+      
+      // Update progress for student users
+      if (userType === "student" && !commentedSlides.includes(currentSlide)) {
+        setCommentedSlides([...commentedSlides, currentSlide]);
+      }
       
       // Reset the form and close popover
       setNewComment("");
@@ -244,6 +265,25 @@ const SlideCanvas = ({ currentSlide, zoomLevel = 100, editable = false }: SlideC
 
   return (
     <div className="relative bg-white rounded-lg shadow-md overflow-hidden">
+      {userType === "student" && (
+        <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 flex items-center justify-between">
+          <div className="flex items-center">
+            <span className="text-sm font-medium text-blue-800">
+              {commentedSlides.length} / 5 スライド完了
+            </span>
+            <div className="ml-3 bg-gray-200 rounded-full h-2 w-32">
+              <div 
+                className="bg-blue-600 h-2 rounded-full" 
+                style={{width: `${(commentedSlides.length / 5) * 100}%`}}
+              ></div>
+            </div>
+          </div>
+          <span className="text-xs text-blue-600">
+            残り {5 - commentedSlides.length} スライド
+          </span>
+        </div>
+      )}
+      
       <div 
         ref={canvasRef} 
         className={`relative w-full aspect-video bg-gray-100 ${editable ? "cursor-crosshair" : "cursor-default"} overflow-hidden`} 
@@ -318,7 +358,8 @@ const SlideCanvas = ({ currentSlide, zoomLevel = 100, editable = false }: SlideC
                   style={{
                     left: `${comment.x}%`,
                     top: `${comment.y}%`,
-                    transform: "translate(-50%, -50%)"
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 20
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -335,7 +376,13 @@ const SlideCanvas = ({ currentSlide, zoomLevel = 100, editable = false }: SlideC
               <PopoverContent className="w-80 p-0 bg-white shadow-xl rounded-lg border-gray-200 z-50">
                 <div className={`px-4 py-3 ${comment.category ? `bg-${comment.category}-50` : 'bg-blue-50'} border-b border-blue-100`}>
                   <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium text-blue-900">{comment.author}</div>
+                    <div className="text-sm font-medium text-blue-900">
+                      {userType === "enterprise" && comment.author !== "企業ユーザー" ? (
+                        `Student #${comment.id % 5 + 1}`
+                      ) : (
+                        comment.author
+                      )}
+                    </div>
                     <Badge variant="secondary" className={`${getCategoryColor(comment.category)} text-white`}>
                       {getCategoryLabel(comment.category)}
                     </Badge>
@@ -362,14 +409,33 @@ const SlideCanvas = ({ currentSlide, zoomLevel = 100, editable = false }: SlideC
                       いいね！
                     </Button>
                     
-                    <Button
-                      variant={comment.resolved ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleToggleResolved(comment)}
-                      className={comment.resolved ? "bg-green-600" : "text-green-600 border-green-200"}
-                    >
-                      {comment.resolved ? "解決済み" : "解決する"}
-                    </Button>
+                    {(userType === "enterprise" || (userType === "student" && comment.author === "あなた")) && (
+                      <Button
+                        variant={comment.resolved ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleToggleResolved(comment)}
+                        className={comment.resolved ? "bg-green-600" : "text-green-600 border-green-200"}
+                      >
+                        {comment.resolved ? "解決済み" : "解決する"}
+                      </Button>
+                    )}
+                    
+                    {userType === "enterprise" && !comment.resolved && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-purple-200 text-purple-600"
+                        onClick={() => {
+                          toast({
+                            title: "再レビュー依頼を送信しました",
+                            description: "学生に修正依頼が通知されます",
+                            variant: "default"
+                          });
+                        }}
+                      >
+                        再レビュー依頼
+                      </Button>
+                    )}
                   </div>
                 </div>
               </PopoverContent>
@@ -392,7 +458,8 @@ const SlideCanvas = ({ currentSlide, zoomLevel = 100, editable = false }: SlideC
                   style={{
                     left: `${selectedComment.x}%`,
                     top: `${selectedComment.y}%`,
-                    transform: "translate(-50%, -50%)"
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 20
                   }}
                 >
                   <Plus className="h-4 w-4" />
@@ -475,6 +542,14 @@ const SlideCanvas = ({ currentSlide, zoomLevel = 100, editable = false }: SlideC
             <div className="absolute bottom-2 right-2 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg flex items-center gap-1">
               <Pencil className="h-3 w-3" />
               編集モード
+            </div>
+          )}
+          
+          {/* Notification badge for student UI when slide needs commenting */}
+          {userType === "student" && !commentedSlides.includes(currentSlide) && (
+            <div className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              コメント未投稿
             </div>
           )}
         </div>

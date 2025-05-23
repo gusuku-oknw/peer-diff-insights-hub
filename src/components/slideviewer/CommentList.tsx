@@ -31,6 +31,7 @@ interface Comment {
 
 interface CommentListProps {
   currentSlide: number;
+  userType?: "student" | "enterprise";
 }
 
 // Mock comments data
@@ -150,15 +151,21 @@ const getCategoryLabel = (category?: string) => {
   }
 };
 
-const CommentList = ({ currentSlide }: CommentListProps) => {
+const CommentList = ({ currentSlide, userType = "enterprise" }: CommentListProps) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [viewFilter, setViewFilter] = useState<"all" | "own" | "resolved" | "unresolved">("all");
   const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
+  const [showDiff, setShowDiff] = useState(false);
 
   // Load and filter comments
   useEffect(() => {
     // Get all comments for this slide
     let filtered = mockAllComments.filter(comment => comment.slideId === currentSlide);
+    
+    // For student users, show only their own comments by default
+    if (userType === "student" && viewFilter === "all") {
+      setViewFilter("own");
+    }
     
     // Apply view filter
     switch(viewFilter) {
@@ -181,7 +188,7 @@ const CommentList = ({ currentSlide }: CommentListProps) => {
     }
     
     setComments(filtered);
-  }, [currentSlide, viewFilter, categoryFilters]);
+  }, [currentSlide, viewFilter, categoryFilters, userType]);
 
   const handleLike = (commentId: number) => {
     setComments(prev => 
@@ -252,6 +259,18 @@ const CommentList = ({ currentSlide }: CommentListProps) => {
             </div>
           </div>
           
+          {/* 企業向け機能：差分表示切替 */}
+          {userType === "enterprise" && (
+            <Button
+              variant={showDiff ? "default" : "outline"}
+              size="sm"
+              className={showDiff ? "bg-blue-600" : ""}
+              onClick={() => setShowDiff(!showDiff)}
+            >
+              <span className="text-xs">差分表示 {showDiff ? "ON" : "OFF"}</span>
+            </Button>
+          )}
+          
           {/* Category filter dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -309,25 +328,32 @@ const CommentList = ({ currentSlide }: CommentListProps) => {
           </DropdownMenu>
         </div>
         
-        {/* View tabs */}
+        {/* View tabs - 学生ユーザーの場合はシンプル化 */}
         <Tabs value={viewFilter} onValueChange={(value) => setViewFilter(value as any)}>
-          <TabsList className="w-full grid grid-cols-4">
-            <TabsTrigger value="all" className="flex flex-col items-center py-1">
-              <span className="text-xs font-semibold">{allCommentsCount}</span>
-              <span className="text-xs">すべて</span>
-            </TabsTrigger>
+          <TabsList className={`w-full grid ${userType === "student" ? "grid-cols-2" : "grid-cols-4"}`}>
+            {userType === "enterprise" && (
+              <TabsTrigger value="all" className="flex flex-col items-center py-1">
+                <span className="text-xs font-semibold">{allCommentsCount}</span>
+                <span className="text-xs">すべて</span>
+              </TabsTrigger>
+            )}
+            
             <TabsTrigger value="own" className="flex flex-col items-center py-1">
               <span className="text-xs font-semibold">{ownCommentsCount}</span>
-              <span className="text-xs">自分</span>
+              <span className="text-xs">{userType === "student" ? "自分のコメント" : "自分"}</span>
             </TabsTrigger>
+            
             <TabsTrigger value="resolved" className="flex flex-col items-center py-1">
               <span className="text-xs font-semibold">{resolvedCommentsCount}</span>
               <span className="text-xs">解決済</span>
             </TabsTrigger>
-            <TabsTrigger value="unresolved" className="flex flex-col items-center py-1">
-              <span className="text-xs font-semibold">{unresolvedCommentsCount}</span>
-              <span className="text-xs">未解決</span>
-            </TabsTrigger>
+            
+            {userType === "enterprise" && (
+              <TabsTrigger value="unresolved" className="flex flex-col items-center py-1">
+                <span className="text-xs font-semibold">{unresolvedCommentsCount}</span>
+                <span className="text-xs">未解決</span>
+              </TabsTrigger>
+            )}
           </TabsList>
         </Tabs>
         
@@ -368,10 +394,12 @@ const CommentList = ({ currentSlide }: CommentListProps) => {
                 {/* Comment header */}
                 <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
                   <div className="font-medium text-sm flex items-center">
-                    {comment.isOwn ? (
-                      <span className="text-blue-600">{comment.author}</span>
+                    {userType === "enterprise" && !comment.isOwn ? (
+                      <span className="text-gray-700">Student #{comment.id % 5 + 1}</span>
                     ) : (
-                      comment.author
+                      <span className={comment.isOwn ? "text-blue-600" : ""}>
+                        {comment.author}
+                      </span>
                     )}
                     {comment.resolved && (
                       <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700 text-xs">
@@ -385,7 +413,7 @@ const CommentList = ({ currentSlide }: CommentListProps) => {
                   </div>
                 </div>
                 
-                {/* Comment content */}
+                {/* Comment content - 差分表示機能 */}
                 <div className="p-4">
                   {/* Category badge */}
                   {comment.category && (
@@ -397,7 +425,28 @@ const CommentList = ({ currentSlide }: CommentListProps) => {
                     </Badge>
                   )}
                   
-                  <p className="text-sm mb-4 leading-relaxed">{comment.text}</p>
+                  {/* 差分表示（企業ユーザーのみ） */}
+                  {userType === "enterprise" && showDiff && comment.category === "content" ? (
+                    <div className="text-sm mb-4 leading-relaxed bg-gray-50 p-2 border border-gray-200 rounded">
+                      {/* ここでは例として差分を色分けして表示 */}
+                      {comment.text.split(' ').map((word, i) => (
+                        <span 
+                          key={i} 
+                          className={
+                            word.includes('XX') || word.includes('YY') 
+                              ? 'bg-red-200 line-through' 
+                              : i > comment.text.split(' ').length - 5 
+                                ? 'bg-green-200' 
+                                : ''
+                          }
+                        >
+                          {word}{' '}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm mb-4 leading-relaxed">{comment.text}</p>
+                  )}
                   
                   {/* Comment actions */}
                   <div className="flex justify-between items-center">
@@ -440,14 +489,28 @@ const CommentList = ({ currentSlide }: CommentListProps) => {
                         </Button>
                       )}
                       
-                      <Button 
-                        variant={comment.resolved ? "default" : "outline"}
-                        size="sm"
-                        className={comment.resolved ? "bg-green-600" : "text-green-600 border-green-200"}
-                        onClick={() => toggleResolvedStatus(comment.id)}
-                      >
-                        {comment.resolved ? "解決済み" : "解決する"}
-                      </Button>
+                      {/* 企業ユーザーと、学生（自分のコメントのみ）がコメント解決可能 */}
+                      {(userType === "enterprise" || (userType === "student" && comment.isOwn)) && (
+                        <Button 
+                          variant={comment.resolved ? "default" : "outline"}
+                          size="sm"
+                          className={comment.resolved ? "bg-green-600" : "text-green-600 border-green-200"}
+                          onClick={() => toggleResolvedStatus(comment.id)}
+                        >
+                          {comment.resolved ? "解決済み" : "解決する"}
+                        </Button>
+                      )}
+                      
+                      {/* 企業ユーザーのみ表示する再レビュー依頼ボタン */}
+                      {userType === "enterprise" && !comment.resolved && !comment.isOwn && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-purple-200 text-purple-700"
+                        >
+                          再レビュー依頼
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -471,7 +534,7 @@ const CommentList = ({ currentSlide }: CommentListProps) => {
                 size="sm" 
                 className="mt-3" 
                 onClick={() => {
-                  setViewFilter("all");
+                  setViewFilter(userType === "student" ? "own" : "all");
                   setCategoryFilters([]);
                 }}
               >
@@ -479,6 +542,25 @@ const CommentList = ({ currentSlide }: CommentListProps) => {
               </Button>
             </>
           )}
+        </div>
+      )}
+      
+      {/* 学生向け進捗表示 */}
+      {userType === "student" && (
+        <div className="p-3 bg-blue-50 border-t border-blue-100 flex items-center justify-between">
+          <div>
+            <h4 className="text-xs font-medium text-blue-700">コメント完了状況</h4>
+            <p className="text-xs text-blue-600 mt-1">
+              {ownCommentsCount > 0 ? `${ownCommentsCount}件のコメントを投稿済み` : "まだコメントがありません"}
+            </p>
+          </div>
+          <Button 
+            variant="outline"
+            size="sm"
+            className="text-xs h-7 border-blue-200 text-blue-700"
+          >
+            レビュー完了
+          </Button>
         </div>
       )}
     </div>
