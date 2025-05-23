@@ -7,6 +7,8 @@ import { toast } from "sonner";
 
 export type UserRole = "student" | "business" | "debugger" | "guest";
 
+type DatabaseUserRole = "student" | "business" | "debugger";
+
 interface UserProfile {
   id: string;
   role: UserRole;
@@ -199,9 +201,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!user) return;
     
     try {
+      // Make sure we only update with valid database role types
+      if (role !== "student" && role !== "business" && role !== "debugger") {
+        throw new Error("Invalid role type for database update");
+      }
+      
       const { error } = await supabase
         .from("profiles")
-        .update({ role })
+        .update({ role: role as DatabaseUserRole })
         .eq("id", user.id);
         
       if (error) throw error;
