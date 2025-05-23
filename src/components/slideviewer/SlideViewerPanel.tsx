@@ -8,40 +8,77 @@ import SlideCanvas from "@/components/slideviewer/SlideCanvas";
 import SlideNotesPanel from "@/components/slideviewer/SlideNotesPanel";
 import CommentList from "@/components/slideviewer/CommentList";
 import AIReviewSummary from "@/components/slideviewer/AIReviewSummary";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SlideViewerPanelProps {
   currentSlide: number;
   zoom: number;
-  viewerMode: "notes" | "edit" | "review";
-  userType: "student" | "enterprise";
+  viewerMode: "presentation" | "edit" | "review";
   showPresenterNotes: boolean;
   isFullScreen: boolean;
   presentationStartTime: Date | null;
   presenterNotes: Record<number, string>;
   totalSlides: number;
   elapsedTime: string;
+  displayCount: number;
+  onSlideChange?: (slideNum: number) => void;
 }
 
 const SlideViewerPanel = ({
   currentSlide,
   zoom,
   viewerMode,
-  userType,
   showPresenterNotes,
   isFullScreen,
   presentationStartTime,
   presenterNotes,
   totalSlides,
-  elapsedTime
+  elapsedTime,
+  displayCount,
+  onSlideChange
 }: SlideViewerPanelProps) => {
-  return (
-    <ResizablePanelGroup direction="horizontal" className="h-full">
-      {/* Slide canvas */}
-      <ResizablePanel id="slide-canvas" order={1} className="overflow-hidden">
-        <div className={`flex-grow flex items-center justify-center h-full p-4 relative ${viewerMode === "notes" && isFullScreen ? "bg-gray-900" : "bg-gradient-to-br from-slate-50 to-gray-100"}`}>
-          <div className={`w-4/5 h-full flex items-center justify-center relative ${viewerMode === "notes" && isFullScreen ? "w-full max-w-none" : ""}`}>
-            {/* プレゼン時間表示（フルスクリーン時のみ） */}
-            {isFullScreen && presentationStartTime && (
+  const { userProfile } = useAuth();
+  const userType = userProfile?.role || "business";
+  
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isFullScreen) return;
+      
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        if (onSlideChange && currentSlide < totalSlides) {
+          onSlideChange(currentSlide + 1);
+        }
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        if (onSlideChange && currentSlide > 1) {
+          onSlideChange(currentSlide - 1);
+        }
+      } else if (e.key === 'Home') {
+        if (onSlideChange) {
+          onSlideChange(1);
+        }
+      } else if (e.key === 'End') {
+        if (onSlideChange) {
+          onSlideChange(totalSlides);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentSlide, totalSlides, isFullScreen, onSlideChange]);
+  
+  // If in full screen presentation mode, show a different layout
+  if (viewerMode === "presentation" && isFullScreen) {
+    // For dual display setup with presenter notes
+    if (displayCount >= 2 && showPresenterNotes) {
+      return (
+        <div className="flex h-full">
+          <div className="w-3/5 h-full flex items-center justify-center bg-gray-900 relative">
+            {/* Timer */}
+            {presentationStartTime && (
               <div className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full flex items-center space-x-2 z-30">
                 <Clock className="h-4 w-4" />
                 <span>{elapsedTime}</span>
@@ -51,15 +88,62 @@ const SlideViewerPanel = ({
             <SlideCanvas 
               currentSlide={currentSlide} 
               zoomLevel={zoom} 
+              editable={false}
+              userType={userType === "student" ? "student" : "enterprise"}
+            />
+          </div>
+          
+          <div className="w-2/5 h-full overflow-auto">
+            <SlideNotesPanel 
+              currentSlide={currentSlide}
+              totalSlides={totalSlides}
+              presenterNotes={presenterNotes}
+            />
+          </div>
+        </div>
+      );
+    }
+    
+    // For single display setup (no presenter notes)
+    return (
+      <div className="flex h-full items-center justify-center bg-gray-900 relative">
+        {/* Timer */}
+        {presentationStartTime && (
+          <div className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full flex items-center space-x-2 z-30">
+            <Clock className="h-4 w-4" />
+            <span>{elapsedTime}</span>
+          </div>
+        )}
+        
+        <SlideCanvas 
+          currentSlide={currentSlide} 
+          zoomLevel={zoom} 
+          editable={false}
+          userType={userType === "student" ? "student" : "enterprise"}
+        />
+      </div>
+    );
+  }
+
+  // Default layout (not in fullscreen presentation mode)
+  return (
+    <ResizablePanelGroup direction="horizontal" className="h-full">
+      {/* Slide canvas */}
+      <ResizablePanel id="slide-canvas" order={1} className="overflow-hidden">
+        <div className="flex-grow flex items-center justify-center h-full p-4 relative bg-gradient-to-br from-slate-50 to-gray-100">
+          <div className="w-4/5 h-full flex items-center justify-center relative">
+            <SlideCanvas 
+              currentSlide={currentSlide} 
+              zoomLevel={zoom} 
               editable={viewerMode === "edit"}
-              userType={userType}
+              userType={userType === "student" ? "student" : "enterprise"}
             />
           </div>
         </div>
       </ResizablePanel>
       
       {/* Notes sidebar (conditionally displayed) */}
-      {showPresenterNotes && viewerMode === "notes" && (
+      {showPresenterNotes && viewerMode === "presentation" && (
         <>
           <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />
           <ResizablePanel defaultSize={30} minSize={20} id="notes-sidebar" order={2} className="overflow-hidden">
@@ -90,7 +174,7 @@ const SlideViewerPanel = ({
       )}
       
       {/* AI要約パネル（企業ユーザーのみ） */}
-      {userType === "enterprise" && viewerMode === "review" && (
+      {userType !== "student" && viewerMode === "review" && (
         <Sheet>
           <SheetTrigger asChild>
             <Button

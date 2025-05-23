@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  ChevronLeft, ChevronRight, Book, Pencil, MessageCircle, 
+  ChevronLeft, ChevronRight, Presentation, Pencil, MessageCircle, 
   Share, Play, History, Settings, Save, Filter, ChevronRight as ChevronDown 
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -17,26 +17,25 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
-type ViewerMode = "notes" | "edit" | "review";
-type UserType = "student" | "enterprise";
+type ViewerMode = "presentation" | "edit" | "review";
 
 interface ViewerToolbarProps {
   currentSlide: number;
   totalSlides: number;
   zoom: number;
   viewerMode: ViewerMode;
-  userType: UserType;
   isFullScreen: boolean;
   leftSidebarOpen: boolean;
   showPresenterNotes: boolean;
   presentationStartTime: Date | null;
+  displayCount: number;
   
   onPreviousSlide: () => void;
   onNextSlide: () => void;
   onZoomChange: (newZoom: number) => void;
   onModeChange: (mode: ViewerMode) => void;
-  onUserTypeToggle: () => void;
   onLeftSidebarToggle: () => void;
   onFullScreenToggle: () => void;
   onShowPresenterNotesToggle: () => void;
@@ -49,16 +48,15 @@ const ViewerToolbar = ({
   totalSlides,
   zoom,
   viewerMode,
-  userType,
   isFullScreen,
   leftSidebarOpen,
   showPresenterNotes,
   presentationStartTime,
+  displayCount,
   onPreviousSlide,
   onNextSlide,
   onZoomChange,
   onModeChange,
-  onUserTypeToggle,
   onLeftSidebarToggle,
   onFullScreenToggle,
   onShowPresenterNotesToggle,
@@ -66,6 +64,7 @@ const ViewerToolbar = ({
   onSaveChanges
 }: ViewerToolbarProps) => {
   const { toast } = useToast();
+  const { userProfile } = useAuth();
   
   // Mode-specific UI elements
   const renderModeSpecificUI = () => {
@@ -103,7 +102,7 @@ const ViewerToolbar = ({
             </Button>
           </div>
         );
-      case "notes":
+      case "presentation":
         return (
           <div className="flex items-center space-x-3">
             <Button 
@@ -111,9 +110,13 @@ const ViewerToolbar = ({
               size="sm" 
               className="flex items-center gap-2" 
               onClick={onShowPresenterNotesToggle}
+              disabled={displayCount < 2 && isFullScreen}
             >
-              <Book className="h-4 w-4" />
-              <span className="hidden lg:inline">発表者メモ {showPresenterNotes ? '非表示' : '表示'}</span>
+              <Presentation className="h-4 w-4" />
+              <span className="hidden lg:inline">
+                発表者メモ {showPresenterNotes ? '非表示' : '表示'}
+                {displayCount < 2 && isFullScreen && " (2画面必要)"}
+              </span>
             </Button>
             <Button 
               variant="default" 
@@ -145,11 +148,11 @@ const ViewerToolbar = ({
             >
               <TabsList className="bg-slate-100 p-1">
                 <TabsTrigger 
-                  value="notes" 
+                  value="presentation" 
                   className="data-[state=active]:bg-blue-500 data-[state=active]:text-white"
                 >
-                  <Book className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">メモ・台本</span>
+                  <Presentation className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">プレゼンテーション</span>
                 </TabsTrigger>
                 
                 <TabsTrigger 
@@ -251,23 +254,6 @@ const ViewerToolbar = ({
               <span className="font-medium">+</span>
             </Button>
             
-            {/* User type switch for demo purposes */}
-            <div className="h-6 border-r border-gray-200 mx-2" />
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onUserTypeToggle}
-              className="flex items-center gap-2"
-            >
-              <span className="text-xs font-medium">
-                {userType === "student" ? "学生" : "企業"} UI
-              </span>
-              <Badge variant="secondary" className={userType === "student" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}>
-                {userType === "student" ? "学生" : "企業"}
-              </Badge>
-            </Button>
-            
             {/* Secondary tools dropdown (advanced features) */}
             <div className="h-6 border-r border-gray-200 mx-2" />
             
@@ -299,6 +285,13 @@ const ViewerToolbar = ({
           </div>
           
           <div className="flex items-center">
+            {/* Role indicator badge */}
+            {userProfile && (
+              <Badge variant="secondary" className={userProfile.role === "student" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800 mr-3"}>
+                {userProfile.role === "student" ? "学生" : "企業"}
+              </Badge>
+            )}
+            
             {/* Mode-specific controls on the right */}
             {renderModeSpecificUI()}
             
