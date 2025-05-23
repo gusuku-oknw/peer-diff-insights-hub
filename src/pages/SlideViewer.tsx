@@ -1,7 +1,9 @@
-import { useState } from "react";
+
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -13,11 +15,28 @@ import {
   Code, 
   FileText,
   Maximize,
+  Minimize2,
   Percent,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  Filter,
+  Calendar,
+  Download,
+  Settings,
+  Tag
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+} from "@/components/ui/sidebar";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SlideCanvas from "@/components/slideviewer/SlideCanvas";
@@ -30,6 +49,9 @@ const SlideViewer = () => {
   const [viewMode, setViewMode] = useState<"all" | "canvas">("canvas");
   const totalSlides = 5; // This would come from the actual slide data
   const [zoom, setZoom] = useState(100);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
+  const [defaultLayout, setDefaultLayout] = useState([20, 60, 20]);
 
   const handlePreviousSlide = () => {
     if (currentSlide > 1) {
@@ -66,6 +88,20 @@ const SlideViewer = () => {
       setZoom(zoom - 10);
     }
   };
+
+  const toggleFullScreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((e) => {
+        console.error(`Error attempting to enable full-screen mode: ${e.message}`);
+      });
+      setIsFullScreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        setIsFullScreen(false);
+      }
+    }
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -109,9 +145,16 @@ const SlideViewer = () => {
                     <FileText className="h-4 w-4 mr-1" />
                     XML Diff
                   </Button>
-                  <Button variant="ghost" size="sm">
-                    <Maximize className="h-4 w-4 mr-1" />
-                    全画面
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={toggleFullScreen}
+                  >
+                    {isFullScreen ? (
+                      <><Minimize2 className="h-4 w-4 mr-1" /> フルスクリーン終了</>
+                    ) : (
+                      <><Maximize className="h-4 w-4 mr-1" /> 全画面</>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -134,9 +177,15 @@ const SlideViewer = () => {
         </div>
         
         <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-          <div className="flex space-x-4">
+          <ResizablePanelGroup
+            direction="horizontal"
+            className="min-h-[70vh] rounded-lg border"
+            onLayout={(sizes) => {
+              setDefaultLayout(sizes);
+            }}
+          >
             {/* Left sidebar - slide thumbnails */}
-            <div className="hidden lg:block w-56 bg-white rounded-lg shadow-lg overflow-hidden">
+            <ResizablePanel defaultSize={defaultLayout[0]} minSize={15} maxSize={30} className="bg-white">
               <div className="p-4 border-b border-gray-200">
                 <h3 className="font-medium">スライド</h3>
               </div>
@@ -158,58 +207,130 @@ const SlideViewer = () => {
                   ))}
                 </div>
               </ScrollArea>
-            </div>
+            </ResizablePanel>
+            
+            <ResizableHandle withHandle />
             
             {/* Main content area */}
-            <div className="flex-1">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className={viewMode === "canvas" ? "lg:col-span-3" : "lg:col-span-2"}>
-                  <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <SlideCanvas currentSlide={currentSlide} zoomLevel={zoom} />
-                  </div>
-                </div>
-                
-                {viewMode === "all" && (
-                  <div className="lg:col-span-1">
-                    <div className="bg-white rounded-lg shadow-lg h-full">
-                      <div className="p-4 border-b flex items-center justify-between">
-                        <h2 className="font-semibold text-lg flex items-center gap-1">
-                          <MessageSquare className="h-5 w-5 text-blue-500" />
-                          コメント一覧
-                        </h2>
-                        <span className="text-sm text-gray-500">スライド {currentSlide}</span>
-                      </div>
-                      <ScrollArea className="h-[600px]">
-                        <CommentList slideId={currentSlide} />
-                      </ScrollArea>
-                    </div>
-                  </div>
-                )}
+            <ResizablePanel defaultSize={defaultLayout[1]} minSize={40}>
+              <div className="bg-white h-full">
+                <SlideCanvas currentSlide={currentSlide} zoomLevel={zoom} />
               </div>
+            </ResizablePanel>
+            
+            {rightSidebarOpen && (
+              <>
+                <ResizableHandle withHandle />
+                {/* Right sidebar - Additional content */}
+                <ResizablePanel defaultSize={defaultLayout[2]} minSize={15} maxSize={30} className="bg-white">
+                  <Tabs defaultValue="comments">
+                    <TabsList className="w-full grid grid-cols-3">
+                      <TabsTrigger value="comments" className="text-xs">
+                        <MessageSquare className="h-4 w-4 mr-1" />
+                        コメント
+                      </TabsTrigger>
+                      <TabsTrigger value="metadata" className="text-xs">
+                        <Tag className="h-4 w-4 mr-1" />
+                        メタデータ
+                      </TabsTrigger>
+                      <TabsTrigger value="settings" className="text-xs">
+                        <Settings className="h-4 w-4 mr-1" />
+                        設定
+                      </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="comments" className="h-[65vh] overflow-auto">
+                      <CommentList slideId={currentSlide} />
+                    </TabsContent>
+                    <TabsContent value="metadata" className="h-[65vh] p-4">
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-sm font-semibold mb-2">スライド情報</h3>
+                          <div className="text-sm space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">作成日:</span>
+                              <span>2025年5月15日</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">最終更新:</span>
+                              <span>2025年5月22日</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">作成者:</span>
+                              <span>佐藤太郎</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold mb-2">タグ</h3>
+                          <div className="flex flex-wrap gap-2">
+                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">プレゼンテーション</span>
+                            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">四半期報告</span>
+                            <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">財務</span>
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="settings" className="h-[65vh] p-4">
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-sm font-semibold mb-2">表示設定</h3>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">高コントラストモード</span>
+                              <Switch />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">グリッド表示</span>
+                              <Switch />
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">自動再生</span>
+                              <Switch />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </ResizablePanel>
+              </>
+            )}
+          </ResizablePanelGroup>
+        </div>
+        
+        {/* Comment view toggle switch */}
+        <div className="fixed right-4 top-24">
+          <div className="bg-white rounded-lg shadow-md p-3 flex flex-col items-center gap-2">
+            <div className="flex items-center space-x-2">
+              <Switch 
+                id="comment-mode"
+                checked={viewMode === "all"}
+                onCheckedChange={(checked) => setViewMode(checked ? "all" : "canvas")}
+              />
+              <span className="text-sm font-medium">
+                {viewMode === "all" ? (
+                  <MessageSquare className="h-4 w-4 inline mr-1" />
+                ) : (
+                  <Eye className="h-4 w-4 inline mr-1" />
+                )}
+                <span className="hidden lg:inline">
+                  {viewMode === "all" ? "コメント表示" : "スライドのみ"}
+                </span>
+              </span>
             </div>
             
-            {/* Right sidebar - toggle switch */}
-            <div className="fixed right-4 top-24">
-              <div className="bg-white rounded-lg shadow-md p-3 flex flex-col items-center gap-2">
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="comment-mode"
-                    checked={viewMode === "all"}
-                    onCheckedChange={(checked) => setViewMode(checked ? "all" : "canvas")}
-                  />
-                  <span className="text-sm font-medium">
-                    {viewMode === "all" ? (
-                      <MessageSquare className="h-4 w-4 inline mr-1" />
-                    ) : (
-                      <Eye className="h-4 w-4 inline mr-1" />
-                    )}
-                    <span className="hidden lg:inline">
-                      {viewMode === "all" ? "コメント表示" : "スライドのみ"}
-                    </span>
-                  </span>
-                </div>
-              </div>
-            </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full"
+              onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+            >
+              {rightSidebarOpen ? (
+                <><ChevronRight className="h-4 w-4" /> サイドバー</>
+              ) : (
+                <><ChevronLeft className="h-4 w-4" /> サイドバー</>
+              )}
+            </Button>
           </div>
         </div>
       </div>
