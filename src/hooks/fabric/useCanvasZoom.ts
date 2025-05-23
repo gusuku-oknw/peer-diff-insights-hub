@@ -21,20 +21,28 @@ export const useCanvasZoom = ({
     try {
       const scaleFactor = zoomLevel / 100;
       
-      // 座標の一貫性を保つために内部キャンバスサイズを一定に保つ
+      // 一貫したサイズを維持する
       const originalWidth = 1600;
       const originalHeight = 900;
       
-      // 視覚的なスケーリングのためにキャンバスラッパーにCSS変換を適用
-      if (canvas.wrapperEl) {
-        canvas.wrapperEl.style.transform = `scale(${scaleFactor})`;
-        canvas.wrapperEl.style.transformOrigin = 'top left';
-        canvas.wrapperEl.style.width = `${originalWidth}px`;
-        canvas.wrapperEl.style.height = `${originalHeight}px`;
+      // キャンバス自体のCSSトランスフォームは行わず、外部のコンテナでスケーリングするアプローチに統一
+      if (containerRef.current) {
+        // キャンバスそのものは固定サイズを維持する
+        canvas.setWidth(originalWidth);
+        canvas.setHeight(originalHeight);
         
-        // スケーリングされたキャンバスに合わせてコンテナサイズを更新
-        containerRef.current.style.width = `${originalWidth * scaleFactor}px`;
-        containerRef.current.style.height = `${originalHeight * scaleFactor}px`;
+        // キャンバスラッパー要素が持つトランスフォームをクリア
+        if (canvas.wrapperEl) {
+          canvas.wrapperEl.style.transform = '';
+          canvas.wrapperEl.style.width = `${originalWidth}px`;
+          canvas.wrapperEl.style.height = `${originalHeight}px`;
+        }
+        
+        // 親コンテナでスケーリング
+        containerRef.current.style.transform = `scale(${scaleFactor})`;
+        containerRef.current.style.transformOrigin = 'center center';
+        containerRef.current.style.width = `${originalWidth}px`;
+        containerRef.current.style.height = `${originalHeight}px`;
       }
       
       canvas.renderAll();

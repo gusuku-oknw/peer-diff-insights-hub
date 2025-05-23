@@ -1,10 +1,9 @@
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useRef } from "react";
 import { useSlideStore } from "@/stores/slideStore";
 import { useAuth } from "@/contexts/AuthContext";
 import useFabricCanvas from "@/hooks/useFabricCanvas";
-import { SlideElement } from "@/stores/slideStore";
-import { CustomFabricObject } from '@/components/slideviewer/editor/FabricObjects';
+import { CustomFabricObject } from '@/utils/types/canvas.types';
 
 interface FabricSlideCanvasProps {
   currentSlide: number;
@@ -20,132 +19,58 @@ const FabricSlideCanvas = ({
   userType = "enterprise" 
 }: FabricSlideCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { userProfile } = useAuth();
   const slides = useSlideStore(state => state.slides);
   const updateElement = useSlideStore(state => state.updateElement);
-  const [canvasReady, setCanvasReady] = useState(false);
-  const [loadingError, setLoadingError] = useState<string | null>(null);
-  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
-  const renderAttemptRef = useRef(0);
-
-  // Use our custom hook for canvas management
-  const { canvas, initialized, renderElements } = useFabricCanvas({
+  
+  // 現在のスライドの要素を取得
+  const currentSlideData = slides.find(slide => slide.id === currentSlide);
+  const elements = currentSlideData?.elements || [];
+  
+  // キャンバスフックを使用
+  const { canvasReady, loadingError } = useFabricCanvas({
     canvasRef,
     currentSlide,
     zoomLevel,
     editable,
+    elements,
     onUpdateElement: (elementId, updates) => {
       updateElement(currentSlide, elementId, updates);
     },
-    onSelectElement: (obj) => {
-      if (obj && obj.customData?.id) {
-        setSelectedElementId(obj.customData.id);
-      } else {
-        setSelectedElementId(null);
-      }
+    onSelectElement: (element: CustomFabricObject | null) => {
+      // 必要に応じて選択ハンドラを実装
     }
   });
 
-  // Mark canvas as ready when initialized
-  useEffect(() => {
-    if (initialized && canvas) {
-      setCanvasReady(true);
-      setLoadingError(null);
-    }
-  }, [initialized, canvas]);
-
-  // Clean function to safely access slide data
-  const getCurrentSlideData = useCallback(() => {
-    return slides.find(slide => slide.id === currentSlide);
-  }, [slides, currentSlide]);
-
-  // Load slide content when current slide changes or canvas is initialized
-  useEffect(() => {
-    if (!canvas || !initialized || !canvasReady) return;
-
-    const maxRenderAttempts = 3;
-    renderAttemptRef.current += 1;
-
-    console.log("Loading slide content for slide", currentSlide);
-    
-    try {
-      // Get current slide data
-      const slideData = getCurrentSlideData();
-      if (!slideData) {
-        console.log("No slide data found for slide", currentSlide);
-        return;
-      }
-
-      // Render the elements
-      renderElements(slideData.elements || []);
-      
-      // Reset the render attempt counter on success
-      renderAttemptRef.current = 0;
-      setLoadingError(null);
-    } catch (error) {
-      console.error("Error rendering slide:", error);
-      
-      // Set error state if max render attempts exceeded
-      if (renderAttemptRef.current >= maxRenderAttempts) {
-        setLoadingError("スライドの読み込み中にエラーが発生しました");
-      }
-    }
-  }, [currentSlide, initialized, canvasReady, canvas, renderElements, getCurrentSlideData]);
-
-  // Container style with CSS scaling instead of dimension changes
-  const containerStyle = {
-    position: 'relative' as const,
-    width: '100%',
-    maxWidth: '1200px',
-    aspectRatio: '16 / 9',
-    display: 'flex',
-    justifyContent: 'center' as const,
-    alignItems: 'center' as const,
-    overflow: 'hidden' as const,
-  };
-
-  // Canvas wrapper style with CSS transform for zoom
-  const canvasWrapperStyle = {
-    position: 'relative' as const,
-    width: '100%',
-    height: '100%',
-    transformOrigin: 'center center',
-  };
-
   return (
     <div className="relative bg-white rounded-lg shadow-md overflow-hidden">
-      <div 
-        className="relative w-full aspect-video bg-gray-100 overflow-hidden flex justify-center items-center p-2"
-      >
-        <div style={containerStyle} className="drop-shadow-xl">
-          <div style={canvasWrapperStyle}>
-            <canvas ref={canvasRef} />
-            
-            {/* Loading indicator */}
-            {!canvasReady && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75">
-                <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                  <p className="mt-4 text-blue-600 font-medium">キャンバスを読み込み中...</p>
-                </div>
+      <div className="relative w-full aspect-video bg-gray-100 overflow-hidden flex justify-center items-center p-2">
+        <div className="relative w-full h-full flex justify-center items-center">
+          <canvas ref={canvasRef} className="absolute" />
+          
+          {/* ローディングインジケータ */}
+          {!canvasReady && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="mt-4 text-blue-600 font-medium">キャンバスを読み込み中...</p>
               </div>
-            )}
-            
-            {/* Error message */}
-            {loadingError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-red-50 bg-opacity-75">
-                <div className="flex flex-col items-center">
-                  <p className="mt-4 text-red-600 font-medium">{loadingError}</p>
-                  <button 
-                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                    onClick={() => window.location.reload()}
-                  >
-                    再読み込み
-                  </button>
-                </div>
+            </div>
+          )}
+          
+          {/* エラー表示 */}
+          {loadingError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-red-50 bg-opacity-75 z-10">
+              <div className="flex flex-col items-center">
+                <p className="mt-4 text-red-600 font-medium">{loadingError}</p>
+                <button 
+                  className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                  onClick={() => window.location.reload()}
+                >
+                  再読み込み
+                </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
