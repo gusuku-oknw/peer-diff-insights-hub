@@ -40,7 +40,7 @@ export const useCanvas = ({
   // モード変更を検出して強制的に再レンダリング
   useEffect(() => {
     if (prevEditableRef.current !== editable) {
-      console.log(`Mode changed in useCanvas: ${prevEditableRef.current} -> ${editable}, forcing render`);
+      console.log(`Mode changed in useCanvas: ${prevEditableRef.current} -> ${editable}`);
       prevEditableRef.current = editable;
       setForceRender(prev => prev + 1);
     }
@@ -58,7 +58,7 @@ export const useCanvas = ({
     }
   }, [onSelectElement]);
 
-  // キャンバス初期化フック
+  // キャンバス初期化フック - editable と forceRender をモード変更検出のために依存関係に追加
   const { canvas, initialized, containerRef } = useCanvasInitialization({
     canvasRef,
     editable,
@@ -92,12 +92,13 @@ export const useCanvas = ({
   // キャンバスが初期化されたらready状態にする
   useEffect(() => {
     if (initialized && canvas) {
+      console.log(`Canvas is now ready - editable: ${editable}, slide: ${currentSlide}`);
       setCanvasReady(true);
       setLoadingError(null);
     } else {
       setCanvasReady(false);
     }
-  }, [initialized, canvas]);
+  }, [initialized, canvas, editable, currentSlide]);
 
   // スライドが変更されたときや、モードが変更されたときに要素をレンダリング
   useEffect(() => {
@@ -113,13 +114,12 @@ export const useCanvas = ({
     // 要素の変更検出
     const elementsChanged = JSON.stringify(previousElementsRef.current) !== JSON.stringify(elements);
     previousElementsRef.current = [...elements];
-
+    
     // モード変更、スライド変更、要素変更があった場合のみレンダリング
     if (slideChanged || elementsChanged || forceRender > 0) {
       renderAttemptRef.current += 1;
-      const maxRenderAttempts = 3;
-
-      console.log(`Rendering slide content for slide ${currentSlide}, attempt ${renderAttemptRef.current}, editable: ${editable}`);
+      
+      console.log(`Rendering slide ${currentSlide} content - editable: ${editable}, forceRender: ${forceRender}, attempt: ${renderAttemptRef.current}`);
       
       try {
         // キャンバスをクリア
@@ -130,6 +130,7 @@ export const useCanvas = ({
         
         // 強制的に再描画
         canvas.renderAll();
+        console.log(`Slide ${currentSlide} rendered successfully with ${elements.length} elements`);
         
         // 成功したらレンダリング試行カウンタをリセット
         renderAttemptRef.current = 0;
@@ -137,8 +138,8 @@ export const useCanvas = ({
       } catch (error) {
         console.error("Error rendering slide:", error);
         
-        // 最大試行回数を超えた場合はエラー状態に設定
-        if (renderAttemptRef.current >= maxRenderAttempts) {
+        // 3回試行してもエラーの場合はエラー状態に設定
+        if (renderAttemptRef.current >= 3) {
           setLoadingError("スライドの読み込み中にエラーが発生しました");
         }
       }

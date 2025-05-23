@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import FabricSlideCanvas from "@/components/slideviewer/canvas/FabricSlideCanvas";
+import FabricSlideCanvas from "@/components/slideviewer/FabricSlideCanvas";
 import EditToolbar from "@/components/slideviewer/editor/EditToolbar";
 import EditSidebar from "@/components/slideviewer/editor/EditSidebar";
 import PresentationControls from "@/components/slideviewer/panel/PresentationControls";
@@ -38,19 +38,21 @@ const SlideViewerPanel = ({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showDragTip, setShowDragTip] = useState(true);
   
-  // コンポーネントのレンダリングキー（モード変更時に強制的に再レンダリング）
-  const [renderKey, setRenderKey] = useState(0);
-  
   const { handlePreviousSlide, handleNextSlide } = useSlideNavigation({
     totalSlides
   });
   
-  // モードが変更されたときに強制的に再レンダリング
+  // Dismiss drag tip after a few seconds
   useEffect(() => {
-    setRenderKey(prev => prev + 1);
-    console.log(`ViewerMode changed to: ${viewerMode}, forcing re-render`);
-  }, [viewerMode]);
-  
+    if (showDragTip) {
+      const timer = setTimeout(() => {
+        setShowDragTip(false);
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [showDragTip]);
+
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -75,26 +77,13 @@ const SlideViewerPanel = ({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentSlide, totalSlides, onSlideChange, viewerMode, isFullScreen]);
-  
-  // Dismiss drag tip after a few seconds
-  useEffect(() => {
-    if (showDragTip) {
-      const timer = setTimeout(() => {
-        setShowDragTip(false);
-      }, 5000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [showDragTip]);
 
   // サイドバーの切り替え
   const toggleSidebar = () => {
     setSidebarOpen(prev => !prev);
   };
 
-  // 右側のサイドバーを表示すべきか判断
-  const shouldShowNotes = showPresenterNotes;
-  const shouldShowReviewPanel = viewerMode === "review";
+  console.log(`Rendering SlideViewerPanel: mode=${viewerMode}, slide=${currentSlide}, showNotes=${showPresenterNotes}`);
   
   return (
     <div className="flex h-full">
@@ -116,7 +105,7 @@ const SlideViewerPanel = ({
         <div className="flex flex-1 relative overflow-hidden">
           <div className="flex-1 flex items-center justify-center bg-slate-100 h-full">
             <FabricSlideCanvas
-              key={`slide-canvas-${renderKey}-${viewerMode}-${currentSlide}`}
+              key={`slide-canvas-${viewerMode}-${currentSlide}`}
               currentSlide={currentSlide}
               zoomLevel={zoom}
               editable={viewerMode === "edit"}
@@ -144,16 +133,14 @@ const SlideViewerPanel = ({
             )}
           </div>
           
-          {/* Right sidebar - 条件を調整 */}
-          {(shouldShowNotes || shouldShowReviewPanel) && (
-            <RightSidebar
-              shouldShowNotes={shouldShowNotes}
-              shouldShowReviewPanel={shouldShowReviewPanel}
-              currentSlide={currentSlide}
-              totalSlides={totalSlides}
-              presenterNotes={presenterNotes}
-            />
-          )}
+          {/* Right sidebar */}
+          <RightSidebar
+            shouldShowNotes={showPresenterNotes}
+            shouldShowReviewPanel={viewerMode === "review"}
+            currentSlide={currentSlide}
+            totalSlides={totalSlides}
+            presenterNotes={presenterNotes}
+          />
         </div>
       </div>
     </div>

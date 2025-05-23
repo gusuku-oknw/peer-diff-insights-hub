@@ -1,5 +1,5 @@
 
-import React, { useRef, useCallback, useMemo, memo, useEffect, useState } from "react";
+import React, { useRef, useCallback, useMemo, useState } from "react";
 import { useSlideStore } from "@/stores/slideStore";
 import { useCanvas } from "@/hooks/fabric/useCanvas";
 import { CustomFabricObject } from '@/utils/types/canvas.types';
@@ -17,13 +17,12 @@ const FabricSlideCanvas = ({
   editable = false,
   userType = "enterprise" 
 }: FabricSlideCanvasProps) => {
-  console.log(`Rendering FabricSlideCanvas - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Editable: ${editable}`);
+  console.log(`Rendering FabricSlideCanvas - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Editable: ${editable}, Type: ${userType}`);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const slides = useSlideStore(state => state.slides);
   const updateElement = useSlideStore(state => state.updateElement);
-  const [renderKey, setRenderKey] = useState(0);
   
   // 現在のスライドの要素を取得
   const currentSlideData = useMemo(() => {
@@ -33,12 +32,6 @@ const FabricSlideCanvas = ({
   const elements = useMemo(() => {
     return currentSlideData?.elements || [];
   }, [currentSlideData]);
-
-  // モードが変更された場合は強制的に再レンダリング
-  useEffect(() => {
-    setRenderKey(prevKey => prevKey + 1);
-    console.log(`FabricSlideCanvas mode changed, forcing re-render. Editable: ${editable}`);
-  }, [editable]);
 
   // 要素更新ハンドラ
   const handleUpdateElement = useCallback((elementId: string, updates: any) => {
@@ -52,7 +45,7 @@ const FabricSlideCanvas = ({
     }
   }, []);
   
-  // useCanvas フックを使用したキャンバス管理 (renderKeyを依存関係に追加)
+  // useCanvas フックを使用したキャンバス管理
   const { canvasReady, loadingError } = useCanvas({
     canvasRef,
     currentSlide,
@@ -78,7 +71,7 @@ const FabricSlideCanvas = ({
         ref={canvasContainerRef} 
         className="will-change-transform"
         style={containerStyle}
-        key={`container-${renderKey}`}
+        data-mode={editable ? "edit" : "view"}
       >
         <canvas 
           ref={canvasRef} 
@@ -86,7 +79,6 @@ const FabricSlideCanvas = ({
           data-testid="fabric-canvas"
           data-editable={editable ? "true" : "false"}
           data-slide={currentSlide}
-          key={`canvas-${renderKey}`}
         />
         
         {!canvasReady && <CanvasLoadingIndicator />}
@@ -121,8 +113,7 @@ const CanvasErrorDisplay = ({ error }: { error: string }) => (
   </div>
 );
 
-// メモ化条件を修正
-export default memo(FabricSlideCanvas, (prevProps, nextProps) => {
+export default React.memo(FabricSlideCanvas, (prevProps, nextProps) => {
   // 一貫性のために変数に格納
   const slideUnchanged = prevProps.currentSlide === nextProps.currentSlide;
   const zoomUnchanged = prevProps.zoomLevel === nextProps.zoomLevel;

@@ -17,7 +17,10 @@ const RightSidebar = ({
   totalSlides,
   presenterNotes,
 }: RightSidebarProps) => {
-  if (!shouldShowNotes && !shouldShowReviewPanel) {
+  // サイドバーを表示するかどうかをチェック
+  const shouldDisplay = shouldShowNotes || shouldShowReviewPanel;
+  
+  if (!shouldDisplay) {
     return null;
   }
 
