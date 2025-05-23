@@ -187,7 +187,7 @@ const SlideViewer = () => {
             zoom={zoom}
             viewerMode={viewerMode}
             leftSidebarOpen={leftSidebarOpen}
-            showPresenterNotes={false}
+            showPresenterNotes={showPresenterNotes}
             isFullScreen={isFullScreen}
             presentationStartTime={presentationStartTime}
             presenterNotes={presenterNotes}

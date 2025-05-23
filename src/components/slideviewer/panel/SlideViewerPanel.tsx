@@ -140,14 +140,16 @@ const SlideViewerPanel = ({
             )}
           </div>
           
-          {/* Right sidebar */}
-          <SidePanel
-            shouldShowNotes={showPresenterNotes}
-            shouldShowReviewPanel={viewerMode === "review"}
-            currentSlide={currentSlide}
-            totalSlides={totalSlides}
-            presenterNotes={presenterNotes}
-          />
+          {/* Right sidebar - 表示条件を厳格にチェック */}
+          {(showPresenterNotes || viewerMode === "review") && (
+            <SidePanel
+              shouldShowNotes={showPresenterNotes}
+              shouldShowReviewPanel={viewerMode === "review"}
+              currentSlide={currentSlide}
+              totalSlides={totalSlides}
+              presenterNotes={presenterNotes}
+            />
+          )}
         </div>
       </div>
     </div>
