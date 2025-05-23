@@ -1,15 +1,38 @@
 
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut, UserCircle } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, userProfile, signOut, isLoading } = useAuth();
   
   const isSlideViewerRoute = location.pathname === "/slides";
   const isDashboardRoute = location.pathname === "/dashboard";
+  const isAuthRoute = location.pathname === "/auth";
+  
+  // Don't show navigation on auth pages
+  if (isAuthRoute) return null;
+  
+  const userDisplayName = userProfile?.display_name || user?.email?.split('@')[0] || 'User';
+  const userRole = userProfile?.role || 'guest';
+  
+  const UserAvatar = () => (
+    <div className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-medium">
+      {userDisplayName.charAt(0).toUpperCase()}
+    </div>
+  );
   
   return <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,25 +79,37 @@ const Navigation = () => {
                 </Link>
               )}
               
-              {isDashboardRoute && (
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative rounded-full p-0 h-8 w-8">
+                      <UserAvatar />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="font-medium">{userDisplayName}</div>
+                      <div className="text-xs text-muted-foreground">{user.email}</div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-xs px-2 py-1 rounded-sm">
+                      ロール: <span className="ml-1 font-medium capitalize">{userRole}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>ログアウト</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
                 <>
-                  <Button variant="ghost" className="text-gray-700">
-                    ログイン
-                  </Button>
-                  <Link to="/demo">
-                    <Button className="gradient-primary text-white hover:opacity-90">
-                      無料で始める
+                  <Link to="/auth">
+                    <Button variant="ghost" className="text-gray-700">
+                      ログイン
                     </Button>
                   </Link>
-                </>
-              )}
-              
-              {!isSlideViewerRoute && !isDashboardRoute && (
-                <>
-                  <Button variant="ghost" className="text-gray-700">
-                    ログイン
-                  </Button>
-                  <Link to="/demo">
+                  <Link to="/auth">
                     <Button className="gradient-primary text-white hover:opacity-90">
                       無料で始める
                     </Button>
@@ -122,12 +157,32 @@ const Navigation = () => {
                 </Link>
               )}
               
-              {(isDashboardRoute || !isSlideViewerRoute) && (
+              {user ? (
                 <>
-                  <Button variant="ghost" className="w-full justify-start">
-                    ログイン
+                  <div className="flex items-center space-x-3 px-3 py-2">
+                    <UserAvatar />
+                    <div>
+                      <p className="font-medium text-gray-800">{userDisplayName}</p>
+                      <p className="text-xs text-gray-500">ロール: {userRole}</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline"
+                    className="w-full justify-start text-red-600 border-red-200"
+                    onClick={() => signOut()}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    ログアウト
                   </Button>
-                  <Link to="/demo">
+                </>
+              ) : (
+                <>
+                  <Link to="/auth">
+                    <Button variant="ghost" className="w-full justify-start">
+                      ログイン
+                    </Button>
+                  </Link>
+                  <Link to="/auth">
                     <Button className="w-full gradient-primary text-white">
                       無料で始める
                     </Button>
