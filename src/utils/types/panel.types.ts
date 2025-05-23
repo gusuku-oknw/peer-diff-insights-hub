@@ -6,6 +6,7 @@ export interface BasePanelProps {
   currentSlide: number;
   totalSlides: number;
   panelWidth?: number;
+  panelHeight?: number;
   isNarrow?: boolean;
   isVeryNarrow?: boolean;
 }
@@ -49,6 +50,7 @@ export interface PanelLayoutConfig {
 // Panel responsive states
 export interface PanelResponsiveState {
   panelWidth: number;
+  panelHeight: number;
   isNarrow: boolean;
   isVeryNarrow: boolean;
   breakpoints: {

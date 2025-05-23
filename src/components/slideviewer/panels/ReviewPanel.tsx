@@ -19,6 +19,7 @@ interface ReviewPanelProps {
   currentSlide: number;
   totalSlides: number;
   panelWidth?: number;
+  panelHeight?: number;
   isNarrow?: boolean;
   isVeryNarrow?: boolean;
 }
@@ -117,11 +118,18 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
   currentSlide, 
   totalSlides,
   panelWidth = 0,
+  panelHeight = 0,
   isNarrow = false,
   isVeryNarrow = false
 }) => {
   const reviews = mockReviews[currentSlide as keyof typeof mockReviews] || [];
   const [selectedReview, setSelectedReview] = useState<number | null>(null);
+  
+  // Dynamic sizing based on actual panel dimensions
+  const isExtremelyNarrow = panelWidth > 0 && panelWidth < 150;
+  const isShort = panelHeight > 0 && panelHeight < 400;
+  
+  console.log('ReviewPanel dimensions:', { panelWidth, panelHeight, isNarrow, isVeryNarrow, isExtremelyNarrow, isShort });
   
   // Review completion status
   const completedSlides = Object.keys(mockReviews).filter(slideId => {
@@ -133,161 +141,173 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
   const completionPercentage = Math.round((completedSlides / totalSlides) * 100);
 
   return (
-    <div className="h-full flex flex-col">
-      <div className={`${isVeryNarrow ? 'p-2' : 'p-4'} border-b border-gray-200`}>
-        <h2 className={`${isVeryNarrow ? 'text-sm' : 'text-lg'} font-semibold text-gray-800 flex items-center`}>
-          <MessageSquare className={`${isVeryNarrow ? 'h-4 w-4 mr-1' : 'h-5 w-5 mr-2'} text-blue-600`} />
-          {isVeryNarrow ? 'レビュー' : 'レビュー管理'}
+    <div className="h-full flex flex-col min-w-0">
+      <div className={`${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-4'} border-b border-gray-200 flex-shrink-0`}>
+        <h2 className={`${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-sm' : 'text-lg'} font-semibold text-gray-800 flex items-center min-w-0`}>
+          <MessageSquare className={`${isExtremelyNarrow ? 'h-3 w-3 mr-1' : isVeryNarrow ? 'h-4 w-4 mr-1' : 'h-5 w-5 mr-2'} text-blue-600 flex-shrink-0`} />
+          <span className="truncate">{isExtremelyNarrow ? 'レビュー' : isVeryNarrow ? 'レビュー' : 'レビュー管理'}</span>
         </h2>
-        <p className={`${isVeryNarrow ? 'text-xs' : 'text-sm'} text-gray-600`}>
-          {isVeryNarrow ? `${currentSlide}/${totalSlides}` : `現在のスライド: ${currentSlide} / ${totalSlides}`}
+        <p className={`${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-xs' : 'text-sm'} text-gray-600 truncate`}>
+          {isExtremelyNarrow ? `${currentSlide}/${totalSlides}` : isVeryNarrow ? `${currentSlide}/${totalSlides}` : `現在のスライド: ${currentSlide} / ${totalSlides}`}
         </p>
         
-        <div className={`${isVeryNarrow ? 'mt-2' : 'mt-3'} bg-blue-50 rounded-md ${isVeryNarrow ? 'p-2' : 'p-3'}`}>
-          <div className="flex items-center justify-between mb-1">
-            <span className={`${isVeryNarrow ? 'text-xs' : 'text-xs'} text-blue-700`}>
-              {isVeryNarrow ? '進捗' : 'レビュー進捗状況'}
-            </span>
-            <span className={`${isVeryNarrow ? 'text-xs' : 'text-xs'} font-medium text-blue-800`}>{completionPercentage}%</span>
+        {!isShort && (
+          <div className={`${isVeryNarrow ? 'mt-1' : isNarrow ? 'mt-2' : 'mt-3'} bg-blue-50 rounded-md ${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'}`}>
+            <div className="flex items-center justify-between mb-1">
+              <span className={`${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-xs' : 'text-xs'} text-blue-700`}>
+                {isExtremelyNarrow ? '進捗' : isVeryNarrow ? '進捗' : 'レビュー進捗状況'}
+              </span>
+              <span className={`${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-xs' : 'text-xs'} font-medium text-blue-800`}>{completionPercentage}%</span>
+            </div>
+            <div className="w-full bg-blue-200 rounded-full h-2">
+              <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${completionPercentage}%` }}></div>
+            </div>
           </div>
-          <div className="w-full bg-blue-200 rounded-full h-2">
-            <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${completionPercentage}%` }}></div>
-          </div>
-        </div>
+        )}
       </div>
       
-      <Tabs defaultValue="reviews" className="flex-grow flex flex-col">
-        <TabsList className={`${isVeryNarrow ? 'p-1' : 'p-2'} justify-center border-b border-gray-100`}>
-          <TabsTrigger value="reviews" className="flex gap-1 items-center text-xs">
-            <MessageSquare className="h-4 w-4" />
-            {!isVeryNarrow && <span>レビュー</span>}
+      <Tabs defaultValue="reviews" className="flex-grow flex flex-col min-h-0">
+        <TabsList className={`${isVeryNarrow ? 'p-0.5' : isNarrow ? 'p-1' : 'p-2'} justify-center border-b border-gray-100 flex-shrink-0`}>
+          <TabsTrigger value="reviews" className="flex gap-1 items-center text-xs min-w-0">
+            <MessageSquare className={`${isExtremelyNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0`} />
+            {!isExtremelyNarrow && <span className="truncate">レビュー</span>}
           </TabsTrigger>
-          <TabsTrigger value="summary" className="flex gap-1 items-center text-xs">
-            <BarChart4 className="h-4 w-4" />
-            {!isVeryNarrow && <span>サマリー</span>}
+          <TabsTrigger value="summary" className="flex gap-1 items-center text-xs min-w-0">
+            <BarChart4 className={`${isExtremelyNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0`} />
+            {!isExtremelyNarrow && <span className="truncate">サマリー</span>}
           </TabsTrigger>
-          <TabsTrigger value="ai-summary" className="flex gap-1 items-center text-xs">
-            <Star className="h-4 w-4" />
-            {!isVeryNarrow && <span>AI要約</span>}
+          <TabsTrigger value="ai-summary" className="flex gap-1 items-center text-xs min-w-0">
+            <Star className={`${isExtremelyNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0`} />
+            {!isExtremelyNarrow && <span className="truncate">AI要約</span>}
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="reviews" className="flex-grow p-0 m-0">
+        <TabsContent value="reviews" className="flex-grow p-0 m-0 overflow-hidden">
           <ScrollArea className="h-full">
             {reviews.length > 0 ? (
-              <div className={`${isVeryNarrow ? 'p-2 space-y-2' : 'p-4 space-y-4'}`}>
+              <div className={`${isVeryNarrow ? 'p-1 space-y-1' : isNarrow ? 'p-2 space-y-2' : 'p-4 space-y-4'} min-w-0`}>
                 {reviews.map((review) => (
                   <div 
                     key={review.id} 
-                    className={`bg-white shadow-sm border rounded-lg ${isVeryNarrow ? 'p-2' : 'p-3'} transition-colors ${
+                    className={`bg-white shadow-sm border rounded-lg ${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'} transition-colors ${
                       selectedReview === review.id ? "border-blue-400 bg-blue-50" : "border-gray-200"
-                    }`}
+                    } min-w-0`}
                     onClick={() => setSelectedReview(review.id)}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <div className={`font-medium ${isVeryNarrow ? 'text-xs' : 'text-sm'}`}>{review.reviewer}</div>
-                        <div className="text-xs text-gray-500">
-                          {isVeryNarrow ? review.timestamp.split(' ')[0] : review.timestamp}
+                    <div className="flex justify-between items-start mb-1 min-w-0">
+                      <div className="min-w-0 flex-1">
+                        <div className={`font-medium ${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-xs' : 'text-sm'} truncate`}>
+                          {review.reviewer}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate">
+                          {isExtremelyNarrow ? review.timestamp.split(' ')[0].slice(5) : isVeryNarrow ? review.timestamp.split(' ')[0] : review.timestamp}
                         </div>
                       </div>
-                      <div className="flex gap-1 flex-wrap">
+                      <div className="flex gap-1 flex-wrap flex-shrink-0">
                         {getRatingBadge(review.rating, isVeryNarrow)}
                         {getStatusBadge(review.status, isVeryNarrow)}
                       </div>
                     </div>
-                    <p className={`${isVeryNarrow ? 'text-xs' : 'text-sm'} text-gray-700 ${isVeryNarrow ? 'line-clamp-2' : ''}`}>
+                    <p className={`${isExtremelyNarrow ? 'text-xs line-clamp-1' : isVeryNarrow ? 'text-xs line-clamp-2' : 'text-sm'} text-gray-700 break-words`}>
                       {review.text}
                     </p>
-                    <div className={`${isVeryNarrow ? 'mt-2' : 'mt-3'} flex justify-between items-center`}>
-                      <div className="flex items-center">
-                        <Button variant="ghost" size="sm" className={`${isVeryNarrow ? 'h-6 px-1' : 'h-7 px-2'}`}>
-                          <ThumbsUp className="h-4 w-4 mr-1" />
-                          {!isVeryNarrow && <span className="text-xs">同意</span>}
+                    {!isShort && (
+                      <div className={`${isVeryNarrow ? 'mt-1' : isNarrow ? 'mt-2' : 'mt-3'} flex justify-between items-center min-w-0`}>
+                        <div className="flex items-center">
+                          <Button variant="ghost" size="sm" className={`${isVeryNarrow ? 'h-5 px-1' : isNarrow ? 'h-6 px-1' : 'h-7 px-2'} min-w-0`}>
+                            <ThumbsUp className={`${isExtremelyNarrow ? 'h-3 w-3' : 'h-4 w-4'} ${!isExtremelyNarrow ? 'mr-1' : ''}`} />
+                            {!isExtremelyNarrow && !isVeryNarrow && <span className="text-xs">同意</span>}
+                          </Button>
+                        </div>
+                        <Button variant="outline" size="sm" className={`${isVeryNarrow ? 'h-5 text-xs px-1' : isNarrow ? 'h-6 text-xs px-2' : 'h-7 text-xs'}`}>
+                          返信
                         </Button>
                       </div>
-                      <Button variant="outline" size="sm" className={`${isVeryNarrow ? 'h-6 text-xs px-2' : 'h-7 text-xs'}`}>
-                        返信
-                      </Button>
-                    </div>
+                    )}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className={`flex flex-col items-center justify-center h-full ${isVeryNarrow ? 'p-2' : 'p-4'} text-center`}>
-                <AlertTriangle className={`${isVeryNarrow ? 'h-8 w-8' : 'h-12 w-12'} text-amber-300 mb-3`} />
-                <h3 className={`${isVeryNarrow ? 'text-sm' : 'text-lg'} font-medium text-gray-800 mb-1`}>
-                  {isVeryNarrow ? 'レビューなし' : 'レビューがありません'}
+              <div className={`flex flex-col items-center justify-center h-full ${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-4'} text-center`}>
+                <AlertTriangle className={`${isExtremelyNarrow ? 'h-6 w-6' : isVeryNarrow ? 'h-8 w-8' : 'h-12 w-12'} text-amber-300 mb-2`} />
+                <h3 className={`${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-sm' : 'text-lg'} font-medium text-gray-800 mb-1`}>
+                  {isExtremelyNarrow ? 'なし' : isVeryNarrow ? 'レビューなし' : 'レビューがありません'}
                 </h3>
-                {!isVeryNarrow && (
-                  <p className="text-sm text-gray-600 mb-4">このスライドにはまだレビューが提出されていません。</p>
+                {!isVeryNarrow && !isShort && (
+                  <p className="text-sm text-gray-600 mb-3">このスライドにはまだレビューが提出されていません。</p>
                 )}
-                <Button size="sm" className={isVeryNarrow ? 'text-xs' : ''}>レビューを依頼</Button>
+                <Button size="sm" className={isVeryNarrow ? 'text-xs px-2' : ''}>レビューを依頼</Button>
               </div>
             )}
           </ScrollArea>
         </TabsContent>
         
-        <TabsContent value="summary" className={`${isVeryNarrow ? 'p-2' : 'p-4'} m-0`}>
-          <div className={isVeryNarrow ? 'space-y-2' : 'space-y-4'}>
-            <div className={`bg-white shadow-sm border border-gray-200 rounded-lg ${isVeryNarrow ? 'p-2' : 'p-3'}`}>
-              <h3 className={`font-medium ${isVeryNarrow ? 'text-xs' : 'text-sm'} mb-2`}>
-                {isVeryNarrow ? '概要' : 'レビュー概要'}
+        <TabsContent value="summary" className={`${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-4'} m-0 overflow-auto`}>
+          <div className={isVeryNarrow ? 'space-y-1' : isNarrow ? 'space-y-2' : 'space-y-4'}>
+            <div className={`bg-white shadow-sm border border-gray-200 rounded-lg ${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'}`}>
+              <h3 className={`font-medium ${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-xs' : 'text-sm'} mb-1`}>
+                {isExtremelyNarrow ? '概要' : isVeryNarrow ? '概要' : 'レビュー概要'}
               </h3>
               <div className={`grid grid-cols-3 gap-${isVeryNarrow ? '1' : '2'} text-center`}>
                 <div className={`bg-blue-50 ${isVeryNarrow ? 'p-1' : 'p-2'} rounded`}>
-                  <div className={`${isVeryNarrow ? 'text-lg' : 'text-2xl'} font-bold text-blue-700`}>
+                  <div className={`${isExtremelyNarrow ? 'text-sm' : isVeryNarrow ? 'text-lg' : 'text-2xl'} font-bold text-blue-700`}>
                     {Object.values(mockReviews).flat().length}
                   </div>
-                  <div className="text-xs text-blue-600">{isVeryNarrow ? '総数' : '総レビュー'}</div>
+                  <div className={`text-xs text-blue-600 ${isExtremelyNarrow ? 'text-xs' : ''}`}>
+                    {isExtremelyNarrow ? '総' : isVeryNarrow ? '総数' : '総レビュー'}
+                  </div>
                 </div>
                 <div className={`bg-green-50 ${isVeryNarrow ? 'p-1' : 'p-2'} rounded`}>
-                  <div className={`${isVeryNarrow ? 'text-lg' : 'text-2xl'} font-bold text-green-700`}>
+                  <div className={`${isExtremelyNarrow ? 'text-sm' : isVeryNarrow ? 'text-lg' : 'text-2xl'} font-bold text-green-700`}>
                     {Object.values(mockReviews).flat().filter(r => r.status === "completed").length}
                   </div>
                   <div className="text-xs text-green-600">完了</div>
                 </div>
                 <div className={`bg-amber-50 ${isVeryNarrow ? 'p-1' : 'p-2'} rounded`}>
-                  <div className={`${isVeryNarrow ? 'text-lg' : 'text-2xl'} font-bold text-amber-700`}>
+                  <div className={`${isExtremelyNarrow ? 'text-sm' : isVeryNarrow ? 'text-lg' : 'text-2xl'} font-bold text-amber-700`}>
                     {Object.values(mockReviews).flat().filter(r => r.status === "pending").length}
                   </div>
-                  <div className="text-xs text-amber-600">{isVeryNarrow ? '検討' : '検討中'}</div>
+                  <div className={`text-xs text-amber-600 ${isExtremelyNarrow ? 'text-xs' : ''}`}>
+                    {isExtremelyNarrow ? '検' : isVeryNarrow ? '検討' : '検討中'}
+                  </div>
                 </div>
               </div>
             </div>
             
-            <div className={`bg-white shadow-sm border border-gray-200 rounded-lg ${isVeryNarrow ? 'p-2' : 'p-3'}`}>
-              <h3 className={`font-medium ${isVeryNarrow ? 'text-xs' : 'text-sm'} mb-2`}>
-                {isVeryNarrow ? 'レビュアー' : 'レビュアー別状況'}
-              </h3>
-              <div className={isVeryNarrow ? 'space-y-1' : 'space-y-2'}>
-                <div className={`flex justify-between items-center ${isVeryNarrow ? 'p-1' : 'p-2'} bg-gray-50 rounded`}>
-                  <span className={isVeryNarrow ? 'text-xs' : 'text-sm'}>鈴木先生</span>
-                  <Badge className="bg-green-500 text-xs">完了</Badge>
-                </div>
-                <div className={`flex justify-between items-center ${isVeryNarrow ? 'p-1' : 'p-2'} bg-gray-50 rounded`}>
-                  <span className={isVeryNarrow ? 'text-xs' : 'text-sm'}>田中教授</span>
-                  <Badge className="bg-amber-500 text-xs">{isVeryNarrow ? '進行' : '進行中'}</Badge>
-                </div>
-                <div className={`flex justify-between items-center ${isVeryNarrow ? 'p-1' : 'p-2'} bg-gray-50 rounded`}>
-                  <span className={isVeryNarrow ? 'text-xs' : 'text-sm'}>山本教授</span>
-                  <Badge className="bg-green-500 text-xs">完了</Badge>
+            {!isShort && (
+              <div className={`bg-white shadow-sm border border-gray-200 rounded-lg ${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'}`}>
+                <h3 className={`font-medium ${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-xs' : 'text-sm'} mb-1`}>
+                  {isExtremelyNarrow ? 'レビュアー' : isVeryNarrow ? 'レビュアー' : 'レビュアー別状況'}
+                </h3>
+                <div className={isVeryNarrow ? 'space-y-0.5' : isNarrow ? 'space-y-1' : 'space-y-2'}>
+                  <div className={`flex justify-between items-center ${isVeryNarrow ? 'p-0.5' : isNarrow ? 'p-1' : 'p-2'} bg-gray-50 rounded min-w-0`}>
+                    <span className={`${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-xs' : 'text-sm'} truncate`}>鈴木先生</span>
+                    <Badge className="bg-green-500 text-xs flex-shrink-0">完了</Badge>
+                  </div>
+                  <div className={`flex justify-between items-center ${isVeryNarrow ? 'p-0.5' : isNarrow ? 'p-1' : 'p-2'} bg-gray-50 rounded min-w-0`}>
+                    <span className={`${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-xs' : 'text-sm'} truncate`}>田中教授</span>
+                    <Badge className="bg-amber-500 text-xs flex-shrink-0">{isExtremelyNarrow ? '進' : isVeryNarrow ? '進行' : '進行中'}</Badge>
+                  </div>
+                  <div className={`flex justify-between items-center ${isVeryNarrow ? 'p-0.5' : isNarrow ? 'p-1' : 'p-2'} bg-gray-50 rounded min-w-0`}>
+                    <span className={`${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-xs' : 'text-sm'} truncate`}>山本教授</span>
+                    <Badge className="bg-green-500 text-xs flex-shrink-0">完了</Badge>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </TabsContent>
         
         <TabsContent value="ai-summary" className="p-0 m-0 flex-grow overflow-auto">
-          <div className={isVeryNarrow ? 'p-2' : 'p-4'}>
+          <div className={isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-4'}>
             <AIReviewSummary slideId={currentSlide} />
           </div>
         </TabsContent>
       </Tabs>
       
-      <div className={`${isVeryNarrow ? 'p-2' : 'p-3'} border-t border-gray-200 bg-gray-50`}>
-        <Button className={`w-full ${isVeryNarrow ? 'text-xs h-8' : ''}`}>
-          {isVeryNarrow ? 'レビュー依頼' : '新しいレビューを依頼'}
+      <div className={`${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'} border-t border-gray-200 bg-gray-50 flex-shrink-0`}>
+        <Button className={`w-full ${isVeryNarrow ? 'text-xs h-6' : isNarrow ? 'text-xs h-7' : ''}`}>
+          {isExtremelyNarrow ? 'レビュー依頼' : isVeryNarrow ? 'レビュー依頼' : '新しいレビューを依頼'}
         </Button>
       </div>
     </div>
