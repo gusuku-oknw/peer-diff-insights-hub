@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -161,7 +162,7 @@ const SlideViewer = () => {
             isFullScreen={isFullScreen}
             leftSidebarOpen={leftSidebarOpen}
             showPresenterNotes={showPresenterNotes}
-            presentationStartTime={presentationStartTime}
+            presentationStartTime={presentationStartTime?.getTime() || null}
             displayCount={displayCount}
             onPreviousSlide={handlePreviousSlide}
             onNextSlide={handleNextSlide}
@@ -188,7 +189,7 @@ const SlideViewer = () => {
             leftSidebarOpen={leftSidebarOpen}
             showPresenterNotes={showPresenterNotes}
             isFullScreen={isFullScreen}
-            presentationStartTime={presentationStartTime}
+            presentationStartTime={presentationStartTime?.getTime() || null}
             presenterNotes={presenterNotes}
             elapsedTime={elapsedTime}
             displayCount={displayCount}
