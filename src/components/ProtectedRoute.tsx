@@ -37,7 +37,7 @@ const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   }
 
   // If allowedRoles is provided, check if the user has the required role
-  if (allowedRoles && userProfile && !allowedRoles.includes(userProfile.role)) {
+  if (allowedRoles && userProfile && userProfile.role && !allowedRoles.includes(userProfile.role)) {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center p-4">
         <div className="bg-red-50 border border-red-200 rounded-md p-6 max-w-md text-center">
