@@ -1,5 +1,6 @@
+
 import { useEffect, useRef, useState, useCallback } from 'react';
-import * as fabric from 'fabric';
+import { fabric } from 'fabric';
 import { SlideElement } from '@/stores/slideStore';
 import { CustomFabricObject } from '@/components/slideviewer/editor/FabricObjects';
 
@@ -92,7 +93,7 @@ export const useFabricCanvas = ({
         if (editable) {
           canvas.on('selection:created', (e) => {
             if (e.selected && e.selected.length > 0) {
-              const obj = e.selected[0] as CustomFabricObject;
+              const obj = e.selected[0] as unknown as CustomFabricObject;
               selectedObjectRef.current = obj;
               if (onSelectElement) onSelectElement(obj);
             }
@@ -100,7 +101,7 @@ export const useFabricCanvas = ({
           
           canvas.on('selection:updated', (e) => {
             if (e.selected && e.selected.length > 0) {
-              const obj = e.selected[0] as CustomFabricObject;
+              const obj = e.selected[0] as unknown as CustomFabricObject;
               selectedObjectRef.current = obj;
               if (onSelectElement) onSelectElement(obj);
             }
@@ -113,7 +114,7 @@ export const useFabricCanvas = ({
           
           // Enhanced object modification events
           canvas.on('object:modified', (e) => {
-            const obj = e.target as fabric.Object & { customData?: { id: string } };
+            const obj = e.target as unknown as CustomFabricObject;
             if (!obj || !obj.customData?.id) return;
             
             const updates: any = {};
@@ -122,7 +123,7 @@ export const useFabricCanvas = ({
             let width, height;
             
             if (obj.type === 'rect') {
-              const rect = obj as fabric.Rect;
+              const rect = obj as unknown as fabric.Rect;
               width = (rect.width || 0) * (rect.scaleX || 1);
               height = (rect.height || 0) * (rect.scaleY || 1);
               
@@ -134,8 +135,8 @@ export const useFabricCanvas = ({
                 scaleY: 1
               });
             } else if (obj.type === 'circle') {
-              const circle = obj as fabric.Circle;
-              const radius = circle.radius || 0;
+              const circle = obj as unknown as fabric.Circle;
+              const radius = (circle as any).radius || 0;
               const scale = obj.scaleX || 1; // アスペクト比を維持するため、X軸のみを考慮
               width = radius * 2 * scale;
               height = radius * 2 * scale;
@@ -147,7 +148,7 @@ export const useFabricCanvas = ({
                 scaleY: 1
               });
             } else if (obj.type === 'text') {
-              const text = obj as fabric.Text;
+              const text = obj as unknown as fabric.Text;
               width = (text.width || 0) * (obj.scaleX || 1);
               height = (text.height || 0) * (obj.scaleY || 1);
               
@@ -158,7 +159,7 @@ export const useFabricCanvas = ({
                 scaleY: 1
               });
             } else if (obj.type === 'image') {
-              const img = obj as fabric.Image;
+              const img = obj as unknown as fabric.Image;
               width = (img.width || 0) * (obj.scaleX || 1);
               height = (img.height || 0) * (obj.scaleY || 1);
             } else {
@@ -184,7 +185,7 @@ export const useFabricCanvas = ({
           
           // Text editing events
           canvas.on('text:changed', (e) => {
-            const textObj = e.target as fabric.IText & CustomFabricObject;
+            const textObj = e.target as unknown as fabric.IText & CustomFabricObject;
             if (!textObj || !textObj.customData?.id) return;
             
             if (onUpdateElement) {
@@ -290,9 +291,9 @@ export const useFabricCanvas = ({
                 originY: 'center',
                 selectable: editable,
                 editable: editable,
-              }) as CustomFabricObject;
+              });
               
-              text.customData = { id };
+              (text as unknown as CustomFabricObject).customData = { id };
               canvas.add(text);
               break;
               
@@ -310,9 +311,9 @@ export const useFabricCanvas = ({
                   originX: 'center',
                   originY: 'center',
                   selectable: editable,
-                }) as CustomFabricObject;
+                });
                 
-                rect.customData = { id };
+                (rect as unknown as CustomFabricObject).customData = { id };
                 canvas.add(rect);
               } else if (props.shape === 'circle') {
                 const circle = new fabric.Circle({
@@ -326,9 +327,9 @@ export const useFabricCanvas = ({
                   originX: 'center',
                   originY: 'center',
                   selectable: editable,
-                }) as CustomFabricObject;
+                });
                 
-                circle.customData = { id };
+                (circle as unknown as CustomFabricObject).customData = { id };
                 canvas.add(circle);
               }
               break;
@@ -351,12 +352,11 @@ export const useFabricCanvas = ({
                   });
                   
                   // Add custom data
-                  (img as CustomFabricObject).customData = { id };
+                  (img as unknown as CustomFabricObject).customData = { id };
                   
                   canvas.add(img);
                   canvas.renderAll();
-                },
-                { crossOrigin: 'anonymous' }
+                }
               );
               break;
           }

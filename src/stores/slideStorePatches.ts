@@ -8,8 +8,8 @@ const extendSlideStore = () => {
   const originalStore = useSlideStore;
   
   // Create a new store function with the extended state
-  const createExtendedStore = create<PPTXImportSlice>()((...a) => ({
-    ...createPPTXImportSlice(...a)
+  const createExtendedStore = create<PPTXImportSlice>()((set, get, api) => ({
+    ...createPPTXImportSlice(set, get, api)
   }));
   
   // Create a combined hook that merges both stores

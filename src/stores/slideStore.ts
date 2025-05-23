@@ -596,7 +596,7 @@ const createSampleSlides = (): Slide[] => [
 ];
 
 // Create the basic slide state creator
-const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get) => ({
+const createSlideStore: StateCreator<SlideStore & PPTXImportSlice, [], [], SlideStore> = (set, get, api) => ({
   slides: createSampleSlides(),
   currentSlide: 1,
   zoom: 100,
@@ -738,12 +738,12 @@ const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get
 // Create the slide store with proper types
 export const useSlideStore = create<SlideStore & PPTXImportSlice>()(
   persist(
-    (set, get) => {
+    (set, get, api) => {
       // First, get the basic slide state creator
-      const basicSlideState = createSlideStore(set, get);
+      const basicSlideState = createSlideStore(set, get, api);
       
       // Now create the PPTX import slice
-      const pptxImportSlice = createPPTXImportSlice(set, get);
+      const pptxImportSlice = createPPTXImportSlice(set, get, api);
       
       // Return the combined state
       return {

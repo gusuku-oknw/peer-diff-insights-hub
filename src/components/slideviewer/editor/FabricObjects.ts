@@ -1,5 +1,5 @@
 
-import { fabric } from 'fabric/fabric-impl';
+import { fabric } from 'fabric';
 
 // Define a custom type that extends fabric.Object to include our customData
 export interface CustomFabricObject extends fabric.Object {

@@ -1,12 +1,12 @@
 
 import { StateCreator } from 'zustand';
-import { SlideStore } from './slideStore';
+import { SlideStore, Slide } from './slideStore';
 
 export interface PPTXImportSlice {
   isPPTXImported: boolean;
   pptxFilename: string | null;
   setPPTXImported: (imported: boolean, filename?: string | null) => void;
-  importSlidesFromPPTX: (slidesData: any[]) => void;
+  importSlidesFromPPTX: (slidesData: Slide[]) => void;
 }
 
 export const createPPTXImportSlice: StateCreator<
@@ -14,7 +14,7 @@ export const createPPTXImportSlice: StateCreator<
   [], 
   [], 
   PPTXImportSlice
-> = (set, get) => ({
+> = (set, get, api) => ({
   isPPTXImported: false,
   pptxFilename: null,
   setPPTXImported: (imported, filename = null) => set({ isPPTXImported: imported, pptxFilename: filename }),
@@ -30,8 +30,8 @@ export const createPPTXImportSlice: StateCreator<
       pptxFilename: currentState.pptxFilename || "imported-presentation.pptx"
     });
     
-    // Update slides separately to avoid property error
-    set((state: SlideStore & PPTXImportSlice) => ({ 
+    // Update slides separately
+    set((state) => ({ 
       slides: slidesData 
     }));
   }

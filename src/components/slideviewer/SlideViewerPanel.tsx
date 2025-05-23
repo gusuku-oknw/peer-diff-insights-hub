@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
-import { SlideNotesPanel } from "@/components/slideviewer/SlideNotesPanel";
+import SlideNotesPanel from "@/components/slideviewer/SlideNotesPanel";
 import { useToast } from "@/hooks/use-toast";
 import FabricSlideCanvas from "@/components/slideviewer/FabricSlideCanvas";
 import EditToolbar from "@/components/slideviewer/editor/EditToolbar";
