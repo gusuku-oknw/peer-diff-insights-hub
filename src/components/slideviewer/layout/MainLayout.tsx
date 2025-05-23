@@ -94,14 +94,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     setIsNotesPanelOpen(!isNotesPanelOpen);
   };
 
-  // 右サイドパネルの表示条件を厳格にチェック
-  const shouldShowRightSidePanel = viewerMode === "review" || (showPresenterNotes === true);
+  // 右サイドパネルの表示条件をより厳格にチェック
+  const shouldShowRightSidePanel = (viewerMode === "review") || (showPresenterNotes === true && viewerMode !== "edit");
   
   console.log("MainLayout: Right side panel conditions:", {
     viewerMode,
     showPresenterNotes,
     shouldShowRightSidePanel
   });
+  
+  // 追加デバッグ: 実際にレンダリングされるコンポーネントの確認
+  useEffect(() => {
+    console.log("MainLayout: Panel visibility updated:", {
+      shouldShowRightSidePanel,
+      viewerMode,
+      showPresenterNotes
+    });
+  }, [shouldShowRightSidePanel, viewerMode, showPresenterNotes]);
   
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
@@ -187,15 +196,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           )}
         </main>
 
-        {/* Right Sidebar - 一箇所での制御に統一 */}
+        {/* Right Sidebar - 表示条件を強化 */}
         {shouldShowRightSidePanel && (
-          <SidePanel
-            shouldShowNotes={showPresenterNotes}
-            shouldShowReviewPanel={viewerMode === "review"}
-            currentSlide={currentSlide}
-            totalSlides={totalSlides}
-            presenterNotes={presenterNotes}
-          />
+          <div className="flex-shrink-0">
+            <SidePanel
+              shouldShowNotes={showPresenterNotes}
+              shouldShowReviewPanel={viewerMode === "review"}
+              currentSlide={currentSlide}
+              totalSlides={totalSlides}
+              presenterNotes={presenterNotes}
+            />
+          </div>
         )}
       </div>
 
