@@ -1,6 +1,6 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { StateCreator } from 'zustand';
 
 // Define our slide element types
 export type SlideElement = {
@@ -56,11 +56,9 @@ interface SlideState {
   exportToPPTX: () => void;
 }
 
-// Import types needed for SetState and GetState
-import { StateCreator } from 'zustand';
-
-type SetState<T> = StateCreator<T, [], [], (state: T) => void>['setState'];
-type GetState<T> = StateCreator<T, [], [], (state: T) => void>['getState'];
+// Correctly define the types for Zustand's SetState and GetState
+type SetState = StateCreator<SlideState>['setState'];
+type GetState = StateCreator<SlideState>['getState'];
 
 // Mock slide data similar to what you have
 const mockSlides: Slide[] = [
@@ -856,8 +854,8 @@ const createSampleSlides = (): Slide[] => [
 
 // Modify the createStore function to use our enhanced sample slides
 const createSlideStore = () => (
-  set: SetState<SlideState>,
-  get: GetState<SlideState>
+  set: SetState,
+  get: GetState
 ) => ({
   slides: createSampleSlides(),
   currentSlide: 1,
