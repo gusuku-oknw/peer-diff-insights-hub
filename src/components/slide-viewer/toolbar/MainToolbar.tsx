@@ -20,7 +20,7 @@ import {
   Eye,
   MessageSquare
 } from "lucide-react";
-import type { ViewerMode } from "@/stores/slideStore";
+import type { ViewerMode } from "@/types/common.types";
 
 interface MainToolbarProps {
   currentSlide: number;

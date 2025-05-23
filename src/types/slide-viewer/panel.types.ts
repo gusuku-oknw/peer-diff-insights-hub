@@ -1,5 +1,5 @@
 
-import type { ViewerMode } from "@/stores/slideStore";
+import type { ViewerMode } from "../common.types";
 
 // Base panel properties
 export interface BasePanelProps {
