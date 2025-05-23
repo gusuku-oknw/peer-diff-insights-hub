@@ -46,16 +46,17 @@ export const useElementsRenderer = ({
     renderTimerRef.current = window.setTimeout(() => {
       if (canvas) {
         canvas.renderAll();
+        console.log(`[Instance ${instanceId}] Batch rendering executed`);
       }
       pendingRenderRef.current = false;
       renderTimerRef.current = null;
     }, 16); // ~60fps
-  }, [canvas]);
+  }, [canvas, instanceId]);
 
   // 要素をキャンバスにレンダリングする関数
   const renderElements = useCallback((elementsToRender: SlideElement[]) => {
     if (!canvas || !initialized) {
-      console.warn("Cannot render elements: Canvas not initialized");
+      console.warn(`[Instance ${instanceId}] Cannot render elements: Canvas not initialized`);
       return;
     }
 
@@ -65,6 +66,7 @@ export const useElementsRenderer = ({
     }
     
     elementsRef.current = elementsToRender;
+    console.log(`[Instance ${instanceId}] Rendering ${elementsToRender.length} elements on slide ${currentSlide}`);
 
     try {
       // キャンバスをクリア
@@ -168,7 +170,7 @@ export const useElementsRenderer = ({
                 // Schedule a render after image is loaded
                 scheduleBatchRender();
               }).catch(err => {
-                console.error("Error loading image:", err);
+                console.error(`[Instance ${instanceId}] Error loading image:`, err);
               });
               break;
           }
@@ -194,30 +196,32 @@ export const useElementsRenderer = ({
         canvas.renderAll();
       }
     } catch (error) {
-      console.error("Error rendering elements to canvas:", error);
+      console.error(`[Instance ${instanceId}] Error rendering elements to canvas:`, error);
     }
-  }, [canvas, initialized, editable, currentSlide, scheduleBatchRender]);
+  }, [canvas, initialized, editable, currentSlide, scheduleBatchRender, instanceId]);
 
   // キャンバスをリセットする関数
   const reset = useCallback(() => {
     if (!canvas || !initialized) return;
     
     try {
+      console.log(`[Instance ${instanceId}] Resetting canvas`);
       canvas.clear();
       canvas.backgroundColor = '#ffffff';
       canvas.renderAll();
       elementsRef.current = [];
     } catch (error) {
-      console.error("Error resetting canvas:", error);
+      console.error(`[Instance ${instanceId}] Error resetting canvas:`, error);
     }
-  }, [canvas, initialized]);
+  }, [canvas, initialized, instanceId]);
   
   // Clean up on unmount
   useCallback(() => {
     if (renderTimerRef.current !== null) {
       window.clearTimeout(renderTimerRef.current);
+      console.log(`[Instance ${instanceId}] Cleaned up batch render timer`);
     }
-  }, []);
+  }, [instanceId]);
 
   return { renderElements, reset };
 };

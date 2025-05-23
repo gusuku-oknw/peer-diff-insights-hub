@@ -22,6 +22,8 @@ export const useObjectEvents = ({
   useEffect(() => {
     if (!canvas || !initialized || !editable || !onUpdateElement) return;
 
+    console.log(`[Instance ${instanceId}] Setting up object events`);
+
     // オブジェクト修正イベント
     const handleObjectModified = (e: any) => {
       const obj = e.target as unknown as CustomFabricObject;
@@ -106,9 +108,12 @@ export const useObjectEvents = ({
     canvas.on('object:modified', handleObjectModified);
     canvas.on('text:changed', handleTextChanged);
 
+    console.log(`[Instance ${instanceId}] Object events set up successfully`);
+
     return () => {
+      console.log(`[Instance ${instanceId}] Removing object event handlers`);
       canvas.off('object:modified', handleObjectModified);
       canvas.off('text:changed', handleTextChanged);
     };
-  }, [canvas, initialized, editable, onUpdateElement]);
+  }, [canvas, initialized, editable, onUpdateElement, instanceId]);
 };

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,8 +10,10 @@ import {
   CheckCircle, 
   Clock, 
   BarChart4, 
-  AlertTriangle 
+  AlertTriangle,
+  Star
 } from "lucide-react";
+import AIReviewSummary from "@/components/slideviewer/AIReviewSummary";
 
 interface ReviewPanelProps {
   currentSlide: number;
@@ -96,6 +98,7 @@ const getStatusBadge = (status: string) => {
 
 const ReviewPanel: React.FC<ReviewPanelProps> = ({ currentSlide, totalSlides }) => {
   const reviews = mockReviews[currentSlide as keyof typeof mockReviews] || [];
+  const [selectedReview, setSelectedReview] = useState<number | null>(null);
   
   // Review completion status
   const completedSlides = Object.keys(mockReviews).filter(slideId => {
@@ -109,7 +112,10 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({ currentSlide, totalSlides }) 
   return (
     <div className="h-full flex flex-col">
       <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800">レビュー管理</h2>
+        <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+          <MessageSquare className="h-5 w-5 mr-2 text-blue-600" />
+          レビュー管理
+        </h2>
         <p className="text-sm text-gray-600">現在のスライド: {currentSlide} / {totalSlides}</p>
         
         <div className="mt-3 bg-blue-50 rounded-md p-3">
@@ -133,6 +139,10 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({ currentSlide, totalSlides }) 
             <BarChart4 className="h-4 w-4" />
             <span>サマリー</span>
           </TabsTrigger>
+          <TabsTrigger value="ai-summary" className="flex gap-1 items-center">
+            <Star className="h-4 w-4" />
+            <span>AI要約</span>
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="reviews" className="flex-grow p-0 m-0">
@@ -140,7 +150,13 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({ currentSlide, totalSlides }) 
             {reviews.length > 0 ? (
               <div className="p-4 space-y-4">
                 {reviews.map((review) => (
-                  <div key={review.id} className="bg-white shadow-sm border border-gray-200 rounded-lg p-3">
+                  <div 
+                    key={review.id} 
+                    className={`bg-white shadow-sm border rounded-lg p-3 transition-colors ${
+                      selectedReview === review.id ? "border-blue-400 bg-blue-50" : "border-gray-200"
+                    }`}
+                    onClick={() => setSelectedReview(review.id)}
+                  >
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <div className="font-medium text-sm">{review.reviewer}</div>
@@ -216,6 +232,12 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({ currentSlide, totalSlides }) 
                 </div>
               </div>
             </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="ai-summary" className="p-0 m-0 flex-grow overflow-auto">
+          <div className="p-4">
+            <AIReviewSummary slideId={currentSlide} />
           </div>
         </TabsContent>
       </Tabs>
