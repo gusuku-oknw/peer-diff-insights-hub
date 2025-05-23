@@ -45,6 +45,7 @@ const SlideThumbnails = ({
               const slideIndex = slide.id;
               const hasComments = (mockComments[slideIndex] || []).length > 0;
               const needsComment = userType === "student" && !commentedSlides?.includes(slideIndex);
+              const slideTitle = slide.title || `スライド ${slideIndex}`;
               
               return (
                 <Tooltip key={index}>
@@ -72,7 +73,7 @@ const SlideThumbnails = ({
                       </div>
                       <div className="p-3">
                         <p className={`text-sm font-medium truncate w-32 ${currentSlide === slideIndex ? 'text-blue-700' : ''}`}>
-                          {slide.title || `スライド ${slideIndex}`}
+                          {slideTitle}
                         </p>
                       </div>
                       
@@ -93,7 +94,7 @@ const SlideThumbnails = ({
                   </TooltipTrigger>
                   <TooltipContent side="bottom">
                     <div className="flex flex-col gap-1">
-                      <p className="font-medium">{slide.title || `スライド ${slideIndex}`}</p>
+                      <p className="font-medium">{slideTitle}</p>
                       {hasComments && (
                         <div className="flex items-center text-xs text-purple-600">
                           <MessageSquare className="h-3 w-3 mr-1" />

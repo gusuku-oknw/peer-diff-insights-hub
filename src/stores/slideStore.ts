@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -15,6 +16,7 @@ export type SlideElement = {
 // Define our slide type
 export type Slide = {
   id: number;
+  title?: string; // Added title property as optional
   elements: SlideElement[];
   notes: string;
   thumbnail?: string;
@@ -53,6 +55,12 @@ interface SlideState {
   generateThumbnails: () => void;
   exportToPPTX: () => void;
 }
+
+// Import types needed for SetState and GetState
+import { StateCreator } from 'zustand';
+
+type SetState<T> = StateCreator<T, [], [], (state: T) => void>['setState'];
+type GetState<T> = StateCreator<T, [], [], (state: T) => void>['getState'];
 
 // Mock slide data similar to what you have
 const mockSlides: Slide[] = [

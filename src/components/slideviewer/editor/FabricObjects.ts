@@ -13,7 +13,7 @@ export const createTextElement = (
   text: string, 
   x: number, 
   y: number, 
-  options: Partial<fabric.ITextOptions> = {}
+  options: Partial<fabric.TOptions<fabric.IText>> = {}
 ): fabric.IText & CustomFabricObject => {
   return new fabric.IText(text, {
     left: x,
@@ -33,7 +33,7 @@ export const createRectElement = (
   y: number, 
   width = 150, 
   height = 100,
-  options: Partial<fabric.RectOptions> = {}
+  options: Partial<fabric.TOptions<fabric.Rect>> = {}
 ): fabric.Rect & CustomFabricObject => {
   return new fabric.Rect({
     left: x,
@@ -54,7 +54,7 @@ export const createCircleElement = (
   x: number, 
   y: number, 
   radius = 50,
-  options: Partial<fabric.CircleOptions> = {}
+  options: Partial<fabric.TOptions<fabric.Circle>> = {}
 ): fabric.Circle & CustomFabricObject => {
   return new fabric.Circle({
     left: x,

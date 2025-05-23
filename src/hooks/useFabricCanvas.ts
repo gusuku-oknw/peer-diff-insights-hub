@@ -77,7 +77,7 @@ export const useFabricCanvas = ({
     const canvas = canvasInstance.current;
     if (!canvas || !initialized || !editable || !onUpdateElement) return;
 
-    const handleObjectModified = (e: fabric.IEvent) => {
+    const handleObjectModified = (e: fabric.TEvent<Event>) => {
       const modifiedObject = e.target as CustomFabricObject;
       if (!modifiedObject || !modifiedObject.customData?.id) return;
       
