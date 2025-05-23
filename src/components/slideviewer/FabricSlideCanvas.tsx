@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { fabric } from 'fabric';
+import * as fabric from 'fabric'; // The correct import
 import { useSlideStore } from "@/stores/slideStore";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
