@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -23,7 +23,11 @@ import {
   Calendar,
   Download,
   Settings,
-  Tag
+  Tag,
+  Git,
+  GitBranch,
+  GitCommit,
+  GitPullRequest
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -52,6 +56,16 @@ const SlideViewer = () => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
   const [defaultLayout, setDefaultLayout] = useState([20, 60, 20]);
+
+  // Mock data for branch and commit history
+  const [currentBranch, setCurrentBranch] = useState("main");
+  const branches = ["main", "feature/new-slides", "hotfix/typo"];
+  const commitHistory = [
+    { id: "a1b2c3d", message: "スライド5を追加", author: "田中さん", date: "2025年5月22日" },
+    { id: "e4f5g6h", message: "グラフのデータを更新", author: "佐藤さん", date: "2025年5月21日" },
+    { id: "i7j8k9l", message: "タイトルのフォント修正", author: "鈴木さん", date: "2025年5月20日" },
+    { id: "m1n2o3p", message: "初回コミット", author: "山本さん", date: "2025年5月19日" },
+  ];
 
   const handlePreviousSlide = () => {
     if (currentSlide > 1) {
@@ -134,10 +148,28 @@ const SlideViewer = () => {
                   </Button>
                 </div>
                 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 border-r border-gray-200 pr-4">
                   <Button onClick={handleZoomOut} variant="ghost" size="sm" className="text-gray-700">-</Button>
                   <span className="text-sm font-medium">{zoom}%</span>
                   <Button onClick={handleZoomIn} variant="ghost" size="sm" className="text-gray-700">+</Button>
+                </div>
+                
+                {/* Comment toggle integrated into toolbar */}
+                <div className="flex items-center space-x-2 border-r border-gray-200 pr-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="comment-mode"
+                      checked={viewMode === "all"}
+                      onCheckedChange={(checked) => setViewMode(checked ? "all" : "canvas")}
+                    />
+                    <span className="text-sm font-medium">
+                      {viewMode === "all" ? (
+                        <><MessageSquare className="h-4 w-4 inline mr-1" />コメント表示</>
+                      ) : (
+                        <><Eye className="h-4 w-4 inline mr-1" />スライドのみ</>
+                      )}
+                    </span>
+                  </div>
                 </div>
                 
                 <div className="flex items-center space-x-2">
@@ -184,29 +216,101 @@ const SlideViewer = () => {
               setDefaultLayout(sizes);
             }}
           >
-            {/* Left sidebar - slide thumbnails */}
+            {/* Left sidebar - slide thumbnails and branch/commit info */}
             <ResizablePanel defaultSize={defaultLayout[0]} minSize={15} maxSize={30} className="bg-white">
-              <div className="p-4 border-b border-gray-200">
-                <h3 className="font-medium">スライド</h3>
-              </div>
-              <ScrollArea className="h-[70vh]">
-                <div className="p-2 space-y-2">
-                  {Array.from({length: totalSlides}).map((_, index) => (
-                    <div 
-                      key={index} 
-                      className={`p-2 border rounded-lg cursor-pointer hover:bg-gray-100 ${currentSlide === index + 1 ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
-                      onClick={() => setCurrentSlide(index + 1)}
-                    >
-                      <div className="aspect-video bg-gray-200 rounded flex items-center justify-center mb-1">
-                        <span className="text-xs text-gray-500">スライド {index + 1}</span>
-                      </div>
-                      <p className="text-xs truncate">
-                        {index === 0 ? 'Q4 Presentation' : `Slide ${index + 1}`}
-                      </p>
+              <Tabs defaultValue="slides">
+                <TabsList className="w-full grid grid-cols-3">
+                  <TabsTrigger value="slides" className="text-xs">
+                    <List className="h-4 w-4 mr-1" />
+                    スライド
+                  </TabsTrigger>
+                  <TabsTrigger value="branches" className="text-xs">
+                    <GitBranch className="h-4 w-4 mr-1" />
+                    ブランチ
+                  </TabsTrigger>
+                  <TabsTrigger value="commits" className="text-xs">
+                    <GitCommit className="h-4 w-4 mr-1" />
+                    コミット
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="slides" className="p-0">
+                  <ScrollArea className="h-[70vh]">
+                    <div className="p-2 space-y-2">
+                      {Array.from({length: totalSlides}).map((_, index) => (
+                        <div 
+                          key={index} 
+                          className={`p-2 border rounded-lg cursor-pointer hover:bg-gray-100 ${currentSlide === index + 1 ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                          onClick={() => setCurrentSlide(index + 1)}
+                        >
+                          <div className="aspect-video bg-gray-200 rounded flex items-center justify-center mb-1">
+                            <span className="text-xs text-gray-500">スライド {index + 1}</span>
+                          </div>
+                          <p className="text-xs truncate">
+                            {index === 0 ? 'Q4 Presentation' : `Slide ${index + 1}`}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
+                  </ScrollArea>
+                </TabsContent>
+                
+                <TabsContent value="branches" className="p-0">
+                  <div className="p-4 border-b border-gray-200">
+                    <h3 className="font-medium flex items-center">
+                      <GitBranch className="h-4 w-4 mr-2" />
+                      現在のブランチ: <span className="ml-1 font-bold text-blue-600">{currentBranch}</span>
+                    </h3>
+                  </div>
+                  <ScrollArea className="h-[64vh]">
+                    <div className="p-2 space-y-1">
+                      {branches.map((branch) => (
+                        <div
+                          key={branch}
+                          className={`p-2 rounded-lg cursor-pointer hover:bg-gray-100 flex items-center ${branch === currentBranch ? 'bg-blue-50 text-blue-700' : ''}`}
+                          onClick={() => setCurrentBranch(branch)}
+                        >
+                          <GitBranch className="h-4 w-4 mr-2" />
+                          <span className="text-sm">{branch}</span>
+                          {branch === currentBranch && (
+                            <span className="ml-auto text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                              現在
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+                
+                <TabsContent value="commits" className="p-0">
+                  <div className="p-4 border-b border-gray-200">
+                    <h3 className="font-medium flex items-center">
+                      <GitCommit className="h-4 w-4 mr-2" />
+                      スライドのコミット履歴
+                    </h3>
+                  </div>
+                  <ScrollArea className="h-[64vh]">
+                    <div className="p-2 space-y-2">
+                      {commitHistory.map((commit) => (
+                        <div
+                          key={commit.id}
+                          className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-mono bg-gray-100 px-2 py-0.5 rounded">{commit.id.substring(0, 7)}</span>
+                            <span className="text-xs text-gray-500">{commit.date}</span>
+                          </div>
+                          <p className="text-sm font-medium mb-1">{commit.message}</p>
+                          <div className="flex items-center text-xs text-gray-500">
+                            <span>作成者: {commit.author}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
             </ResizablePanel>
             
             <ResizableHandle withHandle />
@@ -298,27 +402,9 @@ const SlideViewer = () => {
           </ResizablePanelGroup>
         </div>
         
-        {/* Comment view toggle switch */}
+        {/* Right sidebar toggle button */}
         <div className="fixed right-4 top-24">
-          <div className="bg-white rounded-lg shadow-md p-3 flex flex-col items-center gap-2">
-            <div className="flex items-center space-x-2">
-              <Switch 
-                id="comment-mode"
-                checked={viewMode === "all"}
-                onCheckedChange={(checked) => setViewMode(checked ? "all" : "canvas")}
-              />
-              <span className="text-sm font-medium">
-                {viewMode === "all" ? (
-                  <MessageSquare className="h-4 w-4 inline mr-1" />
-                ) : (
-                  <Eye className="h-4 w-4 inline mr-1" />
-                )}
-                <span className="hidden lg:inline">
-                  {viewMode === "all" ? "コメント表示" : "スライドのみ"}
-                </span>
-              </span>
-            </div>
-            
+          <div className="bg-white rounded-lg shadow-md p-3">
             <Button 
               variant="ghost" 
               size="sm" 
