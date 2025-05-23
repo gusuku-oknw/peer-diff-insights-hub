@@ -21,8 +21,19 @@ import {
   CheckCircle,
   AlertCircle,
   Timer,
-  Zap
+  Zap,
+  MoreHorizontal
 } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 // Mock data for the student dashboard
 const assignedTasks = [
@@ -34,6 +45,7 @@ const assignedTasks = [
     progress: 60,
     totalSlides: 5,
     completedSlides: 3,
+    slideId: "product-planning",
   },
   {
     id: 2,
@@ -43,6 +55,7 @@ const assignedTasks = [
     progress: 0,
     totalSlides: 10,
     completedSlides: 0,
+    slideId: "marketing-strategy",
   },
   {
     id: 3,
@@ -52,6 +65,7 @@ const assignedTasks = [
     progress: 100,
     totalSlides: 8,
     completedSlides: 8,
+    slideId: "quarterly-report",
   },
 ];
 
@@ -70,12 +84,14 @@ const notifications = [
     type: "reply",
     message: "あなたのコメントに企業から返信がありました",
     time: "30分前",
+    slideId: "product-planning",
   },
   {
     id: 2,
     type: "review",
     message: "再レビュー依頼が届いています",
     time: "2時間前",
+    slideId: "marketing-strategy",
   },
 ];
 
@@ -92,6 +108,18 @@ const getStatusIcon = (status: string) => {
 };
 
 const StudentDashboard = () => {
+  const handleTaskDelete = (taskId: number) => {
+    toast.success(`タスク #${taskId} を削除しました`);
+  };
+
+  const handleTaskHide = (taskId: number) => {
+    toast.info(`タスク #${taskId} を非表示にしました`);
+  };
+
+  const handleTaskShare = (taskId: number) => {
+    toast.info(`タスク #${taskId} の共有リンクをコピーしました`);
+  };
+
   return (
     <div className="p-6 space-y-8">
       {/* 割り当てタスク一覧 */}
@@ -109,21 +137,48 @@ const StudentDashboard = () => {
               <CardHeader className="pb-2 bg-gradient-to-r from-blue-50 to-purple-50 border-b">
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-lg font-semibold text-gray-800">{task.title}</CardTitle>
-                  <Badge
-                    variant="secondary"
-                    className={
-                      task.status === "完了"
-                        ? "bg-green-100 text-green-800 hover:bg-green-200 border border-green-200"
-                        : task.status === "進行中"
-                        ? "bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-200"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
-                    }
-                  >
-                    <span className="flex items-center gap-1">
-                      {getStatusIcon(task.status)}
-                      {task.status}
-                    </span>
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="secondary"
+                      className={
+                        task.status === "完了"
+                          ? "bg-green-100 text-green-800 hover:bg-green-200 border border-green-200"
+                          : task.status === "進行中"
+                          ? "bg-blue-100 text-blue-800 hover:bg-blue-200 border border-blue-200"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
+                      }
+                    >
+                      <span className="flex items-center gap-1">
+                        {getStatusIcon(task.status)}
+                        {task.status}
+                      </span>
+                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">メニューを開く</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel>タスクの操作</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleTaskShare(task.id)}>
+                          共有
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleTaskHide(task.id)}>
+                          非表示にする
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => handleTaskDelete(task.id)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          削除
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
                 <CardDescription className="flex items-center gap-1 mt-1 text-gray-600">
                   <Clock className="h-3.5 w-3.5" /> 期限: {task.deadline}
@@ -153,8 +208,11 @@ const StudentDashboard = () => {
                 <Button 
                   variant="outline" 
                   className="w-full flex items-center justify-center gap-1 text-blue-700 hover:bg-blue-50 hover:text-blue-800 transition-colors group-hover:border-blue-300"
+                  asChild
                 >
-                  詳細を見る <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                  <Link to={`/slides?id=${task.slideId}`}>
+                    スライドを開く <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -218,8 +276,8 @@ const StudentDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
-              <Button className="w-full gradient-primary shadow-md shadow-blue-500/10 hover:shadow-blue-500/20 transition-all hover:-translate-y-0.5 duration-200">
-                最新PPTXを開く
+              <Button className="w-full gradient-primary shadow-md shadow-blue-500/10 hover:shadow-blue-500/20 transition-all hover:-translate-y-0.5 duration-200" asChild>
+                <Link to="/slides">最新PPTXを開く</Link>
               </Button>
               <div className="flex gap-3">
                 <Button variant="outline" className="flex-1 border-gray-200 hover:bg-blue-50 hover:text-blue-700 transition-colors hover:-translate-y-0.5 duration-200">
@@ -250,8 +308,10 @@ const StudentDashboard = () => {
                       <p className="text-sm font-medium text-gray-800">{notification.message}</p>
                       <p className="text-xs text-gray-500">{notification.time}</p>
                     </div>
-                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-full w-8 h-8 p-0">
-                      <ChevronRight className="h-4 w-4" />
+                    <Button variant="ghost" size="sm" className="text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-full w-8 h-8 p-0" asChild>
+                      <Link to={`/slides?id=${notification.slideId}`}>
+                        <ChevronRight className="h-4 w-4" />
+                      </Link>
                     </Button>
                   </div>
                 ))}

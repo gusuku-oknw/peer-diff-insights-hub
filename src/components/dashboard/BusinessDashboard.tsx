@@ -43,7 +43,18 @@ import {
   Smile,
   Meh,
   Frown,
+  MoreHorizontal
 } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 // Mock data for business dashboard
 const projects = [
@@ -54,6 +65,7 @@ const projects = [
     progress: 75,
     unreadComments: 12,
     lastUpdated: "30分前",
+    slideId: "product-roadmap-2025",
   },
   {
     id: 2,
@@ -62,6 +74,7 @@ const projects = [
     progress: 40,
     unreadComments: 5,
     lastUpdated: "2時間前",
+    slideId: "q2-marketing-strategy",
   },
   {
     id: 3,
@@ -70,6 +83,7 @@ const projects = [
     progress: 100,
     unreadComments: 0,
     lastUpdated: "1日前",
+    slideId: "quarterly-report",
   },
 ];
 
@@ -102,6 +116,22 @@ const aiSummaryData = {
 };
 
 const BusinessDashboard = () => {
+  const handleProjectEdit = (projectId: number) => {
+    toast.info(`プロジェクト #${projectId} を編集します`);
+  };
+
+  const handleProjectShare = (projectId: number) => {
+    toast.success(`プロジェクト #${projectId} の共有リンクをコピーしました`);
+  };
+
+  const handleProjectDelete = (projectId: number) => {
+    toast.success(`プロジェクト #${projectId} を削除しました`);
+  };
+  
+  const handleProjectSettings = (projectId: number) => {
+    toast.info(`プロジェクト #${projectId} の設定を開きます`);
+  };
+
   return (
     <div className="space-y-8">
       {/* プロジェクトサマリパネル */}
@@ -116,11 +146,41 @@ const BusinessDashboard = () => {
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-lg">{project.title}</CardTitle>
-                  <Badge
-                    variant={project.status === "完了" ? "default" : "secondary"}
-                  >
-                    {project.status}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant={project.status === "完了" ? "default" : "secondary"}
+                    >
+                      {project.status}
+                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">メニューを開く</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel>プロジェクト操作</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleProjectEdit(project.id)}>
+                          編集
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleProjectShare(project.id)}>
+                          共有
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleProjectSettings(project.id)}>
+                          設定
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => handleProjectDelete(project.id)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          削除
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
                 <CardDescription>最終更新: {project.lastUpdated}</CardDescription>
               </CardHeader>
@@ -156,8 +216,10 @@ const BusinessDashboard = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full flex items-center justify-center gap-1">
-                  詳細を見る <ChevronRight className="h-4 w-4" />
+                <Button variant="outline" className="w-full flex items-center justify-center gap-1" asChild>
+                  <Link to={`/slides?id=${project.slideId}`}>
+                    スライドを開く <ChevronRight className="h-4 w-4" />
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>
@@ -304,8 +366,10 @@ const BusinessDashboard = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button variant="outline" className="w-full">
-                詳細レポートを見る
+              <Button variant="outline" className="w-full" asChild>
+                <Link to={`/slides?id=${projects[0].slideId}`}>
+                  詳細レポートを見る
+                </Link>
               </Button>
             </CardFooter>
           </Card>
@@ -378,12 +442,14 @@ const BusinessDashboard = () => {
               <CardDescription>次に何をしますか？</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button className="w-full flex items-center justify-between gradient-primary text-white">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5" />
-                  <span>差分プレビューを見る</span>
-                </div>
-                <ChevronRight className="h-5 w-5" />
+              <Button className="w-full flex items-center justify-between gradient-primary text-white" asChild>
+                <Link to={`/slides?id=${projects[0].slideId}`}>
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5" />
+                    <span>差分プレビューを見る</span>
+                  </div>
+                  <ChevronRight className="h-5 w-5" />
+                </Link>
               </Button>
               
               <Button variant="outline" className="w-full flex items-center justify-between">
