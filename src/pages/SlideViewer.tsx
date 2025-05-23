@@ -188,23 +188,24 @@ const SlideViewer = () => {
             
             {/* Right sidebar - toggle button */}
             <div className="fixed right-4 top-24">
-              <Tabs 
-                value={viewMode} 
-                onValueChange={(v) => setViewMode(v as "all" | "canvas")}
-                orientation="vertical"
-                className="bg-white rounded-lg shadow-md"
-              >
-                <TabsList className="flex-col">
-                  <TabsTrigger value="canvas" className="flex items-center gap-1 py-3">
-                    <Eye className="h-4 w-4" />
-                    <span className="hidden lg:inline">スライドのみ</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="all" className="flex items-center gap-1 py-3">
-                    <MessageSquare className="h-4 w-4" />
-                    <span className="hidden lg:inline">コメント表示</span>
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+              <div className="bg-white rounded-lg shadow-md">
+                <Button 
+                  variant={viewMode === "canvas" ? "default" : "ghost"} 
+                  className="flex items-center gap-1 py-3 w-full"
+                  onClick={() => setViewMode("canvas")}
+                >
+                  <Eye className="h-4 w-4" />
+                  <span className="hidden lg:inline">スライドのみ</span>
+                </Button>
+                <Button 
+                  variant={viewMode === "all" ? "default" : "ghost"} 
+                  className="flex items-center gap-1 py-3 w-full"
+                  onClick={() => setViewMode("all")}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  <span className="hidden lg:inline">コメント表示</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
