@@ -15,6 +15,7 @@ interface UseCanvasProps {
   elements?: SlideElement[];
   onUpdateElement?: (elementId: string, updates: Partial<SlideElement>) => void;
   onSelectElement?: (element: CustomFabricObject | null) => void;
+  instanceId?: string;
 }
 
 export const useCanvas = ({
@@ -24,7 +25,8 @@ export const useCanvas = ({
   editable = false,
   elements = [],
   onUpdateElement,
-  onSelectElement
+  onSelectElement,
+  instanceId = 'default'
 }: UseCanvasProps) => {
   // 状態管理
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
@@ -34,20 +36,13 @@ export const useCanvas = ({
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const previousElementsRef = useRef<SlideElement[]>(elements);
   const previousSlideRef = useRef<number>(currentSlide);
-  const prevEditableRef = useRef<boolean>(editable);
-  const [forceRender, setForceRender] = useState(0);
-
-  // モード変更を検出して強制的に再レンダリング
-  useEffect(() => {
-    if (prevEditableRef.current !== editable) {
-      console.log(`Mode changed in useCanvas: ${prevEditableRef.current} -> ${editable}`);
-      prevEditableRef.current = editable;
-      setForceRender(prev => prev + 1);
-    }
-  }, [editable]);
+  const mountedRef = useRef<boolean>(true);
+  const renderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // メモ化したonSelectElement関数
   const handleSelectElement = useCallback((obj: CustomFabricObject | null) => {
+    if (!mountedRef.current) return;
+    
     selectedObjectRef.current = obj;
     if (obj && obj.customData?.id) {
       setSelectedElementId(obj.customData.id);
@@ -58,11 +53,27 @@ export const useCanvas = ({
     }
   }, [onSelectElement]);
 
-  // キャンバス初期化フック - editable と forceRender をモード変更検出のために依存関係に追加
+  // メウントおよびアンマウント時の処理
+  useEffect(() => {
+    console.log(`[Instance ${instanceId}] useCanvas mounted - editable: ${editable}`);
+    mountedRef.current = true;
+    
+    return () => {
+      mountedRef.current = false;
+      if (renderTimerRef.current) {
+        clearTimeout(renderTimerRef.current);
+        renderTimerRef.current = null;
+      }
+      console.log(`[Instance ${instanceId}] useCanvas unmounted - editable: ${editable}`);
+    };
+  }, [editable, instanceId]);
+
+  // キャンバス初期化フック
   const { canvas, initialized, containerRef } = useCanvasInitialization({
     canvasRef,
     editable,
-    onSelectElement: handleSelectElement
+    onSelectElement: handleSelectElement,
+    instanceId
   });
 
   // ズームフック
@@ -78,7 +89,8 @@ export const useCanvas = ({
     canvas,
     initialized,
     editable,
-    onUpdateElement
+    onUpdateElement,
+    instanceId
   });
 
   // 要素レンダリングフック
@@ -86,27 +98,62 @@ export const useCanvas = ({
     canvas,
     initialized,
     editable,
-    currentSlide
+    currentSlide,
+    instanceId
   });
 
   // キャンバスが初期化されたらready状態にする
   useEffect(() => {
+    if (!mountedRef.current) return;
+    
     if (initialized && canvas) {
-      console.log(`Canvas is now ready - editable: ${editable}, slide: ${currentSlide}`);
+      console.log(`[Instance ${instanceId}] Canvas is now ready - editable: ${editable}, slide: ${currentSlide}`);
       setCanvasReady(true);
       setLoadingError(null);
     } else {
       setCanvasReady(false);
     }
-  }, [initialized, canvas, editable, currentSlide]);
+  }, [initialized, canvas, editable, currentSlide, instanceId]);
 
-  // スライドが変更されたときや、モードが変更されたときに要素をレンダリング
-  useEffect(() => {
-    if (!canvas || !initialized) {
-      console.log("Canvas not ready for rendering elements");
+  // スライドの内容をレンダリング
+  const renderSlideContent = useCallback(() => {
+    if (!canvas || !initialized || !mountedRef.current) {
+      console.log(`[Instance ${instanceId}] Canvas not ready for rendering elements`);
       return;
     }
 
+    renderAttemptRef.current += 1;
+    console.log(`[Instance ${instanceId}] Rendering slide ${currentSlide} content - editable: ${editable}, attempt: ${renderAttemptRef.current}`);
+    
+    try {
+      // キャンバスをクリア
+      canvas.clear();
+      canvas.backgroundColor = '#ffffff';
+      
+      // 現在のスライドの要素をレンダリング
+      renderElements(elements);
+      
+      // 強制的に再描画
+      canvas.renderAll();
+      console.log(`[Instance ${instanceId}] Slide ${currentSlide} rendered successfully with ${elements.length} elements`);
+      
+      // 成功したらレンダリング試行カウンタをリセット
+      renderAttemptRef.current = 0;
+      setLoadingError(null);
+    } catch (error) {
+      console.error(`[Instance ${instanceId}] Error rendering slide:`, error);
+      
+      // 3回試行してもエラーの場合はエラー状態に設定
+      if (renderAttemptRef.current >= 3) {
+        setLoadingError("スライドの読み込み中にエラーが発生しました");
+      }
+    }
+  }, [canvas, initialized, currentSlide, editable, elements, renderElements, instanceId]);
+
+  // 要素やスライドの変更を監視して再レンダリング
+  useEffect(() => {
+    if (!mountedRef.current) return;
+    
     // スライド変更の検出
     const slideChanged = previousSlideRef.current !== currentSlide;
     previousSlideRef.current = currentSlide;
@@ -115,36 +162,36 @@ export const useCanvas = ({
     const elementsChanged = JSON.stringify(previousElementsRef.current) !== JSON.stringify(elements);
     previousElementsRef.current = [...elements];
     
-    // モード変更、スライド変更、要素変更があった場合のみレンダリング
-    if (slideChanged || elementsChanged || forceRender > 0) {
-      renderAttemptRef.current += 1;
-      
-      console.log(`Rendering slide ${currentSlide} content - editable: ${editable}, forceRender: ${forceRender}, attempt: ${renderAttemptRef.current}`);
-      
-      try {
-        // キャンバスをクリア
-        canvas.clear();
-        
-        // 現在のスライドの要素をレンダリング
-        renderElements(elements);
-        
-        // 強制的に再描画
-        canvas.renderAll();
-        console.log(`Slide ${currentSlide} rendered successfully with ${elements.length} elements`);
-        
-        // 成功したらレンダリング試行カウンタをリセット
-        renderAttemptRef.current = 0;
-        setLoadingError(null);
-      } catch (error) {
-        console.error("Error rendering slide:", error);
-        
-        // 3回試行してもエラーの場合はエラー状態に設定
-        if (renderAttemptRef.current >= 3) {
-          setLoadingError("スライドの読み込み中にエラーが発生しました");
-        }
-      }
+    // スライド変更、要素変更があった場合のみレンダリング
+    if (!canvas || !initialized) {
+      console.log(`[Instance ${instanceId}] Skipping render - canvas not ready`);
+      return;
     }
-  }, [currentSlide, initialized, canvas, renderElements, elements, forceRender, editable]);
+    
+    if (slideChanged || elementsChanged) {
+      console.log(`[Instance ${instanceId}] Slide or elements changed, scheduling render`);
+      
+      // 短い遅延を入れて連続更新を防止
+      if (renderTimerRef.current) {
+        clearTimeout(renderTimerRef.current);
+      }
+      
+      renderTimerRef.current = setTimeout(() => {
+        if (mountedRef.current) {
+          renderSlideContent();
+        }
+        renderTimerRef.current = null;
+      }, 50);
+    }
+  }, [canvas, initialized, currentSlide, elements, renderSlideContent, instanceId]);
+
+  // キャンバスが初期化されたときにすぐに内容をレンダリング
+  useEffect(() => {
+    if (initialized && canvas && mountedRef.current) {
+      console.log(`[Instance ${instanceId}] Canvas initialized, rendering initial content`);
+      renderSlideContent();
+    }
+  }, [initialized, canvas, renderSlideContent, instanceId]);
 
   // 戻り値をメモ化して安定させる
   return useMemo(() => ({

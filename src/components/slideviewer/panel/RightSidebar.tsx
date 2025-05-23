@@ -24,6 +24,8 @@ const RightSidebar = ({
     return null;
   }
 
+  console.log(`Rendering RightSidebar: showNotes=${shouldShowNotes}, showReview=${shouldShowReviewPanel}`);
+
   return (
     <div className="w-80 h-full bg-gray-50 border-l border-gray-200 overflow-hidden">
       {shouldShowNotes && (
@@ -34,6 +36,7 @@ const RightSidebar = ({
         />
       )}
       
+      {/* レビューパネルはプレゼンターノートより優先度を下げる */}
       {shouldShowReviewPanel && !shouldShowNotes && (
         <div className="h-full flex items-center justify-center">
           <div className="text-center p-4">

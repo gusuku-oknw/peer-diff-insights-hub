@@ -1,5 +1,5 @@
 
-import React, { useRef, useCallback, useMemo, useState } from "react";
+import React, { useRef, useCallback, useMemo, useState, useEffect } from "react";
 import { useSlideStore } from "@/stores/slideStore";
 import { useCanvas } from "@/hooks/fabric/useCanvas";
 import { CustomFabricObject } from '@/utils/types/canvas.types';
@@ -23,6 +23,14 @@ const FabricSlideCanvas = ({
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const slides = useSlideStore(state => state.slides);
   const updateElement = useSlideStore(state => state.updateElement);
+  const [instanceId] = useState(() => Math.random().toString(36).substring(2, 9));
+  
+  useEffect(() => {
+    console.log(`FabricSlideCanvas instance ${instanceId} mounted - Editable: ${editable}`);
+    return () => {
+      console.log(`FabricSlideCanvas instance ${instanceId} will unmount - Editable: ${editable}`);
+    };
+  }, [instanceId, editable]);
   
   // 現在のスライドの要素を取得
   const currentSlideData = useMemo(() => {
@@ -53,7 +61,8 @@ const FabricSlideCanvas = ({
     editable,
     elements,
     onUpdateElement: handleUpdateElement,
-    onSelectElement: handleSelectElement
+    onSelectElement: handleSelectElement,
+    instanceId // インスタンスIDを渡して再初期化を確実にする
   });
   
   // キャンバスコンテナのスタイル
@@ -72,13 +81,15 @@ const FabricSlideCanvas = ({
         className="will-change-transform"
         style={containerStyle}
         data-mode={editable ? "edit" : "view"}
+        data-instance={instanceId}
       >
         <canvas 
           ref={canvasRef} 
-          className="fabric-canvas" 
+          className="fabric-canvas"
           data-testid="fabric-canvas"
           data-editable={editable ? "true" : "false"}
           data-slide={currentSlide}
+          data-instance={instanceId}
         />
         
         {!canvasReady && <CanvasLoadingIndicator />}

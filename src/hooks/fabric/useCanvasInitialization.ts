@@ -6,6 +6,7 @@ interface UseCanvasInitializationProps {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   editable?: boolean;
   onSelectElement?: (element: any | null) => void;
+  instanceId?: string;
 }
 
 interface UseCanvasInitializationResult {
@@ -17,13 +18,15 @@ interface UseCanvasInitializationResult {
 export const useCanvasInitialization = ({
   canvasRef,
   editable = false,
-  onSelectElement
+  onSelectElement,
+  instanceId = 'default'
 }: UseCanvasInitializationProps): UseCanvasInitializationResult => {
   const canvasInstance = useRef<Canvas | null>(null);
   const [initialized, setInitialized] = useState(false);
   const containerRef = useRef<HTMLElement | null>(null);
   const canvasInitializationCount = useRef(0);
   const prevEditableRef = useRef<boolean>(editable);
+  const mountedRef = useRef<boolean>(false);
 
   // キャンバス設定をメモ化して再レンダリングを防ぐ
   const canvasConfig = useMemo(() => ({
@@ -36,59 +39,81 @@ export const useCanvasInitialization = ({
     selectionLineWidth: 2,
   }), [editable]);
 
+  // キャンバスを明示的に破棄するヘルパー関数
+  const disposeCanvas = () => {
+    if (canvasInstance.current) {
+      try {
+        console.log(`[Instance ${instanceId}] Explicitly disposing canvas`);
+        canvasInstance.current.dispose();
+        canvasInstance.current = null;
+        setInitialized(false);
+      } catch (e) {
+        console.error(`[Instance ${instanceId}] Error disposing canvas:`, e);
+      }
+    }
+  };
+
   useEffect(() => {
-    console.log(`useCanvasInitialization effect triggered, editable: ${editable}, initialized: ${initialized}`);
+    console.log(`[Instance ${instanceId}] Canvas initialization effect triggered, editable: ${editable}, initialized: ${initialized}`);
+    mountedRef.current = true;
     
-    // モードが変更された場合は再初期化フラグを設定
+    // モードが変更された場合は再初期化
     const modeChanged = prevEditableRef.current !== editable;
+    if (modeChanged) {
+      console.log(`[Instance ${instanceId}] Mode changed from ${prevEditableRef.current} to ${editable}, clearing existing canvas`);
+      disposeCanvas();
+    }
     prevEditableRef.current = editable;
     
-    if (modeChanged) {
-      console.log(`Mode changed from ${prevEditableRef.current} to ${editable}, forcing re-initialization`);
-    }
-    
     // DOMがマウントされていることを確認
-    if (!canvasRef.current || !document.body.contains(canvasRef.current)) {
-      console.log("Canvas element is not in DOM yet or not available, waiting...");
+    if (!canvasRef.current) {
+      console.log(`[Instance ${instanceId}] Canvas element not available yet`);
+      return;
+    }
+
+    if (!document.body.contains(canvasRef.current)) {
+      console.log(`[Instance ${instanceId}] Canvas element is not in DOM yet`);
       return;
     }
 
     // 親コンテナを保存
     containerRef.current = canvasRef.current.parentElement;
 
-    // 既存のキャンバスがある場合は明示的に破棄
-    if (canvasInstance.current) {
-      try {
-        console.log(`Disposing existing canvas: editable=${editable}, modeChanged=${modeChanged}`);
-        canvasInstance.current.dispose();
-        canvasInstance.current = null;
-        setInitialized(false);
-      } catch (e) {
-        console.error("Error disposing canvas on mode change:", e);
-      }
+    // 既に初期化済みの場合はスキップ
+    if (canvasInstance.current && initialized) {
+      console.log(`[Instance ${instanceId}] Canvas already initialized, skipping`);
+      return;
     }
 
     // 初期化カウントを追跡して診断に使用
     canvasInitializationCount.current += 1;
-    console.log(`Canvas initialization attempt #${canvasInitializationCount.current}, editable: ${editable}`);
+    console.log(`[Instance ${instanceId}] Canvas initialization attempt #${canvasInitializationCount.current}, editable: ${editable}`);
 
-    // キャンバス初期化を少し遅らせてDOMが完全に準備されるようにする
+    // キャンバス初期化
     const initTimer = setTimeout(() => {
-      try {
-        // 要素がまだDOM内に存在するか再確認
-        if (!canvasRef.current || !document.body.contains(canvasRef.current)) {
-          console.log("Canvas element is no longer in the DOM during initialization");
-          return;
-        }
+      // コンポーネントがまだマウントされているか確認
+      if (!mountedRef.current) {
+        console.log(`[Instance ${instanceId}] Component unmounted before canvas initialization`);
+        return;
+      }
+      
+      // 要素がまだDOM内に存在するか再確認
+      if (!canvasRef.current || !document.body.contains(canvasRef.current)) {
+        console.log(`[Instance ${instanceId}] Canvas element is no longer in the DOM during initialization`);
+        return;
+      }
 
+      try {
+        // 既存のキャンバスがあれば破棄
+        disposeCanvas();
+        
         // 新しいキャンバスを作成
         const canvas = new Canvas(canvasRef.current, canvasConfig);
+        console.log(`[Instance ${instanceId}] New canvas created with config:`, canvasConfig);
 
         // 親コンテナに基づいて適切なサイズを設定
-        if (containerRef.current) {
-          canvas.setWidth(1600);
-          canvas.setHeight(900);
-        }
+        canvas.setWidth(1600);
+        canvas.setHeight(900);
         
         // 編集モードの場合、選択イベントをセットアップ
         if (editable && onSelectElement) {
@@ -113,38 +138,29 @@ export const useCanvasInitialization = ({
 
         // 参照を設定し、初期化完了をマーク
         canvasInstance.current = canvas;
-        console.log(`Canvas successfully initialized, editable: ${editable}, id: ${canvasRef.current.id}`);
+        console.log(`[Instance ${instanceId}] Canvas successfully initialized, editable: ${editable}`);
         setInitialized(true);
         
         // 初期化後に強制的に再描画
         setTimeout(() => {
-          if (canvas && !canvas.disposed) {
+          if (canvas && !canvas.disposed && mountedRef.current) {
             canvas.renderAll();
-            console.log("Forced canvas render after initialization");
+            console.log(`[Instance ${instanceId}] Forced canvas render after initialization`);
           }
         }, 50);
       } catch (error) {
-        console.error("Error initializing canvas:", error);
+        console.error(`[Instance ${instanceId}] Error initializing canvas:`, error);
       }
-    }, 10); // 短い遅延を入れる
+    }, 50); // 少し長めの遅延を入れて確実にDOMが準備されるようにする
 
     // クリーンアップ関数
     return () => {
+      mountedRef.current = false;
       clearTimeout(initTimer);
-      
-      if (canvasInstance.current) {
-        try {
-          // unmount時の再初期化を防ぐためにフラグを設定
-          setInitialized(false);
-          canvasInstance.current.dispose();
-          canvasInstance.current = null;
-          console.log("Canvas disposed during cleanup");
-        } catch (e) {
-          console.error("Error disposing canvas:", e);
-        }
-      }
+      disposeCanvas();
+      console.log(`[Instance ${instanceId}] Canvas initialization effect cleanup`);
     };
-  }, [canvasRef, editable, onSelectElement, canvasConfig]);
+  }, [canvasRef, editable, onSelectElement, canvasConfig, instanceId]);
 
   return {
     canvas: canvasInstance.current,

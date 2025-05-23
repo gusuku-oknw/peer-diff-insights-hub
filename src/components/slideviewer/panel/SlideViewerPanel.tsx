@@ -37,11 +37,18 @@ const SlideViewerPanel = ({
 }: SlideViewerPanelProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showDragTip, setShowDragTip] = useState(true);
+  const [renderKey, setRenderKey] = useState(`${viewerMode}-${currentSlide}-${Date.now()}`);
   
   const { handlePreviousSlide, handleNextSlide } = useSlideNavigation({
     totalSlides
   });
   
+  // モードが変わったときにキャンバスを再レンダリング
+  useEffect(() => {
+    setRenderKey(`${viewerMode}-${currentSlide}-${Date.now()}`);
+    console.log(`SlideViewerPanel: Updated renderKey due to mode change: ${renderKey}`);
+  }, [viewerMode, currentSlide]);
+
   // Dismiss drag tip after a few seconds
   useEffect(() => {
     if (showDragTip) {
@@ -83,7 +90,7 @@ const SlideViewerPanel = ({
     setSidebarOpen(prev => !prev);
   };
 
-  console.log(`Rendering SlideViewerPanel: mode=${viewerMode}, slide=${currentSlide}, showNotes=${showPresenterNotes}`);
+  console.log(`Rendering SlideViewerPanel: mode=${viewerMode}, slide=${currentSlide}, showNotes=${showPresenterNotes}, renderKey=${renderKey}`);
   
   return (
     <div className="flex h-full">
@@ -105,7 +112,7 @@ const SlideViewerPanel = ({
         <div className="flex flex-1 relative overflow-hidden">
           <div className="flex-1 flex items-center justify-center bg-slate-100 h-full">
             <FabricSlideCanvas
-              key={`slide-canvas-${viewerMode}-${currentSlide}`}
+              key={renderKey}
               currentSlide={currentSlide}
               zoomLevel={zoom}
               editable={viewerMode === "edit"}
