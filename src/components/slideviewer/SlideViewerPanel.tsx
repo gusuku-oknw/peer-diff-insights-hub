@@ -1,0 +1,112 @@
+
+import { useEffect, useState } from "react";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Clock } from "lucide-react";
+import SlideCanvas from "@/components/slideviewer/SlideCanvas";
+import SlideNotesPanel from "@/components/slideviewer/SlideNotesPanel";
+import CommentList from "@/components/slideviewer/CommentList";
+import AIReviewSummary from "@/components/slideviewer/AIReviewSummary";
+
+interface SlideViewerPanelProps {
+  currentSlide: number;
+  zoom: number;
+  viewerMode: "notes" | "edit" | "review";
+  userType: "student" | "enterprise";
+  showPresenterNotes: boolean;
+  isFullScreen: boolean;
+  presentationStartTime: Date | null;
+  presenterNotes: Record<number, string>;
+  totalSlides: number;
+  elapsedTime: string;
+}
+
+const SlideViewerPanel = ({
+  currentSlide,
+  zoom,
+  viewerMode,
+  userType,
+  showPresenterNotes,
+  isFullScreen,
+  presentationStartTime,
+  presenterNotes,
+  totalSlides,
+  elapsedTime
+}: SlideViewerPanelProps) => {
+  return (
+    <ResizablePanelGroup direction="horizontal" className="h-full">
+      {/* Slide canvas */}
+      <ResizablePanel id="slide-canvas" order={1} className="overflow-hidden">
+        <div className={`flex-grow flex items-center justify-center h-full p-4 relative ${viewerMode === "notes" && isFullScreen ? "bg-gray-900" : "bg-gradient-to-br from-slate-50 to-gray-100"}`}>
+          <div className={`w-4/5 h-full flex items-center justify-center relative ${viewerMode === "notes" && isFullScreen ? "w-full max-w-none" : ""}`}>
+            {/* プレゼン時間表示（フルスクリーン時のみ） */}
+            {isFullScreen && presentationStartTime && (
+              <div className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full flex items-center space-x-2 z-30">
+                <Clock className="h-4 w-4" />
+                <span>{elapsedTime}</span>
+              </div>
+            )}
+            
+            <SlideCanvas 
+              currentSlide={currentSlide} 
+              zoomLevel={zoom} 
+              editable={viewerMode === "edit"}
+              userType={userType}
+            />
+          </div>
+        </div>
+      </ResizablePanel>
+      
+      {/* Notes sidebar (conditionally displayed) */}
+      {showPresenterNotes && viewerMode === "notes" && (
+        <>
+          <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />
+          <ResizablePanel defaultSize={30} minSize={20} id="notes-sidebar" order={2} className="overflow-hidden">
+            <SlideNotesPanel 
+              currentSlide={currentSlide}
+              totalSlides={totalSlides}
+              presenterNotes={presenterNotes}
+            />
+          </ResizablePanel>
+        </>
+      )}
+      
+      {/* Comment sidebar */}
+      {viewerMode === "review" && (
+        <>
+          <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />
+          <ResizablePanel defaultSize={30} minSize={20} id="comment-sidebar" order={2} className="overflow-hidden">
+            <div className="h-full bg-white shadow-sm">
+              <div className="px-4 py-3 border-b border-gray-200 bg-purple-50">
+                <h3 className="font-medium text-sm flex items-center text-purple-800">
+                  コメント管理
+                </h3>
+              </div>
+              <CommentList currentSlide={currentSlide} />
+            </div>
+          </ResizablePanel>
+        </>
+      )}
+      
+      {/* AI要約パネル（企業ユーザーのみ） */}
+      {userType === "enterprise" && viewerMode === "review" && (
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              className="absolute top-4 right-4 z-20 bg-purple-600 hover:bg-purple-700 text-white"
+              size="sm"
+            >
+              AI要約
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="w-[400px]">
+            <AIReviewSummary slideId={currentSlide} />
+          </SheetContent>
+        </Sheet>
+      )}
+    </ResizablePanelGroup>
+  );
+};
+
+export default SlideViewerPanel;
