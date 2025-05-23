@@ -98,6 +98,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
+      {/* Mobile overlay for left sidebar */}
+      {isMobile && leftSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={onToggleLeftSidebar}
+        />
+      )}
+
       {/* Main horizontal layout */}
       <div className="flex flex-grow overflow-hidden">
         {/* Left Sidebar */}
@@ -109,19 +117,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           onBranchChange={onBranchChange}
         />
 
-        {/* Main Content */}
-        <MainContent
-          currentSlide={currentSlide}
-          zoom={zoom}
-          viewerMode={viewerMode}
-          userType={userType}
-          isNotesPanelOpen={isNotesPanelOpen}
-          comments={comments}
-          commentText={commentText}
-          setCommentText={setCommentText}
-          handleAddComment={handleAddComment}
-          toggleNotesPanel={toggleNotesPanel}
-        />
+        {/* Main Content - adjust width based on sidebar state */}
+        <div className={`flex-1 flex flex-col transition-all duration-300 ${leftSidebarOpen && !isMobile ? 'ml-0' : ''}`}>
+          <MainContent
+            currentSlide={currentSlide}
+            zoom={zoom}
+            viewerMode={viewerMode}
+            userType={userType}
+            isNotesPanelOpen={isNotesPanelOpen}
+            comments={comments}
+            commentText={commentText}
+            setCommentText={setCommentText}
+            handleAddComment={handleAddComment}
+            toggleNotesPanel={toggleNotesPanel}
+          />
+        </div>
 
         {/* Right Sidebar - Conditional display */}
         {shouldShowRightSidePanel && (

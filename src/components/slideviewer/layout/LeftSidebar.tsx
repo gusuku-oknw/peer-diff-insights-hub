@@ -2,6 +2,7 @@
 import React from "react";
 import BranchSelector from "@/components/slideviewer/history/BranchSelector";
 import CommitHistory from "@/components/slideviewer/history/CommitHistory";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LeftSidebarProps {
   leftSidebarOpen: boolean;
@@ -18,8 +19,17 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
   commitHistory,
   onBranchChange
 }) => {
+  const isMobile = useIsMobile();
+
   return (
-    <aside className={`w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 transition-transform duration-300 transform ${leftSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:block`}>
+    <aside 
+      className={`
+        w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 
+        transition-transform duration-300 ease-in-out
+        ${leftSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${isMobile ? 'fixed top-0 left-0 h-full z-40' : 'relative'}
+      `}
+    >
       <div className="h-full flex flex-col">
         <div className="p-4">
           <h2 className="text-lg font-semibold text-gray-800">スライド管理</h2>
