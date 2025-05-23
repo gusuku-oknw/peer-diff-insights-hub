@@ -14,9 +14,13 @@ type EmptyStateCreator = [["zustand/persist", unknown]];
 
 // スライドストアの作成
 const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get, api) => {
+  // サンプルスライドを作成
+  const sampleSlides = createSampleSlides();
+  console.log('Creating slide store with sample slides:', sampleSlides.length);
+  
   // 各スライスを結合
   return {
-    slides: createSampleSlides(),
+    slides: sampleSlides,
     
     // Navigation slice
     ...createNavigationSlice(set, get, api),
@@ -46,6 +50,12 @@ export const useSlideStore = create<SlideStore>()(
         isPPTXImported: state.isPPTXImported,
         pptxFilename: state.pptxFilename
       }),
+      // デバッグ用のログを追加
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          console.log('Slide store rehydrated with slides:', state.slides?.length || 0);
+        }
+      },
     }
   )
 );

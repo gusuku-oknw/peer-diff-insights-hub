@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,6 +40,13 @@ const SlideViewer = () => {
     generateThumbnails,
     setDisplayCount
   } = useSlideStore();
+  
+  // デバッグ用ログを追加
+  useEffect(() => {
+    console.log('SlideViewer rendered with slides:', slides.length);
+    console.log('Current slide:', currentSlide);
+    console.log('Available slide IDs:', slides.map(s => s.id));
+  }, [slides, currentSlide]);
   
   const { elapsedTime, toggleFullScreenWithEffects } = usePresentationMode();
   const { handlePreviousSlide, handleNextSlide } = useSlideNavigation({

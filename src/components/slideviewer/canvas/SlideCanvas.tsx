@@ -27,19 +27,30 @@ const SlideCanvas = ({
   
   useEffect(() => {
     console.log(`SlideCanvas instance ${instanceId} mounted - Editable: ${editable}`);
+    console.log(`Total slides available:`, slides.length);
+    console.log(`Looking for slide with ID:`, currentSlide);
     return () => {
       console.log(`SlideCanvas instance ${instanceId} will unmount - Editable: ${editable}`);
     };
-  }, [instanceId, editable]);
+  }, [instanceId, editable, slides.length, currentSlide]);
   
-  // 現在のスライドの要素を取得
+  // 現在のスライドの要素を取得 - より詳細なデバッグ情報を追加
   const currentSlideData = useMemo(() => {
-    return slides.find(slide => slide.id === currentSlide);
+    console.log(`Available slides:`, slides.map(s => ({ id: s.id, elementsCount: s.elements?.length || 0 })));
+    const slide = slides.find(slide => slide.id === currentSlide);
+    console.log(`Found slide data for ID ${currentSlide}:`, slide ? { 
+      id: slide.id, 
+      elementsCount: slide.elements?.length || 0,
+      elements: slide.elements?.map(e => ({ id: e.id, type: e.type })) || []
+    } : 'No slide found');
+    return slide;
   }, [slides, currentSlide]);
   
   const elements = useMemo(() => {
-    return currentSlideData?.elements || [];
-  }, [currentSlideData]);
+    const slideElements = currentSlideData?.elements || [];
+    console.log(`Elements for slide ${currentSlide}:`, slideElements.length, slideElements);
+    return slideElements;
+  }, [currentSlideData, currentSlide]);
 
   // 要素更新ハンドラ
   const handleUpdateElement = useCallback((elementId: string, updates: any) => {
