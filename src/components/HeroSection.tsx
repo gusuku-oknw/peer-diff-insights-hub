@@ -1,11 +1,8 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, GitBranch, Users, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
-
 const HeroSection = () => {
-  return (
-    <section className="pt-20 pb-16 gradient-secondary min-h-screen flex items-center">
+  return <section className="pt-20 pb-16 gradient-secondary min-h-screen flex items-center">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left">
@@ -18,7 +15,7 @@ const HeroSection = () => {
             
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
               学生×企業の
-              <span className="gradient-primary bg-clip-text text-transparent inline-block">
+              <span className="gradient-primary bg-clip-text text-transparent inline-block font-normal">
                 共創プラットフォーム
               </span>
             </h1>
@@ -90,8 +87,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;
