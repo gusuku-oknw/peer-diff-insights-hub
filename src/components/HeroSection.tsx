@@ -49,7 +49,7 @@ const HeroSection = () => {
           </div>
           
           <div className="relative">
-            <div className="relative bg-white rounded-2xl shadow-2xl p-8 animate-float">
+            <div className="relative bg-white rounded-2xl shadow-2xl p-8 animate-float z-10">
               <div className="space-y-4">
                 <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse-soft"></div>
@@ -80,8 +80,8 @@ const HeroSection = () => {
               </div>
             </div>
             
-            <div className="absolute -top-4 -right-4 w-24 h-24 gradient-primary rounded-full opacity-20 animate-ping"></div>
-            <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-purple-300 rounded-full opacity-20 animate-pulse-soft"></div>
+            <div className="absolute -top-4 -right-4 w-24 h-24 gradient-primary rounded-full opacity-20 animate-ping z-0"></div>
+            <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-purple-300 rounded-full opacity-20 animate-pulse-soft z-0"></div>
           </div>
         </div>
       </div>

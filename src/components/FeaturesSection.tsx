@@ -48,7 +48,7 @@ const FeaturesSection = () => {
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             革新的な機能で
-            <span className="gradient-primary bg-clip-text text-transparent">
+            <span className="gradient-primary bg-clip-text text-transparent inline-block">
               レビューを再定義
             </span>
           </h2>

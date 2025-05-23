@@ -66,7 +66,7 @@ const PricingSection = () => {
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             シンプルで
-            <span className="gradient-primary bg-clip-text text-transparent">
+            <span className="gradient-primary bg-clip-text text-transparent inline-block">
               透明性のある料金
             </span>
           </h2>
@@ -95,7 +95,7 @@ const PricingSection = () => {
               <CardHeader className="text-center pb-8">
                 <CardTitle className="text-2xl font-bold mb-2">{plan.name}</CardTitle>
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-4xl font-bold gradient-primary bg-clip-text text-transparent">
+                  <span className="text-4xl font-bold gradient-primary bg-clip-text text-transparent inline-block">
                     {plan.price}
                   </span>
                   <span className="text-gray-600">{plan.period}</span>
