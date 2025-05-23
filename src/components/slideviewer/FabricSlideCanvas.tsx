@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSlideStore } from "@/stores/slideStore";
 import { useAuth } from "@/contexts/AuthContext";
 import useFabricCanvas from "@/hooks/useFabricCanvas";
@@ -31,6 +31,7 @@ const FabricSlideCanvas = ({
   const slides = useSlideStore(state => state.slides);
   const addElement = useSlideStore(state => state.addElement);
   const updateElement = useSlideStore(state => state.updateElement);
+  const [canvasReady, setCanvasReady] = useState(false);
 
   // Use our custom hook for canvas management
   const { canvas, initialized } = useFabricCanvas({
@@ -43,125 +44,143 @@ const FabricSlideCanvas = ({
     }
   });
 
+  // Mark canvas as ready when initialized
+  useEffect(() => {
+    if (initialized && canvas) {
+      setCanvasReady(true);
+    }
+  }, [initialized, canvas]);
+
   // Load slide content when current slide changes or canvas is initialized
   useEffect(() => {
-    if (!canvas || !initialized) return;
+    if (!canvas || !initialized || !canvasReady) return;
 
-    // Clear canvas
-    canvas.clear();
-    canvas.backgroundColor = '#ffffff';
-    canvas.renderAll();
+    console.log("Loading slide content for slide", currentSlide);
+    
+    try {
+      // Clear canvas
+      canvas.clear();
+      canvas.backgroundColor = '#ffffff';
+      canvas.renderAll();
 
-    // Get current slide data
-    const slideData = slides.find(slide => slide.id === currentSlide);
-    if (!slideData) return;
+      // Get current slide data
+      const slideData = slides.find(slide => slide.id === currentSlide);
+      if (!slideData) {
+        console.log("No slide data found for slide", currentSlide);
+        return;
+      }
 
-    // If the slide has elements, add them to the canvas
-    if (slideData.elements && slideData.elements.length > 0) {
-      slideData.elements.forEach(element => {
-        let fabricObject;
+      // If the slide has elements, add them to the canvas
+      if (slideData.elements && slideData.elements.length > 0) {
+        slideData.elements.forEach(element => {
+          let fabricObject;
 
-        switch (element.type) {
-          case 'text':
-            fabricObject = createTextElement(
-              element.props.text || "New Text",
-              element.position.x,
-              element.position.y,
-              {
-                width: element.size.width,
-                fontSize: element.props.fontSize || 24,
-                fill: element.props.color || '#000000',
-                fontFamily: element.props.fontFamily || 'Arial',
-                fontWeight: element.props.fontWeight || 'normal',
-                angle: element.angle,
-                selectable: editable,
+          switch (element.type) {
+            case 'text':
+              fabricObject = createTextElement(
+                element.props.text || "New Text",
+                element.position.x,
+                element.position.y,
+                {
+                  width: element.size.width,
+                  fontSize: element.props.fontSize || 24,
+                  fill: element.props.color || '#000000',
+                  fontFamily: element.props.fontFamily || 'Arial',
+                  fontWeight: element.props.fontWeight || 'normal',
+                  angle: element.angle,
+                  selectable: editable,
+                }
+              );
+              break;
+              
+            case 'shape':
+              if (element.props.shape === 'rect') {
+                fabricObject = createRectElement(
+                  element.position.x,
+                  element.position.y,
+                  element.size.width,
+                  element.size.height,
+                  {
+                    fill: element.props.fill || '#000000',
+                    stroke: element.props.stroke || '',
+                    strokeWidth: element.props.strokeWidth || 0,
+                    angle: element.angle,
+                    selectable: editable,
+                  }
+                );
+              } else if (element.props.shape === 'circle') {
+                fabricObject = createCircleElement(
+                  element.position.x,
+                  element.position.y,
+                  element.size.width / 2,
+                  {
+                    fill: element.props.fill || '#000000',
+                    stroke: element.props.stroke || '',
+                    strokeWidth: element.props.strokeWidth || 0,
+                    angle: element.angle,
+                    selectable: editable,
+                  }
+                );
               }
-            );
-            break;
-            
-          case 'shape':
-            if (element.props.shape === 'rect') {
-              fabricObject = createRectElement(
-                element.position.x,
-                element.position.y,
-                element.size.width,
-                element.size.height,
-                {
-                  fill: element.props.fill || '#000000',
-                  stroke: element.props.stroke || '',
-                  strokeWidth: element.props.strokeWidth || 0,
-                  angle: element.angle,
-                  selectable: editable,
-                }
-              );
-            } else if (element.props.shape === 'circle') {
-              fabricObject = createCircleElement(
-                element.position.x,
-                element.position.y,
-                element.size.width / 2,
-                {
-                  fill: element.props.fill || '#000000',
-                  stroke: element.props.stroke || '',
-                  strokeWidth: element.props.strokeWidth || 0,
-                  angle: element.angle,
-                  selectable: editable,
-                }
-              );
-            }
-            break;
-            
-          case 'image':
-            // Fixed the image loading API to match Fabric.js v6
-            fabric.Image.fromURL(
-              element.props.src, 
-              { crossOrigin: 'anonymous' }
-            ).then((img) => {
-              img.set({
-                left: element.position.x,
-                top: element.position.y,
-                scaleX: element.size.width / img.width! || 1,
-                scaleY: element.size.height / img.height! || 1,
-                angle: element.angle,
-                selectable: editable,
-                originX: 'center',
-                originY: 'center',
-              });
+              break;
               
-              // Add custom data
-              addCustomDataToObject(img, element.id);
-              
-              canvas.add(img);
-              canvas.renderAll();
-            }).catch(error => console.error("Error loading image:", error));
-            break;
-        }
+            case 'image':
+              // Using the Promise-based API for Fabric.js v6
+              fabric.Image.fromURL(
+                element.props.src, 
+                { crossOrigin: 'anonymous' }
+              ).then((img) => {
+                if (!canvas || !canvasReady) return; // Safety check before adding to canvas
 
-        if (fabricObject) {
-          // Add custom data for tracking
-          addCustomDataToObject(fabricObject, element.id);
-          canvas.add(fabricObject);
-        }
-      });
-    } else {
-      // If there are no elements, use a placeholder text
-      const slideNumberText = new fabric.Text(`スライド ${currentSlide}`, {
-        left: canvas.width! / 2,
-        top: canvas.height! / 2,
-        fontSize: 36,
-        fill: '#1e293b',
-        originX: 'center',
-        originY: 'center',
-        selectable: false,
-      });
-      canvas.add(slideNumberText);
+                img.set({
+                  left: element.position.x,
+                  top: element.position.y,
+                  scaleX: element.size.width / img.width! || 1,
+                  scaleY: element.size.height / img.height! || 1,
+                  angle: element.angle,
+                  selectable: editable,
+                  originX: 'center',
+                  originY: 'center',
+                });
+                
+                // Add custom data
+                addCustomDataToObject(img, element.id);
+                
+                canvas.add(img);
+                canvas.renderAll();
+              }).catch(error => console.error("Error loading image:", error));
+              break;
+          }
+
+          if (fabricObject) {
+            // Add custom data for tracking
+            addCustomDataToObject(fabricObject, element.id);
+            canvas.add(fabricObject);
+          }
+        });
+      } else {
+        // If there are no elements, use a placeholder text
+        const slideNumberText = new fabric.Text(`スライド ${currentSlide}`, {
+          left: canvas.width! / 2,
+          top: canvas.height! / 2,
+          fontSize: 36,
+          fill: '#1e293b',
+          originX: 'center',
+          originY: 'center',
+          selectable: false,
+        });
+        canvas.add(slideNumberText);
+      }
+
+      canvas.renderAll();
+    } catch (error) {
+      console.error("Error rendering slide:", error);
     }
-
-    canvas.renderAll();
-  }, [currentSlide, initialized, slides, editable, canvas, updateElement]);
+  }, [currentSlide, initialized, canvasReady, slides, editable, canvas, updateElement]);
 
   // Add a new text element in edit mode
   const handleAddTextElement = () => {
-    if (!editable || !canvas) return;
+    if (!editable || !canvas || !canvasReady) return;
     
     const newId = `text-${Date.now()}`;
     const newText = createTextElement(
@@ -308,12 +327,22 @@ const FabricSlideCanvas = ({
           {editable && <EditModeIndicator />}
 
           {/* Edit toolbar for adding elements */}
-          {editable && (
+          {editable && canvasReady && (
             <AddElementButtons 
               onAddText={handleAddTextElement}
               onAddRect={handleAddRectElement}
               onAddCircle={handleAddCircleElement}
             />
+          )}
+          
+          {/* Loading indicator */}
+          {!canvasReady && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75">
+              <div className="flex flex-col items-center">
+                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="mt-4 text-blue-600 font-medium">キャンバスを読み込み中...</p>
+              </div>
+            </div>
           )}
         </div>
       </div>
