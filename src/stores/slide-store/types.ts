@@ -4,11 +4,17 @@ import type { NavigationSlice } from './navigation.slice';
 import type { PresentationSlice } from './presentation.slice';
 import type { ElementsSlice } from './elements.slice';
 
+export interface PPTXImportSlice {
+  isPPTXImported: boolean;
+  pptxFilename: string | null;
+  
+  setPPTXImported: (imported: boolean, filename?: string | null) => void;
+  importSlidesFromPPTX: (slidesData: Slide[]) => void;
+}
+
 export interface BaseSlideStore {
   slides: Slide[];
   thumbnails: Record<number, string>;
-  isPPTXImported: boolean;
-  pptxFilename: string | null;
   
   // Methods
   generateThumbnails: () => void;
@@ -21,4 +27,5 @@ export interface BaseSlideStore {
 export type SlideStore = BaseSlideStore & 
   NavigationSlice & 
   PresentationSlice & 
-  ElementsSlice;
+  ElementsSlice &
+  PPTXImportSlice;

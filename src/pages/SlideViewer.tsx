@@ -1,10 +1,9 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import MainToolbar from "@/components/slideviewer/toolbars/MainToolbar";
+import MainToolbar from "@/components/slide-viewer/toolbar/MainToolbar";
 import MainLayout from "@/components/slideviewer/layout/MainLayout";
 import { useSlideStore } from "@/stores/slideStore";
 import useSlideNavigation from "@/hooks/slideviewer/useSlideNavigation";

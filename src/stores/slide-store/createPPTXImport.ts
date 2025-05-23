@@ -1,7 +1,15 @@
 
 import { StateCreator } from 'zustand';
-import { Slide } from '@/utils/types/slide.types';
-import { SlideStore, PPTXImportSlice } from './types';
+import { Slide } from '@/types/slide-viewer/slide.types';
+import { SlideStore } from './types';
+
+export interface PPTXImportSlice {
+  isPPTXImported: boolean;
+  pptxFilename: string | null;
+  
+  setPPTXImported: (imported: boolean, filename?: string | null) => void;
+  importSlidesFromPPTX: (slidesData: Slide[]) => void;
+}
 
 // PPTXインポートスライスの作成
 export const createPPTXImportSlice: StateCreator<
