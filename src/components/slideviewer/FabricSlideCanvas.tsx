@@ -1,23 +1,23 @@
 
-import { useEffect, useRef, useState } from "react";
-import * as fabric from 'fabric';
+import { useEffect, useRef } from "react";
 import { useSlideStore } from "@/stores/slideStore";
-import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import useFabricCanvas from "@/hooks/useFabricCanvas";
+import {
+  createTextElement,
+  createRectElement,
+  createCircleElement,
+  addCustomDataToObject,
+} from "@/components/slideviewer/editor/FabricObjects";
+import AddElementButtons from "@/components/slideviewer/editor/AddElementButtons";
+import EditModeIndicator from "@/components/slideviewer/editor/EditModeIndicator";
+import * as fabric from 'fabric';
 
 interface FabricSlideCanvasProps {
   currentSlide: number;
   zoomLevel?: number;
   editable?: boolean;
   userType?: "student" | "enterprise";
-}
-
-// Define type for custom properties we want to add to fabric objects
-interface CustomFabricObject extends fabric.Object {
-  customData?: {
-    id: string;
-  };
 }
 
 const FabricSlideCanvas = ({ 
@@ -27,56 +27,28 @@ const FabricSlideCanvas = ({
   userType = "enterprise" 
 }: FabricSlideCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
   const { userProfile } = useAuth();
   const slides = useSlideStore(state => state.slides);
   const addElement = useSlideStore(state => state.addElement);
   const updateElement = useSlideStore(state => state.updateElement);
-  const [canvasInitialized, setCanvasInitialized] = useState(false);
 
-  // Initialize Fabric canvas
+  // Use our custom hook for canvas management
+  const { canvas, initialized } = useFabricCanvas({
+    canvasRef,
+    currentSlide,
+    zoomLevel,
+    editable,
+    onUpdateElement: (elementId, updates) => {
+      updateElement(currentSlide, elementId, updates);
+    }
+  });
+
+  // Load slide content when current slide changes or canvas is initialized
   useEffect(() => {
-    if (!canvasRef.current || fabricCanvasRef.current) return;
-
-    const canvas = new fabric.Canvas(canvasRef.current, {
-      backgroundColor: '#ffffff',
-      width: 1600,
-      height: 900,
-      selection: editable, // Allow selection only in editable mode
-      preserveObjectStacking: true,
-    });
-
-    fabricCanvasRef.current = canvas;
-    setCanvasInitialized(true);
-
-    // Clean up
-    return () => {
-      canvas.dispose();
-      fabricCanvasRef.current = null;
-    };
-  }, [editable]);
-
-  // Apply the zoom level
-  useEffect(() => {
-    const canvas = fabricCanvasRef.current;
-    if (!canvas) return;
-    
-    const scaleFactor = zoomLevel / 100;
-    canvas.setZoom(scaleFactor);
-    canvas.setDimensions({
-      width: canvas.getWidth() * scaleFactor,
-      height: canvas.getHeight() * scaleFactor,
-    });
-  }, [zoomLevel]);
-
-  // Load slide content when current slide changes
-  useEffect(() => {
-    const canvas = fabricCanvasRef.current;
-    if (!canvas || !canvasInitialized) return;
+    if (!canvas || !initialized) return;
 
     // Clear canvas
     canvas.clear();
-    // Update background color instead of using setBackgroundColor
     canvas.backgroundColor = '#ffffff';
     canvas.renderAll();
 
@@ -91,58 +63,50 @@ const FabricSlideCanvas = ({
 
         switch (element.type) {
           case 'text':
-            fabricObject = new fabric.Text(element.props.text || "New Text", {
-              left: element.position.x,
-              top: element.position.y,
-              width: element.size.width,
-              fontSize: element.props.fontSize || 24,
-              fill: element.props.color || '#000000',
-              fontFamily: element.props.fontFamily || 'Arial',
-              fontWeight: element.props.fontWeight || 'normal',
-              angle: element.angle,
-              selectable: editable,
-              originX: 'center',
-              originY: 'center',
-            }) as CustomFabricObject;
-            
-            // Add custom data
-            fabricObject.customData = { id: element.id };
+            fabricObject = createTextElement(
+              element.props.text || "New Text",
+              element.position.x,
+              element.position.y,
+              {
+                width: element.size.width,
+                fontSize: element.props.fontSize || 24,
+                fill: element.props.color || '#000000',
+                fontFamily: element.props.fontFamily || 'Arial',
+                fontWeight: element.props.fontWeight || 'normal',
+                angle: element.angle,
+                selectable: editable,
+              }
+            );
             break;
             
           case 'shape':
             if (element.props.shape === 'rect') {
-              fabricObject = new fabric.Rect({
-                left: element.position.x,
-                top: element.position.y,
-                width: element.size.width,
-                height: element.size.height,
-                fill: element.props.fill || '#000000',
-                stroke: element.props.stroke || '',
-                strokeWidth: element.props.strokeWidth || 0,
-                angle: element.angle,
-                selectable: editable,
-                originX: 'center',
-                originY: 'center',
-              }) as CustomFabricObject;
-              
-              // Add custom data
-              fabricObject.customData = { id: element.id };
+              fabricObject = createRectElement(
+                element.position.x,
+                element.position.y,
+                element.size.width,
+                element.size.height,
+                {
+                  fill: element.props.fill || '#000000',
+                  stroke: element.props.stroke || '',
+                  strokeWidth: element.props.strokeWidth || 0,
+                  angle: element.angle,
+                  selectable: editable,
+                }
+              );
             } else if (element.props.shape === 'circle') {
-              fabricObject = new fabric.Circle({
-                left: element.position.x,
-                top: element.position.y,
-                radius: element.size.width / 2,
-                fill: element.props.fill || '#000000',
-                stroke: element.props.stroke || '',
-                strokeWidth: element.props.strokeWidth || 0,
-                angle: element.angle,
-                selectable: editable,
-                originX: 'center',
-                originY: 'center',
-              }) as CustomFabricObject;
-              
-              // Add custom data
-              fabricObject.customData = { id: element.id };
+              fabricObject = createCircleElement(
+                element.position.x,
+                element.position.y,
+                element.size.width / 2,
+                {
+                  fill: element.props.fill || '#000000',
+                  stroke: element.props.stroke || '',
+                  strokeWidth: element.props.strokeWidth || 0,
+                  angle: element.angle,
+                  selectable: editable,
+                }
+              );
             }
             break;
             
@@ -152,7 +116,7 @@ const FabricSlideCanvas = ({
               element.props.src, 
               { crossOrigin: 'anonymous' }
             ).then((img) => {
-              (img as CustomFabricObject).set({
+              img.set({
                 left: element.position.x,
                 top: element.position.y,
                 scaleX: element.size.width / img.width! || 1,
@@ -164,7 +128,7 @@ const FabricSlideCanvas = ({
               });
               
               // Add custom data
-              (img as CustomFabricObject).customData = { id: element.id };
+              addCustomDataToObject(img, element.id);
               
               canvas.add(img);
               canvas.renderAll();
@@ -173,6 +137,8 @@ const FabricSlideCanvas = ({
         }
 
         if (fabricObject) {
+          // Add custom data for tracking
+          addCustomDataToObject(fabricObject, element.id);
           canvas.add(fabricObject);
         }
       });
@@ -190,54 +156,26 @@ const FabricSlideCanvas = ({
       canvas.add(slideNumberText);
     }
 
-    // Set up fabric object modification events when editable
-    if (editable) {
-      canvas.on('object:modified', (e) => {
-        const modifiedObject = e.target as CustomFabricObject;
-        if (!modifiedObject) return;
-        
-        // Update the object in our store using customData instead of data
-        updateElement(
-          currentSlide,
-          modifiedObject.customData?.id || 'temp-id',
-          {
-            position: { 
-              x: modifiedObject.left || 0, 
-              y: modifiedObject.top || 0 
-            },
-            size: { 
-              width: modifiedObject.width! * (modifiedObject.scaleX || 1), 
-              height: modifiedObject.height! * (modifiedObject.scaleY || 1) 
-            },
-            angle: modifiedObject.angle || 0,
-            // We would also update props based on type here
-          }
-        );
-      });
-    }
-
     canvas.renderAll();
-  }, [currentSlide, canvasInitialized, slides, editable, updateElement]);
+  }, [currentSlide, initialized, slides, editable, canvas, updateElement]);
 
-  // Add a new element in edit mode
+  // Add a new text element in edit mode
   const handleAddTextElement = () => {
-    if (!editable || !fabricCanvasRef.current) return;
-    
-    const canvas = fabricCanvasRef.current;
-    const newText = new fabric.IText("テキストをクリックして編集", {
-      left: canvas.width! / 2,
-      top: canvas.height! / 2,
-      fontSize: 24,
-      fill: '#000000',
-      originX: 'center',
-      originY: 'center',
-      selectable: true,
-      editable: true,
-    }) as fabric.IText & CustomFabricObject;
+    if (!editable || !canvas) return;
     
     const newId = `text-${Date.now()}`;
-    // Use customData instead of data
-    newText.customData = { id: newId };
+    const newText = createTextElement(
+      "テキストをクリックして編集", 
+      canvas.width! / 2, 
+      canvas.height! / 2,
+      {
+        selectable: true,
+        editable: true,
+      }
+    );
+    
+    // Add custom data
+    addCustomDataToObject(newText, newId);
     
     canvas.add(newText);
     canvas.setActiveObject(newText);
@@ -266,24 +204,16 @@ const FabricSlideCanvas = ({
   };
 
   const handleAddRectElement = () => {
-    if (!editable || !fabricCanvasRef.current) return;
-    
-    const canvas = fabricCanvasRef.current;
-    const newRect = new fabric.Rect({
-      left: canvas.width! / 2,
-      top: canvas.height! / 2,
-      width: 150,
-      height: 100,
-      fill: '#4287f5',
-      stroke: '#2054a8',
-      strokeWidth: 2,
-      originX: 'center',
-      originY: 'center',
-      selectable: true,
-    }) as fabric.Rect & CustomFabricObject;
+    if (!editable || !canvas) return;
     
     const newId = `rect-${Date.now()}`;
-    newRect.customData = { id: newId };
+    const newRect = createRectElement(
+      canvas.width! / 2, 
+      canvas.height! / 2
+    );
+    
+    // Add custom data
+    addCustomDataToObject(newRect, newId);
     
     canvas.add(newRect);
     canvas.setActiveObject(newRect);
@@ -313,23 +243,16 @@ const FabricSlideCanvas = ({
   };
 
   const handleAddCircleElement = () => {
-    if (!editable || !fabricCanvasRef.current) return;
-    
-    const canvas = fabricCanvasRef.current;
-    const newCircle = new fabric.Circle({
-      left: canvas.width! / 2,
-      top: canvas.height! / 2,
-      radius: 50,
-      fill: '#f54242',
-      stroke: '#8a2727',
-      strokeWidth: 2,
-      originX: 'center',
-      originY: 'center',
-      selectable: true,
-    }) as fabric.Circle & CustomFabricObject;
+    if (!editable || !canvas) return;
     
     const newId = `circle-${Date.now()}`;
-    newCircle.customData = { id: newId };
+    const newCircle = createCircleElement(
+      canvas.width! / 2, 
+      canvas.height! / 2
+    );
+    
+    // Add custom data
+    addCustomDataToObject(newCircle, newId);
     
     canvas.add(newCircle);
     canvas.setActiveObject(newCircle);
@@ -382,41 +305,15 @@ const FabricSlideCanvas = ({
           <canvas ref={canvasRef} className="max-w-full" />
           
           {/* Editable mode overlay message */}
-          {editable && (
-            <div className="absolute bottom-2 right-2 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg flex items-center gap-1">
-              <Pencil className="h-3 w-3" />
-              編集モード
-            </div>
-          )}
+          {editable && <EditModeIndicator />}
 
           {/* Edit toolbar for adding elements */}
           {editable && (
-            <div className="absolute top-2 left-2 bg-white p-2 rounded-md shadow-lg flex gap-2 flex-wrap">
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={handleAddTextElement}
-                className="bg-white"
-              >
-                テキスト追加
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={handleAddRectElement}
-                className="bg-white"
-              >
-                四角形追加
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={handleAddCircleElement}
-                className="bg-white"
-              >
-                円追加
-              </Button>
-            </div>
+            <AddElementButtons 
+              onAddText={handleAddTextElement}
+              onAddRect={handleAddRectElement}
+              onAddCircle={handleAddCircleElement}
+            />
           )}
         </div>
       </div>

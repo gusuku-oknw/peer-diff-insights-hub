@@ -1,74 +1,94 @@
 
-import { Slide, SlideElement } from "@/stores/slideStore";
+import { Slide } from '@/stores/slideStore';
 
-// This is a placeholder utility that would be implemented with a library like pptxgenjs
-// For now, we just simulate the export functionality
-
-export const exportSlidesToPPTX = async (slides: Slide[]): Promise<boolean> => {
-  console.log("Exporting slides to PPTX:", slides);
+// This is a placeholder for actual PPTX export functionality
+// In a real implementation, you would use a library like pptxgenjs
+const exportToPPTX = (slides: Slide[]) => {
+  console.log('Exporting slides to PPTX:', slides);
   
-  // In a real implementation, we would:
-  // 1. Create a new PPTX document
-  // 2. For each slide, convert the elements to PPTX elements
-  // 3. Save the PPTX file and prompt the user to download it
+  // For now, we'll just simulate a download by creating a simple text file
+  const slidesData = JSON.stringify(slides, null, 2);
+  const blob = new Blob([slidesData], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
   
-  // Mock delay to simulate processing
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  // Create a download link and trigger it
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'presentation-data.json';
+  document.body.appendChild(a);
+  a.click();
   
-  // Return true to indicate success
-  return true;
+  // Clean up
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 100);
+  
+  // In a real implementation, you would use something like:
+  // 
+  // import pptxgen from 'pptxgenjs';
+  // 
+  // const pptx = new pptxgen();
+  // 
+  // slides.forEach(slide => {
+  //   const pptxSlide = pptx.addSlide();
+  //   
+  //   // Add slide title
+  //   pptxSlide.addText(slide.title || `Slide ${slide.id}`, { 
+  //     x: 0.5, y: 0.5, w: 9, h: 0.5, fontSize: 24, bold: true
+  //   });
+  //   
+  //   // Add slide elements
+  //   slide.elements.forEach(element => {
+  //     switch (element.type) {
+  //       case 'text':
+  //         pptxSlide.addText(element.props.text, {
+  //           x: element.position.x / 1600,
+  //           y: element.position.y / 900,
+  //           w: element.size.width / 1600,
+  //           h: element.size.height / 900,
+  //           fontSize: element.props.fontSize || 12,
+  //           color: element.props.color || '#000000',
+  //           fontFace: element.props.fontFamily || 'Arial',
+  //           bold: element.props.fontWeight === 'bold',
+  //           rotate: element.angle || 0
+  //         });
+  //         break;
+  //       case 'shape':
+  //         if (element.props.shape === 'rect') {
+  //           pptxSlide.addShape(pptxgen.shapes.RECTANGLE, {
+  //             x: element.position.x / 1600,
+  //             y: element.position.y / 900,
+  //             w: element.size.width / 1600,
+  //             h: element.size.height / 900,
+  //             fill: element.props.fill || '#000000',
+  //             line: { color: element.props.stroke, width: element.props.strokeWidth },
+  //             rotate: element.angle || 0
+  //           });
+  //         } else if (element.props.shape === 'circle') {
+  //           pptxSlide.addShape(pptxgen.shapes.OVAL, {
+  //             x: element.position.x / 1600,
+  //             y: element.position.y / 900,
+  //             w: element.size.width / 1600,
+  //             h: element.size.height / 1600, // Make it a circle by using width for height
+  //             fill: element.props.fill || '#000000',
+  //             line: { color: element.props.stroke, width: element.props.strokeWidth },
+  //             rotate: element.angle || 0
+  //           });
+  //         }
+  //         break;
+  //       case 'image':
+  //         // Would require fetching the image data
+  //         break;
+  //     }
+  //   });
+  // });
+  // 
+  // // Save the presentation
+  // pptx.writeFile({ fileName: 'presentation.pptx' });
+  
+  // Show message to user
+  alert('プレゼンテーションデータをエクスポートしました。\n実際のPPTXエクスポート機能は今後実装予定です。');
 };
 
-// Helper function to convert our slide model to PPTX format
-export const convertElementToPPTXFormat = (element: SlideElement) => {
-  // This would convert our internal slide element format to the format
-  // expected by the PPTX generation library
-  
-  switch (element.type) {
-    case 'text':
-      return {
-        type: 'text',
-        text: element.props.text,
-        options: {
-          x: element.position.x / 1600, // Normalized coordinates
-          y: element.position.y / 900,
-          w: element.size.width / 1600,
-          h: element.size.height / 900,
-          fontSize: element.props.fontSize,
-          color: element.props.color,
-          fontFace: element.props.fontFamily,
-          rotate: element.angle
-        }
-      };
-      
-    case 'shape':
-      return {
-        type: element.props.shape,
-        options: {
-          x: element.position.x / 1600, // Normalized coordinates
-          y: element.position.y / 900,
-          w: element.size.width / 1600,
-          h: element.size.height / 900,
-          fill: element.props.fill,
-          line: { color: element.props.stroke, width: element.props.strokeWidth },
-          rotate: element.angle
-        }
-      };
-      
-    case 'image':
-      return {
-        type: 'image',
-        path: element.props.src,
-        options: {
-          x: element.position.x / 1600, // Normalized coordinates
-          y: element.position.y / 900,
-          w: element.size.width / 1600,
-          h: element.size.height / 900,
-          rotate: element.angle
-        }
-      };
-      
-    default:
-      return null;
-  }
-};
+export default exportToPPTX;
