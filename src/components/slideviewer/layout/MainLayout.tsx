@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import SidePanel from "@/components/slideviewer/panels/SidePanel";
@@ -7,6 +6,7 @@ import { useSlideStore } from "@/stores/slideStore";
 import LeftSidebar from "./LeftSidebar";
 import MainContent from "./MainContent";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 interface MainLayoutProps {
   currentBranch: string;
@@ -98,8 +98,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      {/* Overlay for sidebar on small and large screens */}
-      {leftSidebarOpen && (
+      {/* Overlay for sidebar - ONLY on mobile */}
+      {leftSidebarOpen && isMobile && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-30"
           onClick={onToggleLeftSidebar}
@@ -117,34 +117,59 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           onBranchChange={onBranchChange}
         />
 
-        {/* Main Content with proper spacing for sidebar */}
-        <div className={`flex-1 flex flex-col transition-all duration-300 ${leftSidebarOpen ? 'ml-64' : 'ml-0'}`}>
-          <MainContent
-            currentSlide={currentSlide}
-            zoom={zoom}
-            viewerMode={viewerMode}
-            userType={userType}
-            isNotesPanelOpen={isNotesPanelOpen}
-            comments={comments}
-            commentText={commentText}
-            setCommentText={setCommentText}
-            handleAddComment={handleAddComment}
-            toggleNotesPanel={toggleNotesPanel}
-          />
-        </div>
+        {/* Main Content Area with Resizable Panels */}
+        <div className={`flex-1 flex transition-all duration-300 ${leftSidebarOpen && !isMobile ? 'ml-64' : 'ml-0'}`}>
+          {shouldShowRightSidePanel ? (
+            <ResizablePanelGroup direction="horizontal" className="flex-1">
+              {/* Main Content Panel */}
+              <ResizablePanel defaultSize={70} minSize={50}>
+                <div className="flex flex-col h-full">
+                  <MainContent
+                    currentSlide={currentSlide}
+                    zoom={zoom}
+                    viewerMode={viewerMode}
+                    userType={userType}
+                    isNotesPanelOpen={isNotesPanelOpen}
+                    comments={comments}
+                    commentText={commentText}
+                    setCommentText={setCommentText}
+                    handleAddComment={handleAddComment}
+                    toggleNotesPanel={toggleNotesPanel}
+                  />
+                </div>
+              </ResizablePanel>
 
-        {/* Right Sidebar - Conditional display */}
-        {shouldShowRightSidePanel && (
-          <div className="flex-shrink-0 side-panel-container" data-testid="right-side-panel">
-            <SidePanel
-              shouldShowNotes={showPresenterNotes}
-              shouldShowReviewPanel={viewerMode === "review"}
-              currentSlide={currentSlide}
-              totalSlides={totalSlides}
-              presenterNotes={presenterNotes}
-            />
-          </div>
-        )}
+              {/* Resizable Handle */}
+              <ResizableHandle withHandle />
+
+              {/* Right Side Panel */}
+              <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
+                <SidePanel
+                  shouldShowNotes={showPresenterNotes}
+                  shouldShowReviewPanel={viewerMode === "review"}
+                  currentSlide={currentSlide}
+                  totalSlides={totalSlides}
+                  presenterNotes={presenterNotes}
+                />
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          ) : (
+            <div className="flex flex-col h-full flex-1">
+              <MainContent
+                currentSlide={currentSlide}
+                zoom={zoom}
+                viewerMode={viewerMode}
+                userType={userType}
+                isNotesPanelOpen={isNotesPanelOpen}
+                comments={comments}
+                commentText={commentText}
+                setCommentText={setCommentText}
+                handleAddComment={handleAddComment}
+                toggleNotesPanel={toggleNotesPanel}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bottom Slide Thumbnails */}
