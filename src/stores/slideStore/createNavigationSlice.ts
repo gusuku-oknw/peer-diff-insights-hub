@@ -1,28 +1,7 @@
 
 import { StateCreator } from 'zustand';
 import { ViewerMode } from '@/utils/types/slide.types';
-import { SlideStore } from './types';
-
-// ナビゲーション関連のスライス
-export interface NavigationSlice {
-  currentSlide: number;
-  zoom: number;
-  viewerMode: ViewerMode;
-  isFullScreen: boolean;
-  leftSidebarOpen: boolean;
-  showPresenterNotes: boolean;
-  displayCount: number;
-  
-  setCurrentSlide: (index: number) => void;
-  previousSlide: () => void;
-  nextSlide: () => void;
-  setZoom: (zoom: number) => void;
-  setViewerMode: (mode: ViewerMode) => void;
-  toggleLeftSidebar: () => void;
-  toggleFullScreen: () => void;
-  togglePresenterNotes: () => void;
-  setDisplayCount: (count: number) => void;
-}
+import { SlideStore, NavigationSlice } from './types';
 
 // ナビゲーションスライスの作成
 export const createNavigationSlice: StateCreator<
@@ -54,6 +33,13 @@ export const createNavigationSlice: StateCreator<
     const { currentSlide, slides } = get();
     if (currentSlide < slides.length) {
       set({ currentSlide: currentSlide + 1 });
+    }
+  },
+  
+  goToSlide: (slideNumber) => {
+    const { slides } = get();
+    if (slideNumber >= 1 && slideNumber <= slides.length) {
+      set({ currentSlide: slideNumber });
     }
   },
   
