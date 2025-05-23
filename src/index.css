@@ -87,3 +87,31 @@
     scrollbar-width: none;
   }
 }
+
+/* 追加: キャンバス関連の最適化スタイル */
+.canvas-container {
+  transform-style: preserve-3d;
+  /* Enable GPU acceleration */
+  backface-visibility: hidden;
+  /* Prevent blurry text during scaling */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize transforms for smoother animations */
+.canvas-container canvas,
+.canvas-container .fabric-canvas {
+  /* Optimize rendering */
+  image-rendering: optimizeQuality;
+}
+
+/* Force hardware acceleration for transforms */
+.fabric-canvas {
+  transform: translateZ(0);
+}
+
+/* Optimize DOM elements for animation performance */
+.will-change-transform {
+  will-change: transform;
+}
+

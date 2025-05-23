@@ -1,8 +1,8 @@
-
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useCallback, memo } from "react";
+import { useCallback, memo, useState, useEffect } from "react";
+import { debounce } from "lodash";
 
 interface ZoomControlsProps {
   zoom: number;
@@ -10,27 +10,55 @@ interface ZoomControlsProps {
 }
 
 const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
+  // Keep internal state for smooth UI updates
+  const [internalZoom, setInternalZoom] = useState(zoom);
+  
+  // Update internal zoom when prop changes
+  useEffect(() => {
+    setInternalZoom(zoom);
+  }, [zoom]);
+  
+  // Create debounced zoom handler that only triggers actual zoom change after delay
+  const debouncedZoomChange = useCallback(
+    debounce((newZoom: number) => {
+      onZoomChange(newZoom);
+    }, 150),
+    [onZoomChange]
+  );
+
   // Memoized zoom change handler with bounds checking
   const handleZoomChange = useCallback((newZoom: number) => {
     // Ensure zoom stays between 25% and 200%
     const boundedZoom = Math.min(Math.max(newZoom, 25), 200);
-    onZoomChange(boundedZoom);
-  }, [onZoomChange]);
+    
+    // Update internal state immediately for responsive UI
+    setInternalZoom(boundedZoom);
+    
+    // Debounce the actual propagation to parent
+    debouncedZoomChange(boundedZoom);
+  }, [debouncedZoomChange]);
 
   // Increment/decrement zoom by a fixed percentage
   const incrementZoom = useCallback(() => {
-    handleZoomChange(zoom + 10);
-  }, [zoom, handleZoomChange]);
+    handleZoomChange(internalZoom + 10);
+  }, [internalZoom, handleZoomChange]);
 
   // Decrement zoom by a fixed percentage
   const decrementZoom = useCallback(() => {
-    handleZoomChange(zoom - 10);
-  }, [zoom, handleZoomChange]);
+    handleZoomChange(internalZoom - 10);
+  }, [internalZoom, handleZoomChange]);
   
   // Reset zoom to 100%
   const resetZoom = useCallback(() => {
     handleZoomChange(100);
   }, [handleZoomChange]);
+  
+  // Clean up the debounce on unmount
+  useEffect(() => {
+    return () => {
+      debouncedZoomChange.cancel();
+    };
+  }, [debouncedZoomChange]);
 
   return (
     <div className="flex items-center space-x-2">
@@ -43,7 +71,7 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
             onClick={resetZoom}
             title="クリックして100%に戻す"
           >
-            <span className="font-medium">{zoom}%</span>
+            <span className="font-medium">{internalZoom}%</span>
             <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 rotate-90" />
           </Button>
         </DropdownMenuTrigger>

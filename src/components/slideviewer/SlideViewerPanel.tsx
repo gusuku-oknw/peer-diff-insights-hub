@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import SlideNotesPanel from "@/components/slideviewer/SlideNotesPanel";
@@ -80,7 +80,8 @@ const SlideViewerPanel = ({
   // Get slide position text
   const slidePosition = `${currentSlide} / ${totalSlides}`;
   
-  const handlePrevious = () => {
+  // メモ化したハンドラー
+  const handlePrevious = useCallback(() => {
     if (currentSlide > 1) {
       onSlideChange(currentSlide - 1);
     } else {
@@ -89,9 +90,9 @@ const SlideViewerPanel = ({
         description: "これ以上前のスライドはありません。",
       });
     }
-  };
+  }, [currentSlide, onSlideChange, toast]);
   
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentSlide < totalSlides) {
       onSlideChange(currentSlide + 1);
     } else {
@@ -100,11 +101,11 @@ const SlideViewerPanel = ({
         description: "これ以上次のスライドはありません。",
       });
     }
-  };
+  }, [currentSlide, totalSlides, onSlideChange, toast]);
   
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev);
+  }, []);
 
   return (
     <div className="flex h-full">
@@ -124,8 +125,8 @@ const SlideViewerPanel = ({
         
         {/* Slide content - DOM構造をシンプル化 */}
         <div className="flex flex-1 relative overflow-hidden">
-          <div className="flex-1 flex items-center justify-center p-4 relative overflow-hidden">
-            {/* キャンバスコンポーネントを配置 - スケーリングはフック内で行うのでここでは行わない */}
+          <div className="flex-1 flex items-center justify-center bg-slate-100 h-full">
+            {/* キャンバスコンポーネントを配置 - スケーリングはフックで一元管理 */}
             <FabricSlideCanvas
               currentSlide={currentSlide}
               zoomLevel={zoom}

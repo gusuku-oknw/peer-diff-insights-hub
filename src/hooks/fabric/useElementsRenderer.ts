@@ -1,5 +1,4 @@
-
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { Canvas, IText, Rect, Circle, Image } from 'fabric';
 import { SlideElement } from '@/utils/types/slide.types';
 import { CustomFabricObject } from '@/utils/types/canvas.types';
@@ -22,12 +21,47 @@ export const useElementsRenderer = ({
   editable,
   currentSlide
 }: UseElementsRendererProps): UseElementsRendererResult => {
+  // Keep track of elements to avoid unnecessary re-renders
+  const elementsRef = useRef<SlideElement[]>([]);
+  // Batch render flag to minimize canvas.renderAll() calls
+  const pendingRenderRef = useRef<boolean>(false);
+  // Timer for batched rendering
+  const renderTimerRef = useRef<number | null>(null);
+
+  // Schedule a batched render
+  const scheduleBatchRender = useCallback(() => {
+    if (!canvas || pendingRenderRef.current) return;
+    
+    pendingRenderRef.current = true;
+    
+    // Clear any existing timer
+    if (renderTimerRef.current !== null) {
+      window.clearTimeout(renderTimerRef.current);
+    }
+    
+    // Schedule render for next frame
+    renderTimerRef.current = window.setTimeout(() => {
+      if (canvas) {
+        canvas.renderAll();
+      }
+      pendingRenderRef.current = false;
+      renderTimerRef.current = null;
+    }, 16); // ~60fps
+  }, [canvas]);
+
   // 要素をキャンバスにレンダリングする関数
   const renderElements = useCallback((elementsToRender: SlideElement[]) => {
     if (!canvas || !initialized) {
       console.warn("Cannot render elements: Canvas not initialized");
       return;
     }
+
+    // Skip if elements are the same (deep comparison could be added for more accuracy)
+    if (elementsRef.current === elementsToRender) {
+      return;
+    }
+    
+    elementsRef.current = elementsToRender;
 
     try {
       // キャンバスをクリア
@@ -37,6 +71,9 @@ export const useElementsRenderer = ({
       if (elementsToRender && elementsToRender.length > 0) {
         // zIndexでソート
         const sortedElements = [...elementsToRender].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+        
+        // Add all objects without rendering between each addition
+        canvas.renderOnAddRemove = false;
         
         // キャンバスに要素を追加
         for (const element of sortedElements) {
@@ -104,7 +141,7 @@ export const useElementsRenderer = ({
               break;
               
             case 'image':
-              // Fix: Using the proper approach for Image.fromURL with Fabric.js v6
+              // Use a promise-based approach with better error handling
               Image.fromURL(props.src, {
                 crossOrigin: 'anonymous',
                 // Additional options can be added here
@@ -124,13 +161,21 @@ export const useElementsRenderer = ({
                 
                 (img as unknown as CustomFabricObject).customData = { id };
                 canvas.add(img);
-                canvas.renderAll();
+                
+                // Schedule a render after image is loaded
+                scheduleBatchRender();
               }).catch(err => {
                 console.error("Error loading image:", err);
               });
               break;
           }
         }
+        
+        // Re-enable rendering for future operations
+        canvas.renderOnAddRemove = true;
+        
+        // Render everything at once
+        scheduleBatchRender();
       } else {
         // 要素がない場合、プレースホルダーテキストを使用
         const slideNumberText = new IText(`スライド ${currentSlide}`, {
@@ -143,13 +188,12 @@ export const useElementsRenderer = ({
           selectable: false,
         });
         canvas.add(slideNumberText);
+        canvas.renderAll();
       }
-      
-      canvas.renderAll();
     } catch (error) {
       console.error("Error rendering elements to canvas:", error);
     }
-  }, [canvas, initialized, editable, currentSlide]);
+  }, [canvas, initialized, editable, currentSlide, scheduleBatchRender]);
 
   // キャンバスをリセットする関数
   const reset = useCallback(() => {
@@ -159,10 +203,18 @@ export const useElementsRenderer = ({
       canvas.clear();
       canvas.backgroundColor = '#ffffff';
       canvas.renderAll();
+      elementsRef.current = [];
     } catch (error) {
       console.error("Error resetting canvas:", error);
     }
   }, [canvas, initialized]);
+  
+  // Clean up on unmount
+  useCallback(() => {
+    if (renderTimerRef.current !== null) {
+      window.clearTimeout(renderTimerRef.current);
+    }
+  }, []);
 
   return { renderElements, reset };
 };
