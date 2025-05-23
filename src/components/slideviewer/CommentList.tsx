@@ -1,7 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Edit, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Edit, ThumbsUp, ThumbsDown, MessageSquare, Filter, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface Comment {
@@ -118,86 +119,108 @@ const CommentList = ({ currentSlide }: CommentListProps) => {
   };
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <div className="text-sm font-medium text-gray-500">
-          {filteredComments.length} コメント
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            variant={viewMode === "all" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setViewMode("all")}
-          >
-            すべて
-          </Button>
-          <Button 
-            variant={viewMode === "own" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setViewMode("own")}
-          >
-            自分のみ
-          </Button>
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex justify-between items-center mb-2">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-blue-600" />
+            <div className="text-sm font-medium">
+              {filteredComments.length} コメント
+            </div>
+          </div>
+          <div className="flex">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setViewMode("all")}
+              className={`px-3 ${viewMode === "all" ? 'text-blue-600 bg-blue-50' : 'text-gray-600'}`}
+            >
+              すべて
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setViewMode("own")}
+              className={`px-3 ${viewMode === "own" ? 'text-blue-600 bg-blue-50' : 'text-gray-600'}`}
+            >
+              自分のみ
+            </Button>
+          </div>
         </div>
       </div>
 
       {filteredComments.length > 0 ? (
-        <div className="space-y-4">
-          {filteredComments.map((comment) => (
-            <div 
-              key={comment.id} 
-              className={`bg-white p-4 rounded-lg border ${comment.isOwn ? "border-blue-200 bg-blue-50" : "border-gray-200"}`}
-            >
-              <div className="flex justify-between items-start mb-2">
-                <div className="font-medium text-sm">{comment.author}</div>
-                <div className="text-xs text-gray-500">{comment.timestamp}</div>
-              </div>
-              <p className="text-sm mb-3">{comment.text}</p>
-              <div className="flex justify-between items-center">
-                <div className="flex gap-1">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-gray-500 hover:text-gray-700"
-                        onClick={() => handleLike(comment.id)}
-                      >
-                        <ThumbsUp className="h-4 w-4 mr-1" /> 
-                        {comment.likes > 0 && <span>{comment.likes}</span>}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>役に立った</TooltipContent>
-                  </Tooltip>
-                  
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="text-gray-500 hover:text-gray-700"
-                        onClick={() => handleDislike(comment.id)}
-                      >
-                        <ThumbsDown className="h-4 w-4 mr-1" /> 
-                        {comment.dislikes > 0 && <span>{comment.dislikes}</span>}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>役に立たなかった</TooltipContent>
-                  </Tooltip>
+        <ScrollArea className="flex-1">
+          <div className="p-4 space-y-3">
+            {filteredComments.map((comment) => (
+              <div 
+                key={comment.id} 
+                className={`rounded-lg border ${comment.isOwn ? "border-blue-200 bg-blue-50" : "border-gray-200 bg-white"} overflow-hidden transition-all hover:shadow-sm`}
+              >
+                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                  <div className="font-medium text-sm flex items-center">
+                    {comment.isOwn ? (
+                      <span className="text-blue-600">{comment.author}</span>
+                    ) : (
+                      comment.author
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500 flex items-center">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    {comment.timestamp}
+                  </div>
                 </div>
-                
-                {comment.isOwn && (
-                  <Button variant="outline" size="sm">
-                    <Edit className="h-4 w-4 mr-1" /> 編集
-                  </Button>
-                )}
+                <div className="p-4">
+                  <p className="text-sm mb-4 leading-relaxed">{comment.text}</p>
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant={comment.likes > 0 ? "outline" : "ghost"}
+                            size="sm" 
+                            className={`text-gray-600 hover:text-gray-900 ${comment.likes > 0 ? 'bg-green-50 border-green-200 text-green-700' : ''}`}
+                            onClick={() => handleLike(comment.id)}
+                          >
+                            <ThumbsUp className={`h-4 w-4 mr-1 ${comment.likes > 0 ? 'text-green-600' : ''}`} /> 
+                            {comment.likes > 0 && <span>{comment.likes}</span>}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>役に立った</TooltipContent>
+                      </Tooltip>
+                      
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant={comment.dislikes > 0 ? "outline" : "ghost"} 
+                            size="sm" 
+                            className={`text-gray-600 hover:text-gray-900 ${comment.dislikes > 0 ? 'bg-red-50 border-red-200 text-red-700' : ''}`}
+                            onClick={() => handleDislike(comment.id)}
+                          >
+                            <ThumbsDown className={`h-4 w-4 mr-1 ${comment.dislikes > 0 ? 'text-red-600' : ''}`} /> 
+                            {comment.dislikes > 0 && <span>{comment.dislikes}</span>}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>役に立たなかった</TooltipContent>
+                      </Tooltip>
+                    </div>
+                    
+                    {comment.isOwn && (
+                      <Button variant="outline" size="sm" className="bg-blue-50 border-blue-200 text-blue-700">
+                        <Edit className="h-4 w-4 mr-1 text-blue-500" /> 編集
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </ScrollArea>
       ) : (
-        <div className="text-center py-8 text-gray-500">
-          このスライドにはまだコメントがありません
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-gray-500">
+          <MessageSquare className="h-12 w-12 text-gray-300 mb-3" />
+          <p className="text-center">このスライドにはまだコメントがありません</p>
+          <p className="text-center text-sm mt-1">スライド上の任意の場所をクリックしてコメントを追加できます</p>
         </div>
       )}
     </div>
