@@ -1,6 +1,7 @@
 
 import { Book, ChevronDown, ChevronUp, Clock } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SlideNotesPanelProps {
   currentSlide: number;
@@ -9,6 +10,8 @@ interface SlideNotesPanelProps {
 }
 
 const SlideNotesPanel = ({ currentSlide, totalSlides, presenterNotes }: SlideNotesPanelProps) => {
+  const { userProfile } = useAuth();
+  
   return (
     <div className="h-full bg-white shadow-sm flex flex-col">
       <div className="px-4 py-3 border-b border-gray-200 bg-blue-50 flex items-center justify-between">

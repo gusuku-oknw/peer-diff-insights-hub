@@ -38,7 +38,6 @@ const SlideViewerPanel = ({
   onSlideChange
 }: SlideViewerPanelProps) => {
   const { userProfile } = useAuth();
-  const userType = userProfile?.role || "business";
   
   // Handle keyboard navigation
   useEffect(() => {
@@ -89,7 +88,7 @@ const SlideViewerPanel = ({
               currentSlide={currentSlide} 
               zoomLevel={zoom} 
               editable={false}
-              userType={userType === "student" ? "student" : "enterprise"}
+              userType={userProfile?.role === "student" ? "student" : "enterprise"}
             />
           </div>
           
@@ -119,7 +118,7 @@ const SlideViewerPanel = ({
           currentSlide={currentSlide} 
           zoomLevel={zoom} 
           editable={false}
-          userType={userType === "student" ? "student" : "enterprise"}
+          userType={userProfile?.role === "student" ? "student" : "enterprise"}
         />
       </div>
     );
@@ -136,7 +135,7 @@ const SlideViewerPanel = ({
               currentSlide={currentSlide} 
               zoomLevel={zoom} 
               editable={viewerMode === "edit"}
-              userType={userType === "student" ? "student" : "enterprise"}
+              userType={userProfile?.role === "student" ? "student" : "enterprise"}
             />
           </div>
         </div>
@@ -174,7 +173,7 @@ const SlideViewerPanel = ({
       )}
       
       {/* AI要約パネル（企業ユーザーのみ） */}
-      {userType !== "student" && viewerMode === "review" && (
+      {userProfile?.role !== "student" && viewerMode === "review" && (
         <Sheet>
           <SheetTrigger asChild>
             <Button

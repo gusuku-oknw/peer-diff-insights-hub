@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
@@ -38,6 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -54,13 +56,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session check:", session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
         fetchUserProfile(session.user.id);
+      } else {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     });
 
     return () => {
@@ -70,6 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log("Fetching user profile for:", userId);
       const { data, error } = await supabase
         .from("profiles")
         .select("id, role, display_name")
@@ -81,7 +86,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (data) {
+        console.log("User profile fetched:", data);
         setUserProfile(data as UserProfile);
+      } else {
+        console.log("No user profile found");
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -200,6 +208,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!user) return;
     
     try {
+      console.log("Updating user role to:", role);
+      
       // Make sure we only update with valid database role types
       if (role !== "student" && role !== "business" && role !== "debugger") {
         throw new Error("Invalid role type for database update");
@@ -213,8 +223,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
       
       // Update local state
-      setUserProfile(prev => prev ? { ...prev, role } : null);
+      setUserProfile(prev => {
+        const updated = prev ? { ...prev, role } : null;
+        console.log("Updated user profile:", updated);
+        return updated;
+      });
+      
       toast.success("ユーザーロールを更新しました");
+      
+      // Force reload the current page to ensure all components update with the new role
+      window.location.reload();
+      
     } catch (error: any) {
       console.error("Error updating user role:", error);
       toast.error("ユーザーロールの更新に失敗しました");
