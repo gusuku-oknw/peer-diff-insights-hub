@@ -1,79 +1,80 @@
 
-import * as fabric from 'fabric';
+import { fabric } from 'fabric';
 
-// Define type for custom properties we want to add to fabric objects
+// Define a custom type that extends fabric.Object to include our customData
 export interface CustomFabricObject extends fabric.Object {
   customData?: {
     id: string;
+    [key: string]: any;
   };
 }
 
 // Helper function to create a text element
-export const createTextElement = (
-  text: string, 
-  x: number, 
-  y: number, 
-  options: Partial<fabric.TOptions<fabric.IText>> = {}
-): fabric.IText & CustomFabricObject => {
-  return new fabric.IText(text, {
-    left: x,
-    top: y,
-    fontSize: 24,
-    fill: '#000000',
-    fontFamily: 'Arial',
+export function createTextElement(options: any): fabric.IText & CustomFabricObject {
+  const text = new fabric.IText(options.text || 'New Text', {
+    left: options.left || 0,
+    top: options.top || 0,
+    fontSize: options.fontSize || 24,
+    fill: options.color || '#000000',
+    fontFamily: options.fontFamily || 'Arial',
     originX: 'center',
     originY: 'center',
     ...options
   }) as fabric.IText & CustomFabricObject;
-};
+  
+  if (options.customData) {
+    text.customData = options.customData;
+  }
+  
+  return text;
+}
 
 // Helper function to create a rectangle element
-export const createRectElement = (
-  x: number, 
-  y: number, 
-  width = 150, 
-  height = 100,
-  options: Partial<fabric.TOptions<fabric.Rect>> = {}
-): fabric.Rect & CustomFabricObject => {
-  return new fabric.Rect({
-    left: x,
-    top: y,
-    width,
-    height,
-    fill: '#4287f5',
-    stroke: '#2054a8',
-    strokeWidth: 2,
+export function createRectElement(options: any): fabric.Rect & CustomFabricObject {
+  const rect = new fabric.Rect({
+    left: options.left || 0,
+    top: options.top || 0,
+    width: options.width || 100,
+    height: options.height || 100,
+    fill: options.fill || '#000000',
+    stroke: options.stroke || '',
+    strokeWidth: options.strokeWidth || 0,
     originX: 'center',
     originY: 'center',
     ...options
   }) as fabric.Rect & CustomFabricObject;
-};
+  
+  if (options.customData) {
+    rect.customData = options.customData;
+  }
+  
+  return rect;
+}
 
 // Helper function to create a circle element
-export const createCircleElement = (
-  x: number, 
-  y: number, 
-  radius = 50,
-  options: Partial<fabric.TOptions<fabric.Circle>> = {}
-): fabric.Circle & CustomFabricObject => {
-  return new fabric.Circle({
-    left: x,
-    top: y,
-    radius,
-    fill: '#f54242',
-    stroke: '#8a2727',
-    strokeWidth: 2,
+export function createCircleElement(options: any): fabric.Circle & CustomFabricObject {
+  const circle = new fabric.Circle({
+    left: options.left || 0,
+    top: options.top || 0,
+    radius: options.radius || 50,
+    fill: options.fill || '#000000',
+    stroke: options.stroke || '',
+    strokeWidth: options.strokeWidth || 0,
     originX: 'center',
     originY: 'center',
     ...options
   }) as fabric.Circle & CustomFabricObject;
-};
+  
+  if (options.customData) {
+    circle.customData = options.customData;
+  }
+  
+  return circle;
+}
 
-// Helper function to add custom data to fabric objects
-export const addCustomDataToObject = (
-  object: CustomFabricObject, 
-  id: string
-): CustomFabricObject => {
-  object.customData = { id };
-  return object;
-};
+// Helper function to add customData to any Fabric object
+export function addCustomDataToObject(obj: fabric.Object, customData: any): CustomFabricObject {
+  const customObj = obj as CustomFabricObject;
+  customObj.customData = customData;
+  return customObj;
+}

@@ -1,41 +1,45 @@
-
 import JSZip from 'jszip';
-import { convert } from 'xml-js';
-import { Slide, SlideElement } from '@/stores/slideStore';
+import { xml2js, js2xml } from 'xml-js';
 
-// Function to parse PPTX file
-export const parsePPTX = async (fileBuffer: ArrayBuffer): Promise<any[]> => {
+// Parse PPTX file and extract slide data
+export async function parsePPTX(fileBuffer: ArrayBuffer) {
   try {
-    // Load the PPTX file using JSZip
-    const zip = new JSZip();
-    const pptxContent = await zip.loadAsync(fileBuffer);
+    // Load the PPTX as a ZIP file
+    const zip = await JSZip.loadAsync(fileBuffer);
     
-    // Extract slides from the PPTX
-    const slides: any[] = [];
-    const slideFiles = Object.keys(pptxContent.files).filter(
-      (fileName) => fileName.startsWith('ppt/slides/slide') && fileName.endsWith('.xml')
-    );
-    
-    // Sort slide files by their number
-    slideFiles.sort((a, b) => {
-      const numA = parseInt(a.match(/slide(\d+)\.xml/)?.[1] || '0');
-      const numB = parseInt(b.match(/slide(\d+)\.xml/)?.[1] || '0');
-      return numA - numB;
-    });
-    
-    // Process each slide file
-    for (const slideFile of slideFiles) {
-      const content = await pptxContent.files[slideFile].async('text');
-      const xmlData = convert(content, { compact: true, spaces: 2 });
-      slides.push(xmlData);
+    // Get presentation.xml which contains the overall structure
+    const presentationXml = await zip.file("ppt/presentation.xml")?.async("text");
+    if (!presentationXml) {
+      throw new Error("Invalid PPTX: Missing presentation.xml");
     }
     
+    // Convert XML to JavaScript object
+    const presentationData = xml2js(presentationXml, { compact: true });
+    
+    // Extract slides information
+    const slideRefs = presentationData?.['p:presentation']?.['p:sldIdLst']?.['p:sldId'] || [];
+    const slideIds = Array.isArray(slideRefs) 
+      ? slideRefs.map(ref => ref._attributes?.['r:id'])
+      : [slideRefs._attributes?.['r:id']].filter(Boolean);
+    
+    // Process each slide
+    const slides = [];
+    for (let i = 0; i < slideIds.length; i++) {
+      // Slide XML path follows pattern ppt/slides/slide1.xml, slide2.xml, etc.
+      const slideXml = await zip.file(`ppt/slides/slide${i + 1}.xml`)?.async("text");
+      if (slideXml) {
+        const slideData = xml2js(slideXml, { compact: true });
+        slides.push(slideData);
+      }
+    }
+    
+    console.log(`Parsed ${slides.length} slides from PPTX`);
     return slides;
   } catch (error) {
-    console.error('Error parsing PPTX:', error);
-    throw new Error('Failed to parse PPTX file');
+    console.error("Error parsing PPTX:", error);
+    throw error;
   }
-};
+}
 
 // Function to convert PPTX slide data to our app's slide format
 export const convertPPTXToSlides = (pptxSlides: any[]): Slide[] => {

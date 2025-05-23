@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as fabric from 'fabric';
 import { SlideElement } from '@/stores/slideStore';
@@ -114,7 +113,7 @@ export const useFabricCanvas = ({
           
           // Enhanced object modification events
           canvas.on('object:modified', (e) => {
-            const obj = e.target as CustomFabricObject;
+            const obj = e.target as fabric.Object & { customData?: { id: string } };
             if (!obj || !obj.customData?.id) return;
             
             const updates: any = {};
@@ -123,8 +122,9 @@ export const useFabricCanvas = ({
             let width, height;
             
             if (obj.type === 'rect') {
-              width = obj.width! * (obj.scaleX || 1);
-              height = obj.height! * (obj.scaleY || 1);
+              const rect = obj as fabric.Rect;
+              width = (rect.width || 0) * (rect.scaleX || 1);
+              height = (rect.height || 0) * (rect.scaleY || 1);
               
               // Reset scale to avoid double scaling
               obj.set({
@@ -134,7 +134,8 @@ export const useFabricCanvas = ({
                 scaleY: 1
               });
             } else if (obj.type === 'circle') {
-              const radius = obj.radius || 0;
+              const circle = obj as fabric.Circle;
+              const radius = circle.radius || 0;
               const scale = obj.scaleX || 1; // アスペクト比を維持するため、X軸のみを考慮
               width = radius * 2 * scale;
               height = radius * 2 * scale;
@@ -146,8 +147,9 @@ export const useFabricCanvas = ({
                 scaleY: 1
               });
             } else if (obj.type === 'text') {
-              width = obj.width! * (obj.scaleX || 1);
-              height = obj.height! * (obj.scaleY || 1);
+              const text = obj as fabric.Text;
+              width = (text.width || 0) * (obj.scaleX || 1);
+              height = (text.height || 0) * (obj.scaleY || 1);
               
               // Reset scale to avoid double scaling
               obj.set({
@@ -156,8 +158,9 @@ export const useFabricCanvas = ({
                 scaleY: 1
               });
             } else if (obj.type === 'image') {
-              width = obj.width! * (obj.scaleX || 1);
-              height = obj.height! * (obj.scaleY || 1);
+              const img = obj as fabric.Image;
+              width = (img.width || 0) * (obj.scaleX || 1);
+              height = (img.height || 0) * (obj.scaleY || 1);
             } else {
               width = obj.width || 0;
               height = obj.height || 0;
@@ -333,27 +336,28 @@ export const useFabricCanvas = ({
             case 'image':
               fabric.Image.fromURL(
                 props.src, 
-                { crossOrigin: 'anonymous' }
-              ).then((img) => {
-                if (!canvas) return;
+                (img) => {
+                  if (!canvas) return;
 
-                img.set({
-                  left: position.x,
-                  top: position.y,
-                  scaleX: size.width / img.width! || 1,
-                  scaleY: size.height / img.height! || 1,
-                  angle: angle || 0,
-                  selectable: editable,
-                  originX: 'center',
-                  originY: 'center',
-                });
-                
-                // Add custom data
-                (img as CustomFabricObject).customData = { id };
-                
-                canvas.add(img);
-                canvas.renderAll();
-              }).catch(error => console.error("Error loading image:", error));
+                  img.set({
+                    left: position.x,
+                    top: position.y,
+                    scaleX: size.width / (img.width || 1),
+                    scaleY: size.height / (img.height || 1),
+                    angle: angle || 0,
+                    selectable: editable,
+                    originX: 'center',
+                    originY: 'center',
+                  });
+                  
+                  // Add custom data
+                  (img as CustomFabricObject).customData = { id };
+                  
+                  canvas.add(img);
+                  canvas.renderAll();
+                },
+                { crossOrigin: 'anonymous' }
+              );
               break;
           }
         }

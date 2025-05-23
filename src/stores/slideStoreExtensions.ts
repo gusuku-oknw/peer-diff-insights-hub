@@ -5,8 +5,8 @@ import { SlideStore } from './slideStore';
 export interface PPTXImportSlice {
   isPPTXImported: boolean;
   pptxFilename: string | null;
-  setPPTXImported: (imported: boolean, filename?: string) => void;
-  importSlidesFromPPTX: (slides: any[]) => void;
+  setPPTXImported: (imported: boolean, filename?: string | null) => void;
+  importSlidesFromPPTX: (slidesData: any[]) => void;
 }
 
 export const createPPTXImportSlice: StateCreator<
@@ -21,11 +21,13 @@ export const createPPTXImportSlice: StateCreator<
   importSlidesFromPPTX: (slidesData) => {
     // Convert the PPTX slides data to our application's slide format
     // and update the store
-    set({
-      slides: slidesData,
-      isPPTXImported: true,
+    const currentState = get();
+    set({ 
       currentSlide: 1,
-      pptxFilename: get().pptxFilename || "imported-presentation.pptx"
+      isPPTXImported: true,
+      pptxFilename: currentState.pptxFilename || "imported-presentation.pptx"
     });
+    // Update slides in a separate set call to avoid property error
+    set({ slides: slidesData });
   }
 });

@@ -32,7 +32,9 @@ import {
   Settings,
   AlignCenter,
   AlignHorizontalJustifyCenter,
-  AlignVerticalJustifyCenter
+  AlignVerticalJustifyCenter,
+  ArrowBigUp,
+  ArrowBigDown
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSlideStore } from "@/stores/slideStore";

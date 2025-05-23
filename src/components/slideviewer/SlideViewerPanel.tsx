@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -195,7 +194,7 @@ const SlideViewerPanel = ({
         </>
       )}
       
-      {/* Comment sidebar */}
+      {/* Comment sidebar - use explicit viewerMode check instead of comparing with "edit" */}
       {viewerMode === "review" && (
         <>
           <ResizableHandle withHandle className="bg-blue-100 hover:bg-blue-200 transition-colors" />

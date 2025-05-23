@@ -850,118 +850,21 @@ const createSampleSlides = (): Slide[] => [
 ];
 
 // Create the slide store with proper types
-const createSlideStore = (...a) => {
-  // First, get the basic slide state creator
-  const basicSlideState = (set, get) => ({
-    slides: createSampleSlides(),
-    currentSlide: 1,
-    zoom: 100,
-    viewerMode: "presentation" as ViewerMode,
-    isFullScreen: false,
-    leftSidebarOpen: false,
-    showPresenterNotes: false,
-    presentationStartTime: null,
-    displayCount: 1,
-    
-    setCurrentSlide: (index) => set({ currentSlide: index }),
-    previousSlide: () => {
-      const { currentSlide } = get();
-      if (currentSlide > 1) {
-        set({ currentSlide: currentSlide - 1 });
-      }
-    },
-    nextSlide: () => {
-      const { currentSlide, slides } = get();
-      if (currentSlide < slides.length) {
-        set({ currentSlide: currentSlide + 1 });
-      }
-    },
-    setZoom: (zoom) => set({ zoom }),
-    setViewerMode: (viewerMode) => set({ viewerMode }),
-    toggleLeftSidebar: () => set((state) => ({ leftSidebarOpen: !state.leftSidebarOpen })),
-    toggleFullScreen: () => set((state) => ({ isFullScreen: !state.isFullScreen })),
-    togglePresenterNotes: () => set((state) => ({ showPresenterNotes: !state.showPresenterNotes })),
-    startPresentation: () => set({ presentationStartTime: new Date(), viewerMode: "presentation" }),
-    endPresentation: () => set({ presentationStartTime: null }),
-    updateElement: (slideId, elementId, props) => {
-      set((state) => ({
-        slides: state.slides.map(slide => 
-          slide.id === slideId 
-            ? { 
-                ...slide, 
-                elements: slide.elements.map(el => 
-                  el.id === elementId ? { ...el, ...props } : el
-                ) 
-              }
-            : slide
-        )
-      }));
-    },
-    addElement: (slideId, element) => {
-      set((state) => ({
-        slides: state.slides.map(slide => 
-          slide.id === slideId 
-            ? { ...slide, elements: [...slide.elements, element] } 
-            : slide
-        )
-      }));
-    },
-    removeElement: (slideId, elementId) => {
-      set((state) => ({
-        slides: state.slides.map(slide => 
-          slide.id === slideId 
-            ? { ...slide, elements: slide.elements.filter(el => el.id !== elementId) } 
-            : slide
-        )
-      }));
-    },
-    setDisplayCount: (displayCount) => set({ displayCount }),
-    
-    generateThumbnails: () => {
-      console.info("Generating thumbnails...");
-      // Use browser APIs or canvas to generate thumbnails
-      // For now, let's simply set some placeholder URLs that would come from a real implementation
-      const slidesCopy = get().slides.map(slide => ({...slide}));
-      
-      // In a real implementation, this would generate actual thumbnails from the slide content
-      // For now, let's pretend it did by setting a unique value
-      const updatedSlides = slidesCopy.map(slide => {
-        return {
-          ...slide,
-          thumbnail: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180"><rect width="100%" height="100%" fill="%23f0f9ff"/><text x="50%" y="50%" font-size="16" text-anchor="middle" fill="%230f172a">${slide.title || `スライド ${slide.id}`}</text></svg>`
-        };
-      });
-      
-      set({ slides: updatedSlides });
-    },
-    
-    exportToPPTX: () => {
-      console.info("Exporting slides to PPTX...");
-      // This would implement actual PPTX export using a library like pptxgenjs
-      // For now, we'll just show a toast notification
-      
-      // Import dynamically to avoid including in main bundle
-      import('@/utils/pptxExport').then(module => {
-        const exportHandler = module.default;
-        exportHandler(get().slides);
-      });
-    }
-  });
-
-  // Now create the PPTX import slice
-  const pptxImportSlice = createPPTXImportSlice(...a);
-  
-  // Return the combined state
-  return {
-    ...basicSlideState(...a),
-    ...pptxImportSlice
-  };
-};
-
-// Now, add thumbnail generation and PPTX export functions
-export const useSlideStore = create<SlideState & PPTXImportSlice>()(
+export const useSlideStore = create<SlideStore & PPTXImportSlice>()(
   persist(
-    createSlideStore,
+    (set, get) => {
+      // First, get the basic slide state creator
+      const basicSlideState = createSlideStore(set, get);
+      
+      // Now create the PPTX import slice
+      const pptxImportSlice = createPPTXImportSlice(set, get);
+      
+      // Return the combined state
+      return {
+        ...basicSlideState,
+        ...pptxImportSlice
+      };
+    },
     {
       name: 'slide-storage',
       // Only persist certain parts of the state
