@@ -27,7 +27,7 @@ export type Slide = {
 export type ViewerMode = "presentation" | "edit" | "review";
 
 // Define our store state
-interface SlideState {
+export interface SlideStore {
   slides: Slide[];
   currentSlide: number;
   zoom: number;
@@ -56,260 +56,6 @@ interface SlideState {
   generateThumbnails: () => void;
   exportToPPTX: () => void;
 }
-
-// Mock slide data similar to what you have
-const mockSlides: Slide[] = [
-  {
-    id: 1,
-    elements: [
-      {
-        id: 'title-1',
-        type: 'text',
-        props: {
-          text: '第4四半期業績報告',
-          fontSize: 48,
-          color: '#333333',
-          fontFamily: 'Arial',
-          fontWeight: 'bold',
-        },
-        position: { x: 800, y: 250 },
-        size: { width: 600, height: 80 },
-        angle: 0,
-        zIndex: 1,
-      },
-      {
-        id: 'subtitle-1',
-        type: 'text',
-        props: {
-          text: '2024年度 市場予測より20%増',
-          fontSize: 28,
-          color: '#666666',
-          fontFamily: 'Arial',
-        },
-        position: { x: 800, y: 350 },
-        size: { width: 500, height: 50 },
-        angle: 0,
-        zIndex: 2,
-      },
-      {
-        id: 'rect-1',
-        type: 'shape',
-        props: {
-          shape: 'rect',
-          fill: '#4287f5',
-          stroke: '#2054a8',
-          strokeWidth: 2,
-        },
-        position: { x: 200, y: 450 },
-        size: { width: 300, height: 200 },
-        angle: 0,
-        zIndex: 0,
-      }
-    ],
-    notes: "このスライドでは、Q4の業績についての概要を説明します。市場予測よりも20%増の売上を記録したことを強調しましょう。",
-    thumbnail: ""
-  },
-  {
-    id: 2,
-    elements: [
-      {
-        id: 'title-2',
-        type: 'text',
-        props: {
-          text: '会社概要',
-          fontSize: 40,
-          color: '#333333',
-          fontFamily: 'Arial',
-          fontWeight: 'bold',
-        },
-        position: { x: 800, y: 150 },
-        size: { width: 400, height: 60 },
-        angle: 0,
-        zIndex: 1,
-      },
-      {
-        id: 'content-2',
-        type: 'text',
-        props: {
-          text: '海外展開の強化：アジア市場での成長率が前年比40%',
-          fontSize: 24,
-          color: '#444444',
-          fontFamily: 'Arial',
-        },
-        position: { x: 800, y: 300 },
-        size: { width: 800, height: 100 },
-        angle: 0,
-        zIndex: 2,
-      },
-      {
-        id: 'circle-2',
-        type: 'shape',
-        props: {
-          shape: 'circle',
-          fill: '#f54242',
-          stroke: '#8a2727',
-          strokeWidth: 2,
-        },
-        position: { x: 250, y: 300 },
-        size: { width: 200, height: 200 },
-        angle: 0,
-        zIndex: 0,
-      }
-    ],
-    notes: "会社概要では、特に海外展開の強化について触れてください。アジア市場での成長率が前年比40%であることを強調。",
-    thumbnail: ""
-  },
-  {
-    id: 3,
-    elements: [
-      {
-        id: 'title-3',
-        type: 'text',
-        props: {
-          text: '財務結果',
-          fontSize: 40,
-          color: '#333333',
-          fontFamily: 'Arial',
-          fontWeight: 'bold',
-        },
-        position: { x: 800, y: 150 },
-        size: { width: 400, height: 60 },
-        angle: 0,
-        zIndex: 1,
-      },
-      {
-        id: 'content-3',
-        type: 'text',
-        props: {
-          text: '営業利益率が業界平均を上回る：昨年比で5ポイント改善',
-          fontSize: 24,
-          color: '#444444',
-          fontFamily: 'Arial',
-        },
-        position: { x: 800, y: 300 },
-        size: { width: 800, height: 100 },
-        angle: 0,
-        zIndex: 2,
-      },
-      {
-        id: 'rect-3',
-        type: 'shape',
-        props: {
-          shape: 'rect',
-          fill: '#42f5ad',
-          stroke: '#27a872',
-          strokeWidth: 2,
-        },
-        position: { x: 300, y: 350 },
-        size: { width: 400, height: 150 },
-        angle: 30,
-        zIndex: 0,
-      }
-    ],
-    notes: "財務結果では、営業利益率が業界平均を上回っていることにフォーカスしてください。昨年比で5ポイント改善。",
-    thumbnail: ""
-  },
-  {
-    id: 4,
-    elements: [
-      {
-        id: 'title-4',
-        type: 'text',
-        props: {
-          text: '将来戦略',
-          fontSize: 40,
-          color: '#333333',
-          fontFamily: 'Arial',
-          fontWeight: 'bold',
-        },
-        position: { x: 800, y: 150 },
-        size: { width: 400, height: 60 },
-        angle: 0,
-        zIndex: 1,
-      },
-      {
-        id: 'content-4',
-        type: 'text',
-        props: {
-          text: '新製品開発のロードマップと市場投入時期：第2四半期の新製品に注目',
-          fontSize: 24,
-          color: '#444444',
-          fontFamily: 'Arial',
-        },
-        position: { x: 800, y: 300 },
-        size: { width: 800, height: 100 },
-        angle: 0,
-        zIndex: 2,
-      },
-      {
-        id: 'circle-4',
-        type: 'shape',
-        props: {
-          shape: 'circle',
-          fill: '#f5e642',
-          stroke: '#a89927',
-          strokeWidth: 2,
-        },
-        position: { x: 250, y: 300 },
-        size: { width: 250, height: 250 },
-        angle: 0,
-        zIndex: 0,
-      }
-    ],
-    notes: "将来戦略では、新製品開発のロードマップと市場投入時期について詳しく説明してください。特に第2四半期の新製品に注目。",
-    thumbnail: ""
-  },
-  {
-    id: 5,
-    elements: [
-      {
-        id: 'title-5',
-        type: 'text',
-        props: {
-          text: '質疑応答',
-          fontSize: 48,
-          color: '#333333',
-          fontFamily: 'Arial',
-          fontWeight: 'bold',
-        },
-        position: { x: 800, y: 400 },
-        size: { width: 400, height: 80 },
-        angle: 0,
-        zIndex: 1,
-      },
-      {
-        id: 'rect-5-1',
-        type: 'shape',
-        props: {
-          shape: 'rect',
-          fill: '#9e42f5',
-          stroke: '#5e27a8',
-          strokeWidth: 2,
-        },
-        position: { x: 200, y: 300 },
-        size: { width: 200, height: 150 },
-        angle: 15,
-        zIndex: 0,
-      },
-      {
-        id: 'rect-5-2',
-        type: 'shape',
-        props: {
-          shape: 'rect',
-          fill: '#f542b3',
-          stroke: '#a8276c',
-          strokeWidth: 2,
-        },
-        position: { x: 1200, y: 300 },
-        size: { width: 200, height: 150 },
-        angle: -15,
-        zIndex: 0,
-      }
-    ],
-    notes: "質疑応答セクションでは、投資家から予想される質問への回答をあらかじめ準備しておきます。特に配当政策について。",
-    thumbnail: ""
-  }
-];
 
 // Enhanced sample slides with more content
 const createSampleSlides = (): Slide[] => [
@@ -848,6 +594,146 @@ const createSampleSlides = (): Slide[] => [
     notes: "よくある質問に対する回答を事前にメモしておく。競合との比較質問、新技術導入の具体的タイムライン、採用計画の詳細などについて。"
   }
 ];
+
+// Create the basic slide state creator
+const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get) => ({
+  slides: createSampleSlides(),
+  currentSlide: 1,
+  zoom: 100,
+  viewerMode: "edit" as ViewerMode,
+  isFullScreen: false,
+  leftSidebarOpen: false,
+  showPresenterNotes: false,
+  presentationStartTime: null,
+  displayCount: 1,
+  
+  setCurrentSlide: (index) => {
+    set({ currentSlide: index });
+  },
+  
+  previousSlide: () => {
+    const { currentSlide } = get();
+    if (currentSlide > 1) {
+      set({ currentSlide: currentSlide - 1 });
+    }
+  },
+  
+  nextSlide: () => {
+    const { currentSlide, slides } = get();
+    if (currentSlide < slides.length) {
+      set({ currentSlide: currentSlide + 1 });
+    }
+  },
+  
+  setZoom: (zoom) => {
+    set({ zoom });
+  },
+  
+  setViewerMode: (mode) => {
+    set({ viewerMode: mode });
+  },
+  
+  toggleLeftSidebar: () => {
+    const { leftSidebarOpen } = get();
+    set({ leftSidebarOpen: !leftSidebarOpen });
+  },
+  
+  toggleFullScreen: () => {
+    const { isFullScreen } = get();
+    set({ isFullScreen: !isFullScreen });
+  },
+  
+  togglePresenterNotes: () => {
+    const { showPresenterNotes } = get();
+    set({ showPresenterNotes: !showPresenterNotes });
+  },
+  
+  startPresentation: () => {
+    set({ presentationStartTime: new Date() });
+  },
+  
+  endPresentation: () => {
+    set({ presentationStartTime: null });
+  },
+  
+  updateElement: (slideId, elementId, updates) => {
+    const { slides } = get();
+    
+    const updatedSlides = slides.map(slide => {
+      if (slide.id !== slideId) return slide;
+      
+      const updatedElements = slide.elements.map(element => {
+        if (element.id !== elementId) return element;
+        
+        return {
+          ...element,
+          ...updates,
+          props: updates.props ? { ...element.props, ...updates.props } : element.props,
+          position: updates.position ? { ...element.position, ...updates.position } : element.position,
+          size: updates.size ? { ...element.size, ...updates.size } : element.size
+        };
+      });
+      
+      return { ...slide, elements: updatedElements };
+    });
+    
+    set({ slides: updatedSlides });
+  },
+  
+  addElement: (slideId, element) => {
+    const { slides } = get();
+    
+    const updatedSlides = slides.map(slide => {
+      if (slide.id !== slideId) return slide;
+      
+      return {
+        ...slide,
+        elements: [...slide.elements, element]
+      };
+    });
+    
+    set({ slides: updatedSlides });
+  },
+  
+  removeElement: (slideId, elementId) => {
+    const { slides } = get();
+    
+    const updatedSlides = slides.map(slide => {
+      if (slide.id !== slideId) return slide;
+      
+      return {
+        ...slide,
+        elements: slide.elements.filter(el => el.id !== elementId)
+      };
+    });
+    
+    set({ slides: updatedSlides });
+  },
+  
+  setDisplayCount: (count) => {
+    set({ displayCount: count });
+  },
+  
+  generateThumbnails: () => {
+    console.log("Generating thumbnails for slides");
+    // In a real implementation, this would create thumbnails for each slide
+    // For now, we'll just add a placeholder
+    const { slides } = get();
+    
+    const updatedSlides = slides.map(slide => ({
+      ...slide,
+      thumbnail: slide.thumbnail || `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="113" viewBox="0 0 200 113"><rect width="200" height="113" fill="%23f0f0f0"/><text x="100" y="60" font-family="Arial" font-size="16" text-anchor="middle" fill="%23666">Slide ${slide.id}</text></svg>`
+    }));
+    
+    set({ slides: updatedSlides });
+  },
+  
+  exportToPPTX: () => {
+    console.log("Exporting presentation to PPTX format");
+    // This would be implemented with a library like JSZip, PptxGenJS, etc.
+    alert("PPTX export functionality is coming soon!");
+  }
+});
 
 // Create the slide store with proper types
 export const useSlideStore = create<SlideStore & PPTXImportSlice>()(
