@@ -506,7 +506,7 @@ const createSampleSlides = (): Slide[] => [
           text: "営業利益: 5.2億円（前年比+22%）",
           fontSize: 28,
           color: "#334155",
-8 fontFamily: "Arial",
+          fontFamily: "Arial",
           fontWeight: "bold",
         },
         position: { x: 800, y: 350 },
@@ -848,8 +848,8 @@ const createSampleSlides = (): Slide[] => [
   }
 ];
 
-// Modify the createStore function to use our enhanced sample slides
-const createSlideStore = (): StateCreator<SlideState> => (set, get) => ({
+// Create the slide store with proper types
+const createSlideStore: StateCreator<SlideState> = (set, get) => ({
   slides: createSampleSlides(),
   currentSlide: 1,
   zoom: 100,
@@ -948,7 +948,7 @@ const createSlideStore = (): StateCreator<SlideState> => (set, get) => ({
 // Now, add thumbnail generation and PPTX export functions
 export const useSlideStore = create<SlideState>()(
   persist(
-    createSlideStore(),
+    createSlideStore,
     {
       name: 'slide-storage',
       // Only persist certain parts of the state
