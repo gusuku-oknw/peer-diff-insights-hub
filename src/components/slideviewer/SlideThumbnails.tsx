@@ -28,7 +28,7 @@ const SlideThumbnails = ({
   }, [generateThumbnails]);
   
   return (
-    <div className="bg-white shadow-sm h-full flex flex-col border-t border-gray-200">
+    <div className="bg-white h-full flex flex-col">
       <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200 bg-gray-50">
         <h3 className="font-medium flex items-center text-sm text-blue-800">
           スライド一覧
@@ -36,8 +36,8 @@ const SlideThumbnails = ({
       </div>
       
       <ScrollArea className="flex-grow">
-        <div className="p-4">
-          <div className="space-y-3">
+        <div className="p-2">
+          <div className="flex gap-3 items-center">
             {slides.map((slide, index) => {
               const slideIndex = slide.id;
               const slideTitle = slide.title || `スライド ${slideIndex}`;
@@ -50,10 +50,10 @@ const SlideThumbnails = ({
                         currentSlide === slideIndex 
                           ? 'border-blue-500 ring-2 ring-blue-200 bg-blue-50 shadow-md' 
                           : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                      } relative`} 
+                      } relative flex-shrink-0`} 
                       onClick={() => onSlideClick(slideIndex)}
                     >
-                      <div className="w-full aspect-video bg-white rounded-t-md flex items-center justify-center overflow-hidden">
+                      <div className="w-24 aspect-video bg-white rounded-t-md flex items-center justify-center overflow-hidden">
                         {slide.thumbnail ? (
                           <img 
                             src={slide.thumbnail} 
@@ -66,14 +66,14 @@ const SlideThumbnails = ({
                           </div>
                         )}
                       </div>
-                      <div className="p-3">
-                        <p className={`text-sm font-medium truncate ${currentSlide === slideIndex ? 'text-blue-700' : ''}`}>
+                      <div className="p-2">
+                        <p className={`text-xs font-medium truncate ${currentSlide === slideIndex ? 'text-blue-700' : ''}`}>
                           {slideTitle}
                         </p>
                       </div>
                     </div>
                   </TooltipTrigger>
-                  <TooltipContent side="right">
+                  <TooltipContent side="top">
                     <p className="font-medium">{slideTitle}</p>
                   </TooltipContent>
                 </Tooltip>
