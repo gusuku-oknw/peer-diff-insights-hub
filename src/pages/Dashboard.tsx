@@ -21,7 +21,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (userProfile && userProfile.role) {
       if (userProfile.role === "student" || userProfile.role === "business" || userProfile.role === "debugger") {
-        setActiveTab(userProfile.role);
+        setActiveTab(userProfile.role === "debugger" ? "student" : userProfile.role);
       }
     }
   }, [userProfile]);
@@ -33,7 +33,7 @@ const Dashboard = () => {
     setActiveTab(role);
     
     // If the user has switched to a different role, update their profile
-    if (userProfile && userProfile.role !== role) {
+    if (userProfile && userProfile.role === "debugger") {
       updateUserRole(role);
       toast(`${role === 'student' ? '学生' : '企業'}ビューに切り替えました`, {
         icon: role === 'student' ? <GraduationCap className="h-5 w-5" /> : 
@@ -46,6 +46,11 @@ const Dashboard = () => {
   
   // For debugger display mode - determine which role to show in the UI
   const displayRole = isDebugger ? activeTab : (userProfile?.role as "student" | "business");
+
+  // Log for debugging
+  console.log("Current user role:", userProfile?.role);
+  console.log("Active tab:", activeTab);
+  console.log("Display role:", displayRole);
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -62,7 +67,7 @@ const Dashboard = () => {
                   </div>
                   <ToggleGroup 
                     type="single" 
-                    value={displayRole} 
+                    value={activeTab} 
                     onValueChange={handleRoleChange}
                     className="justify-center"
                   >
@@ -92,19 +97,6 @@ const Dashboard = () => {
             <TabsContent value="business" className="animate-fade-in focus:outline-none p-0 mt-0">
               <BusinessDashboard />
             </TabsContent>
-            {activeTab === "debugger" && (
-              <div className="p-8 bg-white rounded-xl border border-gray-200">
-                <div className="bg-red-50 border border-red-200 p-4 rounded-md mb-6">
-                  <h3 className="font-medium text-red-800 mb-2">デバッガーモード</h3>
-                  <p className="text-red-700 text-sm">
-                    現在のユーザープロファイル情報:
-                  </p>
-                  <pre className="bg-white p-3 mt-2 rounded border text-xs overflow-auto">
-                    {JSON.stringify(userProfile, null, 2)}
-                  </pre>
-                </div>
-              </div>
-            )}
           </Tabs>
 
           <div className="mt-6 flex justify-center">
