@@ -18,7 +18,7 @@ export const createPresentationSlice: StateCreator<
   [],
   [],
   PresentationSlice
-> = (set, get) => ({
+> = (set, get, api) => ({
   presentationStartTime: null,
   
   startPresentation: () => {

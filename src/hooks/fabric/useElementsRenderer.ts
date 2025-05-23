@@ -104,30 +104,25 @@ export const useElementsRenderer = ({
               break;
               
             case 'image':
-              Image.fromURL(
-                props.src,
-                {
-                  crossOrigin: 'anonymous',
-                  onload: (img) => {
-                    if (!canvas) return;
+              // Fix: Using the correct approach for Image.fromURL in Fabric.js v6
+              Image.fromURL(props.src, (img) => {
+                if (!canvas) return;
 
-                    img.set({
-                      left: position.x,
-                      top: position.y,
-                      scaleX: size.width / (img.width || 1),
-                      scaleY: size.height / (img.height || 1),
-                      angle: angle || 0,
-                      selectable: editable,
-                      originX: 'center',
-                      originY: 'center',
-                    });
-                    
-                    (img as unknown as CustomFabricObject).customData = { id };
-                    canvas.add(img);
-                    canvas.renderAll();
-                  }
-                }
-              );
+                img.set({
+                  left: position.x,
+                  top: position.y,
+                  scaleX: size.width / (img.width || 1),
+                  scaleY: size.height / (img.height || 1),
+                  angle: angle || 0,
+                  selectable: editable,
+                  originX: 'center',
+                  originY: 'center',
+                });
+                
+                (img as unknown as CustomFabricObject).customData = { id };
+                canvas.add(img);
+                canvas.renderAll();
+              }, { crossOrigin: 'anonymous' });
               break;
           }
         }

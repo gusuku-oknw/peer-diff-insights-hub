@@ -9,23 +9,26 @@ import { createPresentationSlice } from './createPresentationSlice';
 import { createPPTXImportSlice } from './createPPTXImport';
 import { createSampleSlides } from './createSampleSlides';
 
+// Define empty third argument type for StateCreator
+type EmptyStateCreator = [["zustand/persist", unknown]];
+
 // スライドストアの作成
-const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get) => {
+const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get, api) => {
   // 各スライスを結合
   return {
     slides: createSampleSlides(),
     
     // Navigation slice
-    ...createNavigationSlice(set, get),
+    ...createNavigationSlice(set, get, api),
     
     // Elements slice
-    ...createElementsSlice(set, get),
+    ...createElementsSlice(set, get, api),
     
     // Presentation slice
-    ...createPresentationSlice(set, get),
+    ...createPresentationSlice(set, get, api),
     
     // PPTX import slice
-    ...createPPTXImportSlice(set, get),
+    ...createPPTXImportSlice(set, get, api),
   };
 };
 

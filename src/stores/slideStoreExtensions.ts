@@ -14,7 +14,7 @@ export const createPPTXImportSlice: StateCreator<
   [], 
   [], 
   PPTXImportSlice
-> = (set, get) => ({
+> = (set, get, api) => ({
   isPPTXImported: false,
   pptxFilename: null,
   setPPTXImported: (imported, filename = null) => set({ isPPTXImported: imported, pptxFilename: filename }),

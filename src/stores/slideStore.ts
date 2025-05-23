@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { StateCreator } from 'zustand';
@@ -600,9 +601,9 @@ const createSampleSlides = (): Slide[] => [
 ];
 
 // Create the basic slide state creator
-const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get) => {
+const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get, api) => {
   // Create the PPTX import slice
-  const pptxImportSlice = createPPTXImportSlice(set, get);
+  const pptxImportSlice = createPPTXImportSlice(set, get, api);
 
   return {
     slides: createSampleSlides(),
