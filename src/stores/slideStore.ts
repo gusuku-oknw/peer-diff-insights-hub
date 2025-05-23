@@ -56,10 +56,6 @@ interface SlideState {
   exportToPPTX: () => void;
 }
 
-// Correctly define the types for Zustand's SetState and GetState
-type SetState = (fn: (state: SlideState) => Partial<SlideState>) => void;
-type GetState = () => SlideState;
-
 // Mock slide data similar to what you have
 const mockSlides: Slide[] = [
   {
@@ -510,7 +506,7 @@ const createSampleSlides = (): Slide[] => [
           text: "営業利益: 5.2億円（前年比+22%）",
           fontSize: 28,
           color: "#334155",
-          fontFamily: "Arial",
+8 fontFamily: "Arial",
           fontWeight: "bold",
         },
         position: { x: 800, y: 350 },
@@ -853,10 +849,7 @@ const createSampleSlides = (): Slide[] => [
 ];
 
 // Modify the createStore function to use our enhanced sample slides
-const createSlideStore = () => (
-  set: SetState,
-  get: GetState
-) => ({
+const createSlideStore = (): StateCreator<SlideState> => (set, get) => ({
   slides: createSampleSlides(),
   currentSlide: 1,
   zoom: 100,
@@ -923,14 +916,13 @@ const createSlideStore = () => (
   
   generateThumbnails: () => {
     console.info("Generating thumbnails...");
-    // Implement thumbnail generation logic for our enhanced slides
-    const slidesCopy = get().slides.map(slide => ({...slide}));
-    
     // Use browser APIs or canvas to generate thumbnails
     // For now, let's simply set some placeholder URLs that would come from a real implementation
+    const slidesCopy = get().slides.map(slide => ({...slide}));
+    
+    // In a real implementation, this would generate actual thumbnails from the slide content
+    // For now, let's pretend it did by setting a unique value
     const updatedSlides = slidesCopy.map(slide => {
-      // In a real implementation, this would generate actual thumbnails from the slide content
-      // For now, let's pretend it did by setting a unique value
       return {
         ...slide,
         thumbnail: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180"><rect width="100%" height="100%" fill="%23f0f9ff"/><text x="50%" y="50%" font-size="16" text-anchor="middle" fill="%230f172a">${slide.title || `スライド ${slide.id}`}</text></svg>`
