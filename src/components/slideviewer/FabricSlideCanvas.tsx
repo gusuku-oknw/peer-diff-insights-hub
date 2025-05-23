@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, memo } from "react";
 import { useSlideStore } from "@/stores/slideStore";
 import { useAuth } from "@/contexts/AuthContext";
 import useFabricCanvas from "@/hooks/useFabricCanvas";
@@ -32,6 +32,8 @@ const FabricSlideCanvas = ({
   const addElement = useSlideStore(state => state.addElement);
   const updateElement = useSlideStore(state => state.updateElement);
   const [canvasReady, setCanvasReady] = useState(false);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
+  const renderAttemptRef = useRef(0);
 
   // Use our custom hook for canvas management
   const { canvas, initialized } = useFabricCanvas({
@@ -48,23 +50,33 @@ const FabricSlideCanvas = ({
   useEffect(() => {
     if (initialized && canvas) {
       setCanvasReady(true);
+      setLoadingError(null);
     }
   }, [initialized, canvas]);
+
+  // Clean function to safely access slide data
+  const getCurrentSlideData = useCallback(() => {
+    return slides.find(slide => slide.id === currentSlide);
+  }, [slides, currentSlide]);
 
   // Load slide content when current slide changes or canvas is initialized
   useEffect(() => {
     if (!canvas || !initialized || !canvasReady) return;
 
+    const maxRenderAttempts = 3;
+    renderAttemptRef.current += 1;
+
     console.log("Loading slide content for slide", currentSlide);
     
     try {
+      // Use a try-catch to handle any rendering errors
       // Clear canvas
       canvas.clear();
       canvas.backgroundColor = '#ffffff';
       canvas.renderAll();
 
       // Get current slide data
-      const slideData = slides.find(slide => slide.id === currentSlide);
+      const slideData = getCurrentSlideData();
       if (!slideData) {
         console.log("No slide data found for slide", currentSlide);
         return;
@@ -173,13 +185,22 @@ const FabricSlideCanvas = ({
       }
 
       canvas.renderAll();
+      
+      // Reset the render attempt counter on success
+      renderAttemptRef.current = 0;
+      setLoadingError(null);
     } catch (error) {
       console.error("Error rendering slide:", error);
+      
+      // Set error state if max render attempts exceeded
+      if (renderAttemptRef.current >= maxRenderAttempts) {
+        setLoadingError("スライドの読み込み中にエラーが発生しました");
+      }
     }
-  }, [currentSlide, initialized, canvasReady, slides, editable, canvas, updateElement]);
+  }, [currentSlide, initialized, canvasReady, canvas, getCurrentSlideData, editable]);
 
-  // Add a new text element in edit mode
-  const handleAddTextElement = () => {
+  // Add a new text element in edit mode - memoized to improve performance
+  const handleAddTextElement = useCallback(() => {
     if (!editable || !canvas || !canvasReady) return;
     
     const newId = `text-${Date.now()}`;
@@ -220,9 +241,9 @@ const FabricSlideCanvas = ({
       angle: 0,
       zIndex: 1,
     });
-  };
+  }, [editable, canvas, canvasReady, addElement, currentSlide]);
 
-  const handleAddRectElement = () => {
+  const handleAddRectElement = useCallback(() => {
     if (!editable || !canvas) return;
     
     const newId = `rect-${Date.now()}`;
@@ -259,9 +280,9 @@ const FabricSlideCanvas = ({
       angle: 0,
       zIndex: 1,
     });
-  };
+  }, [editable, canvas, addElement, currentSlide]);
 
-  const handleAddCircleElement = () => {
+  const handleAddCircleElement = useCallback(() => {
     if (!editable || !canvas) return;
     
     const newId = `circle-${Date.now()}`;
@@ -298,56 +319,79 @@ const FabricSlideCanvas = ({
       angle: 0,
       zIndex: 1,
     });
+  }, [editable, canvas, addElement, currentSlide]);
+
+  // Improved container style with CSS scaling instead of dimension changes
+  const containerStyle = {
+    position: 'relative' as const,
+    width: '100%',
+    maxWidth: '1200px',
+    aspectRatio: '16 / 9',
+    display: 'flex',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
+    overflow: 'hidden' as const,
+  };
+
+  // Canvas wrapper style with CSS transform for zoom
+  const canvasWrapperStyle = {
+    position: 'relative' as const,
+    width: '100%',
+    height: '100%',
+    transformOrigin: 'center center',
   };
 
   return (
     <div className="relative bg-white rounded-lg shadow-md overflow-hidden">
       <div 
-        className={`relative w-full aspect-video bg-gray-100 overflow-hidden`}
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "0.5rem"
-        }}
+        className="relative w-full aspect-video bg-gray-100 overflow-hidden flex justify-center items-center p-2"
       >
-        <div 
-          style={{
-            transformOrigin: "center center",
-            transition: "transform 0.3s ease-in-out",
-            width: "100%",
-            maxWidth: "1200px",
-            position: "relative"
-          }}
-          className="drop-shadow-xl"
-        >
-          <canvas ref={canvasRef} className="max-w-full" />
-          
-          {/* Editable mode overlay message */}
-          {editable && <EditModeIndicator />}
+        <div style={containerStyle} className="drop-shadow-xl">
+          <div style={canvasWrapperStyle}>
+            <canvas ref={canvasRef} />
+            
+            {/* Editable mode overlay message */}
+            {editable && <EditModeIndicator />}
 
-          {/* Edit toolbar for adding elements */}
-          {editable && canvasReady && (
-            <AddElementButtons 
-              onAddText={handleAddTextElement}
-              onAddRect={handleAddRectElement}
-              onAddCircle={handleAddCircleElement}
-            />
-          )}
-          
-          {/* Loading indicator */}
-          {!canvasReady && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75">
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="mt-4 text-blue-600 font-medium">キャンバスを読み込み中...</p>
+            {/* Edit toolbar for adding elements */}
+            {editable && canvasReady && (
+              <AddElementButtons 
+                onAddText={handleAddTextElement}
+                onAddRect={handleAddRectElement}
+                onAddCircle={handleAddCircleElement}
+              />
+            )}
+            
+            {/* Loading indicator */}
+            {!canvasReady && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75">
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="mt-4 text-blue-600 font-medium">キャンバスを読み込み中...</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+            
+            {/* Error message */}
+            {loadingError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-red-50 bg-opacity-75">
+                <div className="flex flex-col items-center">
+                  <p className="mt-4 text-red-600 font-medium">{loadingError}</p>
+                  <button 
+                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                    onClick={() => window.location.reload()}
+                  >
+                    再読み込み
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default FabricSlideCanvas;
+// メモ化してパフォーマンス改善
+export default memo(FabricSlideCanvas);

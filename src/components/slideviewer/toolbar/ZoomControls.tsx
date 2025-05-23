@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useCallback } from "react";
 
 interface ZoomControlsProps {
   zoom: number;
@@ -9,12 +10,22 @@ interface ZoomControlsProps {
 }
 
 const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
-  // Handle zoom change with bounds checking
-  const handleZoomChange = (newZoom: number) => {
+  // Memoized zoom change handler with bounds checking
+  const handleZoomChange = useCallback((newZoom: number) => {
     // Ensure zoom stays between 50% and 200%
     const boundedZoom = Math.min(Math.max(newZoom, 50), 200);
     onZoomChange(boundedZoom);
-  };
+  }, [onZoomChange]);
+
+  // Increment/decrement zoom by a fixed percentage
+  const incrementZoom = useCallback(() => {
+    handleZoomChange(zoom + 10);
+  }, [zoom, handleZoomChange]);
+
+  // Decrement zoom by a fixed percentage
+  const decrementZoom = useCallback(() => {
+    handleZoomChange(zoom - 10);
+  }, [zoom, handleZoomChange]);
 
   return (
     <div className="flex items-center space-x-2">
@@ -42,7 +53,7 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
       </DropdownMenu>
       
       <Button 
-        onClick={() => handleZoomChange(zoom - 10)} 
+        onClick={decrementZoom} 
         variant="ghost" 
         size="icon" 
         className="rounded-full h-6 w-6 sm:h-8 sm:w-8 flex items-center justify-center hover:bg-blue-50"
@@ -51,7 +62,7 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
       </Button>
       
       <Button 
-        onClick={() => handleZoomChange(zoom + 10)} 
+        onClick={incrementZoom} 
         variant="ghost" 
         size="icon" 
         className="rounded-full h-6 w-6 sm:h-8 sm:w-8 flex items-center justify-center hover:bg-blue-50"

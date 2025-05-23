@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 import { CustomFabricObject } from '@/components/slideviewer/editor/FabricObjects';
@@ -33,7 +32,11 @@ export const useFabricCanvas = ({
   useEffect(() => {
     // Clean up previous canvas instance if it exists
     if (canvasInstance.current) {
-      canvasInstance.current.dispose();
+      try {
+        canvasInstance.current.dispose();
+      } catch (e) {
+        console.error("Error disposing canvas:", e);
+      }
       canvasInstance.current = null;
     }
 
@@ -46,6 +49,12 @@ export const useFabricCanvas = ({
     // Add a small delay to ensure DOM is ready
     const initTimer = setTimeout(() => {
       try {
+        // Check if the element still exists before initializing
+        if (!canvasRef.current || !document.body.contains(canvasRef.current)) {
+          console.log("Canvas element is no longer in the DOM");
+          return;
+        }
+
         const canvas = new fabric.Canvas(canvasRef.current, {
           backgroundColor: '#ffffff',
           width: 1600,
@@ -60,7 +69,7 @@ export const useFabricCanvas = ({
       } catch (error) {
         console.error("Error initializing canvas:", error);
       }
-    }, 50);
+    }, 150); // Increased delay to ensure DOM is stable
 
     // Clean up
     return () => {
@@ -75,9 +84,9 @@ export const useFabricCanvas = ({
         setInitialized(false);
       }
     };
-  }, [editable, canvasRef]);
+  }, [canvasRef, editable]);
 
-  // Apply the zoom level
+  // Apply the zoom level - improved implementation
   useEffect(() => {
     const canvas = canvasInstance.current;
     if (!canvas || !initialized) return;
@@ -86,14 +95,19 @@ export const useFabricCanvas = ({
       const scaleFactor = zoomLevel / 100;
       canvas.setZoom(scaleFactor);
       
-      // Update canvas dimensions based on zoom while maintaining aspect ratio
-      const originalWidth = 1600; // Original width
-      const originalHeight = 900; // Original height
+      // Keep the original dimensions and let CSS handle the visual scaling
+      // This improves performance while maintaining correct internal coordinates
+      const originalWidth = 1600;
+      const originalHeight = 900;
       
-      canvas.setDimensions({
-        width: originalWidth * scaleFactor,
-        height: originalHeight * scaleFactor,
-      });
+      canvas.setWidth(originalWidth);
+      canvas.setHeight(originalHeight);
+      
+      // Apply CSS transform on the canvas wrapper
+      if (canvas.wrapperEl) {
+        canvas.wrapperEl.style.transform = `scale(${scaleFactor})`;
+        canvas.wrapperEl.style.transformOrigin = 'center center';
+      }
       
       canvas.renderAll();
     } catch (error) {
