@@ -6,12 +6,18 @@ import StudentDashboard from "@/components/dashboard/StudentDashboard";
 import BusinessDashboard from "@/components/dashboard/BusinessDashboard";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FileText, GraduationCap, Building, Plus, ArrowRight, RefreshCw } from "lucide-react";
+import { FileText, GraduationCap, Building, Plus, ArrowRight, RefreshCw, Eye, Pencil, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Card, CardContent } from "@/components/ui/card";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 const Dashboard = () => {
   const { userProfile } = useAuth();
@@ -70,12 +76,35 @@ const Dashboard = () => {
                   更新する
                 </Button>
                 
-                <Link to="/slides">
-                  <Button className="gradient-primary shadow-sm hover:shadow">
-                    <FileText className="mr-2 h-5 w-5" />
-                    スライドビューアを開く
-                  </Button>
-                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="gradient-primary shadow-sm hover:shadow">
+                      <FileText className="mr-2 h-5 w-5" />
+                      スライドビューアを開く
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <Link to="/slides?mode=presentation">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <Eye className="mr-2 h-4 w-4" />
+                        <span>プレゼンテーションモード</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link to="/slides?mode=edit">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <Pencil className="mr-2 h-4 w-4" />
+                        <span>編集モード</span>
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link to="/slides?mode=review">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <MessageSquare className="mr-2 h-4 w-4" />
+                        <span>レビューモード</span>
+                      </DropdownMenuItem>
+                    </Link>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
             
