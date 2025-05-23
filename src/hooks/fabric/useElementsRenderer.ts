@@ -1,4 +1,3 @@
-
 import { useCallback, useRef } from 'react';
 import { Canvas, IText, Rect, Circle, Image } from 'fabric';
 import { SlideElement } from '@/utils/types/slide.types';
@@ -9,7 +8,7 @@ interface UseElementsRendererProps {
   initialized: boolean;
   editable: boolean;
   currentSlide: number;
-  instanceId?: string; // Added instanceId parameter
+  instanceId?: string;
 }
 
 interface UseElementsRendererResult {
@@ -22,7 +21,7 @@ export const useElementsRenderer = ({
   initialized,
   editable,
   currentSlide,
-  instanceId = 'default' // Default value for backward compatibility
+  instanceId = 'default'
 }: UseElementsRendererProps): UseElementsRendererResult => {
   // Keep track of elements to avoid unnecessary re-renders
   const elementsRef = useRef<SlideElement[]>([]);
@@ -44,14 +43,14 @@ export const useElementsRenderer = ({
     
     // Schedule render for next frame
     renderTimerRef.current = window.setTimeout(() => {
-      if (canvas) {
+      if (canvas && !canvas.disposed) {
         canvas.renderAll();
-        console.log(`[Instance ${instanceId}] Batch rendering executed`);
+        console.log(`[Instance ${instanceId}] Batch rendering executed for slide ${currentSlide}`);
       }
       pendingRenderRef.current = false;
       renderTimerRef.current = null;
     }, 16); // ~60fps
-  }, [canvas, instanceId]);
+  }, [canvas, instanceId, currentSlide]);
 
   // 要素をキャンバスにレンダリングする関数
   const renderElements = useCallback((elementsToRender: SlideElement[]) => {
@@ -60,25 +59,24 @@ export const useElementsRenderer = ({
       return;
     }
 
-    // Skip if elements are the same (deep comparison could be added for more accuracy)
-    if (elementsRef.current === elementsToRender) {
+    if (canvas.disposed) {
+      console.warn(`[Instance ${instanceId}] Cannot render elements: Canvas is disposed`);
       return;
     }
-    
-    elementsRef.current = elementsToRender;
-    console.log(`[Instance ${instanceId}] Rendering ${elementsToRender.length} elements on slide ${currentSlide}`);
 
+    console.log(`[Instance ${instanceId}] Rendering ${elementsToRender.length} elements on slide ${currentSlide}`);
+    
     try {
       // キャンバスをクリア
       canvas.clear();
       canvas.backgroundColor = '#ffffff';
       
+      // Disable rendering during batch operations
+      canvas.renderOnAddRemove = false;
+      
       if (elementsToRender && elementsToRender.length > 0) {
         // zIndexでソート
         const sortedElements = [...elementsToRender].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
-        
-        // Add all objects without rendering between each addition
-        canvas.renderOnAddRemove = false;
         
         // キャンバスに要素を追加
         for (const element of sortedElements) {
@@ -149,9 +147,8 @@ export const useElementsRenderer = ({
               // Use a promise-based approach with better error handling
               Image.fromURL(props.src, {
                 crossOrigin: 'anonymous',
-                // Additional options can be added here
               }).then((img) => {
-                if (!canvas) return;
+                if (!canvas || canvas.disposed) return;
 
                 img.set({
                   left: position.x,
@@ -175,34 +172,60 @@ export const useElementsRenderer = ({
               break;
           }
         }
-        
-        // Re-enable rendering for future operations
-        canvas.renderOnAddRemove = true;
-        
-        // Render everything at once
-        scheduleBatchRender();
       } else {
-        // 要素がない場合、プレースホルダーテキストを使用
+        // 要素がない場合、プレースホルダーテキストを確実に表示
+        console.log(`[Instance ${instanceId}] No elements found for slide ${currentSlide}, showing placeholder`);
         const slideNumberText = new IText(`スライド ${currentSlide}`, {
-          left: canvas.width! / 2,
-          top: canvas.height! / 2,
+          left: (canvas.width || 800) / 2,
+          top: (canvas.height || 600) / 2,
           fontSize: 36,
-          fill: '#1e293b',
+          fill: '#64748b',
+          fontFamily: 'Arial',
           originX: 'center',
           originY: 'center',
           selectable: false,
+          editable: false,
         });
         canvas.add(slideNumberText);
-        canvas.renderAll();
+        console.log(`[Instance ${instanceId}] Placeholder text added for slide ${currentSlide}`);
       }
+      
+      // Re-enable rendering and force render
+      canvas.renderOnAddRemove = true;
+      scheduleBatchRender();
+      
+      // Update elements reference
+      elementsRef.current = elementsToRender;
+      console.log(`[Instance ${instanceId}] Successfully rendered slide ${currentSlide} with ${elementsToRender.length} elements`);
+      
     } catch (error) {
       console.error(`[Instance ${instanceId}] Error rendering elements to canvas:`, error);
+      
+      // Fallback: show error message on canvas
+      try {
+        canvas.clear();
+        const errorText = new IText(`エラー: スライド ${currentSlide} を読み込めませんでした`, {
+          left: (canvas.width || 800) / 2,
+          top: (canvas.height || 600) / 2,
+          fontSize: 24,
+          fill: '#ef4444',
+          fontFamily: 'Arial',
+          originX: 'center',
+          originY: 'center',
+          selectable: false,
+          editable: false,
+        });
+        canvas.add(errorText);
+        canvas.renderAll();
+      } catch (fallbackError) {
+        console.error(`[Instance ${instanceId}] Fallback rendering also failed:`, fallbackError);
+      }
     }
   }, [canvas, initialized, editable, currentSlide, scheduleBatchRender, instanceId]);
 
   // キャンバスをリセットする関数
   const reset = useCallback(() => {
-    if (!canvas || !initialized) return;
+    if (!canvas || !initialized || canvas.disposed) return;
     
     try {
       console.log(`[Instance ${instanceId}] Resetting canvas`);

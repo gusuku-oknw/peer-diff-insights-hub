@@ -27,6 +27,7 @@ export const useCanvasInitialization = ({
   const canvasInitializationCount = useRef(0);
   const prevEditableRef = useRef<boolean>(editable);
   const mountedRef = useRef<boolean>(false);
+  const initializationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // キャンバス設定をメモ化して再レンダリングを防ぐ
   const canvasConfig = useMemo(() => ({
@@ -79,9 +80,9 @@ export const useCanvasInitialization = ({
     // 親コンテナを保存
     containerRef.current = canvasRef.current.parentElement;
 
-    // 既に初期化済みの場合はスキップ
-    if (canvasInstance.current && initialized) {
-      console.log(`[Instance ${instanceId}] Canvas already initialized, skipping`);
+    // 既に初期化済みで有効な場合はスキップ
+    if (canvasInstance.current && initialized && !canvasInstance.current.disposed) {
+      console.log(`[Instance ${instanceId}] Canvas already initialized and valid, skipping`);
       return;
     }
 
@@ -89,8 +90,13 @@ export const useCanvasInitialization = ({
     canvasInitializationCount.current += 1;
     console.log(`[Instance ${instanceId}] Canvas initialization attempt #${canvasInitializationCount.current}, editable: ${editable}`);
 
+    // Clear any existing timeout
+    if (initializationTimeoutRef.current) {
+      clearTimeout(initializationTimeoutRef.current);
+    }
+
     // キャンバス初期化
-    const initTimer = setTimeout(() => {
+    initializationTimeoutRef.current = setTimeout(() => {
       // コンポーネントがまだマウントされているか確認
       if (!mountedRef.current) {
         console.log(`[Instance ${instanceId}] Component unmounted before canvas initialization`);
@@ -111,7 +117,7 @@ export const useCanvasInitialization = ({
         const canvas = new Canvas(canvasRef.current, canvasConfig);
         console.log(`[Instance ${instanceId}] New canvas created with config:`, canvasConfig);
 
-        // 親コンテナに基づいて適切なサイズを設定
+        // キャンバスサイズを設定
         canvas.setWidth(1600);
         canvas.setHeight(900);
         
@@ -147,16 +153,20 @@ export const useCanvasInitialization = ({
             canvas.renderAll();
             console.log(`[Instance ${instanceId}] Forced canvas render after initialization`);
           }
-        }, 50);
+        }, 100); // Increased delay for stability
       } catch (error) {
         console.error(`[Instance ${instanceId}] Error initializing canvas:`, error);
+        setInitialized(false);
       }
-    }, 50); // 少し長めの遅延を入れて確実にDOMが準備されるようにする
+    }, 100); // Increased delay for stability
 
     // クリーンアップ関数
     return () => {
       mountedRef.current = false;
-      clearTimeout(initTimer);
+      if (initializationTimeoutRef.current) {
+        clearTimeout(initializationTimeoutRef.current);
+        initializationTimeoutRef.current = null;
+      }
       disposeCanvas();
       console.log(`[Instance ${instanceId}] Canvas initialization effect cleanup`);
     };

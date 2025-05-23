@@ -38,6 +38,7 @@ export const useCanvas = ({
   const previousSlideRef = useRef<number>(currentSlide);
   const mountedRef = useRef<boolean>(true);
   const renderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastRenderTimeRef = useRef<number>(0);
 
   // メモ化したonSelectElement関数
   const handleSelectElement = useCallback((obj: CustomFabricObject | null) => {
@@ -53,9 +54,9 @@ export const useCanvas = ({
     }
   }, [onSelectElement]);
 
-  // メウントおよびアンマウント時の処理
+  // マウントおよびアンマウント時の処理
   useEffect(() => {
-    console.log(`[Instance ${instanceId}] useCanvas mounted - editable: ${editable}`);
+    console.log(`[Instance ${instanceId}] useCanvas mounted - slide: ${currentSlide}, editable: ${editable}`);
     mountedRef.current = true;
     
     return () => {
@@ -64,9 +65,9 @@ export const useCanvas = ({
         clearTimeout(renderTimerRef.current);
         renderTimerRef.current = null;
       }
-      console.log(`[Instance ${instanceId}] useCanvas unmounted - editable: ${editable}`);
+      console.log(`[Instance ${instanceId}] useCanvas unmounted - slide: ${currentSlide}, editable: ${editable}`);
     };
-  }, [editable, instanceId]);
+  }, [editable, instanceId, currentSlide]);
 
   // キャンバス初期化フック
   const { canvas, initialized, containerRef } = useCanvasInitialization({
@@ -106,8 +107,8 @@ export const useCanvas = ({
   useEffect(() => {
     if (!mountedRef.current) return;
     
-    if (initialized && canvas) {
-      console.log(`[Instance ${instanceId}] Canvas is now ready - editable: ${editable}, slide: ${currentSlide}`);
+    if (initialized && canvas && !canvas.disposed) {
+      console.log(`[Instance ${instanceId}] Canvas is now ready - slide: ${currentSlide}, editable: ${editable}`);
       setCanvasReady(true);
       setLoadingError(null);
     } else {
@@ -117,24 +118,26 @@ export const useCanvas = ({
 
   // スライドの内容をレンダリング
   const renderSlideContent = useCallback(() => {
-    if (!canvas || !initialized || !mountedRef.current) {
-      console.log(`[Instance ${instanceId}] Canvas not ready for rendering elements`);
+    if (!canvas || !initialized || !mountedRef.current || canvas.disposed) {
+      console.log(`[Instance ${instanceId}] Canvas not ready for rendering - initialized: ${initialized}, disposed: ${canvas?.disposed || 'no canvas'}`);
       return;
     }
 
+    // Prevent too frequent renders
+    const now = Date.now();
+    if (now - lastRenderTimeRef.current < 50) {
+      console.log(`[Instance ${instanceId}] Skipping render due to throttling`);
+      return;
+    }
+    lastRenderTimeRef.current = now;
+
     renderAttemptRef.current += 1;
-    console.log(`[Instance ${instanceId}] Rendering slide ${currentSlide} content - editable: ${editable}, attempt: ${renderAttemptRef.current}`);
+    console.log(`[Instance ${instanceId}] Rendering slide ${currentSlide} content - editable: ${editable}, attempt: ${renderAttemptRef.current}, elements: ${elements.length}`);
     
     try {
-      // キャンバスをクリア
-      canvas.clear();
-      canvas.backgroundColor = '#ffffff';
-      
       // 現在のスライドの要素をレンダリング
       renderElements(elements);
       
-      // 強制的に再描画
-      canvas.renderAll();
       console.log(`[Instance ${instanceId}] Slide ${currentSlide} rendered successfully with ${elements.length} elements`);
       
       // 成功したらレンダリング試行カウンタをリセット
@@ -162,14 +165,14 @@ export const useCanvas = ({
     const elementsChanged = JSON.stringify(previousElementsRef.current) !== JSON.stringify(elements);
     previousElementsRef.current = [...elements];
     
-    // スライド変更、要素変更があった場合のみレンダリング
-    if (!canvas || !initialized) {
+    // キャンバスが準備されていない場合はスキップ
+    if (!canvas || !initialized || canvas.disposed) {
       console.log(`[Instance ${instanceId}] Skipping render - canvas not ready`);
       return;
     }
     
     if (slideChanged || elementsChanged) {
-      console.log(`[Instance ${instanceId}] Slide or elements changed, scheduling render`);
+      console.log(`[Instance ${instanceId}] Slide or elements changed, scheduling render - slideChanged: ${slideChanged}, elementsChanged: ${elementsChanged}`);
       
       // 短い遅延を入れて連続更新を防止
       if (renderTimerRef.current) {
@@ -181,17 +184,22 @@ export const useCanvas = ({
           renderSlideContent();
         }
         renderTimerRef.current = null;
-      }, 50);
+      }, 100); // Slightly increased delay for stability
     }
   }, [canvas, initialized, currentSlide, elements, renderSlideContent, instanceId]);
 
   // キャンバスが初期化されたときにすぐに内容をレンダリング
   useEffect(() => {
-    if (initialized && canvas && mountedRef.current) {
-      console.log(`[Instance ${instanceId}] Canvas initialized, rendering initial content`);
-      renderSlideContent();
+    if (initialized && canvas && !canvas.disposed && mountedRef.current) {
+      console.log(`[Instance ${instanceId}] Canvas initialized, rendering initial content for slide ${currentSlide}`);
+      // 初期化直後はやや長めの遅延
+      setTimeout(() => {
+        if (mountedRef.current) {
+          renderSlideContent();
+        }
+      }, 200);
     }
-  }, [initialized, canvas, renderSlideContent, instanceId]);
+  }, [initialized, canvas, renderSlideContent, instanceId, currentSlide]);
 
   // 戻り値をメモ化して安定させる
   return useMemo(() => ({
