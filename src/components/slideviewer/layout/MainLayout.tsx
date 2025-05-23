@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
-import SidePanel from "@/components/slideviewer/panels/SidePanel";
+import SidePanel from "@/components/slide-viewer/panels/SidePanel";
 import { useToast } from "@/hooks/use-toast";
 import { useSlideStore } from "@/stores/slideStore";
 import LeftSidebar from "./LeftSidebar";

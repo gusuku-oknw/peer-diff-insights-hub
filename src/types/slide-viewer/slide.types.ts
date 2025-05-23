@@ -11,6 +11,7 @@ export interface SlideElement {
     height: number;
   };
   angle?: number;
+  zIndex?: number;
   props: Record<string, any>;
 }
 

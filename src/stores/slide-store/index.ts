@@ -10,7 +10,7 @@ import { createPPTXImportSlice } from './createPPTXImport';
 import { createSampleSlides } from './createSampleSlides';
 
 // スライドストアの作成
-const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get, api) => {
+const createSlideStore: StateCreator<SlideStore> = (set, get, api) => {
   // サンプルスライドを作成
   const sampleSlides = createSampleSlides();
   console.log('Creating slide store with sample slides:', sampleSlides.length);
@@ -18,6 +18,19 @@ const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get
   // 各スライスを結合
   return {
     slides: sampleSlides,
+    thumbnails: {},
+    
+    // Base methods
+    setSlides: (slides) => set({ slides }),
+    addSlide: (slide) => set((state) => ({ slides: [...state.slides, slide] })),
+    removeSlide: (slideId) => set((state) => ({ 
+      slides: state.slides.filter(slide => slide.id !== slideId) 
+    })),
+    updateSlide: (slideId, updates) => set((state) => ({
+      slides: state.slides.map(slide => 
+        slide.id === slideId ? { ...slide, ...updates } : slide
+      )
+    })),
     
     // Navigation slice
     ...createNavigationSlice(set, get, api),
@@ -36,7 +49,7 @@ const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get
 // 永続化付きのスライドストア
 export const useSlideStore = create<SlideStore>()(
   persist(
-    (set, get, api) => createSlideStore(set, get, api),
+    createSlideStore,
     {
       name: 'slide-storage',
       // 永続化する部分状態を指定

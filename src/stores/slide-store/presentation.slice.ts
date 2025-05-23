@@ -1,7 +1,8 @@
 
 import type { StateCreator } from 'zustand';
 import type { SlideStore } from './types';
-import type { ViewerMode } from '@/types/common.types';
+
+export type ViewerMode = "presentation" | "edit" | "review";
 
 export interface PresentationSlice {
   viewerMode: ViewerMode;
@@ -19,6 +20,7 @@ export interface PresentationSlice {
   toggleLeftSidebar: () => void;
   setPresentationStartTime: (time: number | null) => void;
   setDisplayCount: (count: number) => void;
+  generateThumbnails: () => void;
 }
 
 export const createPresentationSlice: StateCreator<
@@ -63,5 +65,17 @@ export const createPresentationSlice: StateCreator<
   
   setDisplayCount: (count: number) => {
     set({ displayCount: count });
+  },
+  
+  generateThumbnails: () => {
+    console.log("Generating thumbnails for slides");
+    const { slides } = get();
+    
+    const updatedSlides = slides.map(slide => ({
+      ...slide,
+      thumbnail: slide.thumbnail || `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="113" viewBox="0 0 200 113"><rect width="200" height="113" fill="%23f0f0f0"/><text x="100" y="60" font-family="Arial" font-size="16" text-anchor="middle" fill="%23666">Slide ${slide.id}</text></svg>`
+    }));
+    
+    set({ slides: updatedSlides });
   },
 });
