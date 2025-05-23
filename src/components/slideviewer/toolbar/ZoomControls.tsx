@@ -1,7 +1,7 @@
+import React, { useCallback, memo, useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useCallback, memo, useState, useEffect } from "react";
 import { debounce } from "lodash";
 
 interface ZoomControlsProps {
@@ -10,6 +10,8 @@ interface ZoomControlsProps {
 }
 
 const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
+  console.log(`Rendering ZoomControls - Current zoom: ${zoom}%`);
+  
   // Keep internal state for smooth UI updates
   const [internalZoom, setInternalZoom] = useState(zoom);
   
@@ -18,25 +20,41 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
     setInternalZoom(zoom);
   }, [zoom]);
   
+  // プリセットズームレベルをメモ化
+  const zoomPresets = useMemo(() => [
+    { label: "25%", value: 25 },
+    { label: "50%", value: 50 },
+    { label: "75%", value: 75 },
+    { label: "100% (デフォルト)", value: 100 },
+    { label: "125%", value: 125 },
+    { label: "150%", value: 150 },
+    { label: "200%", value: 200 },
+  ], []);
+  
   // Create debounced zoom handler that only triggers actual zoom change after delay
-  const debouncedZoomChange = useCallback(
+  // leading: falseでズーム操作開始時のレンダリングを抑制
+  // trailing: trueでズーム操作終了時のみレンダリングを発生させる
+  const debouncedZoomChange = useMemo(() => 
     debounce((newZoom: number) => {
       onZoomChange(newZoom);
-    }, 150),
+    }, 150, { leading: false, trailing: true }),
     [onZoomChange]
   );
 
-  // Memoized zoom change handler with bounds checking
+  // バウンド付きズーム変更ハンドラをメモ化
   const handleZoomChange = useCallback((newZoom: number) => {
     // Ensure zoom stays between 25% and 200%
     const boundedZoom = Math.min(Math.max(newZoom, 25), 200);
+    
+    // 変更がない場合は処理をスキップ
+    if (boundedZoom === internalZoom) return;
     
     // Update internal state immediately for responsive UI
     setInternalZoom(boundedZoom);
     
     // Debounce the actual propagation to parent
     debouncedZoomChange(boundedZoom);
-  }, [debouncedZoomChange]);
+  }, [internalZoom, debouncedZoomChange]);
 
   // Increment/decrement zoom by a fixed percentage
   const incrementZoom = useCallback(() => {
@@ -60,6 +78,18 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
     };
   }, [debouncedZoomChange]);
 
+  // ドロップダウンメニュー項目をメモ化
+  const dropdownItems = useMemo(() => (
+    zoomPresets.map(preset => (
+      <DropdownMenuItem 
+        key={preset.value} 
+        onClick={() => handleZoomChange(preset.value)}
+      >
+        {preset.label}
+      </DropdownMenuItem>
+    ))
+  ), [zoomPresets, handleZoomChange]);
+
   return (
     <div className="flex items-center space-x-2">
       <DropdownMenu>
@@ -78,13 +108,7 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
         <DropdownMenuContent align="start" className="w-48">
           <DropdownMenuLabel>ズーム設定</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => handleZoomChange(25)}>25%</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleZoomChange(50)}>50%</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleZoomChange(75)}>75%</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleZoomChange(100)}>100% (デフォルト)</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleZoomChange(125)}>125%</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleZoomChange(150)}>150%</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleZoomChange(200)}>200%</DropdownMenuItem>
+          {dropdownItems}
         </DropdownMenuContent>
       </DropdownMenu>
       
@@ -111,4 +135,8 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
   );
 };
 
-export default memo(ZoomControls);
+// メモ化を最適化
+export default memo(ZoomControls, (prevProps, nextProps) => {
+  // 本当にzoomが変わった時だけ再レンダリング
+  return prevProps.zoom === nextProps.zoom;
+});

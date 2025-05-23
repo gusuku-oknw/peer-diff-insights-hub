@@ -88,30 +88,47 @@
   }
 }
 
-/* 追加: キャンバス関連の最適化スタイル */
+/* キャンバス関連の最適化スタイル - 改良版 */
 .canvas-container {
   transform-style: preserve-3d;
-  /* Enable GPU acceleration */
+  -webkit-transform-style: preserve-3d;
+  will-change: transform;
   backface-visibility: hidden;
-  /* Prevent blurry text during scaling */
+  -webkit-backface-visibility: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  contain: layout paint size;
 }
 
-/* Optimize transforms for smoother animations */
+/* GPUレンダリングの最適化 */
 .canvas-container canvas,
 .canvas-container .fabric-canvas {
-  /* Optimize rendering */
-  image-rendering: optimizeQuality;
-}
-
-/* Force hardware acceleration for transforms */
-.fabric-canvas {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
   transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
-/* Optimize DOM elements for animation performance */
+/* アニメーション中のちらつき防止 */
 .will-change-transform {
   will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000;
+  -webkit-perspective: 1000;
 }
 
+/* CSS アニメーションをスムーズにする */
+@media screen and (prefers-reduced-motion: no-preference) {
+  .fabric-canvas,
+  .canvas-container {
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* フォーカス時の青枠をなくす（アクセシビリティには注意） */
+canvas:focus {
+  outline: none;
+}

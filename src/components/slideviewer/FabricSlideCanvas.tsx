@@ -1,5 +1,5 @@
 
-import { useRef, useCallback, memo } from "react";
+import React, { useRef, useCallback, useMemo, memo } from "react";
 import { useSlideStore } from "@/stores/slideStore";
 import useFabricCanvas from "@/hooks/useFabricCanvas";
 import { CustomFabricObject } from '@/utils/types/canvas.types';
@@ -17,21 +17,33 @@ const FabricSlideCanvas = ({
   editable = false,
   userType = "enterprise" 
 }: FabricSlideCanvasProps) => {
+  console.log(`Rendering FabricSlideCanvas - Slide: ${currentSlide}, Zoom: ${zoomLevel}%`);
+  
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const slides = useSlideStore(state => state.slides);
   const updateElement = useSlideStore(state => state.updateElement);
   
-  // 現在のスライドの要素を取得
-  const currentSlideData = slides.find(slide => slide.id === currentSlide);
-  const elements = currentSlideData?.elements || [];
+  // 現在のスライドの要素を取得 - useMemoでパフォーマンスを最適化
+  const currentSlideData = useMemo(() => {
+    return slides.find(slide => slide.id === currentSlide);
+  }, [slides, currentSlide]);
+  
+  const elements = useMemo(() => {
+    return currentSlideData?.elements || [];
+  }, [currentSlideData]);
 
-  // 要素更新ハンドラ - 最適化のためにuseCallbackで包む
+  // 要素更新ハンドラ - メモ化して再レンダリングを防止
   const handleUpdateElement = useCallback((elementId: string, updates: any) => {
     updateElement(currentSlide, elementId, updates);
   }, [updateElement, currentSlide]);
   
-  // キャンバスフックを使用
+  // 要素選択ハンドラもメモ化
+  const handleSelectElement = useCallback((element: CustomFabricObject | null) => {
+    // コンソールに選択情報を記録（必要に応じて）
+  }, []);
+  
+  // useFabricCanvasフックを使ったキャンバス管理
   const { canvasReady, loadingError } = useFabricCanvas({
     canvasRef,
     currentSlide,
@@ -39,29 +51,33 @@ const FabricSlideCanvas = ({
     editable,
     elements,
     onUpdateElement: handleUpdateElement,
-    onSelectElement: useCallback((element: CustomFabricObject | null) => {
-      // 必要に応じて選択ハンドラを実装
-    }, [])
+    onSelectElement: handleSelectElement
   });
   
-  // シンプルな構造でレンダリング
+  // キャンバスコンテナのスタイル - useMemoで再計算を防止
+  const containerStyle = useMemo(() => ({
+    position: 'relative' as const,
+    transformStyle: 'preserve-3d' as const,
+    backfaceVisibility: 'hidden' as const,
+    perspective: '1000px' as const,
+    imageRendering: 'optimizeQuality' as const
+  }), []);
+  
+  // より効率的な構造でレンダリング
   return (
     <div className="canvas-container flex items-center justify-center w-full h-full overflow-hidden">
       <div 
         ref={canvasContainerRef} 
-        className="relative" 
-        style={{
-          // スタイルは最小限に保ち、useCanvasZoom内で操作
-          position: 'relative',
-          // GPUアクセラレーションを活用
-          backfaceVisibility: 'hidden',
-          // スムーズな表示のためにレイヤー作成を促す
-          perspective: 1000,
-        }}
+        className="will-change-transform"
+        style={containerStyle}
       >
-        <canvas ref={canvasRef} className="fabric-canvas" />
+        <canvas 
+          ref={canvasRef} 
+          className="fabric-canvas" 
+          data-testid="fabric-canvas"
+        />
         
-        {/* ローディングインジケータ */}
+        {/* ローディングとエラー表示 */}
         {!canvasReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
             <div className="flex flex-col items-center">
@@ -71,7 +87,6 @@ const FabricSlideCanvas = ({
           </div>
         )}
         
-        {/* エラー表示 */}
         {loadingError && (
           <div className="absolute inset-0 flex items-center justify-center bg-red-50 bg-opacity-75 z-10">
             <div className="flex flex-col items-center">
@@ -91,4 +106,12 @@ const FabricSlideCanvas = ({
 };
 
 // メモ化してコンポーネントの不必要な再レンダリングを防止
-export default memo(FabricSlideCanvas);
+// React.memo の比較関数を提供してより精密な制御
+export default memo(FabricSlideCanvas, (prevProps, nextProps) => {
+  // 本当に変更があった場合のみ再レンダリング
+  return (
+    prevProps.currentSlide === nextProps.currentSlide &&
+    prevProps.zoomLevel === nextProps.zoomLevel &&
+    prevProps.editable === nextProps.editable
+  );
+});

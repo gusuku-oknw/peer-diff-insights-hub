@@ -1,5 +1,5 @@
 
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { CustomFabricObject } from '@/utils/types/canvas.types';
 import { SlideElement } from '@/utils/types/slide.types';
 import { useCanvasInitialization } from './useCanvasInitialization';
@@ -26,26 +26,32 @@ export const useCanvas = ({
   onUpdateElement,
   onSelectElement
 }: UseCanvasProps) => {
+  // 状態管理
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const selectedObjectRef = useRef<CustomFabricObject | null>(null);
   const renderAttemptRef = useRef(0);
   const [canvasReady, setCanvasReady] = useState(false);
   const [loadingError, setLoadingError] = useState<string | null>(null);
+  const previousElementsRef = useRef<SlideElement[]>(elements);
+  const previousSlideRef = useRef<number>(currentSlide);
+
+  // メモ化したonSelectElement関数
+  const handleSelectElement = useCallback((obj: CustomFabricObject | null) => {
+    selectedObjectRef.current = obj;
+    if (obj && obj.customData?.id) {
+      setSelectedElementId(obj.customData.id);
+      if (onSelectElement) onSelectElement(obj);
+    } else {
+      setSelectedElementId(null);
+      if (onSelectElement) onSelectElement(null);
+    }
+  }, [onSelectElement]);
 
   // キャンバス初期化フック
   const { canvas, initialized, containerRef } = useCanvasInitialization({
     canvasRef,
     editable,
-    onSelectElement: (obj) => {
-      selectedObjectRef.current = obj;
-      if (obj && obj.customData?.id) {
-        setSelectedElementId(obj.customData.id);
-        if (onSelectElement) onSelectElement(obj);
-      } else {
-        setSelectedElementId(null);
-        if (onSelectElement) onSelectElement(null);
-      }
-    }
+    onSelectElement: handleSelectElement
   });
 
   // ズームフック
@@ -64,7 +70,7 @@ export const useCanvas = ({
     onUpdateElement
   });
 
-  // 要素レンダリングフック
+  // 要素レンダリングフック - メモ化した依存関係で再レンダリングを最適化
   const { renderElements, reset } = useElementsRenderer({
     canvas,
     initialized,
@@ -84,29 +90,41 @@ export const useCanvas = ({
   useEffect(() => {
     if (!canvas || !initialized || !canvasReady) return;
 
-    const maxRenderAttempts = 3;
-    renderAttemptRef.current += 1;
+    // スライド変更の検出
+    const slideChanged = previousSlideRef.current !== currentSlide;
+    previousSlideRef.current = currentSlide;
 
-    console.log("Loading slide content for slide", currentSlide);
-    
-    try {
-      // 現在のスライドの要素をレンダリング
-      renderElements(elements);
+    // 要素の変更検出
+    const elementsChanged = JSON.stringify(previousElementsRef.current) !== JSON.stringify(elements);
+    previousElementsRef.current = [...elements];
+
+    // 変更があった場合のみレンダリング
+    if (slideChanged || elementsChanged) {
+      const maxRenderAttempts = 3;
+      renderAttemptRef.current += 1;
+
+      console.log(`Rendering slide content for slide ${currentSlide}, attempt ${renderAttemptRef.current}`);
       
-      // 成功したらレンダリング試行カウンタをリセット
-      renderAttemptRef.current = 0;
-      setLoadingError(null);
-    } catch (error) {
-      console.error("Error rendering slide:", error);
-      
-      // 最大試行回数を超えた場合はエラー状態に設定
-      if (renderAttemptRef.current >= maxRenderAttempts) {
-        setLoadingError("スライドの読み込み中にエラーが発生しました");
+      try {
+        // 現在のスライドの要素をレンダリング
+        renderElements(elements);
+        
+        // 成功したらレンダリング試行カウンタをリセット
+        renderAttemptRef.current = 0;
+        setLoadingError(null);
+      } catch (error) {
+        console.error("Error rendering slide:", error);
+        
+        // 最大試行回数を超えた場合はエラー状態に設定
+        if (renderAttemptRef.current >= maxRenderAttempts) {
+          setLoadingError("スライドの読み込み中にエラーが発生しました");
+        }
       }
     }
   }, [currentSlide, initialized, canvasReady, canvas, renderElements, elements]);
 
-  return {
+  // 戻り値をメモ化して安定させる
+  return useMemo(() => ({
     canvas,
     initialized,
     renderElements,
@@ -114,7 +132,7 @@ export const useCanvas = ({
     selectedObject: selectedObjectRef.current,
     loadingError,
     canvasReady
-  };
+  }), [canvas, initialized, renderElements, reset, loadingError, canvasReady]);
 };
 
 export default useCanvas;
