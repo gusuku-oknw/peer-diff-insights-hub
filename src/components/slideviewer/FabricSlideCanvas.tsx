@@ -24,6 +24,7 @@ const FabricSlideCanvas = ({
   const slides = useSlideStore(state => state.slides);
   const updateElement = useSlideStore(state => state.updateElement);
   const prevEditableRef = useRef(editable);
+  const prevSlideRef = useRef(currentSlide);
   
   // 現在のスライドの要素を取得 - useMemoでパフォーマンスを最適化
   const currentSlideData = useMemo(() => {
@@ -42,15 +43,19 @@ const FabricSlideCanvas = ({
   // 要素選択ハンドラもメモ化
   const handleSelectElement = useCallback((element: CustomFabricObject | null) => {
     // コンソールに選択情報を記録（必要に応じて）
+    if (element) {
+      console.log("Selected element:", element.customData?.id);
+    }
   }, []);
 
   // editableの変更を検出して強制的にキャンバスを再レンダリング
   useEffect(() => {
-    if (prevEditableRef.current !== editable) {
-      console.log(`Editable state changed: ${prevEditableRef.current} -> ${editable}, forcing canvas refresh`);
+    if (prevEditableRef.current !== editable || prevSlideRef.current !== currentSlide) {
+      console.log(`Canvas state changed: editable=${prevEditableRef.current}->${editable}, slide=${prevSlideRef.current}->${currentSlide}`);
       prevEditableRef.current = editable;
+      prevSlideRef.current = currentSlide;
     }
-  }, [editable]);
+  }, [editable, currentSlide]);
   
   // useFabricCanvasフックを使ったキャンバス管理
   const { canvasReady, loadingError } = useFabricCanvas({
@@ -85,6 +90,8 @@ const FabricSlideCanvas = ({
           ref={canvasRef} 
           className="fabric-canvas" 
           data-testid="fabric-canvas"
+          data-editable={editable ? "true" : "false"}
+          data-slide={currentSlide}
         />
         
         {/* ローディングとエラー表示 */}

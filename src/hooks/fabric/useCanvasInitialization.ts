@@ -55,6 +55,19 @@ export const useCanvasInitialization = ({
       }
     }
 
+    // DOMがマウントされていることを確認
+    if (!document.body.contains(canvasRef.current)) {
+      console.log("Canvas element is not in DOM yet, waiting...");
+      return;
+    }
+
+    // キャンバス要素が使用可能か確認
+    if (!canvasRef.current) {
+      console.log("Canvas reference is not available");
+      setInitialized(false);
+      return;
+    }
+
     // 既に初期化されていて、モードも変更されていない場合はスキップ
     if (initialized && canvasInstance.current && !modeChanged) {
       return;
@@ -62,15 +75,7 @@ export const useCanvasInitialization = ({
 
     // 初期化カウントを追跡
     canvasInitializationCount.current += 1;
-    if (canvasInitializationCount.current > 1) {
-      console.log(`Canvas initialization attempt #${canvasInitializationCount.current}, editable: ${editable}`);
-    }
-
-    // キャンバス要素が使用可能か確認
-    if (!canvasRef.current) {
-      setInitialized(false);
-      return;
-    }
+    console.log(`Canvas initialization attempt #${canvasInitializationCount.current}, editable: ${editable}`);
 
     // 親コンテナを保存
     containerRef.current = canvasRef.current.parentElement;
@@ -114,6 +119,14 @@ export const useCanvasInitialization = ({
       canvasInstance.current = canvas;
       setInitialized(true);
       console.log(`Canvas initialized successfully, editable: ${editable}`);
+      
+      // 初期化後に強制的に再描画
+      setTimeout(() => {
+        if (canvas && !canvas.disposed) {
+          canvas.renderAll();
+          console.log("Forced canvas render after initialization");
+        }
+      }, 50);
     } catch (error) {
       console.error("Error initializing canvas:", error);
     }

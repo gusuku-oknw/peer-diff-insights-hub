@@ -99,7 +99,15 @@ export const useCanvas = ({
 
   // スライドが変更されたときに要素をレンダリング
   useEffect(() => {
-    if (!canvas || !initialized || !canvasReady) return;
+    if (!canvas || !initialized) {
+      console.log("Canvas not ready for rendering elements");
+      return;
+    }
+
+    if (!canvasReady) {
+      console.log("Canvas not in ready state yet");
+      return;
+    }
 
     // スライド変更の検出
     const slideChanged = previousSlideRef.current !== currentSlide;
@@ -117,8 +125,14 @@ export const useCanvas = ({
       console.log(`Rendering slide content for slide ${currentSlide}, attempt ${renderAttemptRef.current}, editable: ${editable}`);
       
       try {
+        // キャンバスをクリア
+        canvas.clear();
+        
         // 現在のスライドの要素をレンダリング
         renderElements(elements);
+        
+        // 強制的に再描画
+        canvas.renderAll();
         
         // 成功したらレンダリング試行カウンタをリセット
         renderAttemptRef.current = 0;
