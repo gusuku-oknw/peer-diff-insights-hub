@@ -9,13 +9,15 @@ interface UseObjectEventsProps {
   initialized: boolean;
   editable: boolean;
   onUpdateElement?: (elementId: string, updates: Partial<SlideElement>) => void;
+  instanceId?: string; // Added instanceId parameter
 }
 
 export const useObjectEvents = ({
   canvas,
   initialized,
   editable,
-  onUpdateElement
+  onUpdateElement,
+  instanceId = 'default' // Default value for backward compatibility
 }: UseObjectEventsProps) => {
   useEffect(() => {
     if (!canvas || !initialized || !editable || !onUpdateElement) return;

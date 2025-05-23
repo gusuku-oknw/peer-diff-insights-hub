@@ -1,3 +1,4 @@
+
 import { useCallback, useRef } from 'react';
 import { Canvas, IText, Rect, Circle, Image } from 'fabric';
 import { SlideElement } from '@/utils/types/slide.types';
@@ -8,6 +9,7 @@ interface UseElementsRendererProps {
   initialized: boolean;
   editable: boolean;
   currentSlide: number;
+  instanceId?: string; // Added instanceId parameter
 }
 
 interface UseElementsRendererResult {
@@ -19,7 +21,8 @@ export const useElementsRenderer = ({
   canvas,
   initialized,
   editable,
-  currentSlide
+  currentSlide,
+  instanceId = 'default' // Default value for backward compatibility
 }: UseElementsRendererProps): UseElementsRendererResult => {
   // Keep track of elements to avoid unnecessary re-renders
   const elementsRef = useRef<SlideElement[]>([]);
