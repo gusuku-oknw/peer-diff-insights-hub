@@ -17,7 +17,7 @@ const HeroSection = () => {
             
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
               学生×企業の
-              <span className="gradient-primary bg-clip-text text-transparent">
+              <span className="gradient-primary bg-clip-text text-transparent inline-block">
                 共創プラットフォーム
               </span>
             </h1>
