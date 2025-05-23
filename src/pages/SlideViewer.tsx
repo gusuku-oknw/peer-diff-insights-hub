@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,6 +30,23 @@ type ViewerMode = "notes" | "edit" | "review";
 
 // Define the user types
 type UserType = "student" | "enterprise";
+
+// Define mock comments data
+const mockComments = {
+  1: [
+    { id: 1, author: "Student #2", text: "タイトルがもう少し具体的だと良いかも", position: { x: 120, y: 80 }, status: "pending" },
+    { id: 2, author: "Student #5", text: "このグラフの数値がわかりにくいです", position: { x: 320, y: 220 }, status: "in-progress" }
+  ],
+  2: [
+    { id: 3, author: "Student #1", text: "このスライドの背景色を変えた方が読みやすいです", position: { x: 200, y: 150 }, status: "completed" }
+  ],
+  4: [
+    { id: 4, author: "Student #3", text: "このデータの出典情報を追加した方が良いです", position: { x: 280, y: 190 }, status: "pending" }
+  ]
+};
+
+// Define commented slides for student progress tracking
+const commentedSlides = [1, 2]; // Slides where the current student has already commented
 
 const SlideViewer = () => {
   const { toast } = useToast();
