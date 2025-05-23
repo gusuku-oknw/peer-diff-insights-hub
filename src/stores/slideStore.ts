@@ -257,7 +257,7 @@ const createSampleSlides = (): Slide[] => [
           text: "営業利益: 5.2億円（前年比+22%）",
           fontSize: 28,
           color: "#334155",
-8          fontFamily: "Arial",
+          fontFamily: "Arial",
           fontWeight: "bold",
         },
         position: { x: 800, y: 350 },
