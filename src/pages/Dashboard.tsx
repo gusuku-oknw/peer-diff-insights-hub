@@ -7,7 +7,7 @@ import StudentDashboard from "@/components/dashboard/StudentDashboard";
 import BusinessDashboard from "@/components/dashboard/BusinessDashboard";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FileText, Layers } from "lucide-react";
+import { FileText, Layers, GraduationCap, Building } from "lucide-react";
 
 const Dashboard = () => {
   const [userType, setUserType] = useState<"student" | "business">("student");
@@ -17,19 +17,19 @@ const Dashboard = () => {
       <Navigation />
       <div className="flex-grow pt-20 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-10 text-center">
+          <div className="mb-8 text-center">
             <div className="inline-block mb-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
               PeerDiffX ダッシュボード
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mt-2">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mt-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               ダッシュボード
             </h1>
             <p className="mt-3 text-lg text-gray-600 max-w-2xl mx-auto">
               あなたのレビュー状況とタスクを管理し、効率的にコラボレーションできます
             </p>
-            <div className="mt-6">
+            <div className="mt-6 flex justify-center gap-4">
               <Link to="/slides">
-                <Button className="gradient-primary shadow-md shadow-blue-500/20 hover:shadow-blue-500/30 transition-all">
+                <Button className="gradient-primary shadow-md shadow-blue-500/20 hover:shadow-blue-500/30 transition-all transform hover:-translate-y-1 duration-200">
                   <FileText className="mr-2 h-5 w-5" />
                   スライドビューを開く
                 </Button>
@@ -43,27 +43,27 @@ const Dashboard = () => {
               className="w-full max-w-3xl"
               onValueChange={(value) => setUserType(value as "student" | "business")}
             >
-              <TabsList className="grid w-full grid-cols-2 mb-8 p-1 bg-blue-50 rounded-lg">
+              <TabsList className="grid w-full grid-cols-2 mb-8 p-1.5 bg-blue-50/80 rounded-xl shadow-sm">
                 <TabsTrigger 
                   value="student"
-                  className="data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm data-[state=active]:font-medium"
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-md data-[state=active]:font-medium py-3 transition-all duration-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500"
                 >
-                  <Layers className="mr-2 h-4 w-4" />
+                  <GraduationCap className="mr-2 h-5 w-5" />
                   学生ビュー
                 </TabsTrigger>
                 <TabsTrigger 
                   value="business"
-                  className="data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm data-[state=active]:font-medium"
+                  className="data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-md data-[state=active]:font-medium py-3 transition-all duration-200 data-[state=active]:border-b-2 data-[state=active]:border-blue-500"
                 >
-                  <Layers className="mr-2 h-4 w-4" />
+                  <Building className="mr-2 h-5 w-5" />
                   企業ビュー
                 </TabsTrigger>
               </TabsList>
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <TabsContent value="student">
+              <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                <TabsContent value="student" className="animate-fade-in">
                   <StudentDashboard />
                 </TabsContent>
-                <TabsContent value="business">
+                <TabsContent value="business" className="animate-fade-in">
                   <BusinessDashboard />
                 </TabsContent>
               </div>
