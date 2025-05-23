@@ -34,6 +34,8 @@ export const useCanvas = ({
   const [loadingError, setLoadingError] = useState<string | null>(null);
   const previousElementsRef = useRef<SlideElement[]>(elements);
   const previousSlideRef = useRef<number>(currentSlide);
+  const prevEditableRef = useRef<boolean>(editable);
+  const [forceRender, setForceRender] = useState(0);
 
   // メモ化したonSelectElement関数
   const handleSelectElement = useCallback((obj: CustomFabricObject | null) => {
@@ -46,6 +48,15 @@ export const useCanvas = ({
       if (onSelectElement) onSelectElement(null);
     }
   }, [onSelectElement]);
+
+  // 編集可能状態が変更された場合に強制的に再レンダリング
+  useEffect(() => {
+    if (prevEditableRef.current !== editable) {
+      console.log(`Canvas editable mode changed in useCanvas: ${prevEditableRef.current} -> ${editable}, forcing render`);
+      prevEditableRef.current = editable;
+      setForceRender(prev => prev + 1);
+    }
+  }, [editable]);
 
   // キャンバス初期化フック
   const { canvas, initialized, containerRef } = useCanvasInitialization({
@@ -98,12 +109,12 @@ export const useCanvas = ({
     const elementsChanged = JSON.stringify(previousElementsRef.current) !== JSON.stringify(elements);
     previousElementsRef.current = [...elements];
 
-    // 変更があった場合のみレンダリング
-    if (slideChanged || elementsChanged) {
+    // 強制レンダリングフラグまたは変更があった場合のみレンダリング
+    if (slideChanged || elementsChanged || forceRender > 0) {
       const maxRenderAttempts = 3;
       renderAttemptRef.current += 1;
 
-      console.log(`Rendering slide content for slide ${currentSlide}, attempt ${renderAttemptRef.current}`);
+      console.log(`Rendering slide content for slide ${currentSlide}, attempt ${renderAttemptRef.current}, editable: ${editable}`);
       
       try {
         // 現在のスライドの要素をレンダリング
@@ -121,7 +132,7 @@ export const useCanvas = ({
         }
       }
     }
-  }, [currentSlide, initialized, canvasReady, canvas, renderElements, elements]);
+  }, [currentSlide, initialized, canvasReady, canvas, renderElements, elements, forceRender, editable]);
 
   // 戻り値をメモ化して安定させる
   return useMemo(() => ({

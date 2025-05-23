@@ -108,7 +108,20 @@ const SlideViewerPanel = ({
   }, []);
 
   // デバッグ用のログを追加
-  console.log("SlideViewerPanel render:", { showPresenterNotes, displayCount, viewerMode });
+  console.log("SlideViewerPanel render:", { 
+    showPresenterNotes, 
+    displayCount, 
+    viewerMode,
+    isReviewMode: viewerMode === "review",
+    isPresentationMode: viewerMode === "presentation" 
+  });
+
+  // 右側のサイドバーを表示すべきか判断
+  const shouldShowNotes = showPresenterNotes;
+  const shouldShowReviewPanel = viewerMode === "review";
+  const showRightSidebar = shouldShowNotes || shouldShowReviewPanel;
+  
+  console.log("Right sidebar visibility:", { shouldShowNotes, shouldShowReviewPanel, showRightSidebar });
 
   return (
     <div className="flex h-full">
@@ -134,6 +147,7 @@ const SlideViewerPanel = ({
               currentSlide={currentSlide}
               zoomLevel={zoom}
               editable={viewerMode === "edit"}
+              userType={viewerMode === "review" ? "student" : "enterprise"}
             />
             
             {/* Navigation controls in presentation mode */}
@@ -181,14 +195,25 @@ const SlideViewerPanel = ({
             )}
           </div>
           
-          {/* Presenter notes panel - 修正: 条件を調整 */}
-          {showPresenterNotes && (
+          {/* 右サイドバー - 発表者メモパネルとレビューパネル */}
+          {showRightSidebar && (
             <div className="w-80 h-full bg-gray-50 border-l border-gray-200 overflow-hidden">
-              <SlideNotesPanel 
-                currentSlide={currentSlide}
-                totalSlides={totalSlides}
-                presenterNotes={presenterNotes}
-              />
+              {shouldShowNotes && (
+                <SlideNotesPanel 
+                  currentSlide={currentSlide}
+                  totalSlides={totalSlides}
+                  presenterNotes={presenterNotes}
+                />
+              )}
+              
+              {shouldShowReviewPanel && !shouldShowNotes && (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center p-4">
+                    <h3 className="text-lg font-medium text-gray-700 mb-2">レビューパネル</h3>
+                    <p className="text-sm text-gray-500">このスライドへのコメントやフィードバックが表示されます</p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

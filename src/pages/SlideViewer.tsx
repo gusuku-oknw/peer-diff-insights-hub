@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,6 +11,7 @@ import SlideViewerPanel from "@/components/slideviewer/SlideViewerPanel";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import { CommitHistory } from "@/components/slideviewer/HistorySidebar";
 import { useSlideStore } from "@/stores/slideStore";
+import { debounce } from "lodash";
 
 // Define commented slides for student progress tracking
 const commentedSlides = [1, 2]; // Slides where the current student has already commented
@@ -66,9 +67,11 @@ const SlideViewer = () => {
   ];
 
   // Mock presenter notes from our slides data
-  const presenterNotes = Object.fromEntries(
-    slides.map(slide => [slide.id, slide.notes])
-  );
+  const presenterNotes = useMemo(() => {
+    return Object.fromEntries(
+      slides.map(slide => [slide.id, slide.notes])
+    );
+  }, [slides]);
 
   // Detect number of displays
   useEffect(() => {
@@ -165,8 +168,9 @@ const SlideViewer = () => {
     }
   }, [presentationStartTime, toggleFullScreen, startPresentation, setViewerMode]);
 
-  // Handle mode change with visual feedback
-  const handleModeChange = (mode: "presentation" | "edit" | "review") => {
+  // メモ化されたモード切替ハンドラ（デバウンス処理も追加）
+  const handleModeChange = useMemo(() => debounce((mode: "presentation" | "edit" | "review") => {
+    console.log(`Mode change requested: ${mode}`);
     setViewerMode(mode);
     
     toast({
@@ -181,7 +185,7 @@ const SlideViewer = () => {
           ? "スライドの編集が可能になります"
           : "コメントやフィードバックに集中できます",
     });
-  };
+  }, 300), [setViewerMode, toast]);
 
   // Save changes functionality
   const handleSaveChanges = () => {
@@ -204,7 +208,12 @@ const SlideViewer = () => {
   };
 
   // デバッグ用のログ追加
-  console.log("SlideViewer render state:", { showPresenterNotes, viewerMode, isFullScreen });
+  console.log("SlideViewer render state:", { 
+    showPresenterNotes, 
+    viewerMode, 
+    isFullScreen,
+    rerender: Math.random() // レンダリング追跡用
+  });
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">

@@ -23,6 +23,7 @@ export const useCanvasInitialization = ({
   const [initialized, setInitialized] = useState(false);
   const containerRef = useRef<HTMLElement | null>(null);
   const canvasInitializationCount = useRef(0);
+  const prevEditableRef = useRef<boolean>(editable);
 
   // キャンバス設定をメモ化して再レンダリングを防ぐ
   const canvasConfig = useMemo(() => ({
@@ -36,25 +37,33 @@ export const useCanvasInitialization = ({
   }), [editable]);
 
   useEffect(() => {
-    // 既に初期化されている場合はスキップ
-    if (initialized && canvasInstance.current) {
+    // モードが変更された場合は再初期化の必要がある
+    const modeChanged = prevEditableRef.current !== editable;
+    if (modeChanged) {
+      console.log(`Canvas editable mode changed: ${prevEditableRef.current} -> ${editable}, reinitializing`);
+      prevEditableRef.current = editable;
+      
+      // 既存のキャンバスがある場合は破棄して再初期化
+      if (canvasInstance.current) {
+        try {
+          canvasInstance.current.dispose();
+          canvasInstance.current = null;
+          setInitialized(false);
+        } catch (e) {
+          console.error("Error disposing canvas on mode change:", e);
+        }
+      }
+    }
+
+    // 既に初期化されていて、モードも変更されていない場合はスキップ
+    if (initialized && canvasInstance.current && !modeChanged) {
       return;
     }
 
     // 初期化カウントを追跡
     canvasInitializationCount.current += 1;
     if (canvasInitializationCount.current > 1) {
-      console.log(`Canvas re-initialization attempt #${canvasInitializationCount.current}`);
-    }
-
-    // 既存のキャンバスインスタンスがあれば破棄
-    if (canvasInstance.current) {
-      try {
-        canvasInstance.current.dispose();
-      } catch (e) {
-        console.error("Error disposing canvas:", e);
-      }
-      canvasInstance.current = null;
+      console.log(`Canvas initialization attempt #${canvasInitializationCount.current}, editable: ${editable}`);
     }
 
     // キャンバス要素が使用可能か確認
@@ -104,7 +113,7 @@ export const useCanvasInitialization = ({
 
       canvasInstance.current = canvas;
       setInitialized(true);
-      console.log("Canvas initialized successfully");
+      console.log(`Canvas initialized successfully, editable: ${editable}`);
     } catch (error) {
       console.error("Error initializing canvas:", error);
     }
@@ -122,7 +131,7 @@ export const useCanvasInitialization = ({
         canvasInstance.current = null;
       }
     };
-  }, [canvasRef, editable, onSelectElement, canvasConfig]);
+  }, [canvasRef, editable, onSelectElement, canvasConfig, initialized]);
 
   return {
     canvas: canvasInstance.current,
