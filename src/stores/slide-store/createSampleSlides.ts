@@ -6,6 +6,7 @@ export const createSampleSlides = (): Slide[] => [
   {
     id: 1,
     title: "2025年度 第4四半期 事業報告",
+    content: "ABC株式会社の2025年度第4四半期事業報告書です。",
     elements: [
       {
         id: "title-1",
@@ -89,6 +90,7 @@ export const createSampleSlides = (): Slide[] => [
   {
     id: 2,
     title: "会社概要",
+    content: "ABC株式会社の基本情報と企業理念について",
     elements: [
       {
         id: "header-2",
@@ -158,6 +160,7 @@ export const createSampleSlides = (): Slide[] => [
   {
     id: 3,
     title: "第4四半期 業績ハイライト",
+    content: "売上高25億円、営業利益5.2億円の好調な業績",
     elements: [
       {
         id: "header-3",
@@ -257,6 +260,7 @@ export const createSampleSlides = (): Slide[] => [
   {
     id: 4,
     title: "今後の戦略",
+    content: "AI技術導入、アジア展開、サブスクリプション、人材育成の4つの柱",
     elements: [
       {
         id: "header-4",
@@ -445,6 +449,7 @@ export const createSampleSlides = (): Slide[] => [
   {
     id: 5,
     title: "ご質問・ご意見",
+    content: "質疑応答とお問い合わせ先の案内",
     elements: [
       {
         id: "header-5",

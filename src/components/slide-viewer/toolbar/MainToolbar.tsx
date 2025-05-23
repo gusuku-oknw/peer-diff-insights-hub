@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -12,7 +11,7 @@ import {
   Monitor, 
   Edit3, 
   MessageSquare, 
-  SidebarLeft, 
+  PanelLeft, 
   Maximize, 
   BookOpen 
 } from "lucide-react";
@@ -68,7 +67,7 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
           onClick={onLeftSidebarToggle}
           className={leftSidebarOpen ? "bg-blue-100" : ""}
         >
-          <SidebarLeft className="h-4 w-4" />
+          <PanelLeft className="h-4 w-4" />
         </Button>
         
         <Separator orientation="vertical" className="h-6" />
