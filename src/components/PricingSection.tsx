@@ -53,7 +53,7 @@ const PricingSection = () => {
               <CardHeader className="text-center pb-8">
                 <CardTitle className="text-2xl font-bold mb-2">{plan.name}</CardTitle>
                 <div className="flex items-baseline justify-center gap-1">
-                  <span className="font-bold gradient-primary bg-clip-text text-transparent inline-block text-4xl mx-0">
+                  <span className="font-bold gradient-primary bg-clip-text text-transparent inline-block mx-0 text-4xl py-0 text-justify">
                     {plan.price}
                   </span>
                   <span className="text-gray-600">{plan.period}</span>
