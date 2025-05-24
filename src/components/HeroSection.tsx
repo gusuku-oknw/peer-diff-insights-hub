@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, GitBranch, Users, Sparkles } from "lucide-react";
+import { ArrowRight, GitBranch, Users, Sparkles, Play } from "lucide-react";
 import { Link } from "react-router-dom";
+
 const HeroSection = () => {
-  return <section className="pt-20 pb-16 gradient-secondary min-h-screen flex items-center">
+  return (
+    <section className="pt-20 pb-16 gradient-secondary min-h-screen flex items-center">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left">
@@ -24,18 +26,25 @@ const HeroSection = () => {
               PeerDiffXは、企業の説明会資料を学生がレビューし、AI要約とGitライクな差分管理で効率的なフィードバックを実現する革新的なSaaSです。
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
-              <Link to="/demo">
-                <Button size="lg" className="gradient-primary text-white hover:opacity-90 text-lg px-8 py-4">
-                  無料トライアルを開始
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+              <Link to="/slides">
+                <Button size="lg" className="gradient-primary text-white hover:opacity-90 text-lg px-8 py-4 shadow-lg">
+                  今すぐ使ってみる
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/demo">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-4 border-2">
+                <Button size="lg" variant="outline" className="text-lg px-8 py-4 border-2 hover:bg-gray-50">
+                  <Play className="mr-2 h-5 w-5" />
                   デモを見る
                 </Button>
               </Link>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+              <p className="text-sm text-blue-800">
+                <strong>💡 ヒント:</strong> 「今すぐ使ってみる」でスライドエディタを体験、「デモを見る」で機能の詳細をご確認いただけます
+              </p>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-8 text-center lg:text-left">
@@ -87,6 +96,8 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default HeroSection;

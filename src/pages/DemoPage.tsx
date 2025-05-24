@@ -1,9 +1,9 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, Building, GraduationCap, Play, FileText } from "lucide-react";
+import { Check, Building, GraduationCap, Play, FileText, ArrowRight, Monitor, Edit3, MessageSquare } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 const DemoPage = () => {
   const [activeTab, setActiveTab] = useState<"business" | "student">("business");
@@ -26,10 +26,62 @@ const DemoPage = () => {
             </span>
             を体験する
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
             企業と学生、それぞれの視点からプラットフォームの機能を試してみましょう。
             無料トライアルでは実際のプロジェクトを作成・参加できます。
           </p>
+          <Link to="/slides">
+            <Button size="lg" className="gradient-primary text-white hover:opacity-90 shadow-lg">
+              <Play className="mr-2 h-5 w-5" />
+              今すぐ実際のエディタを体験
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
+        </div>
+
+        {/* 機能デモセクション */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-center mb-8">主要機能のデモ</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+              <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                <Monitor className="h-6 w-6 text-blue-600" />
+              </div>
+              <h3 className="font-bold mb-2">プレゼンテーションモード</h3>
+              <p className="text-gray-600 text-sm mb-4">実際のプレゼンテーション環境でスライドを表示・操作</p>
+              <Link to="/slides">
+                <Button variant="outline" size="sm" className="w-full">
+                  試してみる
+                </Button>
+              </Link>
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+              <div className="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                <Edit3 className="h-6 w-6 text-green-600" />
+              </div>
+              <h3 className="font-bold mb-2">編集モード</h3>
+              <p className="text-gray-600 text-sm mb-4">スライドの内容を直接編集・カスタマイズ</p>
+              <Link to="/slides">
+                <Button variant="outline" size="sm" className="w-full">
+                  試してみる
+                </Button>
+              </Link>
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+              <div className="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                <MessageSquare className="h-6 w-6 text-purple-600" />
+              </div>
+              <h3 className="font-bold mb-2">レビューモード</h3>
+              <p className="text-gray-600 text-sm mb-4">コメントやフィードバックの確認・作成</p>
+              <Link to="/slides">
+                <Button variant="outline" size="sm" className="w-full">
+                  試してみる
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
 
         <Tabs 
@@ -62,7 +114,7 @@ const DemoPage = () => {
                   </div>
                   <div className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <p>GitライクなUI操作で資料のバージョン管理</p>
+                    <p>Gitライクなコミット機能で資料のバージョン管理</p>
                   </div>
                   <div className="flex items-start gap-3">
                     <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -77,13 +129,21 @@ const DemoPage = () => {
                     </div>
                   </div>
                 </div>
-                <Button 
-                  className="w-full gradient-primary text-white hover:opacity-90" 
-                  size="lg"
-                  onClick={handleStartTrial}
-                >
-                  企業として無料トライアルを開始
-                </Button>
+                <div className="space-y-3">
+                  <Link to="/slides">
+                    <Button className="w-full gradient-primary text-white hover:opacity-90">
+                      実際のエディタで体験
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="outline"
+                    className="w-full" 
+                    onClick={handleStartTrial}
+                  >
+                    企業として無料トライアルを開始
+                  </Button>
+                </div>
               </div>
 
               <div className="bg-white rounded-xl shadow-lg p-8">
@@ -144,13 +204,21 @@ const DemoPage = () => {
                     </div>
                   </div>
                 </div>
-                <Button 
-                  className="w-full gradient-primary text-white hover:opacity-90" 
-                  size="lg"
-                  onClick={handleStartTrial}
-                >
-                  学生として無料トライアルを開始
-                </Button>
+                <div className="space-y-3">
+                  <Link to="/slides">
+                    <Button className="w-full gradient-primary text-white hover:opacity-90">
+                      実際のレビュー機能を体験
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="outline"
+                    className="w-full" 
+                    onClick={handleStartTrial}
+                  >
+                    学生として無料トライアルを開始
+                  </Button>
+                </div>
               </div>
 
               <div className="bg-white rounded-xl shadow-lg p-8">
