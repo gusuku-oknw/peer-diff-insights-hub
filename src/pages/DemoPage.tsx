@@ -17,7 +17,7 @@ const DemoPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">
-            <span className="gradient-primary bg-clip-text text-transparent inline-block my-0">
+            <span className="gradient-primary bg-clip-text inline-block my-0 text-slate-950">
               PeerDiffX
             </span>
             を体験する
