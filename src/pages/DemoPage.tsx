@@ -4,24 +4,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, Building, GraduationCap, Play, FileText, ArrowRight, Monitor, Edit3, MessageSquare } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
-
 const DemoPage = () => {
   const [activeTab, setActiveTab] = useState<"business" | "student">("business");
-
   const handleStartTrial = () => {
     toast({
       title: "無料トライアル登録",
       description: `${activeTab === "business" ? "企業" : "学生"}アカウントの登録を開始します。`,
-      duration: 3000,
+      duration: 3000
     });
   };
-
-  return (
-    <div className="pt-20 pb-16 min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+  return <div className="pt-20 pb-16 min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">
-            <span className="gradient-primary bg-clip-text text-transparent inline-block">
+            <span className="gradient-primary bg-clip-text text-transparent inline-block my-0">
               PeerDiffX
             </span>
             を体験する
@@ -84,11 +80,7 @@ const DemoPage = () => {
           </div>
         </div>
 
-        <Tabs 
-          defaultValue="business" 
-          className="max-w-4xl mx-auto mb-12"
-          onValueChange={(value) => setActiveTab(value as "business" | "student")}
-        >
+        <Tabs defaultValue="business" className="max-w-4xl mx-auto mb-12" onValueChange={value => setActiveTab(value as "business" | "student")}>
           <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto">
             <TabsTrigger value="business" className="flex items-center gap-2">
               <Building className="h-4 w-4" />
@@ -136,11 +128,7 @@ const DemoPage = () => {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
-                  <Button 
-                    variant="outline"
-                    className="w-full" 
-                    onClick={handleStartTrial}
-                  >
+                  <Button variant="outline" className="w-full" onClick={handleStartTrial}>
                     企業として無料トライアルを開始
                   </Button>
                 </div>
@@ -211,11 +199,7 @@ const DemoPage = () => {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
-                  <Button 
-                    variant="outline"
-                    className="w-full" 
-                    onClick={handleStartTrial}
-                  >
+                  <Button variant="outline" className="w-full" onClick={handleStartTrial}>
                     学生として無料トライアルを開始
                   </Button>
                 </div>
@@ -275,8 +259,6 @@ const DemoPage = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default DemoPage;
