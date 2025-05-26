@@ -4,8 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import SimpleMainToolbar from "@/components/slide-viewer/toolbar/SimpleMainToolbar";
-import MainLayout from "@/components/slideviewer/layout/MainLayout";
-import { useSlideStore } from "@/stores/slideStore";
+import MainLayout from "@/components/slide-viewer/layout/MainLayout";
+import { useSlideStore } from "@/stores/slide-store";
 import useSlideNavigation from "@/hooks/slideviewer/useSlideNavigation";
 import usePresentationMode from "@/hooks/slideviewer/usePresentationMode";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -21,7 +21,7 @@ const SlideViewer = () => {
   const { toast } = useToast();
   const { userProfile } = useAuth();
   
-  // Use Zustand store for state management
+  // Use the unified slide store
   const { 
     currentSlide, 
     zoom, 
@@ -46,23 +46,34 @@ const SlideViewer = () => {
   // Determine user type from profile
   const userType = userProfile?.role === "student" ? "student" : "enterprise";
   
-  // Initialize proper mode for student accounts
+  // 学生アカウントの初期化改善
   useEffect(() => {
-    // If student is in edit mode, switch to presentation mode
+    console.log('SlideViewer: Initializing for user type:', userType, 'viewerMode:', viewerMode);
+    
+    // 学生が編集モードにいる場合はプレゼンテーションモードに切り替え
     if (userType === "student" && viewerMode === "edit") {
       console.log("Student detected in edit mode, switching to presentation");
       setViewerMode("presentation");
     }
+    
+    // 学生でviewerModeが未定義の場合はデフォルトをプレゼンテーションに
+    if (userType === "student" && !viewerMode) {
+      console.log("Setting default mode for student to presentation");
+      setViewerMode("presentation");
+    }
   }, [userType, viewerMode, setViewerMode]);
   
-  // デバッグ用ログを追加
+  // デバッグ用ログ
   useEffect(() => {
-    console.log('SlideViewer rendered with slides:', slides.length);
-    console.log('Current slide:', currentSlideNumber);
-    console.log('Available slide IDs:', slides.map(s => s.id));
-    console.log('User type:', userType);
-    console.log('Viewer mode:', viewerMode);
-  }, [slides, currentSlideNumber, userType, viewerMode]);
+    console.log('SlideViewer state:', {
+      slides: slides.length,
+      currentSlide: currentSlideNumber,
+      userType,
+      viewerMode,
+      showPresenterNotes,
+      leftSidebarOpen
+    });
+  }, [slides, currentSlideNumber, userType, viewerMode, showPresenterNotes, leftSidebarOpen]);
   
   const { elapsedTime, toggleFullScreenWithEffects } = usePresentationMode();
   const { handlePreviousSlide, handleNextSlide } = useSlideNavigation({
@@ -97,7 +108,6 @@ const SlideViewer = () => {
   useEffect(() => {
     const checkDisplays = () => {
       if (window.screen && 'availWidth' in window.screen) {
-        // This is a rough estimate - assuming displays with similar resolutions
         const estimatedDisplays = Math.round(window.screen.width / window.screen.availWidth) || 1;
         setDisplayCount(Math.max(1, estimatedDisplays));
       }
@@ -105,7 +115,6 @@ const SlideViewer = () => {
     
     checkDisplays();
     
-    // Try to use the Screen API if available
     if (typeof window !== 'undefined' && 'screen' in window && 'orientation' in window) {
       window.addEventListener('resize', checkDisplays);
     }

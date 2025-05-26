@@ -5,7 +5,7 @@ import { StateCreator } from 'zustand';
 import { SlideStore } from './types';
 import { createNavigationSlice } from './navigation.slice';
 import { createElementsSlice } from './elements.slice';
-import { createPresentationSlice } from './presentation.slice';
+import { createPresentationSlice, ViewerMode } from './presentation.slice';
 import { createPPTXImportSlice } from './createPPTXImport';
 import { createSampleSlides } from './createSampleSlides';
 
@@ -46,24 +46,52 @@ const createSlideStore: StateCreator<SlideStore> = (set, get, api) => {
   };
 };
 
+// 学生アカウント用のフィルタリング関数
+const filterViewerModeForStudent = (mode: ViewerMode): ViewerMode => {
+  if (mode === "edit") {
+    console.log('Filtering edit mode to presentation for student account');
+    return "presentation";
+  }
+  return mode;
+};
+
 // 永続化付きのスライドストア
 export const useSlideStore = create<SlideStore>()(
   persist(
     createSlideStore,
     {
       name: 'slide-storage',
-      // 永続化する部分状態を指定
+      // 永続化する部分状態を指定（viewerModeを追加）
       partialize: (state) => ({ 
         slides: state.slides, 
         currentSlide: state.currentSlide,
         zoom: state.zoom,
+        viewerMode: state.viewerMode, // 永続化対象に追加
+        showPresenterNotes: state.showPresenterNotes,
         isPPTXImported: state.isPPTXImported,
         pptxFilename: state.pptxFilename
       }),
-      // デバッグ用のログを追加
-      onRehydrateStorage: () => (state) => {
+      // 復元時に学生アカウント用のフィルタリングを適用
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error('Failed to rehydrate slide store:', error);
+          return;
+        }
+        
         if (state) {
-          console.log('Slide store rehydrated with slides:', state.slides?.length || 0);
+          console.log('Slide store rehydrated:', {
+            slides: state.slides?.length || 0,
+            viewerMode: state.viewerMode,
+            currentSlide: state.currentSlide
+          });
+          
+          // 学生アカウント用のフィルタリング（将来的にはAuthContextから判定）
+          if (state.viewerMode) {
+            const filteredMode = filterViewerModeForStudent(state.viewerMode);
+            if (filteredMode !== state.viewerMode) {
+              state.viewerMode = filteredMode;
+            }
+          }
         }
       },
     }

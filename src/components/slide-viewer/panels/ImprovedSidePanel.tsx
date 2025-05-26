@@ -67,9 +67,18 @@ const ImprovedSidePanel = ({
     };
   }, []);
   
-  // Early return if panel shouldn't be displayed at all
+  // より厳密な表示判定
   const shouldDisplay = shouldShowNotes || shouldShowReviewPanel;
   
+  console.log('ImprovedSidePanel render:', {
+    shouldShowNotes,
+    shouldShowReviewPanel,
+    shouldDisplay,
+    userType,
+    currentSlide
+  });
+  
+  // パネルを表示しない場合は何もレンダリングしない
   if (!shouldDisplay) {
     console.log('ImprovedSidePanel: Not displaying panel - no content to show');
     return null;

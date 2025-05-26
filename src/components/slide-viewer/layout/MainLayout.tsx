@@ -38,16 +38,27 @@ const MainLayout = ({
   const [thumbnailsHeight, setThumbnailsHeight] = useState(128);
   const [isOverallReviewOpen, setIsOverallReviewOpen] = useState(false);
   
-  // Improved logic for determining when to show panels
+  // 右パネル表示判定の改善
   const shouldShowNotes = (viewerMode === "presentation" && showPresenterNotes) || 
                          (viewerMode === "review" && showPresenterNotes);
   const shouldShowReviewPanel = viewerMode === "review";
   
-  // Determine if right panel should be displayed at all
+  // 右パネルを表示すべきかの厳密な判定
   const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
   
-  // Hide right panel completely in fullscreen presentation mode
-  const hideRightPanelCompletely = (viewerMode === "presentation" && isFullScreen) || !shouldDisplayRightPanel;
+  // フルスクリーンプレゼンテーション時は完全に非表示
+  const hideRightPanelCompletely = (viewerMode === "presentation" && isFullScreen) || 
+                                  !shouldDisplayRightPanel;
+
+  console.log('MainLayout render:', {
+    viewerMode,
+    showPresenterNotes,
+    shouldShowNotes,
+    shouldShowReviewPanel,
+    shouldDisplayRightPanel,
+    hideRightPanelCompletely,
+    userType
+  });
 
   return (
     <div className="flex h-full bg-gray-50 relative">
@@ -107,8 +118,8 @@ const MainLayout = ({
         </div>
       </div>
 
-      {/* Right Panel - conditionally rendered instead of just hidden */}
-      {!hideRightPanelCompletely && (
+      {/* Right Panel - 完全な条件付きレンダリング */}
+      {!hideRightPanelCompletely && shouldDisplayRightPanel && (
         <div className={`transition-all duration-300 ease-in-out ${rightPanelCollapsed ? 'w-12' : 'w-80'} flex-shrink-0`}>
           <ImprovedSidePanel
             shouldShowNotes={shouldShowNotes}
