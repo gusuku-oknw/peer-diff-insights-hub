@@ -302,7 +302,7 @@ canvas:focus {
   min-width: 120px;
 }
 
-/* モダンサムネイルスタイル */
+/* モダンサムネイルスタイル - 横スクロール対応 */
 .modern-thumbnails {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
 }
@@ -313,11 +313,64 @@ canvas:focus {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  min-width: 160px; /* 横スクロール用の最小幅 */
 }
 
 .thumbnail-card:hover {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* 横スクロール最適化 */
+.horizontal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.horizontal-scroll::-webkit-scrollbar-track {
+  background: rgba(243, 244, 246, 0.5);
+  border-radius: 3px;
+}
+
+.horizontal-scroll::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.horizontal-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.8);
+}
+
+/* タイムライン用スタイル */
+.timeline-item {
+  position: relative;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 20px;
+  bottom: -16px;
+  width: 2px;
+  background: linear-gradient(to bottom, #e5e7eb, #f3f4f6);
+}
+
+.timeline-item:last-child::before {
+  display: none;
+}
+
+/* コミット履歴のホバー効果 */
+.commit-item {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.commit-item:hover {
+  transform: translateX(2px);
 }
 
 /* レスポンシブレイアウト改善 */
@@ -327,9 +380,9 @@ canvas:focus {
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 50; /* サイドパネルを前面に */
-    width: 100%; /* モバイルでは全幅 */
-    max-width: 320px; /* 最大幅を制限 */
+    z-index: 50;
+    width: 100%;
+    max-width: 320px;
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
   }
 
@@ -344,7 +397,12 @@ canvas:focus {
   }
 
   .thumbnail-card {
-    width: 120px;
+    min-width: 120px;
+  }
+
+  /* モバイルでの横スクロール改善 */
+  .horizontal-scroll {
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -366,7 +424,8 @@ canvas:focus {
 @media (prefers-reduced-motion: reduce) {
   .modern-button,
   .thumbnail-card,
-  .canvas-wrapper {
+  .canvas-wrapper,
+  .commit-item {
     transition: none;
   }
   
