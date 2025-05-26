@@ -13,6 +13,7 @@ interface SlideThumbnailsProps {
   onOpenOverallReview?: () => void;
   height?: number;
   onHeightChange?: (height: number) => void;
+  containerWidth?: number;
 }
 
 const SlideThumbnails = ({
@@ -21,7 +22,8 @@ const SlideThumbnails = ({
   onSlideClick,
   onOpenOverallReview,
   height = 128,
-  onHeightChange
+  onHeightChange,
+  containerWidth
 }: SlideThumbnailsProps) => {
   const storeSlides = useSlideStore(state => state.slides);
   const generateThumbnails = useSlideStore(state => state.generateThumbnails);
@@ -57,9 +59,20 @@ const SlideThumbnails = ({
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
+
+  // Calculate dynamic width based on container
+  const getContainerWidth = () => {
+    if (containerWidth) return containerWidth;
+    return typeof window !== 'undefined' ? window.innerWidth - 100 : 1200; // Fallback with padding
+  };
+
+  const thumbnailWidth = height > 150 ? 160 : 120;
+  const gap = height > 150 ? 24 : 16;
+  const totalItemsWidth = (slides.length + 2) * (thumbnailWidth + gap);
+  const dynamicWidth = Math.max(getContainerWidth(), totalItemsWidth);
   
   return (
-    <div className="modern-thumbnails bg-white flex flex-col border-t border-gray-200 shadow-sm" style={{ height: `${height}px` }}>
+    <div className="modern-thumbnails bg-white flex flex-col border-t border-gray-200 shadow-sm w-full" style={{ height: `${height}px` }}>
       {/* Resize handle */}
       {onHeightChange && (
         <div 
@@ -109,12 +122,14 @@ const SlideThumbnails = ({
       {/* 横スクロール対応のスライド一覧 */}
       <div className="flex-grow overflow-hidden">
         <ScrollArea className="h-full w-full" orientation="horizontal">
-          <div className="flex gap-4 lg:gap-6 p-4 lg:p-6 pb-4" style={{ width: `${(slides.length + 2) * (height > 150 ? 180 : 140)}px` }}>
+          <div 
+            className="flex gap-4 lg:gap-6 p-4 lg:p-6 pb-4" 
+            style={{ width: `${dynamicWidth}px`, minWidth: '100%' }}
+          >
             {slides.map((slide, index) => {
               const slideIndex = slide.id;
               const slideTitle = slide.title || `スライド ${slideIndex}`;
               const isActive = currentSlide === slideIndex;
-              const thumbnailWidth = height > 150 ? 160 : 120;
               
               return (
                 <Tooltip key={index}>
@@ -200,7 +215,7 @@ const SlideThumbnails = ({
             {/* Add new slide button */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="thumbnail-card flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 border-2 border-dashed border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-blue-50" style={{ width: `${height > 150 ? 160 : 120}px` }}>
+                <div className="thumbnail-card flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 border-2 border-dashed border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-blue-50" style={{ width: `${thumbnailWidth}px` }}>
                   <div className="w-full aspect-video flex items-center justify-center mb-3">
                     <div className="text-center">
                       <Plus className="w-6 h-6 lg:w-8 lg:h-8 text-gray-400 mx-auto mb-2" />
@@ -219,7 +234,7 @@ const SlideThumbnails = ({
               <TooltipTrigger asChild>
                 <div 
                   className="thumbnail-card flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 border-2 border-dashed border-purple-300 hover:border-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100"
-                  style={{ width: `${height > 150 ? 160 : 120}px` }}
+                  style={{ width: `${thumbnailWidth}px` }}
                   onClick={() => {
                     console.log("Opening presentation evaluation");
                     onOpenOverallReview?.();

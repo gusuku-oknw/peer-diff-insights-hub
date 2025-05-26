@@ -50,7 +50,7 @@ const MainLayout = ({
     setThumbnailsHeight,
     setLeftSidebarOpen,
     setRightPanelHidden,
-    getContentAreaDimensions
+    getSlideThumbnailsWidth
   } = useSlideStore();
   
   // 右パネル表示ロジック - 学生のレビューモードでも台本を表示
@@ -63,8 +63,8 @@ const MainLayout = ({
   const hideRightPanelCompletely = (viewerMode === "presentation" && isFullScreen) || 
                                   !shouldDisplayRightPanel;
 
-  // Calculate dynamic content width
-  const { availableWidth } = getContentAreaDimensions();
+  // Calculate dynamic content width for thumbnails
+  const thumbnailsWidth = getSlideThumbnailsWidth();
 
   console.log('MainLayout render:', {
     viewerMode,
@@ -74,7 +74,7 @@ const MainLayout = ({
     shouldDisplayRightPanel,
     hideRightPanelCompletely,
     rightPanelHidden,
-    availableWidth
+    thumbnailsWidth
   });
 
   return (
@@ -101,12 +101,7 @@ const MainLayout = ({
       )}
 
       {/* Main Content Area */}
-      <div 
-        className="flex-1 flex overflow-hidden min-w-0"
-        style={{
-          width: leftSidebarOpen ? `calc(100% - ${leftSidebarWidth}px)` : '100%'
-        }}
-      >
+      <div className="flex-1 flex overflow-hidden min-w-0">
         {/* Edit Sidebar - 企業ユーザーの編集モードのみ */}
         {viewerMode === "edit" && userType === "enterprise" && (
           <ResizablePanel
@@ -122,14 +117,7 @@ const MainLayout = ({
         )}
 
         {/* Central Content Area */}
-        <div 
-          className="flex-1 flex flex-col overflow-hidden min-w-0"
-          style={{
-            width: viewerMode === "edit" && userType === "enterprise" 
-              ? `calc(100% - ${editSidebarWidth}px)` 
-              : '100%'
-          }}
-        >
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           {/* Main slide display area */}
           <div className="flex-1 overflow-hidden">
             <MainContent
@@ -162,13 +150,15 @@ const MainLayout = ({
               resizePosition="top"
               className="border-t border-gray-200"
             >
-              <SlideThumbnails
-                currentSlide={currentSlide}
-                onSlideClick={onSlideChange}
-                onOpenOverallReview={() => {}}
-                height={thumbnailsHeight}
-                onHeightChange={setThumbnailsHeight}
-              />
+              <div style={{ width: `${thumbnailsWidth}px` }}>
+                <SlideThumbnails
+                  currentSlide={currentSlide}
+                  onSlideClick={onSlideChange}
+                  onOpenOverallReview={() => {}}
+                  height={thumbnailsHeight}
+                  onHeightChange={setThumbnailsHeight}
+                />
+              </div>
             </ResizablePanel>
           )}
         </div>
@@ -181,6 +171,7 @@ const MainLayout = ({
             maxWidth={500}
             onWidthChange={setRightSidebarWidth}
             resizePosition="left"
+            className="border-l border-gray-200"
           >
             <ImprovedSidePanel
               shouldShowNotes={shouldShowNotes}
