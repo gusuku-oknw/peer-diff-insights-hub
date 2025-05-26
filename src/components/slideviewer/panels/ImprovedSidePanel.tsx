@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import NotesPanel from "../../slide-viewer/panels/NotesPanel";
 import ReviewPanel from "../../slide-viewer/panels/ReviewPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, MessageSquare, X, ChevronRight, ChevronLeft, Plus, Send } from "lucide-react";
+import { BookOpen, MessageSquare, X, Plus, Send } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -11,8 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import type { SidePanelProps } from "@/types/slide-viewer/panel.types";
 
-interface ImprovedSidePanelProps extends SidePanelProps {
+interface ImprovedSidePanelProps extends Omit<SidePanelProps, 'isCollapsed' | 'onToggleCollapse'> {
   userType: "student" | "enterprise";
+  isHidden?: boolean;
+  onToggleHide?: () => void;
 }
 
 const ImprovedSidePanel = ({
@@ -21,8 +23,8 @@ const ImprovedSidePanel = ({
   currentSlide,
   totalSlides,
   presenterNotes,
-  isCollapsed = false,
-  onToggleCollapse,
+  isHidden = false,
+  onToggleHide,
   userType,
 }: ImprovedSidePanelProps) => {
   const isMobile = useIsMobile();
@@ -83,7 +85,7 @@ const ImprovedSidePanel = ({
   // Determine if we should display the panel at all
   const shouldDisplay = shouldShowNotes || shouldShowReviewPanel;
   
-  if (!shouldDisplay) {
+  if (!shouldDisplay || isHidden) {
     return null;
   }
 
@@ -157,20 +159,16 @@ const ImprovedSidePanel = ({
             )}
           </TabsList>
           
-          {/* Collapse/Expand button for desktop */}
-          {!isMobile && onToggleCollapse && (
+          {/* Hide button for desktop */}
+          {!isMobile && onToggleHide && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={onToggleCollapse}
+              onClick={onToggleHide}
               className={`ml-2 ${isVeryNarrow ? 'h-6 w-6 p-0' : 'h-8 w-8 p-0'} flex-shrink-0 hover:bg-gray-200 transition-all duration-200 hover:scale-105`}
-              title={isCollapsed ? "パネルを展開" : "パネルを折りたたみ"}
+              title="パネルを閉じる"
             >
-              {isCollapsed ? (
-                <ChevronRight className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-gray-600`} />
-              ) : (
-                <ChevronLeft className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-gray-600`} />
-              )}
+              <X className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-gray-600`} />
             </Button>
           )}
           
@@ -291,84 +289,6 @@ const ImprovedSidePanel = ({
   }
 
   // Desktop implementation
-  if (isCollapsed) {
-    return (
-      <div className="w-full h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 flex flex-col items-center py-4 relative shadow-sm">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggleCollapse}
-          className="h-8 w-8 p-0 mb-4 hover:bg-blue-100 transition-all duration-200 hover:scale-110 bg-blue-50 border border-blue-200"
-          title="パネルを展開"
-        >
-          <ChevronRight className="h-4 w-4 text-blue-600" />
-        </Button>
-        
-        {/* Quick access buttons when collapsed */}
-        <div className="flex flex-col space-y-2">
-          {shouldShowNotes && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 relative hover:bg-blue-100 transition-all duration-200 hover:scale-110 bg-blue-50 border border-blue-200"
-              title="メモパネル"
-              onClick={() => {
-                onToggleCollapse?.();
-                setActiveTab("notes");
-              }}
-            >
-              <BookOpen className="h-4 w-4 text-blue-600" />
-              {presenterNotes[currentSlide] && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-              )}
-            </Button>
-          )}
-          {shouldShowReviewPanel && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 relative hover:bg-red-100 transition-all duration-200 hover:scale-110 bg-red-50 border border-red-200"
-              title="レビューパネル"
-              onClick={() => {
-                onToggleCollapse?.();
-                setActiveTab("reviews");
-              }}
-            >
-              <MessageSquare className="h-4 w-4 text-red-600" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
-                <span className="text-white text-xs font-bold">3</span>
-              </div>
-            </Button>
-          )}
-        </div>
-
-        {/* Quick action buttons when collapsed - only for students */}
-        {userType === "student" && (
-          <div className="mt-auto flex flex-col space-y-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 hover:bg-green-100 transition-all duration-200 hover:scale-110 bg-green-50 border border-green-200"
-              title="クイックコメント追加"
-              onClick={handleAddComment}
-            >
-              <Plus className="h-3 w-3 text-green-600" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 hover:bg-purple-100 transition-all duration-200 hover:scale-110 bg-purple-50 border border-purple-200"
-              title="レビュー送信"
-              onClick={handleSendReview}
-            >
-              <Send className="h-3 w-3 text-purple-600" />
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   return (
     <div className="w-full h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shadow-sm" ref={panelRef}>
       <PanelContent />

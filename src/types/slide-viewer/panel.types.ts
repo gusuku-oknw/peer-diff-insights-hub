@@ -18,7 +18,7 @@ export interface NotesPanelProps extends BasePanelProps {
 
 // Review panel specific props
 export interface ReviewPanelProps extends BasePanelProps {
-  // Additional review-specific props can be added here
+  presenterNotes?: Record<number, string>;
 }
 
 // Side panel props

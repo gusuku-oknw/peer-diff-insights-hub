@@ -6,6 +6,8 @@ import SlideThumbnails from "../SlideThumbnails";
 import ImprovedSidePanel from "../panels/ImprovedSidePanel";
 import OverallReviewPanel from "../panels/OverallReviewPanel";
 import EditSidebar from "../editor/EditSidebar";
+import { Button } from "@/components/ui/button";
+import { PanelRightOpen } from "lucide-react";
 import type { MainLayoutProps } from "@/types/slide-viewer/toolbar.types";
 
 interface ExtendedMainLayoutProps extends MainLayoutProps {
@@ -34,7 +36,7 @@ const MainLayout = ({
   onToggleLeftSidebar,
   onSlideChange,
 }: ExtendedMainLayoutProps) => {
-  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+  const [rightPanelHidden, setRightPanelHidden] = useState(false);
   const [thumbnailsHeight, setThumbnailsHeight] = useState(128);
   const [isOverallReviewOpen, setIsOverallReviewOpen] = useState(false);
   
@@ -55,7 +57,7 @@ const MainLayout = ({
     shouldShowReviewPanel,
     shouldDisplayRightPanel,
     hideRightPanelCompletely,
-    rightPanelCollapsed
+    rightPanelHidden
   });
 
   return (
@@ -97,7 +99,7 @@ const MainLayout = ({
               commentedSlides={commentedSlides}
               mockComments={mockComments}
               userType={userType}
-              rightPanelCollapsed={hideRightPanelCompletely ? true : rightPanelCollapsed}
+              rightPanelCollapsed={false}
               onSlideChange={onSlideChange}
             />
           </div>
@@ -116,24 +118,35 @@ const MainLayout = ({
           )}
         </div>
 
-        {/* Right Panel - サイズ管理をここで統一 */}
-        {!hideRightPanelCompletely && shouldDisplayRightPanel && (
-          <div className={`flex-shrink-0 transition-all duration-200 ease-in-out ${
-            rightPanelCollapsed ? 'w-12' : 'w-80'
-          }`}>
+        {/* Right Panel - 完全な表示/非表示切り替え */}
+        {!hideRightPanelCompletely && shouldDisplayRightPanel && !rightPanelHidden && (
+          <div className="w-80 flex-shrink-0">
             <ImprovedSidePanel
               shouldShowNotes={shouldShowNotes}
               shouldShowReviewPanel={shouldShowReviewPanel}
               currentSlide={currentSlide}
               totalSlides={totalSlides}
               presenterNotes={presenterNotes}
-              isCollapsed={rightPanelCollapsed}
-              onToggleCollapse={() => setRightPanelCollapsed(!rightPanelCollapsed)}
+              isHidden={false}
+              onToggleHide={() => setRightPanelHidden(true)}
               userType={userType}
             />
           </div>
         )}
       </div>
+
+      {/* Floating button to show right panel when hidden */}
+      {!hideRightPanelCompletely && shouldDisplayRightPanel && rightPanelHidden && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setRightPanelHidden(false)}
+          className="fixed top-1/2 right-4 z-50 shadow-lg bg-white hover:bg-gray-50 border-2 transition-all duration-200 hover:scale-105 h-10 w-10 p-0"
+          title="右パネルを表示"
+        >
+          <PanelRightOpen className="h-4 w-4 text-gray-600" />
+        </Button>
+      )}
 
       {/* Overall Review Panel */}
       <OverallReviewPanel
