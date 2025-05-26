@@ -9,7 +9,7 @@ interface ResizablePanelProps {
   maxWidth?: number;
   onWidthChange?: (width: number) => void;
   className?: string;
-  resizePosition?: 'left' | 'right';
+  resizePosition?: 'left' | 'right' | 'top' | 'bottom';
   orientation?: 'vertical' | 'horizontal';
 }
 
