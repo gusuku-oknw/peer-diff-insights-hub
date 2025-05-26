@@ -1,5 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, UserCircle, Shield, GraduationCap, Building } from "lucide-react";
+import { Menu, X, LogOut, UserCircle, Shield, GraduationCap, Building, ArrowLeft, FileText } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
@@ -77,7 +78,7 @@ const Navigation = () => {
   return <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
             <div className="flex-shrink-0">
               <Link to="/">
                 <h1 className="font-bold gradient-primary bg-clip-text text-transparent text-2xl">
@@ -85,6 +86,30 @@ const Navigation = () => {
                 </h1>
               </Link>
             </div>
+            
+            {/* Slide Viewer Project Info and Back Button */}
+            {isSlideViewerRoute && (
+              <>
+                <div className="h-6 w-px bg-gray-300" />
+                <Link to="/dashboard">
+                  <Button className="gradient-primary text-white hover:opacity-90 flex items-center space-x-2">
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="hidden sm:inline">ダッシュボードに戻る</span>
+                    <span className="sm:hidden">戻る</span>
+                  </Button>
+                </Link>
+                <div className="hidden md:flex items-center space-x-3">
+                  <div className="h-6 w-px bg-gray-300" />
+                  <div className="flex items-center space-x-2">
+                    <FileText className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm font-medium text-gray-900">サンプルプレゼンテーション</span>
+                  </div>
+                  <Badge variant="secondary" className="text-xs">
+                    プレゼンテーションモード
+                  </Badge>
+                </div>
+              </>
+            )}
           </div>
           
           {!isSlideViewerRoute && !isDashboardRoute && (
@@ -111,14 +136,6 @@ const Navigation = () => {
           
           <div className="hidden md:block">
             <div className="ml-4 flex items-center space-x-4">
-              {isSlideViewerRoute && (
-                <Link to="/dashboard">
-                  <Button className="gradient-primary text-white hover:opacity-90">
-                    ダッシュボードに戻る
-                  </Button>
-                </Link>
-              )}
-              
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -210,6 +227,15 @@ const Navigation = () => {
       
       {isMenuOpen && <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+            {isSlideViewerRoute && (
+              <Link to="/dashboard">
+                <Button className="w-full gradient-primary text-white mb-3">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  ダッシュボードに戻る
+                </Button>
+              </Link>
+            )}
+            
             {!isSlideViewerRoute && !isDashboardRoute && (
               <>
                 <a href="#features" className="block px-3 py-2 text-gray-700">
@@ -230,14 +256,6 @@ const Navigation = () => {
               </>
             )}
             <div className="pt-4 space-y-2">
-              {isSlideViewerRoute && (
-                <Link to="/dashboard">
-                  <Button className="w-full gradient-primary text-white">
-                    ダッシュボードに戻る
-                  </Button>
-                </Link>
-              )}
-              
               {user ? (
                 <>
                   <div className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
