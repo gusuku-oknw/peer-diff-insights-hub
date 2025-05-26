@@ -65,7 +65,6 @@ const MainLayout = ({
     editSidebarWidth,
     thumbnailsHeight,
     rightPanelHidden,
-    isFullScreen,
     setLeftSidebarWidth,
     setRightSidebarWidth,
     setEditSidebarWidth,
