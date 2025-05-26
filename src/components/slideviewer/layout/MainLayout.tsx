@@ -38,18 +38,23 @@ const MainLayout = ({
   const [thumbnailsHeight, setThumbnailsHeight] = useState(128);
   const [isOverallReviewOpen, setIsOverallReviewOpen] = useState(false);
   
+  // 企業ユーザーのみ右パネルでレビュー機能を使用
   const shouldShowNotes = (viewerMode === "presentation" && showPresenterNotes) || 
                          (viewerMode === "review" && showPresenterNotes);
-  const shouldShowReviewPanel = viewerMode === "review";
+  const shouldShowReviewPanel = viewerMode === "review" && userType === "enterprise";
   const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
+  
+  // フルスクリーンプレゼンテーション時は右パネルを完全に非表示
   const hideRightPanelCompletely = (viewerMode === "presentation" && isFullScreen) || 
                                   !shouldDisplayRightPanel;
 
   console.log('MainLayout render:', {
     viewerMode,
+    userType,
+    shouldShowNotes,
+    shouldShowReviewPanel,
     shouldDisplayRightPanel,
-    hideRightPanelCompletely,
-    rightPanelCollapsed
+    hideRightPanelCompletely
   });
 
   return (
@@ -64,21 +69,18 @@ const MainLayout = ({
         onToggleLeftSidebar={onToggleLeftSidebar}
       />
 
-      {/* Main Content Area - CSS Grid Layout */}
-      <div className="flex-1 min-w-0 grid grid-cols-1 overflow-hidden" 
-           style={{
-             gridTemplateColumns: `${viewerMode === "edit" && userType === "enterprise" ? "320px " : ""}1fr${!hideRightPanelCompletely ? (rightPanelCollapsed ? " 48px" : " 320px") : ""}`
-           }}>
-        
-        {/* Edit Sidebar */}
+      {/* Main Content Area - Simplified Flexbox Layout */}
+      <div className="flex-1 flex overflow-hidden min-w-0">
+        {/* Edit Sidebar - 企業ユーザーの編集モードのみ */}
         {viewerMode === "edit" && userType === "enterprise" && (
-          <div className="border-r border-gray-200 bg-white overflow-hidden">
+          <div className="w-80 flex-shrink-0 border-r border-gray-200 bg-white overflow-hidden">
             <EditSidebar currentSlide={currentSlide} />
           </div>
         )}
 
-        {/* Main Content Column */}
-        <div className="flex flex-col overflow-hidden min-w-0">
+        {/* Central Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+          {/* Main slide display area */}
           <div className="flex-1 overflow-hidden">
             <MainContent
               currentSlide={currentSlide}
@@ -99,9 +101,9 @@ const MainLayout = ({
             />
           </div>
 
-          {/* Bottom thumbnails */}
+          {/* Bottom thumbnails - フルスクリーンプレゼンテーション時は非表示 */}
           {!(viewerMode === "presentation" && isFullScreen) && (
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 border-t border-gray-200">
               <SlideThumbnails
                 currentSlide={currentSlide}
                 onSlideClick={onSlideChange}
@@ -113,9 +115,9 @@ const MainLayout = ({
           )}
         </div>
 
-        {/* Right Panel */}
+        {/* Right Panel - 企業ユーザーのみ */}
         {!hideRightPanelCompletely && shouldDisplayRightPanel && (
-          <div className="bg-gray-50 border-l border-gray-200 overflow-hidden">
+          <div className={`transition-all duration-200 ease-in-out ${rightPanelCollapsed ? 'w-12' : 'w-80'} flex-shrink-0`}>
             <ImprovedSidePanel
               shouldShowNotes={shouldShowNotes}
               shouldShowReviewPanel={shouldShowReviewPanel}

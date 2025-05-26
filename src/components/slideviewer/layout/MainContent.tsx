@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
-import ReviewCommentSection from "./ReviewCommentSection";
+import StudentReviewSection from "./StudentReviewSection";
 
 interface MainContentProps {
   currentSlide: number;
@@ -40,11 +40,11 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const [isNotesPanelOpen, setIsNotesPanelOpen] = React.useState(false);
-  const [commentText, setCommentText] = React.useState("");
+  const [isNotesPanelOpen, setIsNotesPanelOpen] = useState(false);
+  const [commentText, setCommentText] = useState("");
   const comments = mockComments || [];
 
-  // 動的幅計算: ResizeObserverでコンテナサイズを監視
+  // ResizeObserverでコンテナサイズを監視
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -78,25 +78,22 @@ const MainContent: React.FC<MainContentProps> = ({
     setIsNotesPanelOpen(!isNotesPanelOpen);
   };
 
-  const shouldShowNotes = (viewerMode === "presentation" && showPresenterNotes) || 
-                         (viewerMode === "review" && showPresenterNotes);
-  const shouldShowReviewPanel = viewerMode === "review";
-  const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
-  const isRightPanelVisible = shouldDisplayRightPanel && !rightPanelCollapsed;
+  // 学生ユーザーのレビューモードかどうかの判定
+  const showStudentReviewSection = viewerMode === "review" && userType === "student";
 
-  console.log('MainContent: Container size and panel state', {
+  console.log('MainContent: Container size and display settings', {
     containerSize,
-    isRightPanelVisible,
-    rightPanelCollapsed,
-    shouldDisplayRightPanel
+    showStudentReviewSection,
+    userType,
+    viewerMode
   });
 
   return (
     <main className="flex-1 flex flex-col h-full overflow-hidden">
-      {/* スライドビューワー - フル幅利用 */}
+      {/* スライドビューワー - メインエリア */}
       <div 
         ref={containerRef}
-        className="flex-1 relative bg-gray-50 w-full h-full"
+        className="flex-1 relative bg-gray-50 w-full h-full min-h-0"
       >
         <div className="absolute inset-0 flex items-center justify-center p-4">
           <div className="w-full h-full flex items-center justify-center">
@@ -112,15 +109,19 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
       </div>
 
-      {/* レビューモードUI */}
-      {viewerMode === "review" && userType === "student" && (
-        <ReviewCommentSection
+      {/* 学生用レビューセクション - 台本表示も含む */}
+      {showStudentReviewSection && (
+        <StudentReviewSection
+          currentSlide={currentSlide}
+          totalSlides={totalSlides}
           isNotesPanelOpen={isNotesPanelOpen}
           comments={comments}
           commentText={commentText}
           setCommentText={setCommentText}
           handleAddComment={handleAddComment}
           toggleNotesPanel={toggleNotesPanel}
+          presenterNotes={presenterNotes}
+          showPresenterNotes={showPresenterNotes}
         />
       )}
     </main>
