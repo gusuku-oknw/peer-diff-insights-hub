@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from "react";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
-import SidePanel from "@/components/slide-viewer/panels/SidePanel";
+import ImprovedSidePanel from "@/components/slideviewer/panels/ImprovedSidePanel";
 import OverallReviewPanel from "@/components/slideviewer/panels/OverallReviewPanel";
+import ProjectHeader from "./ProjectHeader";
 import { useToast } from "@/hooks/use-toast";
 import { useSlideStore } from "@/stores/slideStore";
 import LeftSidebar from "./LeftSidebar";
@@ -115,6 +116,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
+      {/* Project Header */}
+      {!isFullScreen && (
+        <ProjectHeader
+          projectName="サンプルプレゼンテーション"
+          projectAuthor="田中太郎"
+          lastModified="5分前"
+          collaborators={3}
+          totalSlides={totalSlides}
+        />
+      )}
+
       {/* Overlay for sidebar - ONLY on mobile */}
       {leftSidebarOpen && isMobile && (
         <div 
@@ -169,7 +181,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 minSize={isRightPanelCollapsed ? 5 : 20} 
                 maxSize={isRightPanelCollapsed ? 5 : 50}
               >
-                <SidePanel
+                <ImprovedSidePanel
                   shouldShowNotes={showPresenterNotes}
                   shouldShowReviewPanel={viewerMode === "review"}
                   currentSlide={currentSlide}
@@ -195,9 +207,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 toggleNotesPanel={toggleNotesPanel}
               />
               
-              {/* Show SidePanel for mobile */}
+              {/* Show ImprovedSidePanel for mobile */}
               {shouldShowRightSidePanel && isMobile && (
-                <SidePanel
+                <ImprovedSidePanel
                   shouldShowNotes={showPresenterNotes}
                   shouldShowReviewPanel={viewerMode === "review"}
                   currentSlide={currentSlide}
@@ -211,16 +223,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       </div>
 
       {/* Bottom Slide Thumbnails with resizable height */}
-      <div className="border-t border-gray-200 bg-white flex-shrink-0">
-        <SlideThumbnails
-          slides={slides}
-          currentSlide={currentSlide}
-          onSlideClick={handleSlideClick}
-          onOpenOverallReview={handleOpenOverallReview}
-          height={thumbnailsHeight}
-          onHeightChange={setThumbnailsHeight}
-        />
-      </div>
+      {!isFullScreen && (
+        <div className="border-t border-gray-200 bg-white flex-shrink-0">
+          <SlideThumbnails
+            slides={slides}
+            currentSlide={currentSlide}
+            onSlideClick={handleSlideClick}
+            onOpenOverallReview={handleOpenOverallReview}
+            height={thumbnailsHeight}
+            onHeightChange={setThumbnailsHeight}
+          />
+        </div>
+      )}
 
       {/* Overall Review Panel */}
       <OverallReviewPanel
