@@ -103,6 +103,8 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
   const { toast } = useToast();
   const canInteract = userType === "student";
 
+  console.log('SimplifiedReviewPanel render:', { activeTab, currentSlide, userType, canInteract });
+
   // Calculate completion percentage
   const completionPercentage = useMemo(() => {
     const totalItems = Object.values(checklistState).flat().length;
@@ -111,25 +113,48 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
   }, [checklistState]);
 
   const handleCheckboxChange = (categoryKey: string, itemId: string, checked: boolean) => {
-    if (!canInteract) return;
+    console.log('SimplifiedReviewPanel: handleCheckboxChange called', { 
+      categoryKey, 
+      itemId, 
+      checked, 
+      canInteract,
+      currentActiveTab: activeTab
+    });
     
-    setChecklistState(prev => ({
-      ...prev,
-      [categoryKey]: prev[categoryKey].map(item =>
-        item.id === itemId ? { ...item, checked } : item
-      )
-    }));
+    if (!canInteract) {
+      console.log('SimplifiedReviewPanel: User cannot interact, blocking checkbox change');
+      return;
+    }
+    
+    // Update checkbox state - this should NOT cause tab transitions
+    setChecklistState(prev => {
+      const newState = {
+        ...prev,
+        [categoryKey]: prev[categoryKey].map(item =>
+          item.id === itemId ? { ...item, checked } : item
+        )
+      };
+      console.log('SimplifiedReviewPanel: Updated checklist state', newState);
+      return newState;
+    });
 
+    // Show toast notification
     if (checked) {
+      console.log('SimplifiedReviewPanel: Showing completion toast');
       toast({
         title: "チェック完了",
-        description: "レビュー項目をチェックしました",
+        description: `${checklistCategories[categoryKey as keyof typeof checklistCategories]?.label}の項目をチェックしました`,
         variant: "default"
       });
     }
+
+    // DO NOT change activeTab here - this was likely causing the unexpected transitions
+    console.log('SimplifiedReviewPanel: Checkbox change completed, activeTab remains:', activeTab);
   };
 
   const handleSubmitComment = () => {
+    console.log('SimplifiedReviewPanel: handleSubmitComment called', { canInteract, newComment });
+    
     if (!canInteract) {
       toast({
         title: "権限がありません",
@@ -157,6 +182,11 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
     }
   };
 
+  const handleTabChange = (newTab: string) => {
+    console.log('SimplifiedReviewPanel: Tab change requested', { from: activeTab, to: newTab });
+    setActiveTab(newTab);
+  };
+
   return (
     <div className="h-full bg-white flex flex-col">
       <ReviewPanelHeader
@@ -173,7 +203,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
 
       <div className="flex-grow flex flex-col min-h-0">
         {canInteract && !isVeryNarrow ? (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-grow flex flex-col">
             <TabsList className="mx-4 mt-3 grid grid-cols-2 bg-gray-50">
               <TabsTrigger value="review" className="flex items-center gap-1">
                 <MessageSquare className="h-3 w-3" />

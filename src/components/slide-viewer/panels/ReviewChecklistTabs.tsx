@@ -62,15 +62,24 @@ const ReviewChecklistTabs = ({
   });
   const { toast } = useToast();
 
+  console.log('ReviewChecklistTabs render:', { activeTab, currentSlide, userType });
+
   const handleCommentChange = (category: string, value: string) => {
+    console.log('ReviewChecklistTabs: Comment change', { category, value });
     setComments(prev => ({ ...prev, [category]: value }));
   };
 
   const handleSubmit = (category: string) => {
     const comment = comments[category as keyof typeof comments];
-    if (!comment.trim()) return;
+    console.log('ReviewChecklistTabs: Submit called', { category, comment, userType });
+    
+    if (!comment.trim()) {
+      console.log('ReviewChecklistTabs: Empty comment, not submitting');
+      return;
+    }
 
     if (userType === "enterprise") {
+      console.log('ReviewChecklistTabs: Enterprise user blocked from submitting');
       toast({
         title: "権限がありません",
         description: "企業ユーザーはコメントの投稿はできません",
@@ -79,6 +88,7 @@ const ReviewChecklistTabs = ({
       return;
     }
 
+    console.log('ReviewChecklistTabs: Calling onSubmitComment');
     onSubmitComment(comment, category);
     setComments(prev => ({ ...prev, [category]: "" }));
     
@@ -89,11 +99,16 @@ const ReviewChecklistTabs = ({
     });
   };
 
+  const handleTabChange = (newTab: string) => {
+    console.log('ReviewChecklistTabs: Tab change', { from: activeTab, to: newTab });
+    setActiveTab(newTab);
+  };
+
   const canInteract = userType === "student";
 
   return (
     <div className="h-full flex flex-col">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="h-full flex flex-col">
         <TabsList className="grid grid-cols-3 w-full bg-gray-50 p-1">
           {Object.entries(checklistCategories).map(([key, category]) => {
             const Icon = category.icon;

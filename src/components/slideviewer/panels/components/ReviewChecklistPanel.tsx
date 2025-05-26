@@ -30,6 +30,19 @@ const ReviewChecklistPanel: React.FC<ReviewChecklistPanelProps> = ({
     return Math.round((completed / items.length) * 100);
   };
 
+  const handleCheckboxChange = (categoryKey: string, itemId: string, checked: boolean) => {
+    console.log('ReviewChecklistPanel: Checkbox change triggered', { categoryKey, itemId, checked, canInteract });
+    
+    if (!canInteract) {
+      console.log('ReviewChecklistPanel: Interaction blocked - user cannot interact');
+      return;
+    }
+    
+    // Call the parent handler - this should NOT cause tab transitions
+    console.log('ReviewChecklistPanel: Calling onCheckboxChange');
+    onCheckboxChange(categoryKey, itemId, checked);
+  };
+
   return (
     <ScrollArea className="h-full">
       <div className="space-y-4 pr-4">
@@ -56,7 +69,7 @@ const ReviewChecklistPanel: React.FC<ReviewChecklistPanelProps> = ({
                       <Checkbox
                         id={item.id}
                         checked={item.checked}
-                        onCheckedChange={(checked) => canInteract && onCheckboxChange(key, item.id, !!checked)}
+                        onCheckedChange={(checked) => handleCheckboxChange(key, item.id, !!checked)}
                         className="mt-0.5 flex-shrink-0"
                         disabled={!canInteract}
                       />
