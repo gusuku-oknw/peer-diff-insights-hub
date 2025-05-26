@@ -105,7 +105,10 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
 
   const canInteract = userType === "student";
 
-  const handleCheckboxChange = (categoryKey: string, itemId: string, checked: boolean) => {
+  const handleCheckboxChange = (e: React.MouseEvent, categoryKey: string, itemId: string, checked: boolean) => {
+    // Prevent event propagation to avoid tab switching
+    e.stopPropagation();
+    
     if (!canInteract) return;
     
     setChecklistState(prev => ({
@@ -159,7 +162,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
   };
 
   return (
-    <div className="h-full bg-white flex flex-col relative z-10">
+    <div className="h-full bg-white flex flex-col">
       {/* Simplified Header with Progress */}
       <div className={`${isVeryNarrow ? 'px-2 py-1' : 'px-4 py-3'} border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center justify-between flex-shrink-0`}>
         <div className="flex items-center gap-2">
@@ -180,7 +183,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
 
       {/* Permission Notice for Enterprise Users */}
       {!canInteract && !isVeryNarrow && (
-        <div className="mx-4 mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg relative z-20">
+        <div className="mx-4 mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
           <div className="flex items-center gap-2 text-amber-700 text-sm">
             <Eye className="h-4 w-4" />
             <span>企業ユーザーは閲覧専用です</span>
@@ -189,7 +192,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
       )}
 
       {/* Main Content */}
-      <div className="flex-grow flex flex-col min-h-0 relative z-10">
+      <div className="flex-grow flex flex-col min-h-0">
         {canInteract && !isVeryNarrow ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
             <TabsList className="mx-4 mt-3 grid grid-cols-2 bg-gray-50">
@@ -231,7 +234,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
               </ScrollArea>
 
               {/* Comment Input */}
-              <Card className="border-gray-200 relative z-30">
+              <Card className="border-gray-200">
                 <CardContent className="p-3 space-y-3">
                   <div className="flex gap-2">
                     {Object.entries(checklistCategories).map(([key, category]) => {
@@ -282,7 +285,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
                     const items = checklistState[key] || [];
                     
                     return (
-                      <Card key={key} className="border-gray-200 relative z-20">
+                      <Card key={key} className="border-gray-200">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2">
@@ -296,14 +299,13 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
                           <div className="space-y-3">
                             {items.map((item) => (
                               <div key={item.id} className="flex items-start gap-3 p-2 bg-gray-50 rounded-lg">
-                                <Checkbox
-                                  id={item.id}
-                                  checked={item.checked}
-                                  onCheckedChange={(checked) => 
-                                    handleCheckboxChange(key, item.id, checked as boolean)
-                                  }
-                                  className="mt-0.5 flex-shrink-0"
-                                />
+                                <div onClick={(e) => handleCheckboxChange(e, key, item.id, !item.checked)}>
+                                  <Checkbox
+                                    id={item.id}
+                                    checked={item.checked}
+                                    className="mt-0.5 flex-shrink-0"
+                                  />
+                                </div>
                                 <label 
                                   htmlFor={item.id}
                                   className={`text-sm cursor-pointer ${
@@ -311,6 +313,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
                                       ? 'text-gray-500 line-through' 
                                       : 'text-gray-700'
                                   }`}
+                                  onClick={(e) => handleCheckboxChange(e, key, item.id, !item.checked)}
                                 >
                                   {item.text}
                                 </label>
@@ -328,7 +331,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
         ) : (
           /* Simplified view for very narrow panels or enterprise users */
           <ScrollArea className="flex-grow">
-            <div className="p-4 space-y-3 relative z-20">
+            <div className="p-4 space-y-3">
               {comments.length > 0 ? (
                 comments.map((comment) => (
                   <Card key={comment.id} className="border-gray-200">

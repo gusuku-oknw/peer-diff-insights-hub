@@ -1,7 +1,6 @@
 
-import { MessageSquare, CheckCircle, AlertCircle } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
 
 interface SlideData {
   id: number;
@@ -32,7 +31,6 @@ const ThumbnailCard = ({
 }: ThumbnailCardProps) => {
   const slideTitle = slide.title || `スライド ${slideIndex}`;
   const commentCount = slide.commentCount || 0;
-  const isReviewed = slide.isReviewed || false;
   const showStudentFeatures = userType === "student";
 
   return (
@@ -47,24 +45,6 @@ const ThumbnailCard = ({
           style={{ width: `${thumbnailWidth}px` }}
           onClick={() => onClick(slideIndex)}
         >
-          {/* Uncommented badge for students */}
-          {showStudentFeatures && !isReviewed && (
-            <div className="absolute -top-2 -right-2 z-10">
-              <Badge variant="destructive" className="rounded-full h-6 w-6 p-0 flex items-center justify-center text-xs font-bold animate-pulse">
-                未
-              </Badge>
-            </div>
-          )}
-
-          {/* Reviewed badge for students */}
-          {showStudentFeatures && isReviewed && (
-            <div className="absolute -top-2 -right-2 z-10">
-              <Badge className="bg-green-500 rounded-full h-6 w-6 p-0 flex items-center justify-center text-white">
-                <CheckCircle className="h-3 w-3" />
-              </Badge>
-            </div>
-          )}
-
           {/* Thumbnail container */}
           <div className="w-full aspect-video bg-white rounded-lg border-2 border-gray-200 overflow-hidden shadow-sm mb-3">
             {slide.thumbnail ? (
@@ -136,9 +116,9 @@ const ThumbnailCard = ({
       <TooltipContent side="top">
         <div className="text-center">
           <p className="font-medium">{slideTitle}</p>
-          {showStudentFeatures && (
+          {showStudentFeatures && commentCount > 0 && (
             <div className="text-xs text-gray-400 mt-1">
-              {isReviewed ? `完了 (${commentCount}コメント)` : "未レビュー"}
+              {commentCount}コメント
             </div>
           )}
           <p className="text-xs text-gray-400">クリックして表示</p>
