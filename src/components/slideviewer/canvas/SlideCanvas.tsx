@@ -8,16 +8,20 @@ interface SlideCanvasProps {
   zoomLevel?: number;
   editable?: boolean;
   userType?: "student" | "enterprise";
+  containerWidth?: number;
+  containerHeight?: number;
 }
 
 const SlideCanvas = ({ 
   currentSlide, 
   zoomLevel = 100, 
   editable = false,
-  userType = "enterprise" 
+  userType = "enterprise",
+  containerWidth = 0,
+  containerHeight = 0
 }: SlideCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
   const fabricCanvasRef = useRef<Canvas | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,69 +30,51 @@ const SlideCanvas = ({
   const slides = useSlideStore(state => state.slides);
   const updateSlideElement = useSlideStore(state => state.updateSlideElement);
   
-  console.log(`SlideCanvas rendering - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Editable: ${editable}`);
+  console.log(`SlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}`);
   
-  // 現在のスライドデータを取得
   const currentSlideData = slides.find(slide => slide.id === currentSlide);
   const elements = currentSlideData?.elements || [];
   
   // レスポンシブキャンバスサイズ計算
-  const calculateCanvasSize = useCallback(() => {
-    if (!containerRef.current) return { width: 1600, height: 900 };
-    
-    const container = containerRef.current;
-    const containerWidth = container.clientWidth;
-    const containerHeight = container.clientHeight;
+  const calculateOptimalCanvasSize = useCallback(() => {
+    // コンテナサイズが提供されている場合はそれを使用
+    const availableWidth = containerWidth > 0 ? containerWidth - 32 : 1600; // 32px for padding
+    const availableHeight = containerHeight > 0 ? containerHeight - 32 : 900; // 32px for padding
     
     // アスペクト比16:9を維持
     const aspectRatio = 16 / 9;
-    let canvasWidth = containerWidth * 0.9; // コンテナの90%を使用
+    let canvasWidth = availableWidth * 0.95; // 利用可能幅の95%を使用
     let canvasHeight = canvasWidth / aspectRatio;
     
     // 高さがコンテナを超える場合は高さベースで計算
-    if (canvasHeight > containerHeight * 0.9) {
-      canvasHeight = containerHeight * 0.9;
+    if (canvasHeight > availableHeight * 0.95) {
+      canvasHeight = availableHeight * 0.95;
       canvasWidth = canvasHeight * aspectRatio;
     }
     
     // 最小サイズと最大サイズを設定
-    canvasWidth = Math.max(800, Math.min(1600, canvasWidth));
-    canvasHeight = Math.max(450, Math.min(900, canvasHeight));
+    canvasWidth = Math.max(400, Math.min(1920, canvasWidth));
+    canvasHeight = Math.max(225, Math.min(1080, canvasHeight));
     
     return { width: canvasWidth, height: canvasHeight };
-  }, []);
+  }, [containerWidth, containerHeight]);
   
-  // ResizeObserverでコンテナサイズ変更を監視
+  // コンテナサイズ変更時にキャンバスサイズを更新
   useEffect(() => {
-    if (!containerRef.current) return;
-    
-    const resizeObserver = new ResizeObserver(() => {
-      const newSize = calculateCanvasSize();
-      setCanvasSize(newSize);
-    });
-    
-    resizeObserver.observe(containerRef.current);
-    
-    // 初期サイズ設定
-    const initialSize = calculateCanvasSize();
-    setCanvasSize(initialSize);
-    
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [calculateCanvasSize]);
+    const newSize = calculateOptimalCanvasSize();
+    setCanvasSize(newSize);
+    console.log('Canvas size calculated:', newSize, 'from container:', { containerWidth, containerHeight });
+  }, [calculateOptimalCanvasSize, containerWidth, containerHeight]);
   
   // キャンバス初期化
   useEffect(() => {
     if (!canvasRef.current) return;
     
     try {
-      // 既存のキャンバスを破棄
       if (fabricCanvasRef.current) {
         fabricCanvasRef.current.dispose();
       }
       
-      // 新しいキャンバスを作成
       const canvas = new Canvas(canvasRef.current, {
         width: canvasSize.width,
         height: canvasSize.height,
@@ -103,9 +89,8 @@ const SlideCanvas = ({
       setIsReady(true);
       setError(null);
       
-      console.log('Canvas initialized successfully with size:', canvasSize);
+      console.log('Canvas initialized with size:', canvasSize);
       
-      // オブジェクト選択イベント（編集モードのみ）
       if (editable) {
         canvas.on('selection:created', (e) => {
           console.log('Object selected:', e.selected?.[0]);
@@ -161,12 +146,10 @@ const SlideCanvas = ({
     if (!canvas || !isReady) return;
     
     try {
-      // キャンバスをクリア
       canvas.clear();
       canvas.backgroundColor = '#ffffff';
       
       if (elements.length === 0) {
-        // プレースホルダー表示
         const placeholder = new IText(`スライド ${currentSlide}`, {
           left: canvasSize.width / 2,
           top: canvasSize.height / 2,
@@ -183,14 +166,12 @@ const SlideCanvas = ({
         return;
       }
       
-      // 要素をzIndexでソート
       const sortedElements = [...elements].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
       
-      // 各要素をキャンバスに追加
       sortedElements.forEach(element => {
         const { type, position, size, props, id, angle } = element;
         
-        // スケール調整（キャンバスサイズに応じて）
+        // スケール調整（現在のキャンバスサイズに応じて）
         const scaleX = canvasSize.width / 1600;
         const scaleY = canvasSize.height / 900;
         
@@ -271,7 +252,6 @@ const SlideCanvas = ({
         }
       });
       
-      // レンダリング実行
       canvas.renderAll();
       console.log(`Rendered ${elements.length} elements for slide ${currentSlide}`);
       
@@ -281,14 +261,12 @@ const SlideCanvas = ({
     }
   }, [elements, currentSlide, editable, isReady, canvasSize]);
   
-  // スライドまたは要素が変更された時にレンダリング
   useEffect(() => {
     if (isReady) {
       renderElements();
     }
   }, [renderElements, isReady]);
   
-  // ズーム適用（CSSトランスフォーム）
   const zoomStyle = {
     transform: `scale(${zoomLevel / 100})`,
     transformOrigin: 'center center',
@@ -312,7 +290,7 @@ const SlideCanvas = ({
   
   return (
     <div 
-      ref={containerRef}
+      ref={canvasContainerRef}
       className="w-full h-full flex items-center justify-center bg-gray-50 overflow-hidden"
     >
       <div className="relative" style={zoomStyle}>
