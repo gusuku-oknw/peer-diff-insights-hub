@@ -1,8 +1,9 @@
+
 import React from "react";
 import { ResizablePanel } from "@/components/slide-viewer/layout/ResizablePanel";
 import LeftSidebar from "./LeftSidebar";
 import MainContent from "./MainContent";
-import SlideThumbnails from "../SlideThumbnails";
+import SlideThumbnails from "@/components/slide-viewer/SlideThumbnails";
 import ImprovedSidePanel from "../panels/ImprovedSidePanel";
 import OverallReviewPanel from "../panels/OverallReviewPanel";
 import EditSidebar from "../editor/EditSidebar";
