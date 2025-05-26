@@ -38,7 +38,7 @@ const MainLayout = ({
   const [thumbnailsHeight, setThumbnailsHeight] = useState(128);
   const [isOverallReviewOpen, setIsOverallReviewOpen] = useState(false);
   
-  // 企業ユーザーのみ右パネルでレビュー機能を使用
+  // 右パネル表示ロジックを修正 - 学生のレビューモードでも台本を表示
   const shouldShowNotes = (viewerMode === "presentation" && showPresenterNotes) || 
                          (viewerMode === "review" && showPresenterNotes);
   const shouldShowReviewPanel = viewerMode === "review" && userType === "enterprise";
@@ -54,7 +54,8 @@ const MainLayout = ({
     shouldShowNotes,
     shouldShowReviewPanel,
     shouldDisplayRightPanel,
-    hideRightPanelCompletely
+    hideRightPanelCompletely,
+    rightPanelCollapsed
   });
 
   return (
@@ -115,9 +116,11 @@ const MainLayout = ({
           )}
         </div>
 
-        {/* Right Panel - 企業ユーザーのみ */}
+        {/* Right Panel - サイズ管理をここで統一 */}
         {!hideRightPanelCompletely && shouldDisplayRightPanel && (
-          <div className={`transition-all duration-200 ease-in-out ${rightPanelCollapsed ? 'w-12' : 'w-80'} flex-shrink-0`}>
+          <div className={`flex-shrink-0 transition-all duration-200 ease-in-out ${
+            rightPanelCollapsed ? 'w-12' : 'w-80'
+          }`}>
             <ImprovedSidePanel
               shouldShowNotes={shouldShowNotes}
               shouldShowReviewPanel={shouldShowReviewPanel}

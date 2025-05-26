@@ -29,7 +29,7 @@ const ImprovedSidePanel = ({
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [panelDimensions, setPanelDimensions] = useState({ width: 0, height: 0 });
   
-  // デフォルトタブの決定ロジックを改善
+  // デフォルトタブの決定ロジック
   const getDefaultTab = () => {
     if (shouldShowNotes && shouldShowReviewPanel) {
       return "notes"; // 両方表示される場合はメモを優先
@@ -128,7 +128,7 @@ const ImprovedSidePanel = ({
 
   // Panel content component
   const PanelContent = () => (
-    <div className="h-full flex flex-col" style={{ minWidth: 0 }}>
+    <div className="h-full flex flex-col">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
         <div className={`${isVeryNarrow ? 'px-2 py-1' : 'px-4 py-2'} border-b border-gray-200 flex items-center justify-between flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50`}>
           <TabsList className={`grid ${shouldShowNotes && shouldShowReviewPanel ? 'grid-cols-2' : 'grid-cols-1'} flex-1 min-w-0 bg-white shadow-sm`}>
@@ -167,9 +167,9 @@ const ImprovedSidePanel = ({
               title={isCollapsed ? "パネルを展開" : "パネルを折りたたみ"}
             >
               {isCollapsed ? (
-                <ChevronLeft className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-gray-600`} />
-              ) : (
                 <ChevronRight className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-gray-600`} />
+              ) : (
+                <ChevronLeft className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-gray-600`} />
               )}
             </Button>
           )}
@@ -293,7 +293,7 @@ const ImprovedSidePanel = ({
   // Desktop implementation
   if (isCollapsed) {
     return (
-      <div className="w-12 h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 flex flex-col items-center py-4 flex-shrink-0 relative shadow-sm">
+      <div className="w-full h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 flex flex-col items-center py-4 relative shadow-sm">
         <Button
           variant="ghost"
           size="sm"
@@ -301,7 +301,7 @@ const ImprovedSidePanel = ({
           className="h-8 w-8 p-0 mb-4 hover:bg-blue-100 transition-all duration-200 hover:scale-110 bg-blue-50 border border-blue-200"
           title="パネルを展開"
         >
-          <ChevronLeft className="h-4 w-4 text-blue-600" />
+          <ChevronRight className="h-4 w-4 text-blue-600" />
         </Button>
         
         {/* Quick access buttons when collapsed */}
@@ -370,7 +370,7 @@ const ImprovedSidePanel = ({
   }
 
   return (
-    <div className="w-80 h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-hidden flex flex-col flex-shrink-0 min-w-0 transition-all duration-300 ease-in-out shadow-sm" ref={panelRef}>
+    <div className="w-full h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shadow-sm" ref={panelRef}>
       <PanelContent />
     </div>
   );
