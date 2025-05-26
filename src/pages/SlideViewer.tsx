@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,16 +44,19 @@ const SlideViewer = () => {
   // Ensure currentSlide is always a number
   const currentSlideNumber = typeof currentSlide === 'string' ? parseInt(currentSlide, 10) : currentSlide;
   
-  // Determine user type from profile - Fixed mapping logic
+  // Determine user type from profile - Fixed mapping logic with proper type handling
   const userType = useMemo(() => {
     const role = userProfile?.role;
     console.log('SlideViewer: User profile role:', role);
     
-    // Map database roles to UI user types
+    // Map database roles to UI user types - Fixed the type comparison issue
     if (role === "student") {
       return "student";
-    } else if (role === "business" || role === "enterprise") {
+    } else if (role === "business") {
       return "enterprise";
+    } else if (role === "debugger" || role === "guest") {
+      // For debugging and guest accounts, default to student mode
+      return "student";
     }
     
     // Default fallback
