@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, MessageSquare, Send, Plus } from "lucide-react";
+import { BookOpen, MessageSquare, Send, Plus, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface StudentReviewSectionProps {
@@ -18,6 +18,7 @@ interface StudentReviewSectionProps {
   toggleNotesPanel: () => void;
   presenterNotes: Record<number, string>;
   showPresenterNotes: boolean;
+  userType: "student" | "enterprise";
 }
 
 const StudentReviewSection: React.FC<StudentReviewSectionProps> = ({
@@ -30,12 +31,24 @@ const StudentReviewSection: React.FC<StudentReviewSectionProps> = ({
   handleAddComment,
   toggleNotesPanel,
   presenterNotes,
-  showPresenterNotes
+  showPresenterNotes,
+  userType
 }) => {
   const { toast } = useToast();
   const currentNotes = presenterNotes[currentSlide] || "";
 
+  console.log('StudentReviewSection render:', { userType, currentSlide });
+
   const handleSendReview = () => {
+    if (userType === "enterprise") {
+      toast({
+        title: "権限がありません",
+        description: "企業ユーザーはレビューの送信はできません",
+        variant: "destructive"
+      });
+      return;
+    }
+
     toast({
       title: "レビューを送信しました",
       description: "コメントが正常に送信されました",
@@ -43,13 +56,30 @@ const StudentReviewSection: React.FC<StudentReviewSectionProps> = ({
     });
   };
 
+  const handleAddCommentWithPermission = () => {
+    if (userType === "enterprise") {
+      toast({
+        title: "権限がありません",
+        description: "企業ユーザーはコメントの追加はできません",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    handleAddComment();
+  };
+
+  // Permission check for interactive elements
+  const canInteract = userType === "student";
+
   return (
     <div className="border-t border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
             <MessageSquare className="h-4 w-4 text-blue-600" />
-            学生レビューパネル
+            {canInteract ? "学生レビューパネル" : "レビューパネル"}
+            {!canInteract && <Eye className="h-4 w-4 text-gray-500" />}
             <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full border">
               スライド {currentSlide}/{totalSlides}
             </span>
@@ -58,6 +88,16 @@ const StudentReviewSection: React.FC<StudentReviewSectionProps> = ({
             {isNotesPanelOpen ? "パネルを閉じる" : "パネルを開く"}
           </Button>
         </div>
+
+        {/* Permission warning for enterprise users */}
+        {!canInteract && (
+          <div className="mb-3 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-center gap-2 text-amber-700">
+              <Eye className="h-4 w-4" />
+              <span className="text-sm">企業ユーザーはレビューの閲覧のみ可能です</span>
+            </div>
+          </div>
+        )}
 
         {isNotesPanelOpen ? (
           <Tabs defaultValue="comments" className="w-full">
@@ -93,43 +133,57 @@ const StudentReviewSection: React.FC<StudentReviewSectionProps> = ({
                 )}
               </div>
 
-              {/* コメント入力エリア */}
-              <div className="bg-white rounded-lg p-3 border shadow-sm">
-                <Label htmlFor="comment" className="text-xs text-gray-600 font-medium">
-                  新しいコメントを追加:
-                </Label>
-                <div className="flex items-end space-x-2 mt-2">
-                  <div className="flex-grow">
-                    <Textarea
-                      id="comment"
-                      placeholder="スライドに関するコメントや質問を入力してください..."
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      className="text-sm min-h-[60px] resize-none border-gray-200 focus:border-blue-400"
-                    />
-                  </div>
-                  <div className="flex flex-col space-y-1">
-                    <Button 
-                      size="sm" 
-                      onClick={handleAddComment}
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                      disabled={!commentText.trim()}
-                    >
-                      <Plus className="h-3 w-3 mr-1" />
-                      追加
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={handleSendReview}
-                      className="border-purple-200 text-purple-700 hover:bg-purple-50"
-                    >
-                      <Send className="h-3 w-3 mr-1" />
-                      送信
-                    </Button>
+              {/* コメント入力エリア - Only show for students */}
+              {canInteract && (
+                <div className="bg-white rounded-lg p-3 border shadow-sm">
+                  <Label htmlFor="comment" className="text-xs text-gray-600 font-medium">
+                    新しいコメントを追加:
+                  </Label>
+                  <div className="flex items-end space-x-2 mt-2">
+                    <div className="flex-grow">
+                      <Textarea
+                        id="comment"
+                        placeholder="スライドに関するコメントや質問を入力してください..."
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        className="text-sm min-h-[60px] resize-none border-gray-200 focus:border-blue-400"
+                      />
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <Button 
+                        size="sm" 
+                        onClick={handleAddCommentWithPermission}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        disabled={!commentText.trim()}
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        追加
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={handleSendReview}
+                        className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                      >
+                        <Send className="h-3 w-3 mr-1" />
+                        送信
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* Read-only message for enterprise users */}
+              {!canInteract && (
+                <div className="bg-white rounded-lg p-3 border shadow-sm">
+                  <div className="flex items-center justify-center text-center py-4">
+                    <Eye className="h-4 w-4 mr-2 text-amber-600" />
+                    <span className="text-sm text-amber-700">
+                      企業ユーザーはコメントの閲覧のみ可能です
+                    </span>
+                  </div>
+                </div>
+              )}
             </TabsContent>
 
             {showPresenterNotes && (

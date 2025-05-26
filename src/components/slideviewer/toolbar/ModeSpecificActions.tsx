@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ViewerMode } from "@/stores/slideStore";
 import { Save, Filter, Presentation, Play } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ModeSpecificActionsProps {
   mode: ViewerMode;
@@ -26,6 +27,30 @@ const ModeSpecificActions = ({
   onStartPresentation,
   onSendFeedback
 }: ModeSpecificActionsProps) => {
+  const { toast } = useToast();
+
+  const handleSendFeedback = () => {
+    if (userType === "enterprise") {
+      toast({
+        title: "権限がありません",
+        description: "企業ユーザーはフィードバックの送信はできません",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (onSendFeedback) {
+      onSendFeedback();
+    } else {
+      toast({
+        title: "フィードバック送信",
+        description: "フィードバックを送信しました",
+        variant: "default"
+      });
+    }
+  };
+  
+  console.log('ModeSpecificActions render:', { mode, userType });
   
   switch (mode) {
     case "edit":
@@ -56,13 +81,13 @@ const ModeSpecificActions = ({
             <Filter className="h-4 w-4" />
             <span className="hidden md:inline">フィルター</span>
           </Button>
-          {/* Students can send feedback, enterprises cannot */}
+          {/* Only students can send feedback */}
           {userType === "student" && (
             <Button 
               variant="default" 
               size="sm" 
               className="bg-purple-600 hover:bg-purple-700 text-white p-1 sm:p-2" 
-              onClick={onSendFeedback}
+              onClick={handleSendFeedback}
             >
               <span className="text-xs sm:text-sm">フィードバック送信</span>
             </Button>

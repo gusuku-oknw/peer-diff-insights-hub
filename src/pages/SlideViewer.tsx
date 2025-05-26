@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -44,12 +45,26 @@ const SlideViewer = () => {
   // Ensure currentSlide is always a number
   const currentSlideNumber = typeof currentSlide === 'string' ? parseInt(currentSlide, 10) : currentSlide;
   
-  // Determine user type from profile
-  const userType = userProfile?.role === "student" ? "student" : "enterprise";
+  // Determine user type from profile - Fixed mapping logic
+  const userType = useMemo(() => {
+    const role = userProfile?.role;
+    console.log('SlideViewer: User profile role:', role);
+    
+    // Map database roles to UI user types
+    if (role === "student") {
+      return "student";
+    } else if (role === "business" || role === "enterprise") {
+      return "enterprise";
+    }
+    
+    // Default fallback
+    console.warn('SlideViewer: Unknown user role, defaulting to student:', role);
+    return "student";
+  }, [userProfile?.role]);
   
   // 学生アカウントの初期化改善
   useEffect(() => {
-    console.log('SlideViewer: Initializing for user type:', userType, 'viewerMode:', viewerMode);
+    console.log('SlideViewer: Initializing for user type:', userType, 'viewerMode:', viewerMode, 'userProfile:', userProfile);
     
     // 学生が編集モードにいる場合はプレゼンテーションモードに切り替え
     if (userType === "student" && viewerMode === "edit") {
@@ -62,7 +77,7 @@ const SlideViewer = () => {
       console.log("Setting default mode for student to presentation");
       setViewerMode("presentation");
     }
-  }, [userType, viewerMode, setViewerMode]);
+  }, [userType, viewerMode, setViewerMode, userProfile]);
   
   // デバッグ用ログ
   useEffect(() => {
@@ -70,11 +85,12 @@ const SlideViewer = () => {
       slides: slides.length,
       currentSlide: currentSlideNumber,
       userType,
+      userProfile: userProfile?.role,
       viewerMode,
       showPresenterNotes,
       leftSidebarOpen
     });
-  }, [slides, currentSlideNumber, userType, viewerMode, showPresenterNotes, leftSidebarOpen]);
+  }, [slides, currentSlideNumber, userType, userProfile, viewerMode, showPresenterNotes, leftSidebarOpen]);
   
   const { elapsedTime, toggleFullScreenWithEffects } = usePresentationMode();
   const { handlePreviousSlide, handleNextSlide } = useSlideNavigation({
@@ -135,7 +151,7 @@ const SlideViewer = () => {
 
   // モード切替をデバウンスなしで即時適用するように変更
   const handleModeChange = (mode: "presentation" | "edit" | "review") => {
-    console.log(`Mode change requested: ${mode} (current: ${viewerMode})`);
+    console.log(`Mode change requested: ${mode} (current: ${viewerMode}) for user type: ${userType}`);
     
     // Students cannot access edit mode
     if (mode === "edit" && userType === "student") {

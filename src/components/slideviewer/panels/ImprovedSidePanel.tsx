@@ -43,6 +43,14 @@ const ImprovedSidePanel = ({
   const panelRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
+  console.log('ImprovedSidePanel render:', {
+    shouldShowNotes,
+    shouldShowReviewPanel,
+    userType,
+    currentSlide,
+    activeTab
+  });
+  
   // shouldShowNotesやshouldShowReviewPanelが変更された時にタブを更新
   useEffect(() => {
     const newDefaultTab = getDefaultTab();
@@ -89,12 +97,12 @@ const ImprovedSidePanel = ({
     return null;
   }
 
-  // Quick action handlers
+  // Quick action handlers - Fixed permission logic
   const handleAddComment = () => {
     if (userType === "enterprise") {
       toast({
         title: "権限がありません",
-        description: "企業ユーザーはコメントの閲覧のみ可能です",
+        description: "企業ユーザーはレビューの閲覧のみ可能です",
         variant: "destructive"
       });
       return;
@@ -111,7 +119,7 @@ const ImprovedSidePanel = ({
     if (userType === "enterprise") {
       toast({
         title: "権限がありません",
-        description: "企業ユーザーはレビューの閲覧のみ可能です",
+        description: "企業ユーザーはレビューの送信はできません",
         variant: "destructive"
       });
       return;
@@ -185,7 +193,7 @@ const ImprovedSidePanel = ({
           )}
         </div>
 
-        {/* Quick action buttons when not very narrow - only show for students in review mode */}
+        {/* Quick action buttons - Only show for students in review mode */}
         {!isVeryNarrow && activeTab === "reviews" && userType === "student" && (
           <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-100">
             <div className="flex items-center space-x-1">
@@ -217,6 +225,11 @@ const ImprovedSidePanel = ({
         {/* Show slide info for enterprise users or when not in review mode */}
         {!isVeryNarrow && (activeTab !== "reviews" || userType === "enterprise") && (
           <div className="flex items-center justify-end px-4 py-2 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-100">
+            {userType === "enterprise" && activeTab === "reviews" && (
+              <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full border border-amber-200 mr-2">
+                閲覧専用
+              </div>
+            )}
             <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full border">
               スライド {currentSlide}/{totalSlides}
             </div>
@@ -247,6 +260,7 @@ const ImprovedSidePanel = ({
               isNarrow={isNarrow}
               isVeryNarrow={isVeryNarrow}
               presenterNotes={presenterNotes}
+              userType={userType}
             />
           )}
         </TabsContent>

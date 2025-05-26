@@ -17,8 +17,10 @@ import {
   ChevronDown,
   ChevronUp,
   Edit3,
-  Send
+  Send,
+  Eye
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import AIReviewSummary from "./AIReviewSummary";
 
 interface ReviewPanelProps {
@@ -29,6 +31,7 @@ interface ReviewPanelProps {
   isNarrow?: boolean;
   isVeryNarrow?: boolean;
   presenterNotes?: Record<number, string>;
+  userType: "student" | "enterprise";
 }
 
 const mockReviews = {
@@ -128,18 +131,29 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
   panelHeight = 0,
   isNarrow = false,
   isVeryNarrow = false,
-  presenterNotes = {}
+  presenterNotes = {},
+  userType
 }) => {
   const reviews = mockReviews[currentSlide as keyof typeof mockReviews] || [];
   const [selectedReview, setSelectedReview] = useState<number | null>(null);
   const [isScriptExpanded, setIsScriptExpanded] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const { toast } = useToast();
   
   // Dynamic sizing based on actual panel dimensions
   const isExtremelyNarrow = panelWidth > 0 && panelWidth < 150;
   const isShort = panelHeight > 0 && panelHeight < 400;
   
-  console.log('ReviewPanel dimensions:', { panelWidth, panelHeight, isNarrow, isVeryNarrow, isExtremelyNarrow, isShort });
+  console.log('ReviewPanel render:', { 
+    userType, 
+    currentSlide, 
+    panelWidth, 
+    panelHeight, 
+    isNarrow, 
+    isVeryNarrow, 
+    isExtremelyNarrow, 
+    isShort 
+  });
   
   // Review completion status
   const completedSlides = Object.keys(mockReviews).filter(slideId => {
@@ -153,12 +167,28 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
   const currentScript = presenterNotes[currentSlide] || "";
 
   const handleSubmitComment = () => {
+    if (userType === "enterprise") {
+      toast({
+        title: "権限がありません",
+        description: "企業ユーザーはレビューの閲覧のみ可能です",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (newComment.trim()) {
-      // Handle comment submission logic here
-      console.log("Submitting comment:", newComment);
+      console.log("Student submitting comment:", newComment);
+      toast({
+        title: "コメントを投稿しました",
+        description: "レビューコメントが正常に投稿されました",
+        variant: "default"
+      });
       setNewComment("");
     }
   };
+
+  // Permission check for interactive elements
+  const canInteract = userType === "student";
 
   return (
     <div className="h-full flex flex-col min-w-0">
@@ -166,9 +196,13 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
         <h2 className={`${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-sm' : 'text-lg'} font-semibold text-gray-800 flex items-center min-w-0`}>
           <MessageSquare className={`${isExtremelyNarrow ? 'h-3 w-3 mr-1' : isVeryNarrow ? 'h-4 w-4 mr-1' : 'h-5 w-5 mr-2'} text-blue-600 flex-shrink-0`} />
           <span className="truncate">{isExtremelyNarrow ? 'レビュー' : isVeryNarrow ? 'レビュー' : 'レビュー管理'}</span>
+          {!canInteract && (
+            <Eye className={`${isExtremelyNarrow ? 'h-3 w-3 ml-1' : 'h-4 w-4 ml-2'} text-gray-500 flex-shrink-0`} />
+          )}
         </h2>
         <p className={`${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-xs' : 'text-sm'} text-gray-600 truncate`}>
           {isExtremelyNarrow ? `${currentSlide}/${totalSlides}` : isVeryNarrow ? `${currentSlide}/${totalSlides}` : `現在のスライド: ${currentSlide} / ${totalSlides}`}
+          {!canInteract && !isExtremelyNarrow && <span className="ml-2 text-amber-600">(閲覧のみ)</span>}
         </p>
         
         {!isShort && (
@@ -266,12 +300,22 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
                     {!isShort && (
                       <div className={`${isVeryNarrow ? 'mt-1' : isNarrow ? 'mt-2' : 'mt-3'} flex justify-between items-center min-w-0`}>
                         <div className="flex items-center">
-                          <Button variant="ghost" size="sm" className={`${isVeryNarrow ? 'h-5 px-1' : isNarrow ? 'h-6 px-1' : 'h-7 px-2'} min-w-0`}>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className={`${isVeryNarrow ? 'h-5 px-1' : isNarrow ? 'h-6 px-1' : 'h-7 px-2'} min-w-0`}
+                            disabled={!canInteract}
+                          >
                             <ThumbsUp className={`${isExtremelyNarrow ? 'h-3 w-3' : 'h-4 w-4'} ${!isExtremelyNarrow ? 'mr-1' : ''}`} />
                             {!isExtremelyNarrow && !isVeryNarrow && <span className="text-xs">同意</span>}
                           </Button>
                         </div>
-                        <Button variant="outline" size="sm" className={`${isVeryNarrow ? 'h-5 text-xs px-1' : isNarrow ? 'h-6 text-xs px-2' : 'h-7 text-xs'}`}>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className={`${isVeryNarrow ? 'h-5 text-xs px-1' : isNarrow ? 'h-6 text-xs px-2' : 'h-7 text-xs'}`}
+                          disabled={!canInteract}
+                        >
                           返信
                         </Button>
                       </div>
@@ -357,31 +401,45 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
         </TabsContent>
       </Tabs>
       
-      {/* Comment Input Section */}
-      <div className={`${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'} border-t border-gray-200 bg-gray-50 flex-shrink-0`}>
-        <div className="space-y-2">
-          <Textarea
-            placeholder="このスライドにコメントを追加..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            className={`${isVeryNarrow ? 'text-xs min-h-16' : 'text-sm min-h-20'} resize-none`}
-          />
-          <div className="flex justify-between items-center">
-            <span className={`${isVeryNarrow ? 'text-xs' : 'text-sm'} text-gray-500`}>
-              台本を参考にしてコメントしてください
-            </span>
-            <Button 
-              size="sm" 
-              onClick={handleSubmitComment}
-              disabled={!newComment.trim()}
-              className={`${isVeryNarrow ? 'text-xs h-6 px-2' : isNarrow ? 'text-xs h-7 px-3' : ''}`}
-            >
-              <Send className={`${isVeryNarrow ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-1'}`} />
-              投稿
-            </Button>
+      {/* Comment Input Section - Only show for students */}
+      {canInteract && (
+        <div className={`${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'} border-t border-gray-200 bg-gray-50 flex-shrink-0`}>
+          <div className="space-y-2">
+            <Textarea
+              placeholder="このスライドにコメントを追加..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className={`${isVeryNarrow ? 'text-xs min-h-16' : 'text-sm min-h-20'} resize-none`}
+            />
+            <div className="flex justify-between items-center">
+              <span className={`${isVeryNarrow ? 'text-xs' : 'text-sm'} text-gray-500`}>
+                台本を参考にしてコメントしてください
+              </span>
+              <Button 
+                size="sm" 
+                onClick={handleSubmitComment}
+                disabled={!newComment.trim()}
+                className={`${isVeryNarrow ? 'text-xs h-6 px-2' : isNarrow ? 'text-xs h-7 px-3' : ''}`}
+              >
+                <Send className={`${isVeryNarrow ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-1'}`} />
+                投稿
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Read-only message for enterprise users */}
+      {!canInteract && (
+        <div className={`${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'} border-t border-gray-200 bg-amber-50 flex-shrink-0`}>
+          <div className="flex items-center justify-center text-center">
+            <Eye className={`${isVeryNarrow ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'} text-amber-600`} />
+            <span className={`${isVeryNarrow ? 'text-xs' : 'text-sm'} text-amber-700`}>
+              {isVeryNarrow ? '閲覧のみ' : '企業ユーザーはレビューの閲覧のみ可能です'}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
