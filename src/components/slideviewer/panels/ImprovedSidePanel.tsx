@@ -22,9 +22,24 @@ const ImprovedSidePanel = ({
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [panelDimensions, setPanelDimensions] = useState({ width: 0, height: 0 });
-  const [activeTab, setActiveTab] = useState(shouldShowNotes ? "notes" : "reviews");
+  
+  // デフォルトタブの決定ロジックを改善
+  const getDefaultTab = () => {
+    if (shouldShowNotes && shouldShowReviewPanel) {
+      return "notes"; // 両方表示される場合はメモを優先
+    }
+    return shouldShowNotes ? "notes" : "reviews";
+  };
+  
+  const [activeTab, setActiveTab] = useState(getDefaultTab());
   const panelRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  
+  // shouldShowNotesやshouldShowReviewPanelが変更された時にタブを更新
+  useEffect(() => {
+    const newDefaultTab = getDefaultTab();
+    setActiveTab(newDefaultTab);
+  }, [shouldShowNotes, shouldShowReviewPanel]);
   
   // Track panel dimensions with ResizeObserver
   useEffect(() => {
@@ -95,9 +110,6 @@ const ImprovedSidePanel = ({
   const isNarrow = panelDimensions.width > 0 && panelDimensions.width < 280;
   const isVeryNarrow = panelDimensions.width > 0 && panelDimensions.width < 200;
 
-  // Default to the tab that's enabled
-  const defaultTab = shouldShowNotes ? "notes" : "reviews";
-  
   // Panel content component
   const PanelContent = () => (
     <div className="h-full flex flex-col" style={{ minWidth: 0 }}>

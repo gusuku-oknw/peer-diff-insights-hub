@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import ImprovedSidePanel from "@/components/slideviewer/panels/ImprovedSidePanel";
 import OverallReviewPanel from "@/components/slideviewer/panels/OverallReviewPanel";
-import ProjectHeader from "./ProjectHeader";
 import { useToast } from "@/hooks/use-toast";
 import { useSlideStore } from "@/stores/slideStore";
 import LeftSidebar from "./LeftSidebar";
@@ -108,25 +107,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     setIsOverallReviewOpen(false);
   };
 
-  // Determine if we should show the right side panel
+  // Determine if we should show the right side panel - 修正: メモまたはレビューが有効な場合に表示
   const shouldShowRightSidePanel = (
-    viewerMode === "review" || 
-    (showPresenterNotes && viewerMode !== "edit")
+    showPresenterNotes || 
+    viewerMode === "review"
   );
   
   return (
     <div className="flex flex-col h-full w-full overflow-hidden">
-      {/* Project Header */}
-      {!isFullScreen && (
-        <ProjectHeader
-          projectName="サンプルプレゼンテーション"
-          projectAuthor="田中太郎"
-          lastModified="5分前"
-          collaborators={3}
-          totalSlides={totalSlides}
-        />
-      )}
-
       {/* Overlay for sidebar - ONLY on mobile */}
       {leftSidebarOpen && isMobile && (
         <div 

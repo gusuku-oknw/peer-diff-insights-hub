@@ -16,11 +16,15 @@ import {
   PanelLeft, 
   Maximize, 
   BookOpen,
-  RotateCcw,
-  RotateCw,
-  Settings
+  ArrowLeft,
+  Users,
+  Clock,
+  FileText
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MainToolbarProps {
   currentSlide: number;
@@ -63,6 +67,8 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
   onStartPresentation,
   onSaveChanges
 }) => {
+  const isMobile = useIsMobile();
+
   const handleZoomSliderChange = (value: number[]) => {
     onZoomChange(value[0]);
   };
@@ -105,8 +111,64 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
 
   return (
     <div className="modern-toolbar flex items-center justify-between p-2 lg:p-3 bg-white border-b border-gray-200 h-14 lg:h-16 shadow-sm overflow-x-auto">
-      {/* Left section - Navigation and sidebar toggle */}
+      {/* Left section - Back button, project info, and navigation */}
       <div className="flex items-center gap-1 lg:gap-3 flex-shrink-0">
+        {/* Back to Dashboard */}
+        <Link to="/dashboard">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="modern-button h-8 w-8 p-0 lg:h-auto lg:w-auto lg:px-3 lg:py-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {!isMobile && <span className="ml-2">ダッシュボード</span>}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>ダッシュボードに戻る</p>
+            </TooltipContent>
+          </Tooltip>
+        </Link>
+
+        {/* Project Info - Desktop only */}
+        {!isMobile && (
+          <>
+            <Separator orientation="vertical" className="h-6 bg-gray-300" />
+            <div className="flex items-center space-x-3 min-w-0">
+              <div className="min-w-0">
+                <h1 className="text-base font-semibold text-gray-900 truncate">
+                  サンプルプレゼンテーション
+                </h1>
+                <div className="flex items-center space-x-3 text-xs text-gray-500">
+                  <span className="flex items-center space-x-1">
+                    <Users className="h-3 w-3" />
+                    <span>田中太郎</span>
+                  </span>
+                  <span className="flex items-center space-x-1">
+                    <Clock className="h-3 w-3" />
+                    <span>5分前</span>
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Badge variant="secondary" className="flex items-center space-x-1">
+                  <FileText className="h-3 w-3" />
+                  <span>{totalSlides}枚</span>
+                </Badge>
+                <Badge variant="outline" className="flex items-center space-x-1">
+                  <Users className="h-3 w-3" />
+                  <span>3人</span>
+                </Badge>
+              </div>
+            </div>
+          </>
+        )}
+
+        <Separator orientation="vertical" className="h-6 lg:h-8 bg-gray-300" />
+
+        {/* Sidebar toggle */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -125,6 +187,7 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
         
         <Separator orientation="vertical" className="h-6 lg:h-8 bg-gray-300" />
         
+        {/* Navigation controls */}
         <div className="flex items-center gap-1 lg:gap-2 bg-gray-50 rounded-lg p-1">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -260,7 +323,7 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
         <Separator orientation="vertical" className="h-6 lg:h-8 bg-gray-300" />
         
         <div className="flex items-center gap-1 lg:gap-2">
-          {viewerMode === "presentation" && (
+          {(viewerMode === "presentation" || viewerMode === "review") && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -273,7 +336,7 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>プレゼンターノート表示/非表示</p>
+                <p>メモ表示/非表示</p>
               </TooltipContent>
             </Tooltip>
           )}

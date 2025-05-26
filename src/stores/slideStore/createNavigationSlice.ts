@@ -12,10 +12,10 @@ export const createNavigationSlice: StateCreator<
 > = (set, get) => ({
   currentSlide: 1,
   zoom: 100,
-  viewerMode: "edit",
+  viewerMode: "presentation",
   isFullScreen: false,
   leftSidebarOpen: false,
-  showPresenterNotes: false,  // 確実に初期値はfalse
+  showPresenterNotes: true,  // デフォルトでtrueに変更
   displayCount: 1,
   
   setCurrentSlide: (index) => {
@@ -48,20 +48,8 @@ export const createNavigationSlice: StateCreator<
   },
   
   setViewerMode: (mode) => {
-    const current = get();
     set({ viewerMode: mode });
-    
-    // 編集モードに切り替えたときは、常にノートパネルを非表示にする
-    if (mode === "edit") {
-      console.log("Navigation slice: Switching to edit mode, hiding presenter notes");
-      set({ showPresenterNotes: false });
-    }
-    
-    console.log("Navigation slice: Mode changed", {
-      oldMode: current.viewerMode,
-      newMode: mode,
-      showPresenterNotes: mode === "edit" ? false : current.showPresenterNotes
-    });
+    console.log("Navigation slice: Mode changed to", mode);
   },
   
   toggleLeftSidebar: () => {
@@ -75,21 +63,12 @@ export const createNavigationSlice: StateCreator<
   },
   
   togglePresenterNotes: () => {
-    const { showPresenterNotes, viewerMode } = get();
-    
-    // 編集モードの場合はノートパネルを表示できないようにする
-    if (viewerMode === "edit") {
-      console.log("Navigation slice: Cannot toggle presenter notes in edit mode");
-      return;
-    }
-    
+    const { showPresenterNotes } = get();
     const newValue = !showPresenterNotes;
     console.log("Navigation slice: Toggling presenter notes:", { 
       current: showPresenterNotes, 
-      new: newValue,
-      viewerMode 
+      new: newValue
     });
-    
     set({ showPresenterNotes: newValue });
   },
   
