@@ -1,24 +1,31 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSlideStore } from "@/stores/slideStore";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { MessageSquare, Plus, MoreVertical, Info, Star, FileText, BarChart3 } from "lucide-react";
+import { MessageSquare, Plus, MoreVertical, Info, Star, FileText, BarChart3, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SlideThumbnailsProps {
   slides?: any[];
   currentSlide: number;
   onSlideClick: (slideIndex: number) => void;
+  onOpenOverallReview?: () => void;
+  height?: number;
+  onHeightChange?: (height: number) => void;
 }
 
 const SlideThumbnails = ({
   slides: propSlides,
   currentSlide,
-  onSlideClick
+  onSlideClick,
+  onOpenOverallReview,
+  height = 128,
+  onHeightChange
 }: SlideThumbnailsProps) => {
   const storeSlides = useSlideStore(state => state.slides);
   const generateThumbnails = useSlideStore(state => state.generateThumbnails);
+  const [isResizing, setIsResizing] = useState(false);
   
   // Use props slides if provided, otherwise use store slides
   const slides = propSlides || storeSlides;
@@ -27,10 +34,43 @@ const SlideThumbnails = ({
   useEffect(() => {
     generateThumbnails();
   }, [generateThumbnails]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!onHeightChange) return;
+    
+    setIsResizing(true);
+    const startY = e.clientY;
+    const startHeight = height;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaY = startY - e.clientY; // Inverted because we want to drag up to increase height
+      const newHeight = Math.max(80, Math.min(400, startHeight + deltaY));
+      onHeightChange(newHeight);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
   
   return (
-    <div className="modern-thumbnails bg-white h-full flex flex-col border-t border-gray-200 shadow-sm">
-      <div className="flex justify-between items-center px-6 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+    <div className="modern-thumbnails bg-white flex flex-col border-t border-gray-200 shadow-sm" style={{ height: `${height}px` }}>
+      {/* Resize handle */}
+      {onHeightChange && (
+        <div 
+          className={`flex items-center justify-center h-2 bg-gray-100 border-b border-gray-200 cursor-row-resize hover:bg-gray-200 transition-colors ${isResizing ? 'bg-blue-100' : ''}`}
+          onMouseDown={handleMouseDown}
+        >
+          <GripVertical className="h-3 w-3 text-gray-400 rotate-90" />
+        </div>
+      )}
+
+      <div className="flex justify-between items-center px-4 lg:px-6 py-2 lg:py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
         <h3 className="font-semibold flex items-center text-sm text-gray-800">
           <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -69,11 +109,12 @@ const SlideThumbnails = ({
       {/* 横スクロール対応のスライド一覧 */}
       <div className="flex-grow overflow-hidden">
         <ScrollArea className="h-full w-full" orientation="horizontal">
-          <div className="flex gap-6 p-6 pb-4" style={{ width: `${(slides.length + 2) * 180}px` }}>
+          <div className="flex gap-4 lg:gap-6 p-4 lg:p-6 pb-4" style={{ width: `${(slides.length + 2) * (height > 150 ? 180 : 140)}px` }}>
             {slides.map((slide, index) => {
               const slideIndex = slide.id;
               const slideTitle = slide.title || `スライド ${slideIndex}`;
               const isActive = currentSlide === slideIndex;
+              const thumbnailWidth = height > 150 ? 160 : 120;
               
               return (
                 <Tooltip key={index}>
@@ -83,7 +124,8 @@ const SlideThumbnails = ({
                         isActive 
                           ? 'ring-2 ring-blue-400 ring-offset-2 bg-blue-50 shadow-lg scale-105' 
                           : 'hover:shadow-md hover:ring-1 hover:ring-blue-200 hover:ring-offset-1'
-                      } relative flex-shrink-0 group w-40`} 
+                      } relative flex-shrink-0 group`} 
+                      style={{ width: `${thumbnailWidth}px` }}
                       onClick={() => onSlideClick(slideIndex)}
                     >
                       {/* Thumbnail container */}
@@ -97,7 +139,7 @@ const SlideThumbnails = ({
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
                             <div className="text-center">
-                              <svg className="w-8 h-8 text-gray-300 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-6 h-6 lg:w-8 lg:h-8 text-gray-300 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                               </svg>
                               <span className="text-gray-400 text-xs">No Preview</span>
@@ -158,10 +200,10 @@ const SlideThumbnails = ({
             {/* Add new slide button */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="thumbnail-card flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 border-2 border-dashed border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-blue-50 w-40">
+                <div className="thumbnail-card flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 border-2 border-dashed border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-blue-50" style={{ width: `${height > 150 ? 160 : 120}px` }}>
                   <div className="w-full aspect-video flex items-center justify-center mb-3">
                     <div className="text-center">
-                      <Plus className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <Plus className="w-6 h-6 lg:w-8 lg:h-8 text-gray-400 mx-auto mb-2" />
                       <span className="text-xs text-gray-500">新規スライド</span>
                     </div>
                   </div>
@@ -176,17 +218,19 @@ const SlideThumbnails = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div 
-                  className="thumbnail-card flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 border-2 border-dashed border-purple-300 hover:border-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100 w-40"
+                  className="thumbnail-card flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 border-2 border-dashed border-purple-300 hover:border-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100"
+                  style={{ width: `${height > 150 ? 160 : 120}px` }}
                   onClick={() => {
                     console.log("Opening presentation evaluation");
+                    onOpenOverallReview?.();
                   }}
                 >
                   <div className="w-full aspect-video flex items-center justify-center p-3 mb-3">
                     <div className="text-center">
                       <div className="flex items-center justify-center mb-2">
-                        <Star className="w-4 h-4 text-purple-500 mr-1" />
-                        <BarChart3 className="w-4 h-4 text-purple-500 mr-1" />
-                        <FileText className="w-4 h-4 text-purple-500" />
+                        <Star className="w-3 h-3 lg:w-4 lg:h-4 text-purple-500 mr-1" />
+                        <BarChart3 className="w-3 h-3 lg:w-4 lg:h-4 text-purple-500 mr-1" />
+                        <FileText className="w-3 h-3 lg:w-4 lg:h-4 text-purple-500" />
                       </div>
                       <span className="text-xs text-purple-700 font-medium">プレゼン評価</span>
                     </div>

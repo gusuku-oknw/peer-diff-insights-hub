@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import SidePanel from "@/components/slide-viewer/panels/SidePanel";
+import OverallReviewPanel from "@/components/slideviewer/panels/OverallReviewPanel";
 import { useToast } from "@/hooks/use-toast";
 import { useSlideStore } from "@/stores/slideStore";
 import LeftSidebar from "./LeftSidebar";
@@ -59,6 +60,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const [comments, setComments] = useState(mockComments[currentSlide] || []);
   const [isNotesPanelOpen, setIsNotesPanelOpen] = useState(false);
   const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
+  const [thumbnailsHeight, setThumbnailsHeight] = useState(128);
+  const [isOverallReviewOpen, setIsOverallReviewOpen] = useState(false);
   const slides = useSlideStore(state => state.slides);
   const isMobile = useIsMobile();
 
@@ -94,6 +97,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
   const toggleRightPanelCollapse = () => {
     setIsRightPanelCollapsed(!isRightPanelCollapsed);
+  };
+
+  const handleOpenOverallReview = () => {
+    setIsOverallReviewOpen(true);
+  };
+
+  const handleCloseOverallReview = () => {
+    setIsOverallReviewOpen(false);
   };
 
   // Determine if we should show the right side panel
@@ -199,14 +210,24 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         </div>
       </div>
 
-      {/* Bottom Slide Thumbnails */}
-      <div className="h-32 border-t border-gray-200 bg-white flex-shrink-0">
+      {/* Bottom Slide Thumbnails with resizable height */}
+      <div className="border-t border-gray-200 bg-white flex-shrink-0">
         <SlideThumbnails
           slides={slides}
           currentSlide={currentSlide}
           onSlideClick={handleSlideClick}
+          onOpenOverallReview={handleOpenOverallReview}
+          height={thumbnailsHeight}
+          onHeightChange={setThumbnailsHeight}
         />
       </div>
+
+      {/* Overall Review Panel */}
+      <OverallReviewPanel
+        isOpen={isOverallReviewOpen}
+        onClose={handleCloseOverallReview}
+        totalSlides={totalSlides}
+      />
     </div>
   );
 };
