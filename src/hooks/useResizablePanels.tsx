@@ -18,31 +18,8 @@ export const useResizablePanels = ({
 }: UseResizablePanelsProps) => {
   const [width, setWidth] = useState(initialWidth);
   const [isResizing, setIsResizing] = useState(false);
-  const [startPosition, setStartPosition] = useState(0);
-  const [startWidth, setStartWidth] = useState(0);
   
   const handleRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-    setStartPosition(orientation === 'vertical' ? e.clientX : e.clientY);
-    setStartWidth(width);
-    
-    document.body.style.cursor = orientation === 'vertical' ? 'col-resize' : 'row-resize';
-    document.body.style.userSelect = 'none';
-  }, [width, orientation]);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isResizing) return;
-    
-    const currentPosition = orientation === 'vertical' ? e.clientX : e.clientY;
-    const delta = currentPosition - startPosition;
-    const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth + delta));
-    
-    setWidth(newWidth);
-    onWidthChange?.(newWidth);
-  }, [isResizing, startPosition, startWidth, minWidth, maxWidth, onWidthChange, orientation]);
 
   const handleMouseUp = useCallback(() => {
     setIsResizing(false);
@@ -50,60 +27,76 @@ export const useResizablePanels = ({
     document.body.style.userSelect = '';
   }, []);
 
-  useEffect(() => {
-    if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isResizing, handleMouseMove, handleMouseUp]);
-
   const ResizeHandle = useCallback(({ className = '', position = 'right' }: { 
     className?: string; 
     position?: 'left' | 'right' | 'top' | 'bottom';
   }) => {
     const isVertical = orientation === 'vertical';
-    const isHorizontal = orientation === 'horizontal';
     
-    // Handle mouse down with corrected delta calculation for left position
+    // Local state for this specific resize handle
+    const [startPosition, setStartPosition] = useState(0);
+    const [startWidth, setStartWidth] = useState(0);
+    
+    // Debug logging
+    const logResize = (action: string, data: any) => {
+      console.log(`[Resize ${position}] ${action}:`, data);
+    };
+    
+    // Unified mouse down handler
     const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
       e.preventDefault();
+      e.stopPropagation();
+      
+      const currentPos = orientation === 'vertical' ? e.clientX : e.clientY;
+      
       setIsResizing(true);
-      setStartPosition(orientation === 'vertical' ? e.clientX : e.clientY);
+      setStartPosition(currentPos);
       setStartWidth(width);
+      
+      logResize('MouseDown', { currentPos, width, position });
       
       document.body.style.cursor = orientation === 'vertical' ? 'col-resize' : 'row-resize';
       document.body.style.userSelect = 'none';
-    }, []);
+    }, [width, orientation]);
 
-    // Mouse move handler with corrected delta for left-positioned handles
+    // Unified mouse move handler
     const handleResizeMouseMove = useCallback((e: MouseEvent) => {
       if (!isResizing) return;
       
       const currentPosition = orientation === 'vertical' ? e.clientX : e.clientY;
       let delta = currentPosition - startPosition;
       
-      // For left-positioned handles (like right panel), reverse the delta
+      // For left-positioned handles (right panel), reverse the delta for intuitive behavior
       if (position === 'left') {
         delta = -delta;
       }
       
       const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth + delta));
       
+      logResize('MouseMove', { 
+        currentPosition, 
+        startPosition, 
+        delta: currentPosition - startPosition,
+        adjustedDelta: delta,
+        startWidth, 
+        newWidth,
+        position
+      });
+      
       setWidth(newWidth);
       onWidthChange?.(newWidth);
     }, [isResizing, startPosition, startWidth, minWidth, maxWidth, onWidthChange, orientation, position]);
 
+    // Single useEffect for event listeners
     useEffect(() => {
       if (isResizing) {
+        logResize('Adding listeners', { isResizing });
+        
         document.addEventListener('mousemove', handleResizeMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
         
         return () => {
+          logResize('Removing listeners', { isResizing });
           document.removeEventListener('mousemove', handleResizeMouseMove);
           document.removeEventListener('mouseup', handleMouseUp);
         };
@@ -146,7 +139,7 @@ export const useResizablePanels = ({
         `} />
       </div>
     );
-  }, [handleMouseDown, isResizing, orientation, width, startPosition, startWidth, minWidth, maxWidth, onWidthChange, handleMouseUp]);
+  }, [width, isResizing, orientation, minWidth, maxWidth, onWidthChange, handleMouseUp]);
 
   return {
     width,
