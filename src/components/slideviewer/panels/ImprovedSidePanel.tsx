@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import NotesPanel from "../../slide-viewer/panels/NotesPanel";
 import SimplifiedReviewPanel from "./SimplifiedReviewPanel";
@@ -8,12 +7,15 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { useResizablePanels } from "@/hooks/useResizablePanels";
 import type { SidePanelProps } from "@/types/slide-viewer/panel.types";
 
 interface ImprovedSidePanelProps extends Omit<SidePanelProps, 'isCollapsed' | 'onToggleCollapse'> {
   userType: "student" | "enterprise";
   isHidden?: boolean;
   onToggleHide?: () => void;
+  onWidthChange?: (width: number) => void;
+  initialWidth?: number;
 }
 
 const ImprovedSidePanel = ({
@@ -25,10 +27,21 @@ const ImprovedSidePanel = ({
   isHidden = false,
   onToggleHide,
   userType,
+  onWidthChange,
+  initialWidth = 320,
 }: ImprovedSidePanelProps) => {
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [panelDimensions, setPanelDimensions] = useState({ width: 0, height: 0 });
+  
+  // リサイズ機能を追加
+  const { width, ResizeHandle } = useResizablePanels({
+    initialWidth,
+    minWidth: 220,
+    maxWidth: 500,
+    onWidthChange,
+    orientation: 'vertical'
+  });
   
   // Simplified default tab logic
   const getDefaultTab = () => {
@@ -44,7 +57,8 @@ const ImprovedSidePanel = ({
     shouldShowReviewPanel,
     userType,
     currentSlide,
-    activeTab
+    activeTab,
+    width
   });
   
   // Update tab when panel visibility changes
@@ -221,12 +235,16 @@ const ImprovedSidePanel = ({
     );
   }
 
-  // Desktop implementation
+  // Desktop implementation with resizable functionality
   return (
     <div 
-      className="w-full h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shadow-sm relative z-10" 
+      className="h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shadow-sm relative z-10" 
       ref={panelRef}
+      style={{ width }}
     >
+      {/* Resize handle on the left side */}
+      <ResizeHandle position="left" className="z-30" />
+      
       <PanelContent />
     </div>
   );
