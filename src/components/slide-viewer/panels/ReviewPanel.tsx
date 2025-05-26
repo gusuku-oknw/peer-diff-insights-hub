@@ -4,6 +4,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   MessageSquare, 
   ThumbsUp, 
@@ -11,7 +13,11 @@ import {
   Clock, 
   BarChart4, 
   AlertTriangle,
-  Star
+  Star,
+  ChevronDown,
+  ChevronUp,
+  Edit3,
+  Send
 } from "lucide-react";
 import AIReviewSummary from "./AIReviewSummary";
 
@@ -22,6 +28,7 @@ interface ReviewPanelProps {
   panelHeight?: number;
   isNarrow?: boolean;
   isVeryNarrow?: boolean;
+  presenterNotes?: Record<number, string>;
 }
 
 const mockReviews = {
@@ -120,10 +127,13 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
   panelWidth = 0,
   panelHeight = 0,
   isNarrow = false,
-  isVeryNarrow = false
+  isVeryNarrow = false,
+  presenterNotes = {}
 }) => {
   const reviews = mockReviews[currentSlide as keyof typeof mockReviews] || [];
   const [selectedReview, setSelectedReview] = useState<number | null>(null);
+  const [isScriptExpanded, setIsScriptExpanded] = useState(false);
+  const [newComment, setNewComment] = useState("");
   
   // Dynamic sizing based on actual panel dimensions
   const isExtremelyNarrow = panelWidth > 0 && panelWidth < 150;
@@ -139,6 +149,16 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
   }).length;
   
   const completionPercentage = Math.round((completedSlides / totalSlides) * 100);
+
+  const currentScript = presenterNotes[currentSlide] || "";
+
+  const handleSubmitComment = () => {
+    if (newComment.trim()) {
+      // Handle comment submission logic here
+      console.log("Submitting comment:", newComment);
+      setNewComment("");
+    }
+  };
 
   return (
     <div className="h-full flex flex-col min-w-0">
@@ -165,6 +185,38 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
           </div>
         )}
       </div>
+
+      {/* Script Section */}
+      {currentScript && (
+        <div className={`${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'} border-b border-gray-100 bg-green-50 flex-shrink-0`}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsScriptExpanded(!isScriptExpanded)}
+            className="w-full justify-between p-2 h-auto hover:bg-green-100"
+          >
+            <div className="flex items-center gap-2">
+              <Edit3 className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-green-600`} />
+              <span className={`${isVeryNarrow ? 'text-xs' : 'text-sm'} font-medium text-green-800`}>
+                {isVeryNarrow ? '台本' : 'このスライドの台本'}
+              </span>
+            </div>
+            {isScriptExpanded ? (
+              <ChevronUp className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-green-600`} />
+            ) : (
+              <ChevronDown className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-green-600`} />
+            )}
+          </Button>
+          
+          {isScriptExpanded && (
+            <div className={`${isVeryNarrow ? 'mt-1 p-1' : 'mt-2 p-3'} bg-white rounded border border-green-200`}>
+              <p className={`${isVeryNarrow ? 'text-xs' : 'text-sm'} text-gray-800 leading-relaxed whitespace-pre-wrap`}>
+                {currentScript}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
       
       <Tabs defaultValue="reviews" className="flex-grow flex flex-col min-h-0">
         <TabsList className={`${isVeryNarrow ? 'p-0.5' : isNarrow ? 'p-1' : 'p-2'} justify-center border-b border-gray-100 flex-shrink-0`}>
@@ -305,10 +357,30 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
         </TabsContent>
       </Tabs>
       
+      {/* Comment Input Section */}
       <div className={`${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'} border-t border-gray-200 bg-gray-50 flex-shrink-0`}>
-        <Button className={`w-full ${isVeryNarrow ? 'text-xs h-6' : isNarrow ? 'text-xs h-7' : ''}`}>
-          {isExtremelyNarrow ? 'レビュー依頼' : isVeryNarrow ? 'レビュー依頼' : '新しいレビューを依頼'}
-        </Button>
+        <div className="space-y-2">
+          <Textarea
+            placeholder="このスライドにコメントを追加..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            className={`${isVeryNarrow ? 'text-xs min-h-16' : 'text-sm min-h-20'} resize-none`}
+          />
+          <div className="flex justify-between items-center">
+            <span className={`${isVeryNarrow ? 'text-xs' : 'text-sm'} text-gray-500`}>
+              台本を参考にしてコメントしてください
+            </span>
+            <Button 
+              size="sm" 
+              onClick={handleSubmitComment}
+              disabled={!newComment.trim()}
+              className={`${isVeryNarrow ? 'text-xs h-6 px-2' : isNarrow ? 'text-xs h-7 px-3' : ''}`}
+            >
+              <Send className={`${isVeryNarrow ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-1'}`} />
+              投稿
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
