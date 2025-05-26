@@ -23,6 +23,7 @@ interface MainLayoutProps {
   viewerMode: ViewerMode;
   leftSidebarOpen: boolean;
   showPresenterNotes: boolean;
+  isFullScreen: boolean;
   presentationStartTime: Date | null;
   presenterNotes: Record<number, string>;
   elapsedTime: number;
@@ -45,6 +46,7 @@ const MainLayout = ({
   viewerMode,
   leftSidebarOpen,
   showPresenterNotes,
+  isFullScreen,
   presentationStartTime,
   presenterNotes,
   elapsedTime,

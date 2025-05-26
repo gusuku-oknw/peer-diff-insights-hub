@@ -1,4 +1,4 @@
-import { Slide } from '@/types/slide-viewer/slide.types';
+import { Slide } from '@/types/slide.types';
 
 // サンプルスライドを作成する関数
 export const createSampleSlides = (): Slide[] => [
