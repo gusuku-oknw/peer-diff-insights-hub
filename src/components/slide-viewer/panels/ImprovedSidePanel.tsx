@@ -1,14 +1,14 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import NotesPanel from "../../slide-viewer/panels/NotesPanel";
-import SimplifiedReviewPanel from "../panels/SimplifiedReviewPanel";
+import SimplifiedReviewPanel from "./SimplifiedReviewPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, MessageSquare, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import SidePanelContent from "../slideviewer/panels/components/SidePanelContent";
+import SidePanelContent from "../../slideviewer/panels/components/SidePanelContent";
 import type { SidePanelProps } from "@/types/slide-viewer/panel.types";
 
 interface ImprovedSidePanelProps extends Omit<SidePanelProps, 'isCollapsed' | 'onToggleCollapse'> {
