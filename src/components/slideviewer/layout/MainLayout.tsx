@@ -1,39 +1,12 @@
-
-import React, { useState, useEffect } from "react";
-import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
-import ImprovedSidePanel from "@/components/slideviewer/panels/ImprovedSidePanel";
-import OverallReviewPanel from "@/components/slideviewer/panels/OverallReviewPanel";
-import { useToast } from "@/hooks/use-toast";
-import { useSlideStore } from "@/stores/slideStore";
+import React, { useState } from "react";
 import LeftSidebar from "./LeftSidebar";
 import MainContent from "./MainContent";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import SlideThumbnails from "../SlideThumbnails";
+import ImprovedSidePanel from "../panels/ImprovedSidePanel";
+import OverallReviewPanel from "../panels/OverallReviewPanel";
+import type { MainLayoutProps } from "@/types/slide-viewer/toolbar.types";
 
-interface MainLayoutProps {
-  currentBranch: string;
-  branches: string[];
-  commitHistory: any[];
-  currentSlide: number;
-  totalSlides: number;
-  zoom: number;
-  viewerMode: "presentation" | "edit" | "review";
-  leftSidebarOpen: boolean;
-  showPresenterNotes: boolean;
-  isFullScreen: boolean;
-  presentationStartTime: number | null;
-  presenterNotes: Record<number, string>;
-  elapsedTime: string;
-  displayCount: number;
-  commentedSlides: number[];
-  mockComments: any;
-  userType: "student" | "enterprise";
-  onBranchChange: (branch: string) => void;
-  onToggleLeftSidebar: () => void;
-  onSlideChange: (currentSlide: number) => void;
-}
-
-const MainLayout: React.FC<MainLayoutProps> = ({
+const MainLayout = ({
   currentBranch,
   branches,
   commitHistory,
@@ -53,173 +26,73 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   userType,
   onBranchChange,
   onToggleLeftSidebar,
-  onSlideChange
-}) => {
-  const { toast } = useToast();
-  const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState(mockComments[currentSlide] || []);
-  const [isNotesPanelOpen, setIsNotesPanelOpen] = useState(false);
-  const [isRightPanelCollapsed, setIsRightPanelCollapsed] = useState(false);
+  onSlideChange,
+}: MainLayoutProps) => {
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
   const [thumbnailsHeight, setThumbnailsHeight] = useState(128);
   const [isOverallReviewOpen, setIsOverallReviewOpen] = useState(false);
-  const slides = useSlideStore(state => state.slides);
-  const isMobile = useIsMobile();
-
-  // Update comments when current slide changes
-  useEffect(() => {
-    setComments(mockComments[currentSlide] || []);
-  }, [currentSlide, mockComments]);
-
-  const handleAddComment = () => {
-    if (commentText.trim() !== "") {
-      const newComment = {
-        id: Date.now(),
-        text: commentText,
-      };
-
-      setComments(prevComments => [...prevComments, newComment]);
-      setCommentText("");
-
-      toast({
-        title: "コメントが追加されました",
-        description: "コメントありがとうございます！",
-      });
-    }
-  };
-
-  const handleSlideClick = (slideNumber: number) => {
-    onSlideChange(slideNumber);
-  };
-
-  const toggleNotesPanel = () => {
-    setIsNotesPanelOpen(!isNotesPanelOpen);
-  };
-
-  const toggleRightPanelCollapse = () => {
-    setIsRightPanelCollapsed(!isRightPanelCollapsed);
-  };
-
-  const handleOpenOverallReview = () => {
-    setIsOverallReviewOpen(true);
-  };
-
-  const handleCloseOverallReview = () => {
-    setIsOverallReviewOpen(false);
-  };
-
-  // Determine if we should show the right side panel - 修正: メモまたはレビューが有効な場合に表示
-  const shouldShowRightSidePanel = (
-    showPresenterNotes || 
-    viewerMode === "review"
-  );
   
+  const shouldShowNotes = viewerMode === "presentation" || showPresenterNotes;
+  const shouldShowReviewPanel = viewerMode === "review";
+
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden">
-      {/* Overlay for sidebar - ONLY on mobile */}
-      {leftSidebarOpen && isMobile && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-30"
-          onClick={onToggleLeftSidebar}
-        />
-      )}
+    <div className="flex h-full bg-gray-50 relative">
+      {/* Left Sidebar */}
+      <LeftSidebar
+        currentBranch={currentBranch}
+        branches={branches}
+        commitHistory={commitHistory}
+        leftSidebarOpen={leftSidebarOpen}
+        onBranchChange={onBranchChange}
+        onToggleLeftSidebar={onToggleLeftSidebar}
+      />
 
-      {/* Main horizontal layout */}
-      <div className="flex flex-grow overflow-hidden relative">
-        {/* Left Sidebar */}
-        <LeftSidebar
-          leftSidebarOpen={leftSidebarOpen}
-          currentBranch={currentBranch}
-          branches={branches}
-          commitHistory={commitHistory}
-          onBranchChange={onBranchChange}
-        />
-
-        {/* Main Content Area with Resizable Panels */}
-        <div className={`flex-1 flex transition-all duration-300 ${leftSidebarOpen && !isMobile ? 'ml-64' : 'ml-0'}`}>
-          {shouldShowRightSidePanel && !isMobile ? (
-            <ResizablePanelGroup direction="horizontal" className="flex-1">
-              {/* Main Content Panel */}
-              <ResizablePanel 
-                defaultSize={isRightPanelCollapsed ? 95 : 70} 
-                minSize={50}
-                maxSize={isRightPanelCollapsed ? 95 : 85}
-              >
-                <div className="flex flex-col h-full">
-                  <MainContent
-                    currentSlide={currentSlide}
-                    zoom={zoom}
-                    viewerMode={viewerMode}
-                    userType={userType}
-                    isNotesPanelOpen={isNotesPanelOpen}
-                    comments={comments}
-                    commentText={commentText}
-                    setCommentText={setCommentText}
-                    handleAddComment={handleAddComment}
-                    toggleNotesPanel={toggleNotesPanel}
-                  />
-                </div>
-              </ResizablePanel>
-
-              {/* Resizable Handle - only show when panel is not collapsed */}
-              {!isRightPanelCollapsed && <ResizableHandle withHandle />}
-
-              {/* Right Side Panel */}
-              <ResizablePanel 
-                defaultSize={isRightPanelCollapsed ? 5 : 30} 
-                minSize={isRightPanelCollapsed ? 5 : 20} 
-                maxSize={isRightPanelCollapsed ? 5 : 50}
-              >
-                <ImprovedSidePanel
-                  shouldShowNotes={showPresenterNotes}
-                  shouldShowReviewPanel={viewerMode === "review"}
-                  currentSlide={currentSlide}
-                  totalSlides={totalSlides}
-                  presenterNotes={presenterNotes}
-                  isCollapsed={isRightPanelCollapsed}
-                  onToggleCollapse={toggleRightPanelCollapse}
-                />
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          ) : (
-            <div className="flex flex-col h-full flex-1">
-              <MainContent
-                currentSlide={currentSlide}
-                zoom={zoom}
-                viewerMode={viewerMode}
-                userType={userType}
-                isNotesPanelOpen={isNotesPanelOpen}
-                comments={comments}
-                commentText={commentText}
-                setCommentText={setCommentText}
-                handleAddComment={handleAddComment}
-                toggleNotesPanel={toggleNotesPanel}
-              />
-              
-              {/* Show ImprovedSidePanel for mobile */}
-              {shouldShowRightSidePanel && isMobile && (
-                <ImprovedSidePanel
-                  shouldShowNotes={showPresenterNotes}
-                  shouldShowReviewPanel={viewerMode === "review"}
-                  currentSlide={currentSlide}
-                  totalSlides={totalSlides}
-                  presenterNotes={presenterNotes}
-                />
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Bottom Slide Thumbnails with resizable height */}
-      {!isFullScreen && (
-        <div className="border-t border-gray-200 bg-white flex-shrink-0">
-          <SlideThumbnails
-            slides={slides}
+      {/* Main Content Area */}
+      <div className="flex-grow flex flex-col overflow-hidden">
+        {/* Main slide display area */}
+        <div className="flex-grow overflow-hidden relative">
+          <MainContent
             currentSlide={currentSlide}
-            onSlideClick={handleSlideClick}
-            onOpenOverallReview={handleOpenOverallReview}
+            totalSlides={totalSlides}
+            zoom={zoom}
+            viewerMode={viewerMode}
+            showPresenterNotes={showPresenterNotes}
+            isFullScreen={isFullScreen}
+            presentationStartTime={presentationStartTime}
+            presenterNotes={presenterNotes}
+            elapsedTime={elapsedTime}
+            displayCount={displayCount}
+            commentedSlides={commentedSlides}
+            mockComments={mockComments}
+            userType={userType}
+            rightPanelCollapsed={rightPanelCollapsed}
+            onSlideChange={onSlideChange}
+          />
+        </div>
+
+        {/* Bottom thumbnails - hide in presentation mode when fullscreen */}
+        {!(viewerMode === "presentation" && isFullScreen) && (
+          <SlideThumbnails
+            currentSlide={currentSlide}
+            onSlideClick={onSlideChange}
+            onOpenOverallReview={() => setIsOverallReviewOpen(true)}
             height={thumbnailsHeight}
             onHeightChange={setThumbnailsHeight}
+          />
+        )}
+      </div>
+
+      {/* Right Panel - hide in presentation mode when fullscreen */}
+      {!(viewerMode === "presentation" && isFullScreen) && (
+        <div className={`transition-all duration-300 ease-in-out ${rightPanelCollapsed ? 'w-12' : 'w-80'} flex-shrink-0`}>
+          <ImprovedSidePanel
+            shouldShowNotes={shouldShowNotes}
+            shouldShowReviewPanel={shouldShowReviewPanel}
+            currentSlide={currentSlide}
+            totalSlides={totalSlides}
+            presenterNotes={presenterNotes}
+            isCollapsed={rightPanelCollapsed}
+            onToggleCollapse={() => setRightPanelCollapsed(!rightPanelCollapsed)}
           />
         </div>
       )}
@@ -227,8 +100,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       {/* Overall Review Panel */}
       <OverallReviewPanel
         isOpen={isOverallReviewOpen}
-        onClose={handleCloseOverallReview}
+        onClose={() => setIsOverallReviewOpen(false)}
         totalSlides={totalSlides}
+        presenterNotes={presenterNotes}
       />
     </div>
   );
