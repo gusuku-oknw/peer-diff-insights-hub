@@ -1,7 +1,6 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
-import StudentReviewSection from "./StudentReviewSection";
 
 interface MainContentProps {
   currentSlide: number;
@@ -40,9 +39,6 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const [isNotesPanelOpen, setIsNotesPanelOpen] = useState(false);
-  const [commentText, setCommentText] = useState("");
-  const comments = mockComments || [];
 
   // ResizeObserverでコンテナサイズを監視
   useEffect(() => {
@@ -69,21 +65,8 @@ const MainContent: React.FC<MainContentProps> = ({
     };
   }, []);
 
-  const handleAddComment = () => {
-    console.log("Adding comment:", commentText);
-    setCommentText("");
-  };
-
-  const toggleNotesPanel = () => {
-    setIsNotesPanelOpen(!isNotesPanelOpen);
-  };
-
-  // 学生ユーザーのレビューモードかどうかの判定
-  const showStudentReviewSection = viewerMode === "review" && userType === "student";
-
   console.log('MainContent: Container size and display settings', {
     containerSize,
-    showStudentReviewSection,
     userType,
     viewerMode
   });
@@ -108,22 +91,6 @@ const MainContent: React.FC<MainContentProps> = ({
           </div>
         </div>
       </div>
-
-      {/* 学生用レビューセクション - 台本表示も含む */}
-      {showStudentReviewSection && (
-        <StudentReviewSection
-          currentSlide={currentSlide}
-          totalSlides={totalSlides}
-          isNotesPanelOpen={isNotesPanelOpen}
-          comments={comments}
-          commentText={commentText}
-          setCommentText={setCommentText}
-          handleAddComment={handleAddComment}
-          toggleNotesPanel={toggleNotesPanel}
-          presenterNotes={presenterNotes}
-          showPresenterNotes={showPresenterNotes}
-        />
-      )}
     </main>
   );
 };

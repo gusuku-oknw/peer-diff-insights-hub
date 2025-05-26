@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import NotesPanel from "../../slide-viewer/panels/NotesPanel";
 import ReviewPanel from "../../slide-viewer/panels/ReviewPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, MessageSquare, X, PanelRightClose, PanelRightOpen, Plus, Send } from "lucide-react";
+import { BookOpen, MessageSquare, X, ChevronRight, ChevronLeft, Plus, Send } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -167,9 +167,9 @@ const ImprovedSidePanel = ({
               title={isCollapsed ? "パネルを展開" : "パネルを折りたたみ"}
             >
               {isCollapsed ? (
-                <PanelRightOpen className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-gray-600`} />
+                <ChevronLeft className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-gray-600`} />
               ) : (
-                <PanelRightClose className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-gray-600`} />
+                <ChevronRight className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-gray-600`} />
               )}
             </Button>
           )}
@@ -301,7 +301,7 @@ const ImprovedSidePanel = ({
           className="h-8 w-8 p-0 mb-4 hover:bg-blue-100 transition-all duration-200 hover:scale-110 bg-blue-50 border border-blue-200"
           title="パネルを展開"
         >
-          <PanelRightOpen className="h-4 w-4 text-blue-600" />
+          <ChevronLeft className="h-4 w-4 text-blue-600" />
         </Button>
         
         {/* Quick access buttons when collapsed */}
@@ -370,7 +370,7 @@ const ImprovedSidePanel = ({
   }
 
   return (
-    <div className="h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-hidden flex flex-col flex-shrink-0 min-w-0 transition-all duration-300 ease-in-out shadow-sm" ref={panelRef}>
+    <div className="w-80 h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-hidden flex flex-col flex-shrink-0 min-w-0 transition-all duration-300 ease-in-out shadow-sm" ref={panelRef}>
       <PanelContent />
     </div>
   );
