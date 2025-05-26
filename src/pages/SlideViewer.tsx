@@ -44,12 +44,16 @@ const SlideViewer = () => {
   // Ensure currentSlide is always a number
   const currentSlideNumber = typeof currentSlide === 'string' ? parseInt(currentSlide, 10) : currentSlide;
   
+  // Determine user type from profile
+  const userType = userProfile?.role === "student" ? "student" : "enterprise";
+  
   // デバッグ用ログを追加
   useEffect(() => {
     console.log('SlideViewer rendered with slides:', slides.length);
     console.log('Current slide:', currentSlideNumber);
     console.log('Available slide IDs:', slides.map(s => s.id));
-  }, [slides, currentSlideNumber]);
+    console.log('User type:', userType);
+  }, [slides, currentSlideNumber, userType]);
   
   const { elapsedTime, toggleFullScreenWithEffects } = usePresentationMode();
   const { handlePreviousSlide, handleNextSlide } = useSlideNavigation({
@@ -114,6 +118,16 @@ const SlideViewer = () => {
   const handleModeChange = (mode: "presentation" | "edit" | "review") => {
     console.log(`Mode change requested: ${mode} (current: ${viewerMode})`);
     
+    // Students cannot access edit mode
+    if (mode === "edit" && userType === "student") {
+      toast({
+        title: "権限がありません",
+        description: "学生ユーザーは編集モードを利用できません",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // 同じモードの場合はスキップ
     if (mode === viewerMode) {
       console.log("Same mode selected, skipping update");
@@ -138,6 +152,15 @@ const SlideViewer = () => {
 
   // Save changes functionality
   const handleSaveChanges = () => {
+    if (userType === "student") {
+      toast({
+        title: "権限がありません",
+        description: "学生ユーザーは変更を保存できません",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     toast({
       title: "変更が保存されました",
       description: "すべての変更が正常に保存されました。",
@@ -186,6 +209,7 @@ const SlideViewer = () => {
             showPresenterNotes={showPresenterNotes}
             presentationStartTime={presentationStartTime}
             displayCount={displayCount}
+            userType={userType}
             onPreviousSlide={handlePreviousSlide}
             onNextSlide={handleNextSlide}
             onZoomChange={handleZoomChange}
@@ -217,7 +241,7 @@ const SlideViewer = () => {
             displayCount={displayCount}
             commentedSlides={commentedSlides}
             mockComments={mockComments}
-            userType={userProfile?.role === "student" ? "student" : "enterprise"}
+            userType={userType}
             onBranchChange={setCurrentBranch}
             onToggleLeftSidebar={toggleLeftSidebar}
             onSlideChange={(slide: number) => useSlideStore.getState().setCurrentSlide(slide)}

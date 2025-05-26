@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ModeSelector from "@/components/slideviewer/toolbar/ModeSelector";
+import ModeSpecificActions from "@/components/slideviewer/toolbar/ModeSpecificActions";
 
 interface MainToolbarProps {
   currentSlide: number;
@@ -30,6 +32,7 @@ interface MainToolbarProps {
   showPresenterNotes: boolean;
   presentationStartTime: number | null;
   displayCount: number;
+  userType: "student" | "enterprise";
   onPreviousSlide: () => void;
   onNextSlide: () => void;
   onZoomChange: (zoom: number) => void;
@@ -51,6 +54,7 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
   showPresenterNotes,
   presentationStartTime,
   displayCount,
+  userType,
   onPreviousSlide,
   onNextSlide,
   onZoomChange,
@@ -75,32 +79,6 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
   const handleZoomOut = () => {
     const newZoom = Math.max(25, zoom - 10);
     onZoomChange(newZoom);
-  };
-
-  const getModeColor = (mode: "presentation" | "edit" | "review") => {
-    switch (mode) {
-      case "presentation":
-        return "bg-blue-500 hover:bg-blue-600 text-white";
-      case "edit":
-        return "bg-green-500 hover:bg-green-600 text-white";
-      case "review":
-        return "bg-purple-500 hover:bg-purple-600 text-white";
-      default:
-        return "bg-gray-100 hover:bg-gray-200 text-gray-700";
-    }
-  };
-
-  const getModeTooltip = (mode: "presentation" | "edit" | "review") => {
-    switch (mode) {
-      case "presentation":
-        return "プレゼンテーションモード - 発表用の画面表示";
-      case "edit":
-        return "編集モード - スライドの内容を編集";
-      case "review":
-        return "レビューモード - コメントやフィードバック";
-      default:
-        return "";
-    }
   };
 
   return (
@@ -171,35 +149,12 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
       </div>
 
       {/* Center section - Mode selector */}
-      <div className="flex items-center gap-1 lg:gap-2 bg-gray-50 rounded-xl p-0.5 lg:p-1 shadow-inner mx-2 lg:mx-4 flex-shrink-0">
-        {(["presentation", "edit", "review"] as const).map((mode) => (
-          <Tooltip key={mode}>
-            <TooltipTrigger asChild>
-              <Button
-                variant={viewerMode === mode ? "default" : "ghost"}
-                size="sm"
-                onClick={() => onModeChange(mode)}
-                className={`mode-button transition-all duration-200 h-7 lg:h-auto text-xs lg:text-sm px-1 lg:px-3 ${
-                  viewerMode === mode 
-                    ? getModeColor(mode) + " shadow-sm" 
-                    : "hover:bg-white hover:shadow-sm text-gray-600"
-                }`}
-              >
-                {mode === "presentation" && <Monitor className="h-3 w-3 lg:h-4 lg:w-4 lg:mr-2" />}
-                {mode === "edit" && <Edit3 className="h-3 w-3 lg:h-4 lg:w-4 lg:mr-2" />}
-                {mode === "review" && <MessageSquare className="h-3 w-3 lg:h-4 lg:w-4 lg:mr-2" />}
-                <span className="hidden lg:inline">
-                  {mode === "presentation" && "プレゼン"}
-                  {mode === "edit" && "編集"}
-                  {mode === "review" && "レビュー"}
-                </span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{getModeTooltip(mode)}</p>
-            </TooltipContent>
-          </Tooltip>
-        ))}
+      <div className="flex items-center mx-2 lg:mx-4 flex-shrink-0">
+        <ModeSelector 
+          currentMode={viewerMode} 
+          onModeChange={onModeChange} 
+          userType={userType}
+        />
       </div>
 
       {/* Right section - Zoom and actions */}
@@ -296,25 +251,16 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
             </TooltipContent>
           </Tooltip>
           
-          {viewerMode === "presentation" ? (
-            <Button 
-              onClick={onStartPresentation} 
-              size="sm"
-              className="action-button bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transition-all duration-200 hover:shadow-lg text-xs lg:text-sm px-2 lg:px-4 h-8 lg:h-auto"
-            >
-              <Play className="h-3 w-3 lg:h-4 lg:w-4 lg:mr-2" />
-              <span className="hidden lg:inline">プレゼン開始</span>
-            </Button>
-          ) : (
-            <Button 
-              onClick={onSaveChanges} 
-              size="sm"
-              className="action-button bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md transition-all duration-200 hover:shadow-lg text-xs lg:text-sm px-2 lg:px-4 h-8 lg:h-auto"
-            >
-              <GitCommitHorizontal className="h-3 w-3 lg:h-4 lg:w-4 lg:mr-2" />
-              <span className="hidden lg:inline">変更保存</span>
-            </Button>
-          )}
+          <ModeSpecificActions
+            mode={viewerMode}
+            displayCount={displayCount}
+            isFullScreen={isFullScreen}
+            showPresenterNotes={showPresenterNotes}
+            userType={userType}
+            onSaveChanges={onSaveChanges}
+            onShowPresenterNotesToggle={onShowPresenterNotesToggle}
+            onStartPresentation={onStartPresentation}
+          />
         </div>
       </div>
     </div>

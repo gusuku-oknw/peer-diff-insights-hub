@@ -8,6 +8,7 @@ interface ModeSpecificActionsProps {
   displayCount: number;
   isFullScreen: boolean;
   showPresenterNotes: boolean;
+  userType: "student" | "enterprise";
   onSaveChanges: () => void;
   onShowPresenterNotesToggle: () => void;
   onStartPresentation: () => void;
@@ -19,6 +20,7 @@ const ModeSpecificActions = ({
   displayCount,
   isFullScreen,
   showPresenterNotes,
+  userType,
   onSaveChanges,
   onShowPresenterNotesToggle,
   onStartPresentation,
@@ -27,6 +29,9 @@ const ModeSpecificActions = ({
   
   switch (mode) {
     case "edit":
+      // Only enterprise users can see edit mode actions
+      if (userType !== "enterprise") return null;
+      
       return (
         <div className="flex items-center space-x-2">
           <Button 
@@ -51,14 +56,17 @@ const ModeSpecificActions = ({
             <Filter className="h-4 w-4" />
             <span className="hidden md:inline">フィルター</span>
           </Button>
-          <Button 
-            variant="default" 
-            size="sm" 
-            className="bg-purple-600 hover:bg-purple-700 text-white p-1 sm:p-2" 
-            onClick={onSendFeedback}
-          >
-            <span className="text-xs sm:text-sm">フィードバック送信</span>
-          </Button>
+          {/* Students can send feedback, enterprises cannot */}
+          {userType === "student" && (
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="bg-purple-600 hover:bg-purple-700 text-white p-1 sm:p-2" 
+              onClick={onSendFeedback}
+            >
+              <span className="text-xs sm:text-sm">フィードバック送信</span>
+            </Button>
+          )}
         </div>
       );
     case "presentation":

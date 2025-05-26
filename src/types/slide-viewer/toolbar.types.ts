@@ -26,6 +26,7 @@ export interface ZoomControlsProps {
 export interface ModeSelectorProps {
   currentMode: ViewerMode;
   onModeChange: (mode: ViewerMode) => void;
+  userType: "student" | "enterprise";
 }
 
 export interface MainLayoutProps {

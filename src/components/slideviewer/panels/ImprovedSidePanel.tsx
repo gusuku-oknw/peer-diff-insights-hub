@@ -11,6 +11,10 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import type { SidePanelProps } from "@/types/slide-viewer/panel.types";
 
+interface ImprovedSidePanelProps extends SidePanelProps {
+  userType: "student" | "enterprise";
+}
+
 const ImprovedSidePanel = ({
   shouldShowNotes,
   shouldShowReviewPanel,
@@ -19,7 +23,8 @@ const ImprovedSidePanel = ({
   presenterNotes,
   isCollapsed = false,
   onToggleCollapse,
-}: SidePanelProps) => {
+  userType,
+}: ImprovedSidePanelProps) => {
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [panelDimensions, setPanelDimensions] = useState({ width: 0, height: 0 });
@@ -84,6 +89,15 @@ const ImprovedSidePanel = ({
 
   // Quick action handlers
   const handleAddComment = () => {
+    if (userType === "enterprise") {
+      toast({
+        title: "権限がありません",
+        description: "企業ユーザーはコメントの閲覧のみ可能です",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     toast({
       title: "コメント追加",
       description: "新しいコメントを追加しました",
@@ -92,6 +106,15 @@ const ImprovedSidePanel = ({
   };
 
   const handleSendReview = () => {
+    if (userType === "enterprise") {
+      toast({
+        title: "権限がありません",
+        description: "企業ユーザーはレビューの閲覧のみ可能です",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     toast({
       title: "レビュー送信",
       description: "レビューを送信しました",
@@ -164,33 +187,38 @@ const ImprovedSidePanel = ({
           )}
         </div>
 
-        {/* Quick action buttons when not very narrow */}
-        {!isVeryNarrow && (
+        {/* Quick action buttons when not very narrow - only show for students in review mode */}
+        {!isVeryNarrow && activeTab === "reviews" && userType === "student" && (
           <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-100">
             <div className="flex items-center space-x-1">
-              {activeTab === "reviews" && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleAddComment}
-                    className="h-7 px-2 text-xs hover:bg-green-100 transition-all duration-200 hover:scale-105 bg-green-50 border border-green-200"
-                  >
-                    <Plus className="h-3 w-3 mr-1 text-green-600" />
-                    <span className="text-green-700 font-medium">追加</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleSendReview}
-                    className="h-7 px-2 text-xs hover:bg-purple-100 transition-all duration-200 hover:scale-105 bg-purple-50 border border-purple-200"
-                  >
-                    <Send className="h-3 w-3 mr-1 text-purple-600" />
-                    <span className="text-purple-700 font-medium">送信</span>
-                  </Button>
-                </>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleAddComment}
+                className="h-7 px-2 text-xs hover:bg-green-100 transition-all duration-200 hover:scale-105 bg-green-50 border border-green-200"
+              >
+                <Plus className="h-3 w-3 mr-1 text-green-600" />
+                <span className="text-green-700 font-medium">追加</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSendReview}
+                className="h-7 px-2 text-xs hover:bg-purple-100 transition-all duration-200 hover:scale-105 bg-purple-50 border border-purple-200"
+              >
+                <Send className="h-3 w-3 mr-1 text-purple-600" />
+                <span className="text-purple-700 font-medium">送信</span>
+              </Button>
             </div>
+            <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full border">
+              スライド {currentSlide}/{totalSlides}
+            </div>
+          </div>
+        )}
+
+        {/* Show slide info for enterprise users or when not in review mode */}
+        {!isVeryNarrow && (activeTab !== "reviews" || userType === "enterprise") && (
+          <div className="flex items-center justify-end px-4 py-2 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-100">
             <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full border">
               スライド {currentSlide}/{totalSlides}
             </div>
@@ -314,27 +342,29 @@ const ImprovedSidePanel = ({
           )}
         </div>
 
-        {/* Quick action buttons when collapsed */}
-        <div className="mt-auto flex flex-col space-y-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 hover:bg-green-100 transition-all duration-200 hover:scale-110 bg-green-50 border border-green-200"
-            title="クイックコメント追加"
-            onClick={handleAddComment}
-          >
-            <Plus className="h-3 w-3 text-green-600" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 hover:bg-purple-100 transition-all duration-200 hover:scale-110 bg-purple-50 border border-purple-200"
-            title="レビュー送信"
-            onClick={handleSendReview}
-          >
-            <Send className="h-3 w-3 text-purple-600" />
-          </Button>
-        </div>
+        {/* Quick action buttons when collapsed - only for students */}
+        {userType === "student" && (
+          <div className="mt-auto flex flex-col space-y-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 hover:bg-green-100 transition-all duration-200 hover:scale-110 bg-green-50 border border-green-200"
+              title="クイックコメント追加"
+              onClick={handleAddComment}
+            >
+              <Plus className="h-3 w-3 text-green-600" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 hover:bg-purple-100 transition-all duration-200 hover:scale-110 bg-purple-50 border border-purple-200"
+              title="レビュー送信"
+              onClick={handleSendReview}
+            >
+              <Send className="h-3 w-3 text-purple-600" />
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
