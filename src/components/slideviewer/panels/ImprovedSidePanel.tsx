@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import NotesPanel from "../../slide-viewer/panels/NotesPanel";
 import SimplifiedReviewPanel from "./SimplifiedReviewPanel";
@@ -61,11 +62,19 @@ const ImprovedSidePanel = ({
     width
   });
   
-  // Update tab when panel visibility changes
+  // FIXED: Prevent unwanted tab resets - only update when panel visibility actually changes
   useEffect(() => {
     const newDefaultTab = getDefaultTab();
-    setActiveTab(newDefaultTab);
-  }, [shouldShowNotes, shouldShowReviewPanel]);
+    // Only change tab if the current tab is no longer valid for the new panel state
+    if (activeTab === "notes" && !shouldShowNotes && shouldShowReviewPanel) {
+      console.log('ImprovedSidePanel: Switching from notes to reviews (notes panel hidden)');
+      setActiveTab("reviews");
+    } else if (activeTab === "reviews" && !shouldShowReviewPanel && shouldShowNotes) {
+      console.log('ImprovedSidePanel: Switching from reviews to notes (review panel hidden)');
+      setActiveTab("notes");
+    }
+    // DO NOT reset tab if both panels are visible - let user control stay
+  }, [shouldShowNotes, shouldShowReviewPanel]); // Removed activeTab from dependencies to prevent loops
   
   // Track panel dimensions
   useEffect(() => {
@@ -111,11 +120,17 @@ const ImprovedSidePanel = ({
   const isNarrow = panelDimensions.width > 0 && panelDimensions.width < 280;
   const isVeryNarrow = panelDimensions.width > 0 && panelDimensions.width < 200;
 
+  // Enhanced tab change handler with strict control
+  const handleTabChange = (newTab: string) => {
+    console.log('ImprovedSidePanel: Manual tab change requested', { from: activeTab, to: newTab });
+    setActiveTab(newTab);
+  };
+
   // Simplified panel content
   const PanelContent = () => (
     <div className="h-full flex flex-col relative z-10">
       {shouldShowNotes && shouldShowReviewPanel ? (
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="h-full flex flex-col">
           <div className={`${isVeryNarrow ? 'px-2 py-1' : 'px-4 py-2'} border-b border-gray-200 flex items-center justify-between flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 relative z-20`}>
             <TabsList className="grid grid-cols-2 flex-1 min-w-0 bg-white shadow-sm">
               <TabsTrigger 
@@ -180,6 +195,8 @@ const ImprovedSidePanel = ({
               panelHeight={panelDimensions.height}
               isNarrow={isNarrow}
               isVeryNarrow={isVeryNarrow}
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
             />
           </TabsContent>
         </Tabs>
@@ -192,6 +209,8 @@ const ImprovedSidePanel = ({
           panelHeight={panelDimensions.height}
           isNarrow={isNarrow}
           isVeryNarrow={isVeryNarrow}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
         />
       ) : shouldShowNotes ? (
         <NotesPanel 

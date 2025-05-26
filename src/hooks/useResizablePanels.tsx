@@ -25,19 +25,22 @@ export const useResizablePanels = ({
 
   // Enhanced mouse up handler
   const handleMouseUp = useCallback(() => {
-    console.log('useResizablePanels: Mouse up event');
+    console.log('useResizablePanels: Mouse up event - ending resize');
     setIsResizing(false);
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
     document.body.style.pointerEvents = '';
   }, []);
 
-  // Enhanced mouse move handler
+  // Enhanced mouse move handler with improved delta calculation
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isResizing) return;
     
+    e.preventDefault();
+    e.stopPropagation();
+    
     const currentPosition = orientation === 'vertical' ? e.clientX : e.clientY;
-    const delta = startPositionRef.current - currentPosition; // Reversed for left handle
+    const delta = startPositionRef.current - currentPosition; // For left handle, reversed delta
     const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidthRef.current + delta));
     
     console.log('useResizablePanels: Mouse move', { 
@@ -45,21 +48,29 @@ export const useResizablePanels = ({
       startPosition: startPositionRef.current,
       delta,
       startWidth: startWidthRef.current,
-      newWidth
+      newWidth,
+      isResizing
     });
     
-    setWidth(newWidth);
-    onWidthChange?.(newWidth);
-  }, [isResizing, minWidth, maxWidth, onWidthChange, orientation]);
+    if (newWidth !== width) {
+      setWidth(newWidth);
+      onWidthChange?.(newWidth);
+    }
+  }, [isResizing, minWidth, maxWidth, onWidthChange, orientation, width]);
 
   // Add event listeners when resizing starts
   useEffect(() => {
     if (isResizing) {
-      console.log('useResizablePanels: Adding mouse event listeners');
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      console.log('useResizablePanels: Adding global mouse event listeners');
+      
+      // Prevent text selection and pointer events during resize
       document.body.style.userSelect = 'none';
       document.body.style.pointerEvents = 'none';
+      document.body.style.cursor = orientation === 'vertical' ? 'col-resize' : 'row-resize';
+      
+      // Add global event listeners
+      document.addEventListener('mousemove', handleMouseMove, { passive: false });
+      document.addEventListener('mouseup', handleMouseUp, { passive: false });
       
       return () => {
         console.log('useResizablePanels: Cleaning up mouse event listeners');
@@ -67,9 +78,10 @@ export const useResizablePanels = ({
         document.removeEventListener('mouseup', handleMouseUp);
         document.body.style.userSelect = '';
         document.body.style.pointerEvents = '';
+        document.body.style.cursor = '';
       };
     }
-  }, [isResizing, handleMouseMove, handleMouseUp]);
+  }, [isResizing, handleMouseMove, handleMouseUp, orientation]);
 
   const ResizeHandle = useCallback(({ className = '', position = 'right' }: { 
     className?: string; 
@@ -87,7 +99,6 @@ export const useResizablePanels = ({
       startWidthRef.current = width;
       
       setIsResizing(true);
-      document.body.style.cursor = orientation === 'vertical' ? 'col-resize' : 'row-resize';
       
       console.log('useResizablePanels: Resize started', { 
         startPosition: currentPos, 
@@ -105,7 +116,7 @@ export const useResizablePanels = ({
             position === 'top' ? 'absolute top-0 left-0 right-0' :
             'absolute bottom-0 left-0 right-0'}
           bg-transparent hover:bg-blue-400 transition-all duration-200 z-50 group
-          ${isResizing ? 'bg-blue-500 shadow-lg' : ''}
+          ${isResizing ? 'bg-blue-500 shadow-lg w-2' : ''}
           ${className}
         `}
         onMouseDown={handleMouseDown}
@@ -126,7 +137,7 @@ export const useResizablePanels = ({
         
         {/* Extended hit area for easier grabbing */}
         <div className={`
-          ${isVertical ? 'w-3 -left-1' : 'h-3 -top-1'}
+          ${isVertical ? 'w-4 -left-1' : 'h-4 -top-1'}
           absolute inset-0 
         `} />
       </div>

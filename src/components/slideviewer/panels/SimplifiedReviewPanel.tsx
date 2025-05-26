@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import ReviewPanelHeader from "./components/ReviewPanelHeader";
 import ReviewPermissionNotice from "./components/ReviewPermissionNotice";
@@ -29,6 +29,8 @@ interface SimplifiedReviewPanelProps {
   panelHeight?: number;
   isNarrow?: boolean;
   isVeryNarrow?: boolean;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
 const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
@@ -36,9 +38,11 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
   totalSlides,
   userType,
   isNarrow = false,
-  isVeryNarrow = false
+  isVeryNarrow = false,
+  activeTab: externalActiveTab,
+  onTabChange: externalOnTabChange
 }) => {
-  const [activeTab, setActiveTab] = useState("review");
+  const [internalActiveTab, setInternalActiveTab] = useState("review");
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState<Comment[]>([
     {
@@ -60,7 +64,17 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
   const { toast } = useToast();
   const canInteract = userType === "student";
 
-  console.log('SimplifiedReviewPanel render:', { activeTab, currentSlide, userType, canInteract });
+  // Use external tab control if provided, otherwise use internal
+  const activeTab = externalActiveTab !== undefined ? externalActiveTab : internalActiveTab;
+  const handleTabChange = externalOnTabChange || setInternalActiveTab;
+
+  console.log('SimplifiedReviewPanel render:', { 
+    activeTab, 
+    externalActiveTab, 
+    currentSlide, 
+    userType, 
+    canInteract 
+  });
 
   // Calculate completion percentage
   const completionPercentage = useMemo(() => {
@@ -69,8 +83,21 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
     return totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0;
   }, [checklistState]);
 
-  // Enhanced checkbox change handler that prevents tab transitions
-  const handleCheckboxChange = (categoryKey: string, itemId: string, checked: boolean) => {
+  // Debounced toast to prevent excessive notifications
+  const debouncedToast = useCallback((message: string, description: string) => {
+    // Use setTimeout to delay toast and prevent it from interfering with tab state
+    setTimeout(() => {
+      toast({
+        title: message,
+        description: description,
+        variant: "default",
+        duration: 2000 // Shorter duration
+      });
+    }, 100);
+  }, [toast]);
+
+  // FIXED: Enhanced checkbox change handler that prevents tab transitions
+  const handleCheckboxChange = useCallback((categoryKey: string, itemId: string, checked: boolean) => {
     console.log('SimplifiedReviewPanel: Enhanced handleCheckboxChange called', { 
       categoryKey, 
       itemId, 
@@ -96,21 +123,19 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
       return newState;
     });
 
-    // Show toast notification
+    // Show toast notification with debounce to prevent state interference
     if (checked) {
-      console.log('SimplifiedReviewPanel: Showing completion toast');
-      toast({
-        title: "チェック完了",
-        description: `${checklistCategories[categoryKey as keyof typeof checklistCategories]?.label}の項目をチェックしました`,
-        variant: "default"
-      });
+      console.log('SimplifiedReviewPanel: Showing completion toast (debounced)');
+      debouncedToast(
+        "チェック完了",
+        `${checklistCategories[categoryKey as keyof typeof checklistCategories]?.label}の項目をチェックしました`
+      );
     }
 
-    // CRITICAL: Do NOT change activeTab here - this was causing the unwanted transitions
-    console.log('SimplifiedReviewPanel: Checkbox change completed, activeTab remains unchanged:', activeTab);
-  };
+    console.log('SimplifiedReviewPanel: Checkbox change completed, activeTab should remain:', activeTab);
+  }, [canInteract, activeTab, debouncedToast]);
 
-  const handleSubmitComment = () => {
+  const handleSubmitComment = useCallback(() => {
     console.log('SimplifiedReviewPanel: handleSubmitComment called', { canInteract, newComment });
     
     if (!canInteract) {
@@ -132,19 +157,20 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
       };
       setComments([...comments, newCommentObj]);
       setNewComment("");
-      toast({
-        title: "コメントを投稿しました",
-        description: "レビューが正常に追加されました",
-        variant: "default"
-      });
+      
+      // Debounced toast for comments too
+      debouncedToast(
+        "コメントを投稿しました",
+        "レビューが正常に追加されました"
+      );
     }
-  };
+  }, [canInteract, newComment, comments, debouncedToast, toast]);
 
   // Enhanced tab change handler with explicit logging
-  const handleTabChange = (newTab: string) => {
+  const handleExplicitTabChange = useCallback((newTab: string) => {
     console.log('SimplifiedReviewPanel: Explicit tab change requested', { from: activeTab, to: newTab });
-    setActiveTab(newTab);
-  };
+    handleTabChange(newTab);
+  }, [activeTab, handleTabChange]);
 
   return (
     <div className="h-full bg-white flex flex-col">
@@ -164,7 +190,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
         {canInteract && !isVeryNarrow ? (
           <SimplifiedReviewTabs
             activeTab={activeTab}
-            onTabChange={handleTabChange}
+            onTabChange={handleExplicitTabChange}
             canInteract={canInteract}
             comments={comments}
             checklistCategories={checklistCategories}
