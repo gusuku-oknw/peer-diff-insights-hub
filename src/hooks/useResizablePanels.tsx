@@ -65,23 +65,25 @@ export const useResizablePanels = ({
   const ResizeHandle = useCallback(({ className = '', position = 'right' }: { 
     className?: string; 
     position?: 'left' | 'right' | 'top' | 'bottom';
-  }) => (
-    <div
-      ref={handleRef}
-      className={`
-        ${orientation === 'vertical' ? 'w-1 cursor-col-resize' : 'h-1 cursor-row-resize'}
-        ${position === 'right' ? 'absolute right-0 top-0 bottom-0' :
-          position === 'left' ? 'absolute left-0 top-0 bottom-0' :
-          position === 'top' ? 'absolute top-0 left-0 right-0' :
-          'absolute bottom-0 left-0 right-0'}
-        bg-gray-300 hover:bg-blue-400 transition-colors duration-200 z-10
-        ${isResizing ? 'bg-blue-500' : ''}
-        ${className}
-      `}
-      onMouseDown={handleMouseDown}
-      title={orientation === 'vertical' ? 'サイズを調整' : '高さを調整'}
-    />
-  ), [handleMouseDown, isResizing, orientation]);
+  }) => {
+    return (
+      <div
+        ref={handleRef}
+        className={`
+          ${orientation === 'vertical' ? 'w-1 cursor-col-resize' : 'h-1 cursor-row-resize'}
+          ${position === 'right' ? 'absolute right-0 top-0 bottom-0' :
+            position === 'left' ? 'absolute left-0 top-0 bottom-0' :
+            position === 'top' ? 'absolute top-0 left-0 right-0' :
+            'absolute bottom-0 left-0 right-0'}
+          bg-gray-300 hover:bg-blue-400 transition-colors duration-200 z-10
+          ${isResizing ? 'bg-blue-500' : ''}
+          ${className}
+        `}
+        onMouseDown={handleMouseDown}
+        title={orientation === 'vertical' ? 'サイズを調整' : '高さを調整'}
+      />
+    );
+  }, [handleMouseDown, isResizing, orientation]);
 
   return {
     width,
