@@ -1,7 +1,7 @@
 
 import type { StateCreator } from 'zustand';
 import type { SlideStore } from './types';
-import type { SlideElement } from '@/types/slide-viewer/slide.types';
+import type { SlideElement } from '@/types/slide.types';
 
 export interface ElementsSlice {
   selectedElementId: string | null;

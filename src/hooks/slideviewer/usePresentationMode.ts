@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useEffect } from "react";
-import { useSlideStore } from "@/stores/slideStore";
+import { useSlideStore } from "@/stores/slide-store";
 
 export const usePresentationMode = () => {
   const isFullScreen = useSlideStore(state => state.isFullScreen);

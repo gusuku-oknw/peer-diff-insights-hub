@@ -10,10 +10,27 @@ import EditSidebar from "../editor/EditSidebar";
 import { Button } from "@/components/ui/button";
 import { PanelRightOpen } from "lucide-react";
 import { useSlideStore } from "@/stores/slide-store";
-import type { MainLayoutProps } from "@/types/slide-viewer/toolbar.types";
+import type { UserRole } from "@/types/common.types";
+import type { ViewerMode } from "@/types/slide.types";
 
-interface ExtendedMainLayoutProps extends MainLayoutProps {
+interface MainLayoutProps {
+  currentBranch: string;
+  branches: string[];
+  commitHistory: any[];
+  currentSlide: number;
+  totalSlides: number;
+  zoom: number;
+  viewerMode: ViewerMode;
+  showPresenterNotes: boolean;
+  presentationStartTime: Date | null;
+  presenterNotes: Record<number, string>;
+  elapsedTime: number;
+  displayCount: number;
+  commentedSlides: number[];
+  mockComments: any[];
   userType: "student" | "enterprise";
+  onBranchChange: (branch: string) => void;
+  onSlideChange: (slide: number) => void;
 }
 
 const MainLayout = ({
@@ -34,7 +51,7 @@ const MainLayout = ({
   userType,
   onBranchChange,
   onSlideChange,
-}: ExtendedMainLayoutProps) => {
+}: MainLayoutProps) => {
   // Use layout state from store
   const {
     leftSidebarWidth,

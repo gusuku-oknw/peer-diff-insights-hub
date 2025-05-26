@@ -5,10 +5,11 @@ import { StateCreator } from 'zustand';
 import { SlideStore } from './types';
 import { createNavigationSlice } from './navigation.slice';
 import { createElementsSlice } from './elements.slice';
-import { createPresentationSlice, ViewerMode } from './presentation.slice';
+import { createPresentationSlice } from './presentation.slice';
 import { createLayoutSlice } from './layout.slice';
 import { createPPTXImportSlice } from './createPPTXImport';
 import { createSampleSlides } from './createSampleSlides';
+import type { ViewerMode } from '@/types/slide.types';
 
 // スライドストアの作成
 const createSlideStore: StateCreator<SlideStore> = (set, get, api) => {

@@ -1,6 +1,6 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useSlideStore } from "@/stores/slideStore";
+import { useSlideStore } from "@/stores/slide-store";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Plus, MoreVertical, Info, Star, FileText, BarChart3, GripVertical } from "lucide-react";

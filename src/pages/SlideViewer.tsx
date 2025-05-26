@@ -9,6 +9,7 @@ import { useSlideStore } from "@/stores/slide-store";
 import useSlideNavigation from "@/hooks/slideviewer/useSlideNavigation";
 import usePresentationMode from "@/hooks/slideviewer/usePresentationMode";
 import { useIsMobile } from "@/hooks/use-mobile";
+import type { ViewerMode } from "@/types/slide.types";
 
 // Define commented slides for student progress tracking
 const commentedSlides = [1, 2]; // Slides where the current student has already commented
@@ -152,7 +153,7 @@ const SlideViewer = () => {
   };
 
   // モード切替をデバウンスなしで即時適用するように変更
-  const handleModeChange = (mode: "presentation" | "edit" | "review") => {
+  const handleModeChange = (mode: ViewerMode) => {
     console.log(`Mode change requested: ${mode} (current: ${viewerMode}) for user type: ${userType}`);
     
     // Students cannot access edit mode

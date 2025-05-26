@@ -1,5 +1,5 @@
 
-import type { Slide } from '@/types/slide-viewer/slide.types';
+import type { Slide } from '@/types/slide.types';
 import type { NavigationSlice } from './navigation.slice';
 import type { PresentationSlice } from './presentation.slice';
 import type { ElementsSlice } from './elements.slice';

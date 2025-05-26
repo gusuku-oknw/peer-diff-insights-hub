@@ -1,7 +1,10 @@
 
+// Unified slide types - consolidating from multiple locations
+export type SlideElementType = 'text' | 'image' | 'shape' | 'chart';
+
 export interface SlideElement {
   id: string;
-  type: 'text' | 'image' | 'shape' | 'chart';
+  type: SlideElementType;
   position: {
     x: number;
     y: number;
@@ -17,14 +20,16 @@ export interface SlideElement {
 
 export interface Slide {
   id: number;
-  title: string;
-  content: string;
+  title?: string;
+  content?: string;
   notes: string;
   elements: SlideElement[];
   thumbnail?: string;
   createdAt?: string;
   updatedAt?: string;
 }
+
+export type ViewerMode = "presentation" | "edit" | "review";
 
 export interface SlideNavigationState {
   currentSlide: number;
