@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import LeftSidebar from "../../slideviewer/layout/LeftSidebar";
 import MainContent from "../../slideviewer/layout/MainContent";
@@ -37,13 +38,16 @@ const MainLayout = ({
   const [thumbnailsHeight, setThumbnailsHeight] = useState(128);
   const [isOverallReviewOpen, setIsOverallReviewOpen] = useState(false);
   
-  // Determine when to show panels based on mode and necessity
+  // Improved logic for determining when to show panels
   const shouldShowNotes = (viewerMode === "presentation" && showPresenterNotes) || 
                          (viewerMode === "review" && showPresenterNotes);
   const shouldShowReviewPanel = viewerMode === "review";
   
-  // Auto-hide right panel when it's not needed
-  const shouldShowRightPanel = shouldShowNotes || shouldShowReviewPanel;
+  // Determine if right panel should be displayed at all
+  const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
+  
+  // Hide right panel completely in fullscreen presentation mode
+  const hideRightPanelCompletely = (viewerMode === "presentation" && isFullScreen) || !shouldDisplayRightPanel;
 
   return (
     <div className="flex h-full bg-gray-50 relative">
@@ -83,7 +87,7 @@ const MainLayout = ({
               commentedSlides={commentedSlides}
               mockComments={mockComments}
               userType={userType}
-              rightPanelCollapsed={rightPanelCollapsed || !shouldShowRightPanel}
+              rightPanelCollapsed={hideRightPanelCompletely ? true : rightPanelCollapsed}
               onSlideChange={onSlideChange}
             />
           </div>
@@ -103,8 +107,8 @@ const MainLayout = ({
         </div>
       </div>
 
-      {/* Right Panel - only show when needed and not in fullscreen presentation */}
-      {shouldShowRightPanel && !(viewerMode === "presentation" && isFullScreen) && (
+      {/* Right Panel - conditionally rendered instead of just hidden */}
+      {!hideRightPanelCompletely && (
         <div className={`transition-all duration-300 ease-in-out ${rightPanelCollapsed ? 'w-12' : 'w-80'} flex-shrink-0`}>
           <ImprovedSidePanel
             shouldShowNotes={shouldShowNotes}

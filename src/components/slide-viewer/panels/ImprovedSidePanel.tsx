@@ -67,10 +67,11 @@ const ImprovedSidePanel = ({
     };
   }, []);
   
-  // Don't display panel if neither notes nor review panel should be shown
+  // Early return if panel shouldn't be displayed at all
   const shouldDisplay = shouldShowNotes || shouldShowReviewPanel;
   
   if (!shouldDisplay) {
+    console.log('ImprovedSidePanel: Not displaying panel - no content to show');
     return null;
   }
 

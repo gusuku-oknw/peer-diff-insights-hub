@@ -609,7 +609,7 @@ const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get
     slides: createSampleSlides(),
     currentSlide: 1,
     zoom: 100,
-    viewerMode: "edit" as ViewerMode,
+    viewerMode: "presentation" as ViewerMode, // Default to presentation for better student experience
     isFullScreen: false,
     leftSidebarOpen: false,
     showPresenterNotes: false,
@@ -748,7 +748,7 @@ const createSlideStore: StateCreator<SlideStore, [], [], SlideStore> = (set, get
   };
 };
 
-// Create the slide store with proper types
+// Create the slide store with proper types and enhanced persistence
 export const useSlideStore = create<SlideStore>()(
   persist(
     (set, get, api) => {
@@ -757,14 +757,36 @@ export const useSlideStore = create<SlideStore>()(
     },
     {
       name: 'slide-storage',
-      // Only persist certain parts of the state
+      // Expand persistence to include viewerMode and apply student filtering
       partialize: (state) => ({ 
         slides: state.slides, 
         currentSlide: state.currentSlide,
         zoom: state.zoom,
+        viewerMode: state.viewerMode, // Now persistent
+        showPresenterNotes: state.showPresenterNotes,
         isPPTXImported: state.isPPTXImported,
         pptxFilename: state.pptxFilename
       }),
+      // Apply student account filtering on rehydration
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error('Failed to rehydrate slide store:', error);
+          return;
+        }
+        
+        if (state) {
+          console.log('Slide store rehydrated with slides:', state.slides?.length || 0);
+          
+          // Check if we're in a student context and filter invalid modes
+          // This will be enhanced when we have proper user context
+          if (state.viewerMode === "edit") {
+            // For now, default to presentation if edit mode is persisted
+            // This will be properly handled when user context is available
+            state.viewerMode = "presentation";
+            console.log('Converted edit mode to presentation for compatibility');
+          }
+        }
+      },
     }
   )
 );

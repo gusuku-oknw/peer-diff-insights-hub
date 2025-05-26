@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,13 +46,23 @@ const SlideViewer = () => {
   // Determine user type from profile
   const userType = userProfile?.role === "student" ? "student" : "enterprise";
   
+  // Initialize proper mode for student accounts
+  useEffect(() => {
+    // If student is in edit mode, switch to presentation mode
+    if (userType === "student" && viewerMode === "edit") {
+      console.log("Student detected in edit mode, switching to presentation");
+      setViewerMode("presentation");
+    }
+  }, [userType, viewerMode, setViewerMode]);
+  
   // デバッグ用ログを追加
   useEffect(() => {
     console.log('SlideViewer rendered with slides:', slides.length);
     console.log('Current slide:', currentSlideNumber);
     console.log('Available slide IDs:', slides.map(s => s.id));
     console.log('User type:', userType);
-  }, [slides, currentSlideNumber, userType]);
+    console.log('Viewer mode:', viewerMode);
+  }, [slides, currentSlideNumber, userType, viewerMode]);
   
   const { elapsedTime, toggleFullScreenWithEffects } = usePresentationMode();
   const { handlePreviousSlide, handleNextSlide } = useSlideNavigation({
