@@ -1,11 +1,12 @@
+
 import React, { useState, useMemo } from "react";
 import { MessageSquare, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import ReviewPanelHeader from "../slideviewer/panels/components/ReviewPanelHeader";
-import ReviewPermissionNotice from "../slideviewer/panels/components/ReviewPermissionNotice";
+import ReviewPanelHeader from "./components/ReviewPanelHeader";
+import ReviewPermissionNotice from "./components/ReviewPermissionNotice";
 import ReviewScriptSection from "./components/ReviewScriptSection";
 import ReviewPanelContent from "./components/ReviewPanelContent";
-import ReviewCommentInput from "../slideviewer/panels/components/ReviewCommentInput";
+import ReviewCommentInput from "./components/ReviewCommentInput";
 
 interface ReviewPanelProps {
   currentSlide: number;

@@ -11,11 +11,15 @@ import {
 } from "lucide-react";
 
 interface Comment {
-  id: string;
-  content: string;
-  category: string;
-  timestamp: Date;
-  resolved: boolean;
+  id: string | number;
+  text?: string;
+  content?: string;
+  category?: string;
+  timestamp: string | Date;
+  resolved?: boolean;
+  status?: string;
+  rating?: string;
+  reviewer?: string;
 }
 
 interface ReviewCommentsListProps {
@@ -27,7 +31,10 @@ const ReviewCommentsList: React.FC<ReviewCommentsListProps> = ({
   comments,
   checklistCategories
 }) => {
-  const formatTimestamp = (timestamp: Date) => {
+  const formatTimestamp = (timestamp: string | Date) => {
+    if (typeof timestamp === 'string') {
+      return timestamp;
+    }
     return timestamp.toLocaleDateString('ja-JP', {
       month: 'short',
       day: 'numeric',
@@ -49,8 +56,9 @@ const ReviewCommentsList: React.FC<ReviewCommentsListProps> = ({
       {comments && comments.length > 0 ? (
         <div className="p-4 space-y-4">
           {comments.map((comment) => {
-            const categoryInfo = getCategoryInfo(comment.category);
+            const categoryInfo = getCategoryInfo(comment.category || 'general');
             const IconComponent = categoryInfo.icon;
+            const commentText = comment.text || comment.content || '';
             
             return (
               <div 
@@ -73,8 +81,14 @@ const ReviewCommentsList: React.FC<ReviewCommentsListProps> = ({
                 </div>
                 
                 <p className="text-sm text-gray-700 mb-3 break-words">
-                  {comment.content}
+                  {commentText}
                 </p>
+                
+                {comment.reviewer && (
+                  <div className="text-xs text-gray-600 mb-2">
+                    - {comment.reviewer}
+                  </div>
+                )}
                 
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
@@ -82,7 +96,7 @@ const ReviewCommentsList: React.FC<ReviewCommentsListProps> = ({
                       <ThumbsUp className="h-4 w-4 mr-1" />
                       <span className="text-xs">同意</span>
                     </Button>
-                    {comment.resolved && (
+                    {(comment.resolved || comment.status === 'completed') && (
                       <Badge variant="outline" className="border-green-500 text-green-700 text-xs">
                         <CheckCircle className="w-3 h-3 mr-1" /> 
                         解決済み

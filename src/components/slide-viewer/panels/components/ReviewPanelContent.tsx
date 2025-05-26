@@ -4,8 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, BarChart4, Star, Clipboard } from "lucide-react";
 import ReviewCommentsList from "../../../slideviewer/panels/components/ReviewCommentsList";
-import ReviewChecklistTabs from "../../ReviewChecklistTabs";
-import AIReviewSummary from "../../AIReviewSummary";
+import ReviewChecklistTabs from "../ReviewChecklistTabs";
+import AIReviewSummary from "../AIReviewSummary";
 import ReviewSummaryTab from "./ReviewSummaryTab";
 
 interface ReviewPanelContentProps {
@@ -57,13 +57,8 @@ const ReviewPanelContent: React.FC<ReviewPanelContentProps> = ({
       
       <TabsContent value="reviews" className="flex-grow p-0 m-0 overflow-hidden">
         <ReviewCommentsList
-          reviews={reviews}
-          isVeryNarrow={isVeryNarrow}
-          isExtremelyNarrow={isExtremelyNarrow}
-          isShort={isShort}
-          canInteract={canInteract}
-          selectedReview={selectedReview}
-          onSelectReview={setSelectedReview}
+          comments={reviews}
+          checklistCategories={{}}
         />
       </TabsContent>
 
