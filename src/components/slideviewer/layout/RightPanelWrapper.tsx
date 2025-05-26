@@ -26,17 +26,22 @@ export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
 }) => {
   const { rightSidebarWidth, rightPanelHidden, setRightSidebarWidth, setRightPanelHidden } = useSlideStore();
 
-  // 右パネル表示ロジック - 学生はメモ機能を利用不可
+  // Simplified panel display logic
   const shouldShowNotes = userType === "enterprise" && 
                          ((viewerMode === "presentation" && showPresenterNotes) || 
                           (viewerMode === "review" && showPresenterNotes));
+  
+  // Review panel is available for both student and enterprise users in review mode
   const shouldShowReviewPanel = viewerMode === "review";
+  
+  // Panel should display if either notes or review panel should be shown
   const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
   
+  // Hide panel completely in fullscreen presentation mode or when no content to show
   const hideRightPanelCompletely = (viewerMode === "presentation" && isFullScreen) || 
                                   !shouldDisplayRightPanel;
 
-  if (hideRightPanelCompletely || !shouldDisplayRightPanel || rightPanelHidden) {
+  if (hideRightPanelCompletely || rightPanelHidden) {
     return null;
   }
 
