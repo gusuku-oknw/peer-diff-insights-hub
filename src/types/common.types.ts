@@ -1,6 +1,7 @@
 
 // Common types used across the application
 export type UserRole = "student" | "business" | "debugger" | "guest";
+export type ViewerMode = "presentation" | "edit" | "review";
 
 export interface User {
   id: string;

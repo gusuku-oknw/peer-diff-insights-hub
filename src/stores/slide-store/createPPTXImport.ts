@@ -1,6 +1,6 @@
 
 import { StateCreator } from 'zustand';
-import { Slide } from '@/types/slide-viewer/slide.types';
+import { Slide } from '@/types/slide.types';
 import { SlideStore } from './types';
 
 export interface PPTXImportSlice {

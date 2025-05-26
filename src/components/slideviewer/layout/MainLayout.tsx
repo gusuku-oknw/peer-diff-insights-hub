@@ -21,6 +21,7 @@ interface MainLayoutProps {
   totalSlides: number;
   zoom: number;
   viewerMode: ViewerMode;
+  leftSidebarOpen: boolean;
   showPresenterNotes: boolean;
   presentationStartTime: Date | null;
   presenterNotes: Record<number, string>;
@@ -31,6 +32,7 @@ interface MainLayoutProps {
   userType: "student" | "enterprise";
   onBranchChange: (branch: string) => void;
   onSlideChange: (slide: number) => void;
+  onToggleLeftSidebar: () => void;
 }
 
 const MainLayout = ({
@@ -41,6 +43,7 @@ const MainLayout = ({
   totalSlides,
   zoom,
   viewerMode,
+  leftSidebarOpen,
   showPresenterNotes,
   presentationStartTime,
   presenterNotes,
@@ -51,6 +54,7 @@ const MainLayout = ({
   userType,
   onBranchChange,
   onSlideChange,
+  onToggleLeftSidebar,
 }: MainLayoutProps) => {
   // Use layout state from store
   const {
@@ -58,14 +62,12 @@ const MainLayout = ({
     rightSidebarWidth,
     editSidebarWidth,
     thumbnailsHeight,
-    leftSidebarOpen,
     rightPanelHidden,
     isFullScreen,
     setLeftSidebarWidth,
     setRightSidebarWidth,
     setEditSidebarWidth,
     setThumbnailsHeight,
-    setLeftSidebarOpen,
     setRightPanelHidden,
     getSlideThumbnailsWidth
   } = useSlideStore();
@@ -73,14 +75,12 @@ const MainLayout = ({
   // 右パネル表示ロジック - 学生もレビューモードでアクセス可能に修正
   const shouldShowNotes = (viewerMode === "presentation" && showPresenterNotes) || 
                          (viewerMode === "review" && showPresenterNotes);
-  const shouldShowReviewPanel = viewerMode === "review"; // 修正: 学生もレビューパネルにアクセス可能
+  const shouldShowReviewPanel = viewerMode === "review";
   const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
   
-  // フルスクリーンプレゼンテーション時は右パネルを完全に非表示
   const hideRightPanelCompletely = (viewerMode === "presentation" && isFullScreen) || 
                                   !shouldDisplayRightPanel;
 
-  // Calculate dynamic content width for thumbnails
   const thumbnailsWidth = getSlideThumbnailsWidth();
 
   console.log('MainLayout render:', {
@@ -112,7 +112,7 @@ const MainLayout = ({
             commitHistory={commitHistory}
             leftSidebarOpen={leftSidebarOpen}
             onBranchChange={onBranchChange}
-            onToggleLeftSidebar={() => setLeftSidebarOpen(!leftSidebarOpen)}
+            onToggleLeftSidebar={onToggleLeftSidebar}
           />
         </ResizablePanel>
       )}

@@ -18,7 +18,10 @@ export interface PresentationSlice {
   setIsFullScreen: (isFullScreen: boolean) => void;
   togglePresenterNotes: () => void;
   toggleLeftSidebar: () => void;
+  toggleFullScreen: () => void;
+  setLeftSidebarOpen: (open: boolean) => void;
   setPresentationStartTime: (time: number | null) => void;
+  startPresentation: () => void;
   setDisplayCount: (count: number) => void;
   generateThumbnails: () => void;
 }
@@ -65,8 +68,20 @@ export const createPresentationSlice: StateCreator<
     set((state) => ({ leftSidebarOpen: !state.leftSidebarOpen }));
   },
   
+  toggleFullScreen: () => {
+    set((state) => ({ isFullScreen: !state.isFullScreen }));
+  },
+  
+  setLeftSidebarOpen: (open: boolean) => {
+    set({ leftSidebarOpen: open });
+  },
+  
   setPresentationStartTime: (time: number | null) => {
     set({ presentationStartTime: time });
+  },
+  
+  startPresentation: () => {
+    set({ presentationStartTime: Date.now() });
   },
   
   setDisplayCount: (count: number) => {
