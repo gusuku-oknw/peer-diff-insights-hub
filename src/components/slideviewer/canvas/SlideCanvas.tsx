@@ -20,7 +20,6 @@ const SlideCanvas = ({
   console.log(`Rendering SlideCanvas - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Editable: ${editable}, Type: ${userType}`);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
   const slides = useSlideStore(state => state.slides);
   const updateElement = useSlideStore(state => state.updateElement);
   const [instanceId] = useState(() => Math.random().toString(36).substring(2, 9));
@@ -94,19 +93,10 @@ const SlideCanvas = ({
     instanceId
   });
   
-  // キャンバスコンテナのスタイル
-  const containerStyle = useMemo(() => ({
-    position: 'relative' as const,
-    transformStyle: 'preserve-3d' as const,
-    backfaceVisibility: 'hidden' as const,
-    perspective: '1000px' as const,
-    imageRendering: 'auto' as const
-  }), []);
-  
   // スライドデータが存在しない場合の表示
   if (!slides || slides.length === 0) {
     return (
-      <div className="modern-canvas-container flex items-center justify-center w-full h-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="text-center p-8 bg-white rounded-xl shadow-lg border border-gray-200">
           <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
             <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,18 +116,16 @@ const SlideCanvas = ({
   }
   
   return (
-    <div className="modern-canvas-container flex items-center justify-center w-full h-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+    <div className="slide-canvas-container w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
       <div 
-        ref={canvasContainerRef} 
-        className="canvas-wrapper will-change-transform bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
-        style={containerStyle}
+        className="canvas-wrapper bg-white rounded-xl shadow-lg border border-gray-200"
         data-mode={editable ? "edit" : "view"}
         data-instance={instanceId}
         data-slide={currentSlide}
       >
         <canvas 
           ref={canvasRef} 
-          className="fabric-canvas block"
+          className="fabric-canvas block rounded-xl"
           data-testid="fabric-canvas"
           data-editable={editable ? "true" : "false"}
           data-slide={currentSlide}
@@ -149,7 +137,7 @@ const SlideCanvas = ({
         
         {/* Grid overlay for edit mode */}
         {editable && (
-          <div className="absolute inset-0 pointer-events-none opacity-10">
+          <div className="absolute inset-0 pointer-events-none opacity-10 rounded-xl overflow-hidden">
             <div className="grid-pattern w-full h-full"></div>
           </div>
         )}
@@ -160,7 +148,7 @@ const SlideCanvas = ({
 
 // 改良されたローディングインジケーター
 const CanvasLoadingIndicator = () => (
-  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 z-10 backdrop-blur-sm">
+  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 z-10 backdrop-blur-sm rounded-xl">
     <div className="flex flex-col items-center">
       <div className="relative">
         <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
@@ -173,7 +161,7 @@ const CanvasLoadingIndicator = () => (
 
 // 改良されたエラー表示
 const CanvasErrorDisplay = ({ error }: { error: string }) => (
-  <div className="absolute inset-0 flex items-center justify-center bg-red-50 bg-opacity-95 z-10 backdrop-blur-sm">
+  <div className="absolute inset-0 flex items-center justify-center bg-red-50 bg-opacity-95 z-10 backdrop-blur-sm rounded-xl">
     <div className="flex flex-col items-center p-6 bg-white rounded-xl shadow-lg border border-red-200">
       <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
         <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

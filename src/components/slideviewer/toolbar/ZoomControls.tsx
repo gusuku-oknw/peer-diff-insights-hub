@@ -11,12 +11,11 @@ interface ZoomControlsProps {
 }
 
 const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
-  // Ensure zoom has a valid default value
-  const currentZoom = zoom || 100;
+  // 確実に100をデフォルト値とする
+  const currentZoom = typeof zoom === 'number' && zoom > 0 ? zoom : 100;
   
   console.log(`Rendering ZoomControls - Current zoom: ${currentZoom}%`);
   
-  // プリセットズームレベルをメモ化
   const zoomPresets = useMemo(() => [
     { label: "25%", value: 25 },
     { label: "50%", value: 50 },
@@ -27,39 +26,31 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
     { label: "200%", value: 200 },
   ], []);
   
-  // バウンド付きズーム変更ハンドラをメモ化
   const handleZoomChange = useCallback((newZoom: number) => {
-    // Ensure zoom stays between 25% and 200%
     const boundedZoom = Math.min(Math.max(newZoom, 25), 200);
     
-    // 変更がない場合は処理をスキップ
     if (boundedZoom === currentZoom) return;
     
-    // 即座に変更を適用
+    console.log(`Zoom changing from ${currentZoom}% to ${boundedZoom}%`);
     onZoomChange(boundedZoom);
   }, [currentZoom, onZoomChange]);
 
-  // Increment zoom by 10%
   const incrementZoom = useCallback(() => {
     handleZoomChange(currentZoom + 10);
   }, [currentZoom, handleZoomChange]);
 
-  // Decrement zoom by 10%
   const decrementZoom = useCallback(() => {
     handleZoomChange(currentZoom - 10);
   }, [currentZoom, handleZoomChange]);
   
-  // Reset zoom to 100%
   const resetZoom = useCallback(() => {
     handleZoomChange(100);
   }, [handleZoomChange]);
 
-  // スライダー変更ハンドラ
   const handleSliderChange = useCallback((value: number[]) => {
     handleZoomChange(value[0]);
   }, [handleZoomChange]);
 
-  // ドロップダウンメニュー項目をメモ化
   const dropdownItems = useMemo(() => (
     zoomPresets.map(preset => (
       <DropdownMenuItem 
@@ -141,8 +132,8 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
   );
 };
 
-// メモ化を最適化
 export default memo(ZoomControls, (prevProps, nextProps) => {
-  // ズームが変わった時だけ再レンダリング
-  return (prevProps.zoom || 100) === (nextProps.zoom || 100);
+  const prevZoom = typeof prevProps.zoom === 'number' && prevProps.zoom > 0 ? prevProps.zoom : 100;
+  const nextZoom = typeof nextProps.zoom === 'number' && nextProps.zoom > 0 ? nextProps.zoom : 100;
+  return prevZoom === nextZoom;
 });
