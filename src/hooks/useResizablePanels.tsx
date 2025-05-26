@@ -1,5 +1,6 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import ResizeHandle from '@/components/ui/ResizeHandle';
 
 interface UseResizablePanelsProps {
   initialWidth?: number;
@@ -83,14 +84,12 @@ export const useResizablePanels = ({
     }
   }, [isResizing, handleMouseMove, handleMouseUp, orientation]);
 
-  const ResizeHandle = useCallback(({ className = '', position = 'right' }: { 
+  const createResizeHandle = useCallback(({ className = '', position = 'right' }: { 
     className?: string; 
     position?: 'left' | 'right' | 'top' | 'bottom';
   }) => {
-    const isVertical = orientation === 'vertical';
-    
     const handleMouseDown = (e: React.MouseEvent) => {
-      console.log('useResizablePanels: Mouse down on resize handle', { position, isVertical });
+      console.log('useResizablePanels: Mouse down on resize handle', { position, isVertical: orientation === 'vertical' });
       e.preventDefault();
       e.stopPropagation();
       
@@ -108,46 +107,20 @@ export const useResizablePanels = ({
     };
     
     return (
-      <div
-        className={`
-          ${isVertical ? 'w-1 cursor-col-resize hover:w-2' : 'h-1 cursor-row-resize hover:h-2'}
-          ${position === 'right' ? 'absolute right-0 top-0 bottom-0' :
-            position === 'left' ? 'absolute left-0 top-0 bottom-0' :
-            position === 'top' ? 'absolute top-0 left-0 right-0' :
-            'absolute bottom-0 left-0 right-0'}
-          bg-transparent hover:bg-blue-400 transition-all duration-200 z-50 group
-          ${isResizing ? 'bg-blue-500 shadow-lg w-2' : ''}
-          ${className}
-        `}
+      <ResizeHandle
+        className={className}
+        position={position}
+        orientation={orientation}
+        isResizing={isResizing}
         onMouseDown={handleMouseDown}
-        title={orientation === 'vertical' ? 'ドラッグして幅を調整' : 'ドラッグして高さを調整'}
-      >
-        {/* Visual grip indicator */}
-        <div className={`
-          ${isVertical ? 'w-full h-8 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2' : 'h-full w-8 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'}
-          absolute flex items-center justify-center
-          ${isResizing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
-          transition-opacity duration-200 pointer-events-none
-        `}>
-          <div className={`
-            ${isVertical ? 'w-0.5 h-4' : 'h-0.5 w-4'}
-            bg-blue-600 rounded-full shadow-sm
-          `} />
-        </div>
-        
-        {/* Extended hit area for easier grabbing */}
-        <div className={`
-          ${isVertical ? 'w-4 -left-1' : 'h-4 -top-1'}
-          absolute inset-0 
-        `} />
-      </div>
+      />
     );
   }, [width, isResizing, orientation]);
 
   return {
     width,
     isResizing,
-    ResizeHandle,
+    ResizeHandle: createResizeHandle,
     setWidth: (newWidth: number) => {
       const clampedWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
       console.log('useResizablePanels: Setting width programmatically', { newWidth, clampedWidth });

@@ -2,9 +2,8 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageSquare, CheckCircle } from "lucide-react";
-import ReviewCommentsList from "./ReviewCommentsList";
-import ReviewCommentInput from "./ReviewCommentInput";
-import ReviewChecklistPanel from "./ReviewChecklistPanel";
+import CommentSection from "./CommentSection";
+import ChecklistSection from "./ChecklistSection";
 
 interface SimplifiedReviewTabsProps {
   activeTab: string;
@@ -79,11 +78,9 @@ const SimplifiedReviewTabs: React.FC<SimplifiedReviewTabsProps> = ({
       </TabsList>
 
       <TabsContent value="review" className="flex-grow mx-4 mt-3 space-y-3 overflow-hidden">
-        <ReviewCommentsList 
+        <CommentSection
           comments={comments}
           checklistCategories={checklistCategories}
-        />
-        <ReviewCommentInput
           newComment={newComment}
           currentSlide={currentSlide}
           isVeryNarrow={isVeryNarrow}
@@ -93,7 +90,7 @@ const SimplifiedReviewTabs: React.FC<SimplifiedReviewTabsProps> = ({
       </TabsContent>
 
       <TabsContent value="checklist" className="flex-grow mx-4 mt-3 overflow-hidden">
-        <ReviewChecklistPanel
+        <ChecklistSection
           checklistState={checklistState}
           onCheckboxChange={handleIsolatedCheckboxChange}
           checklistCategories={checklistCategories}
