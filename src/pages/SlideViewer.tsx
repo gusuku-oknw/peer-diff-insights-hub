@@ -41,12 +41,15 @@ const SlideViewer = () => {
     setDisplayCount
   } = useSlideStore();
   
+  // Ensure currentSlide is always a number
+  const currentSlideNumber = typeof currentSlide === 'string' ? parseInt(currentSlide, 10) : currentSlide;
+  
   // デバッグ用ログを追加
   useEffect(() => {
     console.log('SlideViewer rendered with slides:', slides.length);
-    console.log('Current slide:', currentSlide);
+    console.log('Current slide:', currentSlideNumber);
     console.log('Available slide IDs:', slides.map(s => s.id));
-  }, [slides, currentSlide]);
+  }, [slides, currentSlideNumber]);
   
   const { elapsedTime, toggleFullScreenWithEffects } = usePresentationMode();
   const { handlePreviousSlide, handleNextSlide } = useSlideNavigation({
@@ -165,7 +168,7 @@ const SlideViewer = () => {
         {/* Hide toolbar when in presentation mode and fullscreen */}
         {!(viewerMode === "presentation" && isFullScreen) && (
           <MainToolbar
-            currentSlide={currentSlide}
+            currentSlide={currentSlideNumber}
             totalSlides={totalSlides}
             zoom={zoom}
             viewerMode={viewerMode}
@@ -192,7 +195,7 @@ const SlideViewer = () => {
             currentBranch={currentBranch}
             branches={branches}
             commitHistory={commitHistory}
-            currentSlide={currentSlide}
+            currentSlide={currentSlideNumber}
             totalSlides={totalSlides}
             zoom={zoom}
             viewerMode={viewerMode}
