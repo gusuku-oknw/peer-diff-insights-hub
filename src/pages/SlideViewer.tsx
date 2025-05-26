@@ -13,10 +13,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 // Define commented slides for student progress tracking
 const commentedSlides = [1, 2]; // Slides where the current student has already commented
-const mockComments = {
-  1: [{ id: 1, text: "とても分かりやすいスライドです！" }],
-  3: [{ id: 2, text: "この数値の根拠は？" }]
-};
+const mockComments = [
+  { id: 1, text: "とても分かりやすいスライドです！", slideId: 1 },
+  { id: 2, text: "この数値の根拠は？", slideId: 3 }
+];
 
 const SlideViewer = () => {
   const { toast } = useToast();
@@ -199,7 +199,7 @@ const SlideViewer = () => {
             leftSidebarOpen={leftSidebarOpen}
             showPresenterNotes={showPresenterNotes}
             isFullScreen={isFullScreen}
-            presentationStartTime={presentationStartTime}
+            presentationStartTime={presentationStartTime ? new Date(presentationStartTime) : null}
             presenterNotes={presenterNotes}
             elapsedTime={elapsedTime}
             displayCount={displayCount}
@@ -208,7 +208,7 @@ const SlideViewer = () => {
             userType={userProfile?.role === "student" ? "student" : "enterprise"}
             onBranchChange={setCurrentBranch}
             onToggleLeftSidebar={toggleLeftSidebar}
-            onSlideChange={currentSlide => useSlideStore.getState().setCurrentSlide(currentSlide)}
+            onSlideChange={(slide: number) => useSlideStore.getState().setCurrentSlide(slide)}
           />
         </div>
       </div>
