@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import MainToolbar from "@/components/slide-viewer/toolbar/MainToolbar";
+import SimpleMainToolbar from "@/components/slide-viewer/toolbar/SimpleMainToolbar";
 import MainLayout from "@/components/slideviewer/layout/MainLayout";
 import { useSlideStore } from "@/stores/slideStore";
 import useSlideNavigation from "@/hooks/slideviewer/useSlideNavigation";
@@ -199,7 +199,7 @@ const SlideViewer = () => {
       <div className={`flex-grow flex flex-col ${!(viewerMode === "presentation" && isFullScreen) ? "pt-16 pb-16" : ""} bg-slate-50 h-full`}>
         {/* Hide toolbar when in presentation mode and fullscreen */}
         {!(viewerMode === "presentation" && isFullScreen) && (
-          <MainToolbar
+          <SimpleMainToolbar
             currentSlide={currentSlideNumber}
             totalSlides={totalSlides}
             zoom={zoom}
