@@ -1,11 +1,10 @@
-
 import React, { useState } from "react";
-import LeftSidebar from "./LeftSidebar";
-import MainContent from "./MainContent";
+import LeftSidebar from "../../slideviewer/layout/LeftSidebar";
+import MainContent from "../../slideviewer/layout/MainContent";
 import SlideThumbnails from "../SlideThumbnails";
 import ImprovedSidePanel from "../panels/ImprovedSidePanel";
-import OverallReviewPanel from "../panels/OverallReviewPanel";
-import EditSidebar from "../editor/EditSidebar";
+import OverallReviewPanel from "../../slideviewer/panels/OverallReviewPanel";
+import EditSidebar from "../../slideviewer/editor/EditSidebar";
 import type { MainLayoutProps } from "@/types/slide-viewer/toolbar.types";
 
 interface ExtendedMainLayoutProps extends MainLayoutProps {
