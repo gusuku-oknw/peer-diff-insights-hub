@@ -1,7 +1,9 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Presentation, Pencil, MessageCircle } from "lucide-react";
-import { ViewerMode } from "@/stores/slideStore";
+
+// Define the ViewerMode type locally to ensure it includes all modes
+type ViewerMode = "presentation" | "edit" | "review";
 
 interface ModeSelectorProps {
   currentMode: ViewerMode;
@@ -11,16 +13,23 @@ interface ModeSelectorProps {
 
 const ModeSelector = ({ currentMode, onModeChange, userType }: ModeSelectorProps) => {
   // Students cannot access edit mode
-  const availableModes = userType === "student" 
-    ? ["presentation", "review"] as const
-    : ["presentation", "edit", "review"] as const;
+  const availableModes: ViewerMode[] = userType === "student" 
+    ? ["presentation", "review"]
+    : ["presentation", "edit", "review"];
+
+  const handleValueChange = (value: string) => {
+    // Ensure the value is a valid ViewerMode before calling onModeChange
+    if (availableModes.includes(value as ViewerMode)) {
+      onModeChange(value as ViewerMode);
+    }
+  };
 
   return (
     <Tabs 
       defaultValue={currentMode} 
       value={currentMode} 
       className="w-auto" 
-      onValueChange={value => onModeChange(value as ViewerMode)}
+      onValueChange={handleValueChange}
     >
       <TabsList className="bg-slate-100 p-0.5 sm:p-1">
         {availableModes.includes("presentation") && (
