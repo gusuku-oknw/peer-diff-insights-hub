@@ -3,6 +3,7 @@ import type { Slide } from '@/types/slide-viewer/slide.types';
 import type { NavigationSlice } from './navigation.slice';
 import type { PresentationSlice } from './presentation.slice';
 import type { ElementsSlice } from './elements.slice';
+import type { LayoutSlice } from './layout.slice';
 
 export interface PPTXImportSlice {
   isPPTXImported: boolean;
@@ -28,4 +29,5 @@ export type SlideStore = BaseSlideStore &
   NavigationSlice & 
   PresentationSlice & 
   ElementsSlice &
-  PPTXImportSlice;
+  PPTXImportSlice &
+  LayoutSlice;

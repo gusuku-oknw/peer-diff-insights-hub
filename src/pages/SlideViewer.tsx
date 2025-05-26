@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,15 +26,16 @@ const SlideViewer = () => {
     currentSlide, 
     zoom, 
     viewerMode, 
-    isFullScreen,
-    leftSidebarOpen,
     showPresenterNotes,
     presentationStartTime,
     displayCount,
     slides,
+    // Layout state
+    leftSidebarOpen,
+    isFullScreen,
     setZoom,
     setViewerMode,
-    toggleLeftSidebar,
+    setLeftSidebarOpen,
     togglePresenterNotes,
     generateThumbnails,
     setDisplayCount
@@ -233,7 +233,7 @@ const SlideViewer = () => {
             onNextSlide={handleNextSlide}
             onZoomChange={handleZoomChange}
             onModeChange={handleModeChange}
-            onLeftSidebarToggle={toggleLeftSidebar}
+            onLeftSidebarToggle={() => setLeftSidebarOpen(!leftSidebarOpen)}
             onFullScreenToggle={toggleFullScreenWithEffects}
             onShowPresenterNotesToggle={togglePresenterNotes}
             onStartPresentation={handleStartPresentation}
@@ -262,7 +262,7 @@ const SlideViewer = () => {
             mockComments={mockComments}
             userType={userType}
             onBranchChange={setCurrentBranch}
-            onToggleLeftSidebar={toggleLeftSidebar}
+            onToggleLeftSidebar={() => setLeftSidebarOpen(!leftSidebarOpen)}
             onSlideChange={(slide: number) => useSlideStore.getState().setCurrentSlide(slide)}
           />
         </div>

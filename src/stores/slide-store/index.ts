@@ -6,6 +6,7 @@ import { SlideStore } from './types';
 import { createNavigationSlice } from './navigation.slice';
 import { createElementsSlice } from './elements.slice';
 import { createPresentationSlice, ViewerMode } from './presentation.slice';
+import { createLayoutSlice } from './layout.slice';
 import { createPPTXImportSlice } from './createPPTXImport';
 import { createSampleSlides } from './createSampleSlides';
 
@@ -41,6 +42,9 @@ const createSlideStore: StateCreator<SlideStore> = (set, get, api) => {
     // Presentation slice
     ...createPresentationSlice(set, get, api),
     
+    // Layout slice
+    ...createLayoutSlice(set, get, api),
+    
     // PPTX import slice
     ...createPPTXImportSlice(set, get, api),
   };
@@ -61,15 +65,22 @@ export const useSlideStore = create<SlideStore>()(
     createSlideStore,
     {
       name: 'slide-storage',
-      // 永続化する部分状態を指定（viewerModeを追加）
+      // 永続化する部分状態を指定（レイアウト状態を追加）
       partialize: (state) => ({ 
         slides: state.slides, 
         currentSlide: state.currentSlide,
         zoom: state.zoom,
-        viewerMode: state.viewerMode, // 永続化対象に追加
+        viewerMode: state.viewerMode,
         showPresenterNotes: state.showPresenterNotes,
         isPPTXImported: state.isPPTXImported,
-        pptxFilename: state.pptxFilename
+        pptxFilename: state.pptxFilename,
+        // Layout state
+        leftSidebarWidth: state.leftSidebarWidth,
+        rightSidebarWidth: state.rightSidebarWidth,
+        editSidebarWidth: state.editSidebarWidth,
+        thumbnailsHeight: state.thumbnailsHeight,
+        leftSidebarOpen: state.leftSidebarOpen,
+        rightPanelHidden: state.rightPanelHidden,
       }),
       // 復元時に学生アカウント用のフィルタリングを適用
       onRehydrateStorage: () => (state, error) => {
@@ -82,7 +93,12 @@ export const useSlideStore = create<SlideStore>()(
           console.log('Slide store rehydrated:', {
             slides: state.slides?.length || 0,
             viewerMode: state.viewerMode,
-            currentSlide: state.currentSlide
+            currentSlide: state.currentSlide,
+            layoutState: {
+              leftSidebarWidth: state.leftSidebarWidth,
+              rightSidebarWidth: state.rightSidebarWidth,
+              editSidebarWidth: state.editSidebarWidth,
+            }
           });
           
           // 学生アカウント用のフィルタリング（将来的にはAuthContextから判定）
