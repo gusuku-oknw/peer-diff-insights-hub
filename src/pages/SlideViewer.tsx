@@ -158,6 +158,15 @@ const SlideViewer = () => {
 
   const isMobile = useIsMobile();
 
+  // Convert elapsedTime string to number (in seconds) for MainLayout
+  const elapsedTimeInSeconds = useMemo(() => {
+    if (typeof elapsedTime === 'string') {
+      const [minutes, seconds] = elapsedTime.split(':').map(Number);
+      return minutes * 60 + seconds;
+    }
+    return 0;
+  }, [elapsedTime]);
+
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Hide navigation when in presentation mode and fullscreen */}
@@ -204,7 +213,7 @@ const SlideViewer = () => {
             isFullScreen={isFullScreen}
             presentationStartTime={presentationStartTime ? new Date(presentationStartTime) : null}
             presenterNotes={presenterNotes}
-            elapsedTime={elapsedTime}
+            elapsedTime={elapsedTimeInSeconds}
             displayCount={displayCount}
             commentedSlides={commentedSlides}
             mockComments={mockComments}
