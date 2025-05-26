@@ -6,14 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   MessageSquare, 
-  CheckCircle2, 
   Send, 
   FileText, 
   Palette, 
   Eye,
-  Plus
+  CheckCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,6 +23,12 @@ interface Comment {
   category: string;
   timestamp: Date;
   resolved: boolean;
+}
+
+interface ChecklistItem {
+  id: string;
+  text: string;
+  checked: boolean;
 }
 
 interface SimplifiedReviewPanelProps {
@@ -41,9 +47,9 @@ const checklistCategories = {
     label: "構成",
     color: "blue",
     items: [
-      "タイトルは明確で理解しやすいか",
-      "内容の流れは論理的か",
-      "重要なポイントが強調されているか"
+      { id: "s1", text: "タイトルは明確で理解しやすいか", checked: false },
+      { id: "s2", text: "内容の流れは論理的か", checked: false },
+      { id: "s3", text: "重要なポイントが強調されているか", checked: false }
     ]
   },
   design: {
@@ -51,9 +57,9 @@ const checklistCategories = {
     label: "デザイン",
     color: "green",
     items: [
-      "色使いは見やすく統一されているか",
-      "フォントサイズは適切か",
-      "レイアウトはバランスが取れているか"
+      { id: "d1", text: "色使いは見やすく統一されているか", checked: false },
+      { id: "d2", text: "フォントサイズは適切か", checked: false },
+      { id: "d3", text: "レイアウトはバランスが取れているか", checked: false }
     ]
   },
   content: {
@@ -61,9 +67,9 @@ const checklistCategories = {
     label: "文言",
     color: "purple",
     items: [
-      "文章は簡潔で分かりやすいか",
-      "専門用語の説明は十分か",
-      "誤字脱字はないか"
+      { id: "c1", text: "文章は簡潔で分かりやすいか", checked: false },
+      { id: "c2", text: "専門用語の説明は十分か", checked: false },
+      { id: "c3", text: "誤字脱字はないか", checked: false }
     ]
   }
 };
@@ -75,7 +81,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
   isNarrow = false,
   isVeryNarrow = false
 }) => {
-  const [activeTab, setActiveTab] = useState("comments");
+  const [activeTab, setActiveTab] = useState("review");
   const [newComment, setNewComment] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("structure");
   const [comments, setComments] = useState<Comment[]>([
@@ -87,9 +93,42 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
       resolved: false
     }
   ]);
+  const [checklistState, setChecklistState] = useState(() => {
+    const initialState: Record<string, ChecklistItem[]> = {};
+    Object.entries(checklistCategories).forEach(([key, category]) => {
+      initialState[key] = [...category.items];
+    });
+    return initialState;
+  });
+
   const { toast } = useToast();
 
   const canInteract = userType === "student";
+
+  const handleCheckboxChange = (categoryKey: string, itemId: string, checked: boolean) => {
+    if (!canInteract) return;
+    
+    setChecklistState(prev => ({
+      ...prev,
+      [categoryKey]: prev[categoryKey].map(item =>
+        item.id === itemId ? { ...item, checked } : item
+      )
+    }));
+
+    if (checked) {
+      toast({
+        title: "チェック完了",
+        description: "レビュー項目をチェックしました",
+        variant: "default"
+      });
+    }
+  };
+
+  const getCompletionRate = (categoryKey: string) => {
+    const items = checklistState[categoryKey] || [];
+    const completed = items.filter(item => item.checked).length;
+    return Math.round((completed / items.length) * 100);
+  };
 
   const handleSubmitComment = () => {
     if (!canInteract) {
@@ -119,18 +158,9 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
     }
   };
 
-  const toggleResolved = (commentId: string) => {
-    if (!canInteract) return;
-    setComments(comments.map(comment => 
-      comment.id === commentId 
-        ? { ...comment, resolved: !comment.resolved }
-        : comment
-    ));
-  };
-
   return (
-    <div className="h-full bg-white flex flex-col">
-      {/* Simplified Header */}
+    <div className="h-full bg-white flex flex-col relative z-10">
+      {/* Simplified Header with Progress */}
       <div className={`${isVeryNarrow ? 'px-2 py-1' : 'px-4 py-3'} border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center justify-between flex-shrink-0`}>
         <div className="flex items-center gap-2">
           <MessageSquare className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-blue-600`} />
@@ -141,14 +171,16 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
           )}
           {!canInteract && <Eye className="h-3 w-3 text-amber-600" />}
         </div>
-        <Badge variant="outline" className="text-xs">
-          {currentSlide}/{totalSlides}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-xs">
+            {currentSlide}/{totalSlides}
+          </Badge>
+        </div>
       </div>
 
       {/* Permission Notice for Enterprise Users */}
       {!canInteract && !isVeryNarrow && (
-        <div className="mx-4 mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+        <div className="mx-4 mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg relative z-20">
           <div className="flex items-center gap-2 text-amber-700 text-sm">
             <Eye className="h-4 w-4" />
             <span>企業ユーザーは閲覧専用です</span>
@@ -157,22 +189,22 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
       )}
 
       {/* Main Content */}
-      <div className="flex-grow flex flex-col min-h-0">
+      <div className="flex-grow flex flex-col min-h-0 relative z-10">
         {canInteract && !isVeryNarrow ? (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-grow flex flex-col">
             <TabsList className="mx-4 mt-3 grid grid-cols-2 bg-gray-50">
-              <TabsTrigger value="comments" className="flex items-center gap-1">
+              <TabsTrigger value="review" className="flex items-center gap-1">
                 <MessageSquare className="h-3 w-3" />
-                コメント
+                レビュー
               </TabsTrigger>
               <TabsTrigger value="checklist" className="flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3" />
+                <CheckCircle className="h-3 w-3" />
                 チェック
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="comments" className="flex-grow mx-4 mt-3 space-y-3 overflow-hidden">
-              <ScrollArea className="flex-grow">
+            <TabsContent value="review" className="flex-grow mx-4 mt-3 space-y-3 overflow-hidden">
+              <ScrollArea className="flex-grow h-[300px]">
                 <div className="space-y-2 pr-4">
                   {comments.length > 0 ? (
                     comments.map((comment) => (
@@ -182,14 +214,6 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
                             <Badge variant="outline" className="text-xs">
                               {checklistCategories[comment.category as keyof typeof checklistCategories]?.label || comment.category}
                             </Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleResolved(comment.id)}
-                              className="h-6 w-6 p-0"
-                            >
-                              <CheckCircle2 className={`h-3 w-3 ${comment.resolved ? 'text-green-600' : 'text-gray-400'}`} />
-                            </Button>
                           </div>
                           <p className={`text-sm ${comment.resolved ? 'line-through text-gray-500' : 'text-gray-700'}`}>
                             {comment.content}
@@ -207,7 +231,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
               </ScrollArea>
 
               {/* Comment Input */}
-              <Card className="border-gray-200">
+              <Card className="border-gray-200 relative z-30">
                 <CardContent className="p-3 space-y-3">
                   <div className="flex gap-2">
                     {Object.entries(checklistCategories).map(([key, category]) => {
@@ -254,18 +278,42 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
                 <div className="space-y-4 pr-4">
                   {Object.entries(checklistCategories).map(([key, category]) => {
                     const Icon = category.icon;
+                    const completionRate = getCompletionRate(key);
+                    const items = checklistState[key] || [];
+                    
                     return (
-                      <Card key={key} className="border-gray-200">
+                      <Card key={key} className="border-gray-200 relative z-20">
                         <CardContent className="p-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Icon className={`h-4 w-4 text-${category.color}-600`} />
-                            <h4 className="font-medium text-gray-800">{category.label}</h4>
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <Icon className={`h-4 w-4 text-${category.color}-600`} />
+                              <h4 className="font-medium text-gray-800">{category.label}</h4>
+                            </div>
+                            <Badge variant={completionRate === 100 ? "default" : "secondary"} className="text-xs">
+                              {completionRate}%
+                            </Badge>
                           </div>
-                          <div className="space-y-2">
-                            {category.items.map((item, index) => (
-                              <div key={index} className="flex items-start gap-2 p-2 bg-gray-50 rounded-lg">
-                                <CheckCircle2 className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm text-gray-700">{item}</span>
+                          <div className="space-y-3">
+                            {items.map((item) => (
+                              <div key={item.id} className="flex items-start gap-3 p-2 bg-gray-50 rounded-lg">
+                                <Checkbox
+                                  id={item.id}
+                                  checked={item.checked}
+                                  onCheckedChange={(checked) => 
+                                    handleCheckboxChange(key, item.id, checked as boolean)
+                                  }
+                                  className="mt-0.5 flex-shrink-0"
+                                />
+                                <label 
+                                  htmlFor={item.id}
+                                  className={`text-sm cursor-pointer ${
+                                    item.checked 
+                                      ? 'text-gray-500 line-through' 
+                                      : 'text-gray-700'
+                                  }`}
+                                >
+                                  {item.text}
+                                </label>
                               </div>
                             ))}
                           </div>
@@ -280,7 +328,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
         ) : (
           /* Simplified view for very narrow panels or enterprise users */
           <ScrollArea className="flex-grow">
-            <div className="p-4 space-y-3">
+            <div className="p-4 space-y-3 relative z-20">
               {comments.length > 0 ? (
                 comments.map((comment) => (
                   <Card key={comment.id} className="border-gray-200">

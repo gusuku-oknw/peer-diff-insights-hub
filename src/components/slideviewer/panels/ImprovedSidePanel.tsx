@@ -99,10 +99,10 @@ const ImprovedSidePanel = ({
 
   // Simplified panel content
   const PanelContent = () => (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col relative z-10">
       {shouldShowNotes && shouldShowReviewPanel ? (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-          <div className={`${isVeryNarrow ? 'px-2 py-1' : 'px-4 py-2'} border-b border-gray-200 flex items-center justify-between flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50`}>
+          <div className={`${isVeryNarrow ? 'px-2 py-1' : 'px-4 py-2'} border-b border-gray-200 flex items-center justify-between flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 relative z-20`}>
             <TabsList className="grid grid-cols-2 flex-1 min-w-0 bg-white shadow-sm">
               <TabsTrigger 
                 value="notes" 
@@ -126,7 +126,7 @@ const ImprovedSidePanel = ({
                 variant="ghost"
                 size="sm"
                 onClick={onToggleHide}
-                className={`ml-2 ${isVeryNarrow ? 'h-6 w-6 p-0' : 'h-8 w-8 p-0'} flex-shrink-0 hover:bg-gray-200 transition-colors`}
+                className={`ml-2 ${isVeryNarrow ? 'h-6 w-6 p-0' : 'h-8 w-8 p-0'} flex-shrink-0 hover:bg-gray-200 transition-colors relative z-30`}
                 title="パネルを閉じる"
               >
                 <X className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} text-gray-600`} />
@@ -138,7 +138,7 @@ const ImprovedSidePanel = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsSheetOpen(false)}
-                className="ml-2 h-8 w-8 p-0 flex-shrink-0 hover:bg-gray-200 transition-colors"
+                className="ml-2 h-8 w-8 p-0 flex-shrink-0 hover:bg-gray-200 transition-colors relative z-30"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -212,7 +212,7 @@ const ImprovedSidePanel = ({
             )}
           </Button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-full max-w-md p-0">
+        <SheetContent side="right" className="w-full max-w-md p-0 z-50">
           <div className="h-full bg-gradient-to-b from-gray-50 to-white" ref={panelRef}>
             <PanelContent />
           </div>
@@ -223,7 +223,10 @@ const ImprovedSidePanel = ({
 
   // Desktop implementation
   return (
-    <div className="w-full h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shadow-sm" ref={panelRef}>
+    <div 
+      className="w-full h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shadow-sm relative z-10" 
+      ref={panelRef}
+    >
       <PanelContent />
     </div>
   );
