@@ -1,15 +1,12 @@
+
 import React from "react";
-import { ResizablePanel } from "@/components/slide-viewer/layout/ResizablePanel";
-import LeftSidebar from "./LeftSidebar";
-import MainContent from "./MainContent";
-import SlideThumbnails from "@/components/slide-viewer/SlideThumbnails";
-import ImprovedSidePanel from "../panels/ImprovedSidePanel";
+import { LayoutProvider } from "./LayoutProvider";
+import { LeftSidebarWrapper } from "./LeftSidebarWrapper";
+import { EditSidebarWrapper } from "./EditSidebarWrapper";
+import { CentralContentArea } from "./CentralContentArea";
+import { RightPanelWrapper } from "./RightPanelWrapper";
+import { FloatingToggleButton } from "./FloatingToggleButton";
 import OverallReviewPanel from "../panels/OverallReviewPanel";
-import EditSidebar from "../editor/EditSidebar";
-import { Button } from "@/components/ui/button";
-import { PanelRightOpen } from "lucide-react";
-import { useSlideStore } from "@/stores/slide-store";
-import type { UserRole } from "@/types/common.types";
 import type { ViewerMode } from "@/types/slide.types";
 
 interface MainLayoutProps {
@@ -35,195 +32,79 @@ interface MainLayoutProps {
   onToggleLeftSidebar: () => void;
 }
 
-const MainLayout = ({
-  currentBranch,
-  branches,
-  commitHistory,
-  currentSlide,
-  totalSlides,
-  zoom,
-  viewerMode,
-  leftSidebarOpen,
-  showPresenterNotes,
-  isFullScreen,
-  presentationStartTime,
-  presenterNotes,
-  elapsedTime,
-  displayCount,
-  commentedSlides,
-  mockComments,
-  userType,
-  onBranchChange,
-  onSlideChange,
-  onToggleLeftSidebar,
-}: MainLayoutProps) => {
-  // Use layout state from store
-  const {
-    leftSidebarWidth,
-    rightSidebarWidth,
-    editSidebarWidth,
-    thumbnailsHeight,
-    rightPanelHidden,
-    setLeftSidebarWidth,
-    setRightSidebarWidth,
-    setEditSidebarWidth,
-    setThumbnailsHeight,
-    setRightPanelHidden,
-    getSlideThumbnailsWidth
-  } = useSlideStore();
-  
-  // 右パネル表示ロジック - 学生もレビューモードでアクセス可能に修正
-  const shouldShowNotes = (viewerMode === "presentation" && showPresenterNotes) || 
-                         (viewerMode === "review" && showPresenterNotes);
-  const shouldShowReviewPanel = viewerMode === "review";
-  const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
-  
-  const hideRightPanelCompletely = (viewerMode === "presentation" && isFullScreen) || 
-                                  !shouldDisplayRightPanel;
-
-  const thumbnailsWidth = getSlideThumbnailsWidth();
-
+const MainLayout = (props: MainLayoutProps) => {
   console.log('MainLayout render:', {
-    viewerMode,
-    userType,
-    shouldShowNotes,
-    shouldShowReviewPanel,
-    shouldDisplayRightPanel,
-    hideRightPanelCompletely,
-    rightPanelHidden,
-    thumbnailsWidth
+    viewerMode: props.viewerMode,
+    userType: props.userType,
+    currentSlide: props.currentSlide
   });
 
   return (
-    <div className="flex h-full bg-gray-50 relative">
-      {/* Left Sidebar with resize functionality */}
-      {leftSidebarOpen && (
-        <ResizablePanel
-          initialWidth={leftSidebarWidth}
-          minWidth={180}
-          maxWidth={400}
-          onWidthChange={setLeftSidebarWidth}
-          className="bg-gray-50 border-r border-gray-200"
-          resizePosition="right"
-        >
-          <LeftSidebar
-            currentBranch={currentBranch}
-            branches={branches}
-            commitHistory={commitHistory}
-            leftSidebarOpen={leftSidebarOpen}
-            onBranchChange={onBranchChange}
-            onToggleLeftSidebar={onToggleLeftSidebar}
-          />
-        </ResizablePanel>
-      )}
+    <LayoutProvider>
+      {/* Left Sidebar */}
+      <LeftSidebarWrapper
+        currentBranch={props.currentBranch}
+        branches={props.branches}
+        commitHistory={props.commitHistory}
+        leftSidebarOpen={props.leftSidebarOpen}
+        onBranchChange={props.onBranchChange}
+        onToggleLeftSidebar={props.onToggleLeftSidebar}
+      />
 
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden min-w-0">
-        {/* Edit Sidebar - 企業ユーザーの編集モードのみ */}
-        {viewerMode === "edit" && userType === "enterprise" && (
-          <ResizablePanel
-            initialWidth={editSidebarWidth}
-            minWidth={220}
-            maxWidth={400}
-            onWidthChange={setEditSidebarWidth}
-            className="border-r border-gray-200 bg-white"
-            resizePosition="right"
-          >
-            <EditSidebar currentSlide={currentSlide} />
-          </ResizablePanel>
-        )}
+        {/* Edit Sidebar */}
+        <EditSidebarWrapper
+          viewerMode={props.viewerMode}
+          userType={props.userType}
+          currentSlide={props.currentSlide}
+        />
 
         {/* Central Content Area */}
-        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-          {/* Main slide display area */}
-          <div className="flex-1 overflow-hidden">
-            <MainContent
-              currentSlide={currentSlide}
-              totalSlides={totalSlides}
-              zoom={zoom}
-              viewerMode={viewerMode}
-              showPresenterNotes={showPresenterNotes}
-              isFullScreen={isFullScreen}
-              presentationStartTime={presentationStartTime}
-              presenterNotes={presenterNotes}
-              elapsedTime={elapsedTime}
-              displayCount={displayCount}
-              commentedSlides={commentedSlides}
-              mockComments={mockComments}
-              userType={userType}
-              rightPanelCollapsed={false}
-              onSlideChange={onSlideChange}
-            />
-          </div>
+        <CentralContentArea
+          currentSlide={props.currentSlide}
+          totalSlides={props.totalSlides}
+          zoom={props.zoom}
+          viewerMode={props.viewerMode}
+          showPresenterNotes={props.showPresenterNotes}
+          isFullScreen={props.isFullScreen}
+          presentationStartTime={props.presentationStartTime}
+          presenterNotes={props.presenterNotes}
+          elapsedTime={props.elapsedTime}
+          displayCount={props.displayCount}
+          commentedSlides={props.commentedSlides}
+          mockComments={props.mockComments}
+          userType={props.userType}
+          onSlideChange={props.onSlideChange}
+        />
 
-          {/* Bottom thumbnails with improved resizing */}
-          {!(viewerMode === "presentation" && isFullScreen) && (
-            <ResizablePanel
-              initialWidth={thumbnailsHeight}
-              minWidth={100}
-              maxWidth={300}
-              onWidthChange={setThumbnailsHeight}
-              orientation="horizontal"
-              resizePosition="top"
-              className="border-t border-gray-200 bg-white"
-            >
-              <SlideThumbnails
-                currentSlide={currentSlide}
-                onSlideClick={onSlideChange}
-                onOpenOverallReview={() => {}}
-                height={thumbnailsHeight}
-                containerWidth={thumbnailsWidth}
-                userType={userType}
-              />
-            </ResizablePanel>
-          )}
-        </div>
-
-        {/* Right Panel with resize functionality */}
-        {!hideRightPanelCompletely && shouldDisplayRightPanel && !rightPanelHidden && (
-          <ResizablePanel
-            initialWidth={rightSidebarWidth}
-            minWidth={220}
-            maxWidth={500}
-            onWidthChange={setRightSidebarWidth}
-            resizePosition="left"
-            className="border-l border-gray-200"
-          >
-            <ImprovedSidePanel
-              shouldShowNotes={shouldShowNotes}
-              shouldShowReviewPanel={shouldShowReviewPanel}
-              currentSlide={currentSlide}
-              totalSlides={totalSlides}
-              presenterNotes={presenterNotes}
-              isHidden={false}
-              onToggleHide={() => setRightPanelHidden(true)}
-              userType={userType}
-            />
-          </ResizablePanel>
-        )}
+        {/* Right Panel */}
+        <RightPanelWrapper
+          viewerMode={props.viewerMode}
+          showPresenterNotes={props.showPresenterNotes}
+          isFullScreen={props.isFullScreen}
+          currentSlide={props.currentSlide}
+          totalSlides={props.totalSlides}
+          presenterNotes={props.presenterNotes}
+          userType={props.userType}
+        />
       </div>
 
-      {/* Floating button to show right panel when hidden */}
-      {!hideRightPanelCompletely && shouldDisplayRightPanel && rightPanelHidden && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setRightPanelHidden(false)}
-          className="fixed top-1/2 right-4 z-50 shadow-lg bg-white hover:bg-gray-50 border-2 transition-all duration-200 hover:scale-105 h-10 w-10 p-0"
-          title="右パネルを表示"
-        >
-          <PanelRightOpen className="h-4 w-4 text-gray-600" />
-        </Button>
-      )}
+      {/* Floating Toggle Button */}
+      <FloatingToggleButton
+        viewerMode={props.viewerMode}
+        showPresenterNotes={props.showPresenterNotes}
+        isFullScreen={props.isFullScreen}
+      />
 
       {/* Overall Review Panel */}
       <OverallReviewPanel
         isOpen={false}
         onClose={() => {}}
-        totalSlides={totalSlides}
-        presenterNotes={presenterNotes}
+        totalSlides={props.totalSlides}
+        presenterNotes={props.presenterNotes}
       />
-    </div>
+    </LayoutProvider>
   );
 };
 
