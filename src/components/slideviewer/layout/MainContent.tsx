@@ -29,9 +29,9 @@ const MainContent: React.FC<MainContentProps> = ({
   toggleNotesPanel
 }) => {
   return (
-    <main className="flex-1 flex flex-col h-full">
-      {/* Slide Viewer */}
-      <div className="flex-grow flex items-center justify-center bg-gray-100 overflow-hidden">
+    <main className="flex-1 flex flex-col h-full overflow-hidden">
+      {/* スライドビューワー - シンプルな構造 */}
+      <div className="flex-grow overflow-hidden">
         <SlideCanvas
           currentSlide={currentSlide}
           zoomLevel={zoom}
@@ -40,7 +40,7 @@ const MainContent: React.FC<MainContentProps> = ({
         />
       </div>
 
-      {/* Review Mode UI */}
+      {/* レビューモードUI */}
       {viewerMode === "review" && userType === "student" && (
         <ReviewCommentSection
           isNotesPanelOpen={isNotesPanelOpen}

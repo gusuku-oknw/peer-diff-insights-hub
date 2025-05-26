@@ -30,7 +30,7 @@ export const createPresentationSlice: StateCreator<
   PresentationSlice
 > = (set, get) => ({
   viewerMode: "presentation",
-  zoom: 100, // 確実に100%をデフォルトに
+  zoom: 100, // 確実に100%をデフォルトに設定
   isFullScreen: false,
   showPresenterNotes: false,
   leftSidebarOpen: false,
@@ -42,9 +42,15 @@ export const createPresentationSlice: StateCreator<
   },
   
   setZoom: (zoom: number) => {
-    // ズーム値を25-200%の範囲に制限し、有効な数値であることを確認
-    const validZoom = Math.max(25, Math.min(200, Number(zoom) || 100));
-    console.log(`Setting zoom to ${validZoom}% (input: ${zoom})`);
+    // 入力値の検証を強化
+    const numericZoom = typeof zoom === 'number' ? zoom : parseFloat(String(zoom));
+    const validZoom = Math.max(25, Math.min(200, isNaN(numericZoom) ? 100 : numericZoom));
+    
+    // 現在の値と同じ場合はスキップ
+    const currentZoom = get().zoom;
+    if (currentZoom === validZoom) return;
+    
+    console.log(`Setting zoom to ${validZoom}% (input: ${zoom}, current: ${currentZoom})`);
     set({ zoom: validZoom });
   },
   

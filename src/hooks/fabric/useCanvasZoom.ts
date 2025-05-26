@@ -1,7 +1,6 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { Canvas } from 'fabric';
-import { debounce } from 'lodash';
 
 interface UseCanvasZoomProps {
   canvas: Canvas | null;
@@ -17,54 +16,36 @@ export const useCanvasZoom = ({
   zoomLevel 
 }: UseCanvasZoomProps) => {
   const prevZoomRef = useRef<number>(100);
-  const animationFrameRef = useRef<number | null>(null);
   
-  const debouncedRender = useRef(
-    debounce((canvas: Canvas) => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      animationFrameRef.current = requestAnimationFrame(() => {
-        canvas.renderAll();
-        animationFrameRef.current = null;
-      });
-    }, 50, { leading: false, trailing: true })
-  ).current;
-
   const applyZoom = useCallback((canvas: Canvas, scaleFactor: number) => {
-    if (!containerRef.current) return;
+    if (!canvas || canvas.disposed) return;
 
     try {
-      const originalWidth = 1600;
-      const originalHeight = 900;
+      const baseWidth = 1600;
+      const baseHeight = 900;
       
-      canvas.setWidth(originalWidth);
-      canvas.setHeight(originalHeight);
+      // キャンバスの実際のサイズを設定
+      canvas.setWidth(baseWidth);
+      canvas.setHeight(baseHeight);
       
-      const container = containerRef.current;
-      if (container) {
-        const validScaleFactor = Math.max(0.25, Math.min(2, scaleFactor));
-        const scaledWidth = originalWidth * validScaleFactor;
-        const scaledHeight = originalHeight * validScaleFactor;
-        
-        // シンプルなサイズ調整のみ適用
-        container.style.width = `${scaledWidth}px`;
-        container.style.height = `${scaledHeight}px`;
-        container.style.transform = 'none';
-        container.style.transition = 'all 0.2s ease-in-out';
-      }
-
-      debouncedRender(canvas);
+      // CSS でのスケーリングはコンテナで処理されるため、ここでは何もしない
+      // Fabric.js キャンバス自体は常に 1600x900 を維持
+      
+      console.log(`Canvas zoom applied: ${scaleFactor * 100}%`);
+      
+      // レンダリングを一度だけ実行
+      canvas.renderAll();
     } catch (error) {
       console.error("Error applying zoom:", error);
     }
-  }, [debouncedRender]);
+  }, []);
   
   useEffect(() => {
-    if (!canvas || !initialized || !containerRef.current) return;
+    if (!canvas || !initialized) return;
     
     const validZoomLevel = Math.max(25, Math.min(200, zoomLevel || 100));
     
+    // 同じズームレベルの場合はスキップ
     if (prevZoomRef.current === validZoomLevel) return;
     
     console.log(`Applying zoom: ${validZoomLevel}% (previous: ${prevZoomRef.current}%)`);
@@ -73,24 +54,15 @@ export const useCanvasZoom = ({
     prevZoomRef.current = validZoomLevel;
     
     applyZoom(canvas, scaleFactor);
-  }, [zoomLevel, initialized, canvas, containerRef, applyZoom]);
+  }, [zoomLevel, initialized, canvas, applyZoom]);
   
+  // 初期化時のズーム適用
   useEffect(() => {
-    if (!canvas || !initialized || !containerRef.current) return;
+    if (!canvas || !initialized) return;
     
     const initialZoom = zoomLevel || 100;
     if (prevZoomRef.current === 100 && initialZoom === 100) {
-      const scaleFactor = 1;
-      applyZoom(canvas, scaleFactor);
+      applyZoom(canvas, 1);
     }
-  }, [canvas, initialized, containerRef, zoomLevel, applyZoom]);
-  
-  useEffect(() => {
-    return () => {
-      debouncedRender.cancel();
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [debouncedRender]);
+  }, [canvas, initialized, zoomLevel, applyZoom]);
 };
