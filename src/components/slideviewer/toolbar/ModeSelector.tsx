@@ -1,5 +1,6 @@
+
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Presentation, Pencil, MessageCircle } from "lucide-react";
+import { Pencil, MessageCircle } from "lucide-react";
 
 // Define the ViewerMode type locally to ensure it includes all modes
 type ViewerMode = "presentation" | "edit" | "review";
@@ -11,9 +12,9 @@ interface ModeSelectorProps {
 }
 
 const ModeSelector = ({ currentMode, onModeChange, userType }: ModeSelectorProps) => {
-  // Students cannot access edit mode
+  // Students can only access review mode
   const availableModes: ViewerMode[] = userType === "student" 
-    ? ["presentation", "review"]
+    ? ["review"]
     : ["presentation", "edit", "review"];
 
   const handleValueChange = (value: string) => {
@@ -31,13 +32,6 @@ const ModeSelector = ({ currentMode, onModeChange, userType }: ModeSelectorProps
       onValueChange={handleValueChange}
     >
       <TabsList className="bg-slate-100 p-0.5 sm:p-1">
-        {availableModes.includes("presentation") && (
-          <TabsTrigger value="presentation" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white px-2 sm:px-3 py-1">
-            <Presentation className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-            <span className="hidden sm:inline">プレゼンテーション</span>
-          </TabsTrigger>
-        )}
-        
         {availableModes.includes("edit") && (
           <TabsTrigger value="edit" className="data-[state=active]:bg-green-500 data-[state=active]:text-white px-2 sm:px-3 py-1">
             <Pencil className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
