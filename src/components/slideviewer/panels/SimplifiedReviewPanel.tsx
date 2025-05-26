@@ -105,10 +105,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
 
   const canInteract = userType === "student";
 
-  const handleCheckboxChange = (e: React.MouseEvent, categoryKey: string, itemId: string, checked: boolean) => {
-    // Prevent event propagation to avoid tab switching
-    e.stopPropagation();
-    
+  const handleCheckboxChange = (categoryKey: string, itemId: string, checked: boolean) => {
     if (!canInteract) return;
     
     setChecklistState(prev => ({
@@ -299,13 +296,12 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
                           <div className="space-y-3">
                             {items.map((item) => (
                               <div key={item.id} className="flex items-start gap-3 p-2 bg-gray-50 rounded-lg">
-                                <div onClick={(e) => handleCheckboxChange(e, key, item.id, !item.checked)}>
-                                  <Checkbox
-                                    id={item.id}
-                                    checked={item.checked}
-                                    className="mt-0.5 flex-shrink-0"
-                                  />
-                                </div>
+                                <Checkbox
+                                  id={item.id}
+                                  checked={item.checked}
+                                  onCheckedChange={(checked) => handleCheckboxChange(key, item.id, !!checked)}
+                                  className="mt-0.5 flex-shrink-0"
+                                />
                                 <label 
                                   htmlFor={item.id}
                                   className={`text-sm cursor-pointer ${
@@ -313,7 +309,6 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
                                       ? 'text-gray-500 line-through' 
                                       : 'text-gray-700'
                                   }`}
-                                  onClick={(e) => handleCheckboxChange(e, key, item.id, !item.checked)}
                                 >
                                   {item.text}
                                 </label>

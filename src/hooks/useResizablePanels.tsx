@@ -69,6 +69,47 @@ export const useResizablePanels = ({
     const isVertical = orientation === 'vertical';
     const isHorizontal = orientation === 'horizontal';
     
+    // Handle mouse down with corrected delta calculation for left position
+    const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsResizing(true);
+      setStartPosition(orientation === 'vertical' ? e.clientX : e.clientY);
+      setStartWidth(width);
+      
+      document.body.style.cursor = orientation === 'vertical' ? 'col-resize' : 'row-resize';
+      document.body.style.userSelect = 'none';
+    }, []);
+
+    // Mouse move handler with corrected delta for left-positioned handles
+    const handleResizeMouseMove = useCallback((e: MouseEvent) => {
+      if (!isResizing) return;
+      
+      const currentPosition = orientation === 'vertical' ? e.clientX : e.clientY;
+      let delta = currentPosition - startPosition;
+      
+      // For left-positioned handles (like right panel), reverse the delta
+      if (position === 'left') {
+        delta = -delta;
+      }
+      
+      const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidth + delta));
+      
+      setWidth(newWidth);
+      onWidthChange?.(newWidth);
+    }, [isResizing, startPosition, startWidth, minWidth, maxWidth, onWidthChange, orientation, position]);
+
+    useEffect(() => {
+      if (isResizing) {
+        document.addEventListener('mousemove', handleResizeMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        
+        return () => {
+          document.removeEventListener('mousemove', handleResizeMouseMove);
+          document.removeEventListener('mouseup', handleMouseUp);
+        };
+      }
+    }, [isResizing, handleResizeMouseMove, handleMouseUp]);
+    
     return (
       <div
         ref={handleRef}
@@ -82,7 +123,7 @@ export const useResizablePanels = ({
           ${isResizing ? 'bg-blue-500 shadow-lg' : ''}
           ${className}
         `}
-        onMouseDown={handleMouseDown}
+        onMouseDown={handleResizeMouseDown}
         title={orientation === 'vertical' ? 'ドラッグして幅を調整' : 'ドラッグして高さを調整'}
       >
         {/* Visual grip indicator */}
@@ -105,7 +146,7 @@ export const useResizablePanels = ({
         `} />
       </div>
     );
-  }, [handleMouseDown, isResizing, orientation]);
+  }, [handleMouseDown, isResizing, orientation, width, startPosition, startWidth, minWidth, maxWidth, onWidthChange, handleMouseUp]);
 
   return {
     width,
