@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ResizablePanel } from "@/components/slide-viewer/layout/ResizablePanel";
 import LeftSidebar from "./LeftSidebar";
@@ -174,6 +173,7 @@ const MainLayout = ({
                 onOpenOverallReview={() => {}}
                 height={thumbnailsHeight}
                 containerWidth={thumbnailsWidth}
+                userType={userType}
               />
             </ResizablePanel>
           )}

@@ -65,20 +65,20 @@ const SlideViewer = () => {
     return "student";
   }, [userProfile?.role]);
   
-  // 学生アカウントの初期化改善
+  // 学生アカウントの初期化改善 - Enhanced for student-focused experience
   useEffect(() => {
     console.log('SlideViewer: Initializing for user type:', userType, 'viewerMode:', viewerMode, 'userProfile:', userProfile);
     
-    // 学生が編集モードにいる場合はプレゼンテーションモードに切り替え
-    if (userType === "student" && viewerMode === "edit") {
-      console.log("Student detected in edit mode, switching to presentation");
-      setViewerMode("presentation");
+    // 学生が編集モードにいる場合はレビューモードに切り替え (students should always use review mode)
+    if (userType === "student" && (viewerMode === "edit" || viewerMode === "presentation")) {
+      console.log("Student detected in non-review mode, switching to review");
+      setViewerMode("review");
     }
     
-    // 学生でviewerModeが未定義の場合はデフォルトをプレゼンテーションに
+    // 学生でviewerModeが未定義の場合はデフォルトをレビューに (default to review for students)
     if (userType === "student" && !viewerMode) {
-      console.log("Setting default mode for student to presentation");
-      setViewerMode("presentation");
+      console.log("Setting default mode for student to review");
+      setViewerMode("review");
     }
   }, [userType, viewerMode, setViewerMode, userProfile]);
   
@@ -152,17 +152,28 @@ const SlideViewer = () => {
     }
   };
 
-  // モード切替をデバウンスなしで即時適用するように変更
+  // モード切替をデバウンスなしで即時適用するように変更 - Enhanced for student experience
   const handleModeChange = (mode: ViewerMode) => {
     console.log(`Mode change requested: ${mode} (current: ${viewerMode}) for user type: ${userType}`);
     
-    // Students cannot access edit mode
+    // Students can only access review mode - Enhanced messaging
     if (mode === "edit" && userType === "student") {
       toast({
         title: "権限がありません",
-        description: "学生ユーザーは編集モードを利用できません",
+        description: "学生ユーザーはレビューモードのみ利用できます",
         variant: "destructive"
       });
+      return;
+    }
+    
+    if (mode === "presentation" && userType === "student") {
+      toast({
+        title: "レビューモードへ切り替え",
+        description: "学生ユーザーはレビューに集中してください",
+        variant: "default"
+      });
+      // Force students to review mode
+      setViewerMode("review");
       return;
     }
     

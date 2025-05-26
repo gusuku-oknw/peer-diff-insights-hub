@@ -14,6 +14,7 @@ interface SlideThumbnailsProps {
   onOpenOverallReview?: () => void;
   height?: number;
   containerWidth?: number;
+  userType?: "student" | "enterprise";
 }
 
 const SlideThumbnails = ({
@@ -22,7 +23,8 @@ const SlideThumbnails = ({
   onSlideClick,
   onOpenOverallReview,
   height = 128,
-  containerWidth
+  containerWidth,
+  userType = "enterprise"
 }: SlideThumbnailsProps) => {
   const storeSlides = useSlideStore(state => state.slides);
   const generateThumbnails = useSlideStore(state => state.generateThumbnails);
@@ -33,6 +35,10 @@ const SlideThumbnails = ({
     generateThumbnails();
   }, [generateThumbnails]);
 
+  // Calculate progress for students
+  const reviewedCount = slides.filter(slide => slide.isReviewed || slide.commentCount > 0).length;
+  const totalComments = slides.reduce((total, slide) => total + (slide.commentCount || 0), 0);
+
   // Calculate dynamic width based on container
   const getContainerWidth = () => {
     if (containerWidth) return containerWidth;
@@ -41,12 +47,23 @@ const SlideThumbnails = ({
 
   const thumbnailWidth = height > 150 ? 160 : 120;
   const gap = height > 150 ? 24 : 16;
-  const totalItemsWidth = (slides.length + 2) * (thumbnailWidth + gap);
+  
+  // Calculate items to show based on user type
+  const showAddSlide = userType === "enterprise";
+  const showEvaluation = userType === "enterprise";
+  const additionalItems = (showAddSlide ? 1 : 0) + (showEvaluation ? 1 : 0);
+  
+  const totalItemsWidth = (slides.length + additionalItems) * (thumbnailWidth + gap);
   const dynamicWidth = Math.max(getContainerWidth(), totalItemsWidth);
   
   return (
     <div className="modern-thumbnails bg-white flex flex-col w-full h-full">
-      <ThumbnailHeader slideCount={slides.length} />
+      <ThumbnailHeader 
+        slideCount={slides.length}
+        userType={userType}
+        reviewedCount={reviewedCount}
+        totalComments={totalComments}
+      />
       
       <div className="flex-grow overflow-hidden">
         <ScrollArea className="h-full w-full" orientation="horizontal">
@@ -62,15 +79,22 @@ const SlideThumbnails = ({
                 isActive={currentSlide === slide.id}
                 thumbnailWidth={thumbnailWidth}
                 onClick={onSlideClick}
+                userType={userType}
               />
             ))}
             
-            <AddSlideCard thumbnailWidth={thumbnailWidth} />
+            {/* Only show AddSlideCard for enterprise users */}
+            {showAddSlide && (
+              <AddSlideCard thumbnailWidth={thumbnailWidth} />
+            )}
             
-            <EvaluationCard 
-              thumbnailWidth={thumbnailWidth}
-              onOpenOverallReview={onOpenOverallReview}
-            />
+            {/* Only show EvaluationCard for enterprise users */}
+            {showEvaluation && (
+              <EvaluationCard 
+                thumbnailWidth={thumbnailWidth}
+                onOpenOverallReview={onOpenOverallReview}
+              />
+            )}
           </div>
         </ScrollArea>
       </div>

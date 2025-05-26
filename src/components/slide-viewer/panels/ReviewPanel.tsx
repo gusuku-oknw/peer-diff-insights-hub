@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -18,10 +17,12 @@ import {
   ChevronUp,
   Edit3,
   Send,
-  Eye
+  Eye,
+  Clipboard
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AIReviewSummary from "./AIReviewSummary";
+import ReviewChecklistTabs from "./ReviewChecklistTabs";
 
 interface ReviewPanelProps {
   currentSlide: number;
@@ -187,6 +188,11 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
     }
   };
 
+  const handleChecklistComment = (comment: string, category: string) => {
+    console.log(`Checklist comment for ${category}:`, comment);
+    // Handle checklist comment submission
+  };
+
   // Permission check for interactive elements
   const canInteract = userType === "student";
 
@@ -258,6 +264,12 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
             <MessageSquare className={`${isExtremelyNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0`} />
             {!isExtremelyNarrow && <span className="truncate">レビュー</span>}
           </TabsTrigger>
+          {canInteract && (
+            <TabsTrigger value="checklist" className="flex gap-1 items-center text-xs min-w-0">
+              <Clipboard className={`${isExtremelyNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0`} />
+              {!isExtremelyNarrow && <span className="truncate">チェックリスト</span>}
+            </TabsTrigger>
+          )}
           <TabsTrigger value="summary" className="flex gap-1 items-center text-xs min-w-0">
             <BarChart4 className={`${isExtremelyNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0`} />
             {!isExtremelyNarrow && <span className="truncate">サマリー</span>}
@@ -337,7 +349,19 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
             )}
           </ScrollArea>
         </TabsContent>
+
+        {/* New Checklist Tab - Only show for students */}
+        {canInteract && (
+          <TabsContent value="checklist" className="flex-grow p-0 m-0 overflow-hidden">
+            <ReviewChecklistTabs
+              currentSlide={currentSlide}
+              onSubmitComment={handleChecklistComment}
+              userType={userType}
+            />
+          </TabsContent>
+        )}
         
+        {/* ... keep existing code for summary and ai-summary tabs */}
         <TabsContent value="summary" className={`${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-4'} m-0 overflow-auto`}>
           <div className={isVeryNarrow ? 'space-y-1' : isNarrow ? 'space-y-2' : 'space-y-4'}>
             <div className={`bg-white shadow-sm border border-gray-200 rounded-lg ${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'}`}>
@@ -401,25 +425,33 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
         </TabsContent>
       </Tabs>
       
-      {/* Comment Input Section - Only show for students */}
+      {/* Enhanced Comment Input Section - Only show for students */}
       {canInteract && (
-        <div className={`${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'} border-t border-gray-200 bg-gray-50 flex-shrink-0`}>
+        <div className={`${isVeryNarrow ? 'p-1' : isNarrow ? 'p-2' : 'p-3'} border-t border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 flex-shrink-0`}>
           <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className={`${isVeryNarrow ? 'text-xs' : 'text-sm'} font-medium text-gray-700`}>
+                新しいコメントを追加
+              </span>
+              <span className={`${isVeryNarrow ? 'text-xs' : 'text-xs'} text-gray-500 bg-white px-2 py-1 rounded-full`}>
+                スライド {currentSlide}
+              </span>
+            </div>
             <Textarea
-              placeholder="このスライドにコメントを追加..."
+              placeholder="このスライドについてのコメントや改善点を入力してください..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className={`${isVeryNarrow ? 'text-xs min-h-16' : 'text-sm min-h-20'} resize-none`}
+              className={`${isVeryNarrow ? 'text-xs min-h-16' : 'text-sm min-h-20'} resize-none border-2 border-blue-200 focus:border-blue-400`}
             />
             <div className="flex justify-between items-center">
               <span className={`${isVeryNarrow ? 'text-xs' : 'text-sm'} text-gray-500`}>
-                台本を参考にしてコメントしてください
+                {isVeryNarrow ? '台本参考に' : 'チェックリストや台本を参考にしてください'}
               </span>
               <Button 
                 size="sm" 
                 onClick={handleSubmitComment}
                 disabled={!newComment.trim()}
-                className={`${isVeryNarrow ? 'text-xs h-6 px-2' : isNarrow ? 'text-xs h-7 px-3' : ''}`}
+                className={`${isVeryNarrow ? 'text-xs h-6 px-2' : isNarrow ? 'text-xs h-7 px-3' : ''} bg-purple-500 hover:bg-purple-600`}
               >
                 <Send className={`${isVeryNarrow ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-1'}`} />
                 投稿
