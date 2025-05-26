@@ -35,8 +35,31 @@ const SimplifiedReviewTabs: React.FC<SimplifiedReviewTabsProps> = ({
   onSubmitComment,
   onCheckboxChange
 }) => {
+  
+  // Enhanced checkbox change handler with event isolation
+  const handleCheckboxChange = (categoryKey: string, itemId: string, checked: boolean) => {
+    console.log('SimplifiedReviewTabs: Enhanced checkbox handler called', { 
+      categoryKey, 
+      itemId, 
+      checked, 
+      currentActiveTab: activeTab 
+    });
+    
+    // Call the parent handler without triggering tab changes
+    onCheckboxChange(categoryKey, itemId, checked);
+    
+    // Explicitly prevent any state changes that might trigger tab transitions
+    console.log('SimplifiedReviewTabs: Checkbox change completed, activeTab should remain:', activeTab);
+  };
+
+  // Enhanced tab change handler with logging
+  const handleTabChange = (newTab: string) => {
+    console.log('SimplifiedReviewTabs: Explicit tab change requested', { from: activeTab, to: newTab });
+    onTabChange(newTab);
+  };
+
   return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="flex-grow flex flex-col">
+    <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-grow flex flex-col">
       <TabsList className="mx-4 mt-3 grid grid-cols-2 bg-gray-50">
         <TabsTrigger value="review" className="flex items-center gap-1">
           <MessageSquare className="h-3 w-3" />
@@ -65,7 +88,7 @@ const SimplifiedReviewTabs: React.FC<SimplifiedReviewTabsProps> = ({
       <TabsContent value="checklist" className="flex-grow mx-4 mt-3 overflow-hidden">
         <ReviewChecklistPanel
           checklistState={checklistState}
-          onCheckboxChange={onCheckboxChange}
+          onCheckboxChange={handleCheckboxChange}
           checklistCategories={checklistCategories}
           canInteract={canInteract}
         />

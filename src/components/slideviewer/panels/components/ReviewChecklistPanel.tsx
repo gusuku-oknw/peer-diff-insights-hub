@@ -30,16 +30,28 @@ const ReviewChecklistPanel: React.FC<ReviewChecklistPanelProps> = ({
     return Math.round((completed / items.length) * 100);
   };
 
-  const handleCheckboxChange = (categoryKey: string, itemId: string, checked: boolean) => {
-    console.log('ReviewChecklistPanel: Checkbox change triggered', { categoryKey, itemId, checked, canInteract });
+  const handleCheckboxChange = (categoryKey: string, itemId: string, checked: boolean, event?: any) => {
+    console.log('ReviewChecklistPanel: Enhanced checkbox change triggered', { 
+      categoryKey, 
+      itemId, 
+      checked, 
+      canInteract,
+      eventType: event?.type
+    });
     
     if (!canInteract) {
       console.log('ReviewChecklistPanel: Interaction blocked - user cannot interact');
       return;
     }
     
+    // Stop event propagation to prevent unwanted side effects
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    
     // Call the parent handler - this should NOT cause tab transitions
-    console.log('ReviewChecklistPanel: Calling onCheckboxChange');
+    console.log('ReviewChecklistPanel: Calling onCheckboxChange with isolated event');
     onCheckboxChange(categoryKey, itemId, checked);
   };
 
@@ -69,7 +81,21 @@ const ReviewChecklistPanel: React.FC<ReviewChecklistPanelProps> = ({
                       <Checkbox
                         id={item.id}
                         checked={item.checked}
-                        onCheckedChange={(checked) => handleCheckboxChange(key, item.id, !!checked)}
+                        onCheckedChange={(checked) => {
+                          console.log('ReviewChecklistPanel: Checkbox onCheckedChange triggered', { 
+                            itemId: item.id, 
+                            checked, 
+                            categoryKey: key 
+                          });
+                          handleCheckboxChange(key, item.id, !!checked);
+                        }}
+                        onClick={(e) => {
+                          console.log('ReviewChecklistPanel: Checkbox onClick triggered', { 
+                            itemId: item.id, 
+                            categoryKey: key 
+                          });
+                          e.stopPropagation();
+                        }}
                         className="mt-0.5 flex-shrink-0"
                         disabled={!canInteract}
                       />
@@ -80,6 +106,17 @@ const ReviewChecklistPanel: React.FC<ReviewChecklistPanelProps> = ({
                             ? 'text-gray-500 line-through' 
                             : 'text-gray-700'
                         }`}
+                        onClick={(e) => {
+                          console.log('ReviewChecklistPanel: Label onClick triggered', { 
+                            itemId: item.id, 
+                            categoryKey: key 
+                          });
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (canInteract) {
+                            handleCheckboxChange(key, item.id, !item.checked, e);
+                          }
+                        }}
                       >
                         {item.text}
                       </label>

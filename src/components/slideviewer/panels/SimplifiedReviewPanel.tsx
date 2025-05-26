@@ -69,8 +69,9 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
     return totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0;
   }, [checklistState]);
 
+  // Enhanced checkbox change handler that prevents tab transitions
   const handleCheckboxChange = (categoryKey: string, itemId: string, checked: boolean) => {
-    console.log('SimplifiedReviewPanel: handleCheckboxChange called', { 
+    console.log('SimplifiedReviewPanel: Enhanced handleCheckboxChange called', { 
       categoryKey, 
       itemId, 
       checked, 
@@ -83,7 +84,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
       return;
     }
     
-    // Update checkbox state - this should NOT cause tab transitions
+    // Update checkbox state WITHOUT affecting activeTab
     setChecklistState(prev => {
       const newState = {
         ...prev,
@@ -105,8 +106,8 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
       });
     }
 
-    // 重要: ここでactiveTabを変更しない - これがタブ遷移の原因だった
-    console.log('SimplifiedReviewPanel: Checkbox change completed, activeTab remains:', activeTab);
+    // CRITICAL: Do NOT change activeTab here - this was causing the unwanted transitions
+    console.log('SimplifiedReviewPanel: Checkbox change completed, activeTab remains unchanged:', activeTab);
   };
 
   const handleSubmitComment = () => {
@@ -139,8 +140,9 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
     }
   };
 
+  // Enhanced tab change handler with explicit logging
   const handleTabChange = (newTab: string) => {
-    console.log('SimplifiedReviewPanel: Tab change requested', { from: activeTab, to: newTab });
+    console.log('SimplifiedReviewPanel: Explicit tab change requested', { from: activeTab, to: newTab });
     setActiveTab(newTab);
   };
 
