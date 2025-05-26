@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import NotesPanel from "./NotesPanel";
 import ReviewPanel from "./ReviewPanel";
@@ -6,9 +7,19 @@ import { BookOpen, MessageSquare, X, PanelRightClose, PanelRightOpen } from "luc
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import type { SidePanelProps } from "@/types/slide-viewer/panel.types";
 
-const SidePanel = ({
+interface ImprovedSidePanelProps {
+  shouldShowNotes: boolean;
+  shouldShowReviewPanel: boolean;
+  currentSlide: number;
+  totalSlides: number;
+  presenterNotes: Record<number, string>;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
+  userType: "student" | "enterprise";
+}
+
+const ImprovedSidePanel = ({
   shouldShowNotes,
   shouldShowReviewPanel,
   currentSlide,
@@ -16,13 +27,14 @@ const SidePanel = ({
   presenterNotes,
   isCollapsed = false,
   onToggleCollapse,
-}: SidePanelProps) => {
+  userType,
+}: ImprovedSidePanelProps) => {
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [panelDimensions, setPanelDimensions] = useState({ width: 0, height: 0 });
   const panelRef = useRef<HTMLDivElement>(null);
   
-  // Track panel dimensions with ResizeObserver for more accurate tracking
+  // Track panel dimensions
   useEffect(() => {
     const updateDimensions = () => {
       if (panelRef.current) {
@@ -47,7 +59,6 @@ const SidePanel = ({
       resizeObserver.observe(panelRef.current);
     }
 
-    // Also listen for window resize as backup
     window.addEventListener('resize', updateDimensions);
 
     return () => {
@@ -56,22 +67,16 @@ const SidePanel = ({
     };
   }, []);
   
-  // Determine if we should display the panel at all
+  // Don't display panel if neither notes nor review panel should be shown
   const shouldDisplay = shouldShowNotes || shouldShowReviewPanel;
   
-  // No display if conditions not met
   if (!shouldDisplay) {
     return null;
   }
 
-  // Default to the tab that's enabled
   const defaultTab = shouldShowNotes ? "notes" : "reviews";
-  
-  // Determine layout mode based on actual panel width
   const isNarrow = panelDimensions.width > 0 && panelDimensions.width < 280;
   const isVeryNarrow = panelDimensions.width > 0 && panelDimensions.width < 200;
-
-  console.log('Panel dimensions:', panelDimensions, 'isNarrow:', isNarrow, 'isVeryNarrow:', isVeryNarrow);
 
   // Panel content component
   const PanelContent = () => (
@@ -83,7 +88,6 @@ const SidePanel = ({
               <TabsTrigger 
                 value="notes" 
                 className={`flex items-center gap-1 ${isVeryNarrow ? 'px-1' : 'px-2'} min-w-0`}
-                data-testid="notes-tab"
               >
                 <BookOpen className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0`} />
                 {!isVeryNarrow && <span className="truncate">メモ</span>}
@@ -93,7 +97,6 @@ const SidePanel = ({
               <TabsTrigger 
                 value="reviews" 
                 className={`flex items-center gap-1 ${isVeryNarrow ? 'px-1' : 'px-2'} min-w-0`}
-                data-testid="reviews-tab"
               >
                 <MessageSquare className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0`} />
                 {!isVeryNarrow && <span className="truncate">レビュー</span>}
@@ -101,7 +104,6 @@ const SidePanel = ({
             )}
           </TabsList>
           
-          {/* Collapse/Expand button for desktop */}
           {!isMobile && onToggleCollapse && (
             <Button
               variant="ghost"
@@ -117,7 +119,6 @@ const SidePanel = ({
             </Button>
           )}
           
-          {/* Close button for mobile sheet */}
           {isMobile && (
             <Button
               variant="ghost"
@@ -232,4 +233,4 @@ const SidePanel = ({
   );
 };
 
-export default SidePanel;
+export default ImprovedSidePanel;
