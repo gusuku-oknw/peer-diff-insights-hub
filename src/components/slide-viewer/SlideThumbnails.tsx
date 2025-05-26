@@ -1,9 +1,9 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSlideStore } from "@/stores/slide-store";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Plus, MoreVertical, Info, Star, FileText, BarChart3, GripVertical } from "lucide-react";
+import { MessageSquare, Plus, MoreVertical, Info, Star, FileText, BarChart3 } from "lucide-react";
 
 interface SlideThumbnailsProps {
   slides?: any[];
@@ -11,7 +11,7 @@ interface SlideThumbnailsProps {
   onSlideClick: (slideIndex: number) => void;
   onOpenOverallReview?: () => void;
   height?: number;
-  onHeightChange?: (height: number) => void;
+  containerWidth?: number;
 }
 
 const SlideThumbnails = ({
@@ -20,11 +20,10 @@ const SlideThumbnails = ({
   onSlideClick,
   onOpenOverallReview,
   height = 128,
-  onHeightChange
+  containerWidth
 }: SlideThumbnailsProps) => {
   const storeSlides = useSlideStore(state => state.slides);
   const generateThumbnails = useSlideStore(state => state.generateThumbnails);
-  const [isResizing, setIsResizing] = useState(false);
   
   const slides = propSlides || storeSlides;
   
@@ -32,41 +31,19 @@ const SlideThumbnails = ({
     generateThumbnails();
   }, [generateThumbnails]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!onHeightChange) return;
-    
-    setIsResizing(true);
-    const startY = e.clientY;
-    const startHeight = height;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const deltaY = startY - e.clientY;
-      const newHeight = Math.max(80, Math.min(400, startHeight + deltaY));
-      onHeightChange(newHeight);
-    };
-
-    const handleMouseUp = () => {
-      setIsResizing(false);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+  // Calculate dynamic width based on container
+  const getContainerWidth = () => {
+    if (containerWidth) return containerWidth;
+    return typeof window !== 'undefined' ? window.innerWidth - 100 : 1200;
   };
+
+  const thumbnailWidth = height > 150 ? 160 : 120;
+  const gap = height > 150 ? 24 : 16;
+  const totalItemsWidth = (slides.length + 2) * (thumbnailWidth + gap);
+  const dynamicWidth = Math.max(getContainerWidth(), totalItemsWidth);
   
   return (
-    <div className="modern-thumbnails bg-white flex flex-col border-t border-gray-200 shadow-sm w-full" style={{ height: `${height}px` }}>
-      {/* Resize handle */}
-      {onHeightChange && (
-        <div 
-          className={`flex items-center justify-center h-2 bg-gray-100 border-b border-gray-200 cursor-row-resize hover:bg-gray-200 transition-colors ${isResizing ? 'bg-blue-100' : ''}`}
-          onMouseDown={handleMouseDown}
-        >
-          <GripVertical className="h-3 w-3 text-gray-400 rotate-90" />
-        </div>
-      )}
-
+    <div className="modern-thumbnails bg-white flex flex-col w-full h-full">
       <div className="flex justify-between items-center px-4 lg:px-6 py-2 lg:py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
         <h3 className="font-semibold flex items-center text-sm text-gray-800">
           <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,12 +69,14 @@ const SlideThumbnails = ({
       {/* Improved horizontal scroll with full width utilization */}
       <div className="flex-grow overflow-hidden">
         <ScrollArea className="h-full w-full" orientation="horizontal">
-          <div className="flex gap-4 lg:gap-6 p-4 lg:p-6 pb-4 min-w-full" style={{ width: `max(100%, ${(slides.length + 2) * (height > 150 ? 180 : 140)}px)` }}>
+          <div 
+            className="flex gap-4 lg:gap-6 p-4 lg:p-6 pb-4" 
+            style={{ width: `${dynamicWidth}px`, minWidth: '100%' }}
+          >
             {slides.map((slide, index) => {
               const slideIndex = slide.id;
               const slideTitle = slide.title || `スライド ${slideIndex}`;
               const isActive = currentSlide === slideIndex;
-              const thumbnailWidth = height > 150 ? 160 : 120;
               
               return (
                 <div
@@ -174,7 +153,7 @@ const SlideThumbnails = ({
             {/* Add new slide button */}
             <div 
               className="thumbnail-card flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 border-2 border-dashed border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-blue-50" 
-              style={{ width: `${height > 150 ? 160 : 120}px` }}
+              style={{ width: `${thumbnailWidth}px` }}
               title="新しいスライドを追加"
             >
               <div className="w-full aspect-video flex items-center justify-center mb-3">
@@ -188,7 +167,7 @@ const SlideThumbnails = ({
             {/* Presentation evaluation button */}
             <div 
               className="thumbnail-card flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 border-2 border-dashed border-purple-300 hover:border-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100"
-              style={{ width: `${height > 150 ? 160 : 120}px` }}
+              style={{ width: `${thumbnailWidth}px` }}
               onClick={() => {
                 console.log("Opening presentation evaluation");
                 onOpenOverallReview?.();

@@ -23,7 +23,7 @@ export const ResizablePanel = ({
   resizePosition = 'right',
   orientation = 'vertical'
 }: ResizablePanelProps) => {
-  const { width, ResizeHandle } = useResizablePanels({
+  const { width, ResizeHandle, isResizing } = useResizablePanels({
     initialWidth,
     minWidth,
     maxWidth,
@@ -33,7 +33,7 @@ export const ResizablePanel = ({
 
   return (
     <div 
-      className={`relative flex-shrink-0 ${className}`}
+      className={`relative flex-shrink-0 ${className} ${isResizing ? 'select-none' : ''}`}
       style={{ 
         width: orientation === 'vertical' ? `${width}px` : '100%',
         height: orientation === 'horizontal' ? `${width}px` : '100%'

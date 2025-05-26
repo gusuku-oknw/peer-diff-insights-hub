@@ -66,22 +66,44 @@ export const useResizablePanels = ({
     className?: string; 
     position?: 'left' | 'right' | 'top' | 'bottom';
   }) => {
+    const isVertical = orientation === 'vertical';
+    const isHorizontal = orientation === 'horizontal';
+    
     return (
       <div
         ref={handleRef}
         className={`
-          ${orientation === 'vertical' ? 'w-1 cursor-col-resize' : 'h-1 cursor-row-resize'}
+          ${isVertical ? 'w-2 cursor-col-resize hover:w-3' : 'h-2 cursor-row-resize hover:h-3'}
           ${position === 'right' ? 'absolute right-0 top-0 bottom-0' :
             position === 'left' ? 'absolute left-0 top-0 bottom-0' :
             position === 'top' ? 'absolute top-0 left-0 right-0' :
             'absolute bottom-0 left-0 right-0'}
-          bg-gray-300 hover:bg-blue-400 transition-colors duration-200 z-10
-          ${isResizing ? 'bg-blue-500' : ''}
+          bg-gray-200 hover:bg-blue-400 transition-all duration-200 z-20 group
+          ${isResizing ? 'bg-blue-500 shadow-lg' : ''}
           ${className}
         `}
         onMouseDown={handleMouseDown}
-        title={orientation === 'vertical' ? 'サイズを調整' : '高さを調整'}
-      />
+        title={orientation === 'vertical' ? 'ドラッグして幅を調整' : 'ドラッグして高さを調整'}
+      >
+        {/* Visual grip indicator */}
+        <div className={`
+          ${isVertical ? 'w-full h-8 top-1/2 left-0 -translate-y-1/2' : 'h-full w-8 left-1/2 top-0 -translate-x-1/2'}
+          absolute flex items-center justify-center
+          ${isResizing ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
+          transition-opacity duration-200
+        `}>
+          <div className={`
+            ${isVertical ? 'w-0.5 h-6' : 'h-0.5 w-6'}
+            bg-white rounded-full shadow-sm
+          `} />
+        </div>
+        
+        {/* Extended hit area */}
+        <div className={`
+          ${isVertical ? 'w-4 -left-1' : 'h-4 -top-1'}
+          absolute inset-0 
+        `} />
+      </div>
     );
   }, [handleMouseDown, isResizing, orientation]);
 

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ResizablePanel } from "@/components/slide-viewer/layout/ResizablePanel";
 import LeftSidebar from "./LeftSidebar";
@@ -101,7 +100,7 @@ const MainLayout = ({
       {leftSidebarOpen && (
         <ResizablePanel
           initialWidth={leftSidebarWidth}
-          minWidth={200}
+          minWidth={180}
           maxWidth={400}
           onWidthChange={setLeftSidebarWidth}
           className="bg-gray-50 border-r border-gray-200"
@@ -124,7 +123,7 @@ const MainLayout = ({
         {viewerMode === "edit" && userType === "enterprise" && (
           <ResizablePanel
             initialWidth={editSidebarWidth}
-            minWidth={240}
+            minWidth={220}
             maxWidth={400}
             onWidthChange={setEditSidebarWidth}
             className="border-r border-gray-200 bg-white"
@@ -157,26 +156,24 @@ const MainLayout = ({
             />
           </div>
 
-          {/* Bottom thumbnails with dynamic sizing */}
+          {/* Bottom thumbnails with improved resizing */}
           {!(viewerMode === "presentation" && isFullScreen) && (
             <ResizablePanel
               initialWidth={thumbnailsHeight}
-              minWidth={80}
-              maxWidth={400}
+              minWidth={100}
+              maxWidth={300}
               onWidthChange={setThumbnailsHeight}
               orientation="horizontal"
               resizePosition="top"
-              className="border-t border-gray-200"
+              className="border-t border-gray-200 bg-white"
             >
-              <div style={{ width: `${thumbnailsWidth}px` }}>
-                <SlideThumbnails
-                  currentSlide={currentSlide}
-                  onSlideClick={onSlideChange}
-                  onOpenOverallReview={() => {}}
-                  height={thumbnailsHeight}
-                  onHeightChange={setThumbnailsHeight}
-                />
-              </div>
+              <SlideThumbnails
+                currentSlide={currentSlide}
+                onSlideClick={onSlideChange}
+                onOpenOverallReview={() => {}}
+                height={thumbnailsHeight}
+                containerWidth={thumbnailsWidth}
+              />
             </ResizablePanel>
           )}
         </div>
@@ -185,7 +182,7 @@ const MainLayout = ({
         {!hideRightPanelCompletely && shouldDisplayRightPanel && !rightPanelHidden && (
           <ResizablePanel
             initialWidth={rightSidebarWidth}
-            minWidth={240}
+            minWidth={220}
             maxWidth={500}
             onWidthChange={setRightSidebarWidth}
             resizePosition="left"
