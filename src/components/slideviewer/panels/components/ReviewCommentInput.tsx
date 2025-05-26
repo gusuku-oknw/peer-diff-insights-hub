@@ -1,73 +1,57 @@
 
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import React from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 
 interface ReviewCommentInputProps {
-  selectedCategory: string;
-  onCategoryChange: (category: string) => void;
-  onSubmitComment: (comment: string) => void;
-  checklistCategories: any;
+  newComment: string;
+  currentSlide: number;
+  isVeryNarrow?: boolean;
+  onCommentChange: (value: string) => void;
+  onSubmitComment: () => void;
 }
 
 const ReviewCommentInput: React.FC<ReviewCommentInputProps> = ({
-  selectedCategory,
-  onCategoryChange,
-  onSubmitComment,
-  checklistCategories
+  newComment,
+  currentSlide,
+  isVeryNarrow = false,
+  onCommentChange,
+  onSubmitComment
 }) => {
-  const [newComment, setNewComment] = useState("");
-
-  const handleSubmit = () => {
-    if (newComment.trim()) {
-      onSubmitComment(newComment);
-      setNewComment("");
-    }
-  };
-
   return (
-    <Card className="border-gray-200">
-      <CardContent className="p-3 space-y-3">
-        <div className="flex gap-2">
-          {Object.entries(checklistCategories).map(([key, category]: [string, any]) => {
-            const Icon = category.icon;
-            return (
-              <Button
-                key={key}
-                variant={selectedCategory === key ? "default" : "outline"}
-                size="sm"
-                onClick={() => onCategoryChange(key)}
-                className={`h-8 px-2 text-xs ${
-                  selectedCategory === key 
-                    ? `bg-${category.color}-100 text-${category.color}-700 border-${category.color}-200` 
-                    : "hover:bg-gray-50"
-                }`}
-              >
-                <Icon className="h-3 w-3 mr-1" />
-                {category.label}
-              </Button>
-            );
-          })}
+    <div className={`${isVeryNarrow ? 'p-1' : 'p-3'} border-t border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 flex-shrink-0`}>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className={`${isVeryNarrow ? 'text-xs' : 'text-sm'} font-medium text-gray-700`}>
+            新しいコメントを追加
+          </span>
+          <span className={`${isVeryNarrow ? 'text-xs' : 'text-xs'} text-gray-500 bg-white px-2 py-1 rounded-full`}>
+            スライド {currentSlide}
+          </span>
         </div>
         <Textarea
+          placeholder="このスライドについてのコメントや改善点を入力してください..."
           value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="レビューコメントを入力してください..."
-          className="text-sm resize-none"
-          rows={3}
+          onChange={(e) => onCommentChange(e.target.value)}
+          className={`${isVeryNarrow ? 'text-xs min-h-16' : 'text-sm min-h-20'} resize-none border-2 border-blue-200 focus:border-blue-400`}
         />
-        <Button
-          onClick={handleSubmit}
-          disabled={!newComment.trim()}
-          className="w-full bg-blue-600 hover:bg-blue-700"
-        >
-          <Send className="h-3 w-3 mr-2" />
-          コメント投稿
-        </Button>
-      </CardContent>
-    </Card>
+        <div className="flex justify-between items-center">
+          <span className={`${isVeryNarrow ? 'text-xs' : 'text-sm'} text-gray-500`}>
+            {isVeryNarrow ? '台本参考に' : 'チェックリストや台本を参考にしてください'}
+          </span>
+          <Button 
+            size="sm" 
+            onClick={onSubmitComment}
+            disabled={!newComment.trim()}
+            className={`${isVeryNarrow ? 'text-xs h-6 px-2' : 'text-xs h-7 px-3'} bg-purple-500 hover:bg-purple-600`}
+          >
+            <Send className={`${isVeryNarrow ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-1'}`} />
+            投稿
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 };
 
