@@ -8,6 +8,7 @@ export interface ElementsSlice {
   
   setSelectedElementId: (id: string | null) => void;
   updateSlideElement: (slideId: number, elementId: string, updates: Partial<SlideElement>) => void;
+  updateElement: (slideId: number, elementId: string, updates: Partial<SlideElement>) => void; // Alias for compatibility
   addSlideElement: (slideId: number, element: SlideElement) => void;
   removeSlideElement: (slideId: number, elementId: string) => void;
 }
@@ -40,6 +41,12 @@ export const createElementsSlice: StateCreator<
         return slide;
       })
     }));
+  },
+  
+  // Alias for backward compatibility
+  updateElement: (slideId: number, elementId: string, updates: Partial<SlideElement>) => {
+    const { updateSlideElement } = get();
+    updateSlideElement(slideId, elementId, updates);
   },
   
   addSlideElement: (slideId: number, element: SlideElement) => {

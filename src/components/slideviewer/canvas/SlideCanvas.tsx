@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { Canvas, IText, Rect, Circle, Image } from 'fabric';
-import { useSlideStore } from "@/stores/slideStore";
+import { useSlideStore } from "@/stores/slide-store";
 
 interface SlideCanvasProps {
   currentSlide: number;
@@ -17,12 +17,14 @@ const SlideCanvas = ({
   userType = "enterprise" 
 }: SlideCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const fabricCanvasRef = useRef<Canvas | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: 1600, height: 900 });
   
   const slides = useSlideStore(state => state.slides);
-  const updateElement = useSlideStore(state => state.updateElement);
+  const updateSlideElement = useSlideStore(state => state.updateSlideElement);
   
   console.log(`SlideCanvas rendering - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Editable: ${editable}`);
   
@@ -30,7 +32,53 @@ const SlideCanvas = ({
   const currentSlideData = slides.find(slide => slide.id === currentSlide);
   const elements = currentSlideData?.elements || [];
   
-  // キャンバス初期化（基本的なFabric.jsパターン）
+  // レスポンシブキャンバスサイズ計算
+  const calculateCanvasSize = useCallback(() => {
+    if (!containerRef.current) return { width: 1600, height: 900 };
+    
+    const container = containerRef.current;
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    
+    // アスペクト比16:9を維持
+    const aspectRatio = 16 / 9;
+    let canvasWidth = containerWidth * 0.9; // コンテナの90%を使用
+    let canvasHeight = canvasWidth / aspectRatio;
+    
+    // 高さがコンテナを超える場合は高さベースで計算
+    if (canvasHeight > containerHeight * 0.9) {
+      canvasHeight = containerHeight * 0.9;
+      canvasWidth = canvasHeight * aspectRatio;
+    }
+    
+    // 最小サイズと最大サイズを設定
+    canvasWidth = Math.max(800, Math.min(1600, canvasWidth));
+    canvasHeight = Math.max(450, Math.min(900, canvasHeight));
+    
+    return { width: canvasWidth, height: canvasHeight };
+  }, []);
+  
+  // ResizeObserverでコンテナサイズ変更を監視
+  useEffect(() => {
+    if (!containerRef.current) return;
+    
+    const resizeObserver = new ResizeObserver(() => {
+      const newSize = calculateCanvasSize();
+      setCanvasSize(newSize);
+    });
+    
+    resizeObserver.observe(containerRef.current);
+    
+    // 初期サイズ設定
+    const initialSize = calculateCanvasSize();
+    setCanvasSize(initialSize);
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [calculateCanvasSize]);
+  
+  // キャンバス初期化
   useEffect(() => {
     if (!canvasRef.current) return;
     
@@ -40,10 +88,10 @@ const SlideCanvas = ({
         fabricCanvasRef.current.dispose();
       }
       
-      // 新しいキャンバスを作成（基本パターン）
+      // 新しいキャンバスを作成
       const canvas = new Canvas(canvasRef.current, {
-        width: 1600,
-        height: 900,
+        width: canvasSize.width,
+        height: canvasSize.height,
         backgroundColor: '#ffffff',
         selection: editable,
         preserveObjectStacking: true,
@@ -55,7 +103,7 @@ const SlideCanvas = ({
       setIsReady(true);
       setError(null);
       
-      console.log('Canvas initialized successfully');
+      console.log('Canvas initialized successfully with size:', canvasSize);
       
       // オブジェクト選択イベント（編集モードのみ）
       if (editable) {
@@ -74,7 +122,7 @@ const SlideCanvas = ({
               },
               angle: obj.angle || 0
             };
-            updateElement(currentSlide, obj.customData.id, updates);
+            updateSlideElement(currentSlide, obj.customData.id, updates);
           }
         });
       }
@@ -91,9 +139,23 @@ const SlideCanvas = ({
         fabricCanvasRef.current = null;
       }
     };
-  }, [editable, currentSlide]);
+  }, [editable, currentSlide, canvasSize]);
   
-  // 要素をキャンバスにレンダリング（基本パターン）
+  // キャンバスサイズ変更時の処理
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas || !isReady) return;
+    
+    canvas.setDimensions({
+      width: canvasSize.width,
+      height: canvasSize.height
+    });
+    canvas.renderAll();
+    
+    console.log('Canvas resized to:', canvasSize);
+  }, [canvasSize, isReady]);
+  
+  // 要素をキャンバスにレンダリング
   const renderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady) return;
@@ -106,9 +168,9 @@ const SlideCanvas = ({
       if (elements.length === 0) {
         // プレースホルダー表示
         const placeholder = new IText(`スライド ${currentSlide}`, {
-          left: 800,
-          top: 450,
-          fontSize: 36,
+          left: canvasSize.width / 2,
+          top: canvasSize.height / 2,
+          fontSize: Math.min(36, canvasSize.width / 25),
           fill: '#64748b',
           fontFamily: 'Arial',
           originX: 'center',
@@ -124,16 +186,20 @@ const SlideCanvas = ({
       // 要素をzIndexでソート
       const sortedElements = [...elements].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
       
-      // 各要素をキャンバスに追加（基本パターン）
+      // 各要素をキャンバスに追加
       sortedElements.forEach(element => {
         const { type, position, size, props, id, angle } = element;
+        
+        // スケール調整（キャンバスサイズに応じて）
+        const scaleX = canvasSize.width / 1600;
+        const scaleY = canvasSize.height / 900;
         
         switch (type) {
           case 'text':
             const text = new IText(props.text || 'New Text', {
-              left: position.x,
-              top: position.y,
-              fontSize: props.fontSize || 24,
+              left: position.x * scaleX,
+              top: position.y * scaleY,
+              fontSize: (props.fontSize || 24) * Math.min(scaleX, scaleY),
               fill: props.color || '#000000',
               fontFamily: props.fontFamily || 'Arial',
               originX: 'center',
@@ -149,13 +215,13 @@ const SlideCanvas = ({
           case 'shape':
             if (props.shape === 'rect') {
               const rect = new Rect({
-                left: position.x,
-                top: position.y,
-                width: size.width,
-                height: size.height,
+                left: position.x * scaleX,
+                top: position.y * scaleY,
+                width: size.width * scaleX,
+                height: size.height * scaleY,
                 fill: props.fill || '#000000',
                 stroke: props.stroke || '',
-                strokeWidth: props.strokeWidth || 0,
+                strokeWidth: (props.strokeWidth || 0) * Math.min(scaleX, scaleY),
                 originX: 'center',
                 originY: 'center',
                 selectable: editable,
@@ -165,12 +231,12 @@ const SlideCanvas = ({
               canvas.add(rect);
             } else if (props.shape === 'circle') {
               const circle = new Circle({
-                left: position.x,
-                top: position.y,
-                radius: size.width / 2,
+                left: position.x * scaleX,
+                top: position.y * scaleY,
+                radius: (size.width / 2) * Math.min(scaleX, scaleY),
                 fill: props.fill || '#000000',
                 stroke: props.stroke || '',
-                strokeWidth: props.strokeWidth || 0,
+                strokeWidth: (props.strokeWidth || 0) * Math.min(scaleX, scaleY),
                 originX: 'center',
                 originY: 'center',
                 selectable: editable,
@@ -186,10 +252,10 @@ const SlideCanvas = ({
               crossOrigin: 'anonymous',
             }).then((img) => {
               img.set({
-                left: position.x,
-                top: position.y,
-                scaleX: size.width / (img.width || 1),
-                scaleY: size.height / (img.height || 1),
+                left: position.x * scaleX,
+                top: position.y * scaleY,
+                scaleX: (size.width / (img.width || 1)) * scaleX,
+                scaleY: (size.height / (img.height || 1)) * scaleY,
                 originX: 'center',
                 originY: 'center',
                 selectable: editable,
@@ -213,7 +279,7 @@ const SlideCanvas = ({
       console.error('Element rendering failed:', err);
       setError('要素の描画に失敗しました');
     }
-  }, [elements, currentSlide, editable, isReady]);
+  }, [elements, currentSlide, editable, isReady, canvasSize]);
   
   // スライドまたは要素が変更された時にレンダリング
   useEffect(() => {
@@ -245,7 +311,10 @@ const SlideCanvas = ({
   }
   
   return (
-    <div className="w-full h-full flex items-center justify-center bg-gray-50 overflow-hidden">
+    <div 
+      ref={containerRef}
+      className="w-full h-full flex items-center justify-center bg-gray-50 overflow-hidden"
+    >
       <div className="relative" style={zoomStyle}>
         <div className="bg-white rounded-lg shadow-lg border">
           <canvas 

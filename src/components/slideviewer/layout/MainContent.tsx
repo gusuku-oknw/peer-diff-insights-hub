@@ -53,12 +53,40 @@ const MainContent: React.FC<MainContentProps> = ({
     setIsNotesPanelOpen(!isNotesPanelOpen);
   };
 
+  // 右サイドバーが表示されているかの判定
+  const shouldShowNotes = (viewerMode === "presentation" && showPresenterNotes) || 
+                         (viewerMode === "review" && showPresenterNotes);
+  const shouldShowReviewPanel = viewerMode === "review";
+  const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
+  const isRightPanelVisible = shouldDisplayRightPanel && !rightPanelCollapsed;
+
+  console.log('MainContent: Right panel visibility', {
+    shouldShowNotes,
+    shouldShowReviewPanel,
+    shouldDisplayRightPanel,
+    rightPanelCollapsed,
+    isRightPanelVisible
+  });
+
   return (
     <main className="flex-1 flex flex-col h-full overflow-hidden">
-      {/* スライドビューワー - 完全中央配置 */}
+      {/* スライドビューワー - 動的幅計算で完全中央配置 */}
       <div className="flex-1 relative bg-gray-50">
-        <div className="absolute inset-0 flex items-center justify-center p-4">
-          <div className="w-full h-full max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+        <div 
+          className={`absolute inset-0 flex items-center justify-center p-4 transition-all duration-300 ease-in-out ${
+            isRightPanelVisible ? 'pr-4' : 'pr-4'
+          }`}
+        >
+          <div 
+            className={`w-full h-full flex items-center justify-center transition-all duration-300 ease-in-out ${
+              isRightPanelVisible 
+                ? 'max-w-[calc(100vw-24rem)]' // 右サイドバー表示時：画面幅 - サイドバー幅(320px) - マージン
+                : 'max-w-[95vw]' // 右サイドバー非表示時：画面幅の95%を使用
+            } max-h-[90vh]`}
+            style={{
+              minWidth: '800px', // 最小幅を設定
+            }}
+          >
             <SlideCanvas
               currentSlide={currentSlide}
               zoomLevel={zoom}
