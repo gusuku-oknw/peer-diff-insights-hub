@@ -82,6 +82,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState("review");
   const [selectedCategory, setSelectedCategory] = useState("structure");
+  const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState<Comment[]>([
     {
       id: "1",
@@ -128,7 +129,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
     }
   };
 
-  const handleSubmitComment = (comment: string) => {
+  const handleSubmitComment = () => {
     if (!canInteract) {
       toast({
         title: "権限がありません",
@@ -138,19 +139,22 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
       return;
     }
 
-    const newComment: Comment = {
-      id: Date.now().toString(),
-      content: comment,
-      category: selectedCategory,
-      timestamp: new Date(),
-      resolved: false
-    };
-    setComments([...comments, newComment]);
-    toast({
-      title: "コメントを投稿しました",
-      description: "レビューが正常に追加されました",
-      variant: "default"
-    });
+    if (newComment && newComment.trim()) {
+      const newCommentObj: Comment = {
+        id: Date.now().toString(),
+        content: newComment,
+        category: selectedCategory,
+        timestamp: new Date(),
+        resolved: false
+      };
+      setComments([...comments, newCommentObj]);
+      setNewComment("");
+      toast({
+        title: "コメントを投稿しました",
+        description: "レビューが正常に追加されました",
+        variant: "default"
+      });
+    }
   };
 
   return (
@@ -187,10 +191,11 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
                 checklistCategories={checklistCategories}
               />
               <ReviewCommentInput
-                selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
+                newComment={newComment}
+                currentSlide={currentSlide}
+                isVeryNarrow={isVeryNarrow}
+                onCommentChange={setNewComment}
                 onSubmitComment={handleSubmitComment}
-                checklistCategories={checklistCategories}
               />
             </TabsContent>
 

@@ -20,7 +20,7 @@ const ReviewCommentInput: React.FC<ReviewCommentInputProps> = ({
   onSubmitComment
 }) => {
   const handleSubmit = () => {
-    if (newComment.trim()) {
+    if (newComment && newComment.trim()) {
       onSubmitComment();
     }
   };
@@ -35,7 +35,7 @@ const ReviewCommentInput: React.FC<ReviewCommentInputProps> = ({
 
       <Textarea
         placeholder="コメントを入力してください..."
-        value={newComment}
+        value={newComment || ""}
         onChange={(e) => onCommentChange(e.target.value)}
         className={`${isVeryNarrow ? 'text-xs min-h-16' : 'text-sm min-h-20'} resize-none border-2 border-blue-200 focus:border-blue-400`}
       />
@@ -44,7 +44,7 @@ const ReviewCommentInput: React.FC<ReviewCommentInputProps> = ({
         <Button 
           size="sm" 
           onClick={handleSubmit}
-          disabled={!newComment.trim()}
+          disabled={!newComment || !newComment.trim()}
           className={`${isVeryNarrow ? 'text-xs h-6 px-2' : 'text-xs h-7 px-3'} bg-purple-500 hover:bg-purple-600`}
         >
           <Send className={`${isVeryNarrow ? 'h-3 w-3 mr-0.5' : 'h-4 w-4 mr-1'}`} />
