@@ -5,29 +5,54 @@ import ReviewCommentSection from "./ReviewCommentSection";
 
 interface MainContentProps {
   currentSlide: number;
+  totalSlides: number;
   zoom: number;
   viewerMode: "presentation" | "edit" | "review";
+  showPresenterNotes: boolean;
+  isFullScreen: boolean;
+  presentationStartTime: Date | null;
+  presenterNotes: Record<number, string>;
+  elapsedTime: number;
+  displayCount: number;
+  commentedSlides: number[];
+  mockComments: any[];
   userType: "student" | "enterprise";
-  isNotesPanelOpen: boolean;
-  comments: any[];
-  commentText: string;
-  setCommentText: (text: string) => void;
-  handleAddComment: () => void;
-  toggleNotesPanel: () => void;
+  rightPanelCollapsed: boolean;
+  onSlideChange: (slide: number) => void;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
   currentSlide,
+  totalSlides,
   zoom,
   viewerMode,
+  showPresenterNotes,
+  isFullScreen,
+  presentationStartTime,
+  presenterNotes,
+  elapsedTime,
+  displayCount,
+  commentedSlides,
+  mockComments,
   userType,
-  isNotesPanelOpen,
-  comments,
-  commentText,
-  setCommentText,
-  handleAddComment,
-  toggleNotesPanel
+  rightPanelCollapsed,
+  onSlideChange
 }) => {
+  // Mock data for review comment section
+  const [isNotesPanelOpen, setIsNotesPanelOpen] = React.useState(false);
+  const [commentText, setCommentText] = React.useState("");
+  const comments = mockComments || [];
+
+  const handleAddComment = () => {
+    // Implementation for adding comments
+    console.log("Adding comment:", commentText);
+    setCommentText("");
+  };
+
+  const toggleNotesPanel = () => {
+    setIsNotesPanelOpen(!isNotesPanelOpen);
+  };
+
   return (
     <main className="flex-1 flex flex-col h-full overflow-hidden">
       {/* スライドビューワー - 完全中央配置 */}

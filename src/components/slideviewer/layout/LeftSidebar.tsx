@@ -10,6 +10,7 @@ interface LeftSidebarProps {
   branches: string[];
   commitHistory: any[];
   onBranchChange: (branch: string) => void;
+  onToggleLeftSidebar: () => void;
 }
 
 const LeftSidebar: React.FC<LeftSidebarProps> = ({
@@ -17,7 +18,8 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
   currentBranch,
   branches,
   commitHistory,
-  onBranchChange
+  onBranchChange,
+  onToggleLeftSidebar
 }) => {
   const isMobile = useIsMobile();
 

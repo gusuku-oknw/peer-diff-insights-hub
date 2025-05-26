@@ -27,3 +27,26 @@ export interface ModeSelectorProps {
   currentMode: ViewerMode;
   onModeChange: (mode: ViewerMode) => void;
 }
+
+export interface MainLayoutProps {
+  currentBranch: string;
+  branches: string[];
+  commitHistory: any[];
+  currentSlide: number;
+  totalSlides: number;
+  zoom: number;
+  viewerMode: ViewerMode;
+  leftSidebarOpen: boolean;
+  showPresenterNotes: boolean;
+  isFullScreen: boolean;
+  presentationStartTime: Date | null;
+  presenterNotes: Record<number, string>;
+  elapsedTime: number;
+  displayCount: number;
+  commentedSlides: number[];
+  mockComments: any[];
+  userType: "student" | "enterprise";
+  onBranchChange: (branch: string) => void;
+  onToggleLeftSidebar: () => void;
+  onSlideChange: (slide: number) => void;
+}
