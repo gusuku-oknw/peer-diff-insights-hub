@@ -3,9 +3,9 @@ import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, BarChart4, Star, Clipboard } from "lucide-react";
-import ReviewCommentsList from "./ReviewCommentsList";
-import ReviewChecklistTabs from "../ReviewChecklistTabs";
-import AIReviewSummary from "../AIReviewSummary";
+import ReviewCommentsList from "../../../slideviewer/panels/components/ReviewCommentsList";
+import ReviewChecklistTabs from "../../ReviewChecklistTabs";
+import AIReviewSummary from "../../AIReviewSummary";
 import ReviewSummaryTab from "./ReviewSummaryTab";
 
 interface ReviewPanelContentProps {

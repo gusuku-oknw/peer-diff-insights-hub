@@ -10,137 +10,101 @@ import {
   AlertTriangle
 } from "lucide-react";
 
-interface Review {
-  id: number;
-  text: string;
-  reviewer: string;
-  timestamp: string;
-  rating: string;
-  status: string;
+interface Comment {
+  id: string;
+  content: string;
+  category: string;
+  timestamp: Date;
+  resolved: boolean;
 }
 
 interface ReviewCommentsListProps {
-  reviews: Review[];
-  isVeryNarrow?: boolean;
-  isExtremelyNarrow?: boolean;
-  isShort?: boolean;
-  canInteract: boolean;
-  selectedReview: number | null;
-  onSelectReview: (id: number) => void;
+  comments: Comment[];
+  checklistCategories: any;
 }
 
-const getRatingBadge = (rating: string, isVeryNarrow: boolean) => {
-  const text = isVeryNarrow ? 
-    { excellent: "優", good: "良", needs_improvement: "要" } :
-    { excellent: "優秀", good: "良好", needs_improvement: "要改善" };
-    
-  switch(rating) {
-    case "excellent":
-      return <Badge className="bg-green-500 text-xs">{text.excellent}</Badge>;
-    case "good":
-      return <Badge className="bg-blue-500 text-xs">{text.good}</Badge>;
-    case "needs_improvement":
-      return <Badge className="bg-amber-500 text-xs">{text.needs_improvement}</Badge>;
-    default:
-      return null;
-  }
-};
-
-const getStatusBadge = (status: string, isVeryNarrow: boolean) => {
-  switch(status) {
-    case "completed":
-      return (
-        <Badge variant="outline" className="border-green-500 text-green-700 text-xs">
-          <CheckCircle className="w-3 h-3 mr-1" /> 
-          {isVeryNarrow ? "完" : "完了"}
-        </Badge>
-      );
-    case "pending":
-      return (
-        <Badge variant="outline" className="border-amber-500 text-amber-700 text-xs">
-          <Clock className="w-3 h-3 mr-1" /> 
-          {isVeryNarrow ? "検" : "検討中"}
-        </Badge>
-      );
-    default:
-      return null;
-  }
-};
-
 const ReviewCommentsList: React.FC<ReviewCommentsListProps> = ({
-  reviews,
-  isVeryNarrow = false,
-  isExtremelyNarrow = false,
-  isShort = false,
-  canInteract,
-  selectedReview,
-  onSelectReview
+  comments,
+  checklistCategories
 }) => {
+  const formatTimestamp = (timestamp: Date) => {
+    return timestamp.toLocaleDateString('ja-JP', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getCategoryInfo = (categoryKey: string) => {
+    return checklistCategories[categoryKey] || { 
+      label: categoryKey, 
+      color: 'gray', 
+      icon: AlertTriangle 
+    };
+  };
+
   return (
     <ScrollArea className="h-full">
-      {reviews.length > 0 ? (
-        <div className={`${isVeryNarrow ? 'p-1 space-y-1' : 'p-4 space-y-4'} min-w-0`}>
-          {reviews.map((review) => (
-            <div 
-              key={review.id} 
-              className={`bg-white shadow-sm border rounded-lg ${isVeryNarrow ? 'p-1' : 'p-3'} transition-colors ${
-                selectedReview === review.id ? "border-blue-400 bg-blue-50" : "border-gray-200"
-              } min-w-0`}
-              onClick={() => onSelectReview(review.id)}
-            >
-              <div className="flex justify-between items-start mb-1 min-w-0">
-                <div className="min-w-0 flex-1">
-                  <div className={`font-medium ${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-xs' : 'text-sm'} truncate`}>
-                    {review.reviewer}
-                  </div>
-                  <div className="text-xs text-gray-500 truncate">
-                    {isExtremelyNarrow ? review.timestamp.split(' ')[0].slice(5) : isVeryNarrow ? review.timestamp.split(' ')[0] : review.timestamp}
-                  </div>
-                </div>
-                <div className="flex gap-1 flex-wrap flex-shrink-0">
-                  {getRatingBadge(review.rating, isVeryNarrow)}
-                  {getStatusBadge(review.status, isVeryNarrow)}
-                </div>
-              </div>
-              <p className={`${isExtremelyNarrow ? 'text-xs line-clamp-1' : isVeryNarrow ? 'text-xs line-clamp-2' : 'text-sm'} text-gray-700 break-words`}>
-                {review.text}
-              </p>
-              {!isShort && (
-                <div className={`${isVeryNarrow ? 'mt-1' : 'mt-3'} flex justify-between items-center min-w-0`}>
-                  <div className="flex items-center">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className={`${isVeryNarrow ? 'h-5 px-1' : 'h-7 px-2'} min-w-0`}
-                      disabled={!canInteract}
+      {comments && comments.length > 0 ? (
+        <div className="p-4 space-y-4">
+          {comments.map((comment) => {
+            const categoryInfo = getCategoryInfo(comment.category);
+            const IconComponent = categoryInfo.icon;
+            
+            return (
+              <div 
+                key={comment.id} 
+                className="bg-white shadow-sm border rounded-lg p-3 transition-colors border-gray-200"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-center gap-2">
+                    <IconComponent className="h-4 w-4" />
+                    <Badge 
+                      variant="outline" 
+                      className={`text-xs bg-${categoryInfo.color}-50 border-${categoryInfo.color}-200 text-${categoryInfo.color}-700`}
                     >
-                      <ThumbsUp className={`${isExtremelyNarrow ? 'h-3 w-3' : 'h-4 w-4'} ${!isExtremelyNarrow ? 'mr-1' : ''}`} />
-                      {!isExtremelyNarrow && !isVeryNarrow && <span className="text-xs">同意</span>}
-                    </Button>
+                      {categoryInfo.label}
+                    </Badge>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className={`${isVeryNarrow ? 'h-5 text-xs px-1' : 'h-7 text-xs'}`}
-                    disabled={!canInteract}
-                  >
+                  <div className="text-xs text-gray-500">
+                    {formatTimestamp(comment.timestamp)}
+                  </div>
+                </div>
+                
+                <p className="text-sm text-gray-700 mb-3 break-words">
+                  {comment.content}
+                </p>
+                
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" className="h-7 px-2">
+                      <ThumbsUp className="h-4 w-4 mr-1" />
+                      <span className="text-xs">同意</span>
+                    </Button>
+                    {comment.resolved && (
+                      <Badge variant="outline" className="border-green-500 text-green-700 text-xs">
+                        <CheckCircle className="w-3 h-3 mr-1" /> 
+                        解決済み
+                      </Badge>
+                    )}
+                  </div>
+                  <Button variant="outline" size="sm" className="h-7 text-xs">
                     返信
                   </Button>
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       ) : (
-        <div className={`flex flex-col items-center justify-center h-full ${isVeryNarrow ? 'p-1' : 'p-4'} text-center`}>
-          <AlertTriangle className={`${isExtremelyNarrow ? 'h-6 w-6' : isVeryNarrow ? 'h-8 w-8' : 'h-12 w-12'} text-amber-300 mb-2`} />
-          <h3 className={`${isExtremelyNarrow ? 'text-xs' : isVeryNarrow ? 'text-sm' : 'text-lg'} font-medium text-gray-800 mb-1`}>
-            {isExtremelyNarrow ? 'なし' : isVeryNarrow ? 'レビューなし' : 'レビューがありません'}
+        <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+          <AlertTriangle className="h-12 w-12 text-amber-300 mb-2" />
+          <h3 className="text-lg font-medium text-gray-800 mb-1">
+            レビューがありません
           </h3>
-          {!isVeryNarrow && !isShort && (
-            <p className="text-sm text-gray-600 mb-3">このスライドにはまだレビューが提出されていません。</p>
-          )}
-          <Button size="sm" className={isVeryNarrow ? 'text-xs px-2' : ''}>レビューを依頼</Button>
+          <p className="text-sm text-gray-600 mb-3">このスライドにはまだレビューが提出されていません。</p>
+          <Button size="sm">レビューを依頼</Button>
         </div>
       )}
     </ScrollArea>

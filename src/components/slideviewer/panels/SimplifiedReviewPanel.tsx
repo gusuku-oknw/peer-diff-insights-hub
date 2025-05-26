@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageSquare, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -102,6 +102,13 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
   const { toast } = useToast();
   const canInteract = userType === "student";
 
+  // Calculate completion percentage
+  const completionPercentage = useMemo(() => {
+    const totalItems = Object.values(checklistState).flat().length;
+    const checkedItems = Object.values(checklistState).flat().filter(item => item.checked).length;
+    return totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0;
+  }, [checklistState]);
+
   const handleCheckboxChange = (categoryKey: string, itemId: string, checked: boolean) => {
     if (!canInteract) return;
     
@@ -153,6 +160,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
         totalSlides={totalSlides}
         canInteract={canInteract}
         isVeryNarrow={isVeryNarrow}
+        completionPercentage={completionPercentage}
       />
 
       {!canInteract && (
