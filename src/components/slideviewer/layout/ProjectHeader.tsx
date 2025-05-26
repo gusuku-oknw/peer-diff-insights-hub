@@ -25,9 +25,9 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
 
   return (
     <div className="bg-white border-b border-gray-200 px-4 py-3">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-start">
         {/* Left side - Back button and project info */}
-        <div className="flex items-center space-x-4 min-w-0 flex-1">
+        <div className="flex items-center space-x-4 min-w-0">
           <Link to="/dashboard">
             <Button variant="ghost" size="sm" className="flex items-center space-x-2">
               <ArrowLeft className="h-4 w-4" />
@@ -38,7 +38,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
           {!isMobile && (
             <>
               <div className="h-6 w-px bg-gray-300" />
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0">
                 <div className="flex items-center space-x-3">
                   <div className="min-w-0">
                     <h1 className="text-lg font-semibold text-gray-900 truncate">
@@ -76,17 +76,12 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
 
         {/* Mobile project name */}
         {isMobile && (
-          <div className="flex-1 text-center">
+          <div className="ml-4">
             <h1 className="text-base font-semibold text-gray-900 truncate">
               {projectName}
             </h1>
           </div>
         )}
-
-        {/* Right side - User avatar placeholder for future enhancement */}
-        <div className="flex items-center space-x-2">
-          {/* Space for user avatar or additional controls */}
-        </div>
       </div>
     </div>
   );
