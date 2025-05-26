@@ -53,10 +53,10 @@ const MainLayout = ({
     getSlideThumbnailsWidth
   } = useSlideStore();
   
-  // 右パネル表示ロジック - 学生のレビューモードでも台本を表示
+  // 右パネル表示ロジック - 学生もレビューモードでアクセス可能に修正
   const shouldShowNotes = (viewerMode === "presentation" && showPresenterNotes) || 
                          (viewerMode === "review" && showPresenterNotes);
-  const shouldShowReviewPanel = viewerMode === "review" && userType === "enterprise";
+  const shouldShowReviewPanel = viewerMode === "review"; // 修正: 学生もレビューパネルにアクセス可能
   const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
   
   // フルスクリーンプレゼンテーション時は右パネルを完全に非表示
