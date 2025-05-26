@@ -11,15 +11,17 @@ interface ZoomControlsProps {
 }
 
 const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
-  // デフォルト値の確実な設定
+  // 確実なデフォルト値設定と検証
   const currentZoom = useMemo(() => {
-    if (typeof zoom !== 'number' || isNaN(zoom) || zoom <= 0) {
+    // より厳密な検証
+    if (zoom === null || zoom === undefined || typeof zoom !== 'number' || isNaN(zoom) || zoom <= 0) {
+      console.warn(`Invalid zoom value: ${zoom}, using default 100%`);
       return 100;
     }
-    return Math.max(25, Math.min(200, zoom));
+    return Math.max(25, Math.min(200, Math.round(zoom)));
   }, [zoom]);
   
-  console.log(`ZoomControls rendering - zoom: ${zoom}, currentZoom: ${currentZoom}`);
+  console.log(`ZoomControls rendering - input zoom: ${zoom}, computed currentZoom: ${currentZoom}`);
   
   const zoomPresets = useMemo(() => [
     { label: "25%", value: 25 },
@@ -32,21 +34,32 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
   ], []);
   
   const handleZoomChange = useCallback((newZoom: number) => {
-    const boundedZoom = Math.max(25, Math.min(200, newZoom));
+    // 入力値の厳密な検証
+    if (typeof newZoom !== 'number' || isNaN(newZoom)) {
+      console.warn(`Invalid zoom input: ${newZoom}`);
+      return;
+    }
+    
+    const boundedZoom = Math.max(25, Math.min(200, Math.round(newZoom)));
     
     // 同じ値の場合はスキップ
-    if (boundedZoom === currentZoom) return;
+    if (boundedZoom === currentZoom) {
+      console.log(`Zoom unchanged: ${boundedZoom}%`);
+      return;
+    }
     
     console.log(`Zoom changing from ${currentZoom}% to ${boundedZoom}%`);
     onZoomChange(boundedZoom);
   }, [currentZoom, onZoomChange]);
 
   const incrementZoom = useCallback(() => {
-    handleZoomChange(currentZoom + 25);
+    const newZoom = Math.min(200, currentZoom + 25);
+    handleZoomChange(newZoom);
   }, [currentZoom, handleZoomChange]);
 
   const decrementZoom = useCallback(() => {
-    handleZoomChange(currentZoom - 25);
+    const newZoom = Math.max(25, currentZoom - 25);
+    handleZoomChange(newZoom);
   }, [currentZoom, handleZoomChange]);
   
   const resetZoom = useCallback(() => {
@@ -54,7 +67,9 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
   }, [handleZoomChange]);
 
   const handleSliderChange = useCallback((value: number[]) => {
-    handleZoomChange(value[0]);
+    if (value && value.length > 0 && typeof value[0] === 'number') {
+      handleZoomChange(value[0]);
+    }
   }, [handleZoomChange]);
 
   return (
@@ -93,7 +108,7 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
               onValueChange={handleSliderChange}
               max={200}
               min={25}
-              step={25}
+              step={5}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-400 mt-1">
@@ -132,7 +147,8 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
 };
 
 export default memo(ZoomControls, (prevProps, nextProps) => {
-  const prevZoom = typeof prevProps.zoom === 'number' && prevProps.zoom > 0 ? prevProps.zoom : 100;
-  const nextZoom = typeof nextProps.zoom === 'number' && nextProps.zoom > 0 ? nextProps.zoom : 100;
+  // より安全な比較
+  const prevZoom = typeof prevProps.zoom === 'number' && prevProps.zoom > 0 ? Math.round(prevProps.zoom) : 100;
+  const nextZoom = typeof nextProps.zoom === 'number' && nextProps.zoom > 0 ? Math.round(nextProps.zoom) : 100;
   return prevZoom === nextZoom;
 });

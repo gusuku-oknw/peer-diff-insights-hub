@@ -30,14 +30,16 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   return (
     <main className="flex-1 flex flex-col h-full overflow-hidden">
-      {/* スライドビューワー - シンプルな構造 */}
-      <div className="flex-grow overflow-hidden">
-        <SlideCanvas
-          currentSlide={currentSlide}
-          zoomLevel={zoom}
-          editable={viewerMode === "edit"}
-          userType={userType}
-        />
+      {/* スライドビューワー - フレキシブルなレイアウト */}
+      <div className="flex-grow flex items-center justify-center overflow-hidden bg-gray-50 p-2">
+        <div className="w-full h-full max-w-full max-h-full flex items-center justify-center">
+          <SlideCanvas
+            currentSlide={currentSlide}
+            zoomLevel={zoom}
+            editable={viewerMode === "edit"}
+            userType={userType}
+          />
+        </div>
       </div>
 
       {/* レビューモードUI */}

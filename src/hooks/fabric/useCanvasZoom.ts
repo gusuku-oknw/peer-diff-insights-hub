@@ -17,28 +17,27 @@ export const useCanvasZoom = ({
 }: UseCanvasZoomProps) => {
   const prevZoomRef = useRef<number>(100);
   
-  const applyZoom = useCallback((canvas: Canvas, scaleFactor: number) => {
-    if (!canvas || canvas.disposed) return;
+  const applyZoom = useCallback((scaleFactor: number) => {
+    if (!canvas || canvas.disposed || !containerRef.current) return;
 
     try {
-      const baseWidth = 1600;
-      const baseHeight = 900;
+      // キャンバスサイズは常に固定（1600x900）
+      canvas.setWidth(1600);
+      canvas.setHeight(900);
       
-      // キャンバスの実際のサイズを設定
-      canvas.setWidth(baseWidth);
-      canvas.setHeight(baseHeight);
+      // CSS transform でズーム処理（コンテナに適用）
+      const container = containerRef.current;
+      container.style.transform = `scale(${scaleFactor})`;
+      container.style.transformOrigin = 'center center';
       
-      // CSS でのスケーリングはコンテナで処理されるため、ここでは何もしない
-      // Fabric.js キャンバス自体は常に 1600x900 を維持
+      console.log(`Canvas zoom applied: ${scaleFactor * 100}% via CSS transform`);
       
-      console.log(`Canvas zoom applied: ${scaleFactor * 100}%`);
-      
-      // レンダリングを一度だけ実行
+      // 軽量な再描画
       canvas.renderAll();
     } catch (error) {
       console.error("Error applying zoom:", error);
     }
-  }, []);
+  }, [canvas, containerRef]);
   
   useEffect(() => {
     if (!canvas || !initialized) return;
@@ -53,7 +52,7 @@ export const useCanvasZoom = ({
     const scaleFactor = validZoomLevel / 100;
     prevZoomRef.current = validZoomLevel;
     
-    applyZoom(canvas, scaleFactor);
+    applyZoom(scaleFactor);
   }, [zoomLevel, initialized, canvas, applyZoom]);
   
   // 初期化時のズーム適用
@@ -62,7 +61,7 @@ export const useCanvasZoom = ({
     
     const initialZoom = zoomLevel || 100;
     if (prevZoomRef.current === 100 && initialZoom === 100) {
-      applyZoom(canvas, 1);
+      applyZoom(1);
     }
   }, [canvas, initialized, zoomLevel, applyZoom]);
 };

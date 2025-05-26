@@ -20,6 +20,7 @@ const SlideCanvas = ({
   console.log(`Rendering SlideCanvas - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Editable: ${editable}`);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const slides = useSlideStore(state => state.slides);
   const updateElement = useSlideStore(state => state.updateElement);
   const [instanceId] = useState(() => Math.random().toString(36).substring(2, 9));
@@ -82,6 +83,21 @@ const SlideCanvas = ({
     onSelectElement: handleSelectElement,
     instanceId
   });
+
+  // レスポンシブサイズ計算
+  const canvasStyle = useMemo(() => {
+    const baseWidth = 1600;
+    const baseHeight = 900;
+    const scale = zoomLevel / 100;
+    
+    return {
+      width: `${baseWidth * scale}px`,
+      height: `${baseHeight * scale}px`,
+      transform: 'none', // CSS transform は useCanvasZoom で処理
+      maxWidth: '100%',
+      maxHeight: '100%',
+    };
+  }, [zoomLevel]);
   
   // スライドデータが存在しない場合の表示
   if (!slides || slides.length === 0) {
@@ -106,25 +122,21 @@ const SlideCanvas = ({
   }
   
   return (
-    <div className="w-full h-full flex items-center justify-center bg-gray-50 p-4">
+    <div className="w-full h-full flex items-center justify-center bg-gray-50 p-4 overflow-hidden">
       <div 
-        className="relative bg-white rounded-lg shadow border"
-        style={{
-          width: `${1600 * (zoomLevel / 100)}px`,
-          height: `${900 * (zoomLevel / 100)}px`,
-          maxWidth: '100%',
-          maxHeight: '100%',
-        }}
+        ref={containerRef}
+        className="relative bg-white rounded-lg shadow border flex items-center justify-center"
+        style={canvasStyle}
         data-testid="canvas-container"
         data-zoom={zoomLevel}
         data-slide={currentSlide}
       >
         <canvas 
           ref={canvasRef} 
-          className="block w-full h-full rounded-lg"
+          className="block rounded-lg"
           style={{
-            width: '100%',
-            height: '100%',
+            width: '1600px',
+            height: '900px',
           }}
           data-testid="fabric-canvas"
           data-editable={editable ? "true" : "false"}
