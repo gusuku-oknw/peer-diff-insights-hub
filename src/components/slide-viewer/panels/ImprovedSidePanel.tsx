@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import NotesPanel from "../../slide-viewer/panels/NotesPanel";
-import SimplifiedReviewPanel from "./SimplifiedReviewPanel";
+import SimplifiedReviewPanel from "../../slideviewer/panels/SimplifiedReviewPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, MessageSquare, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
