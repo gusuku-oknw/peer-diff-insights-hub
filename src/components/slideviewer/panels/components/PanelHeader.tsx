@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, BookOpen, MessageSquare } from "lucide-react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PanelHeaderProps {
