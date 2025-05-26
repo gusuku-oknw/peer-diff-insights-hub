@@ -106,11 +106,16 @@ const SlideCanvas = ({
   // スライドデータが存在しない場合の表示
   if (!slides || slides.length === 0) {
     return (
-      <div className="canvas-container flex items-center justify-center w-full h-full overflow-hidden">
-        <div className="text-center">
-          <p className="text-gray-500 text-lg">スライドが読み込まれていません</p>
+      <div className="modern-canvas-container flex items-center justify-center w-full h-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center p-8 bg-white rounded-xl shadow-lg border border-gray-200">
+          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <p className="text-gray-600 text-lg mb-4">スライドが読み込まれていません</p>
           <button 
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-md hover:shadow-lg"
             onClick={() => window.location.reload()}
           >
             再読み込み
@@ -121,10 +126,10 @@ const SlideCanvas = ({
   }
   
   return (
-    <div className="canvas-container flex items-center justify-center w-full h-full overflow-hidden">
+    <div className="modern-canvas-container flex items-center justify-center w-full h-full overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 p-4">
       <div 
         ref={canvasContainerRef} 
-        className="will-change-transform"
+        className="canvas-wrapper will-change-transform bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
         style={containerStyle}
         data-mode={editable ? "edit" : "view"}
         data-instance={instanceId}
@@ -132,7 +137,7 @@ const SlideCanvas = ({
       >
         <canvas 
           ref={canvasRef} 
-          className="fabric-canvas"
+          className="fabric-canvas block"
           data-testid="fabric-canvas"
           data-editable={editable ? "true" : "false"}
           data-slide={currentSlide}
@@ -141,28 +146,43 @@ const SlideCanvas = ({
         
         {!canvasReady && <CanvasLoadingIndicator />}
         {loadingError && <CanvasErrorDisplay error={loadingError} />}
+        
+        {/* Grid overlay for edit mode */}
+        {editable && (
+          <div className="absolute inset-0 pointer-events-none opacity-10">
+            <div className="grid-pattern w-full h-full"></div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-// キャンバスローディングインジケーター
+// 改良されたローディングインジケーター
 const CanvasLoadingIndicator = () => (
-  <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-10">
+  <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 z-10 backdrop-blur-sm">
     <div className="flex flex-col items-center">
-      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="relative">
+        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+        <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-r-blue-300 rounded-full animate-spin animate-reverse"></div>
+      </div>
       <p className="mt-4 text-blue-600 font-medium">キャンバスを読み込み中...</p>
     </div>
   </div>
 );
 
-// キャンバスエラー表示
+// 改良されたエラー表示
 const CanvasErrorDisplay = ({ error }: { error: string }) => (
-  <div className="absolute inset-0 flex items-center justify-center bg-red-50 bg-opacity-75 z-10">
-    <div className="flex flex-col items-center">
-      <p className="mt-4 text-red-600 font-medium">{error}</p>
+  <div className="absolute inset-0 flex items-center justify-center bg-red-50 bg-opacity-95 z-10 backdrop-blur-sm">
+    <div className="flex flex-col items-center p-6 bg-white rounded-xl shadow-lg border border-red-200">
+      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+        <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <p className="text-red-600 font-medium mb-4 text-center">{error}</p>
       <button 
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-md hover:shadow-lg"
         onClick={() => window.location.reload()}
       >
         再読み込み
