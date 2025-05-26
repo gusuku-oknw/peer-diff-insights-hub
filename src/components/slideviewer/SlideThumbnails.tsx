@@ -3,7 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSlideStore } from "@/stores/slideStore";
 import { useEffect } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { MessageSquare, Plus, MoreVertical } from "lucide-react";
+import { MessageSquare, Plus, MoreVertical, Info, Star, FileText, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SlideThumbnailsProps {
@@ -159,14 +159,61 @@ const SlideThumbnails = ({
             })}
             
             {/* Add new slide button */}
-            <div className="thumbnail-card flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 border-2 border-dashed border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-blue-50">
-              <div className="w-32 aspect-video flex items-center justify-center">
-                <div className="text-center">
-                  <Plus className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <span className="text-xs text-gray-500">新規スライド</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="thumbnail-card flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 border-2 border-dashed border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-blue-50">
+                  <div className="w-32 aspect-video flex items-center justify-center">
+                    <div className="text-center">
+                      <Plus className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <span className="text-xs text-gray-500">新規スライド</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>新しいスライドを追加</p>
+              </TooltipContent>
+            </Tooltip>
+            
+            {/* Info slide for presentation evaluation */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div 
+                  className="thumbnail-card flex-shrink-0 cursor-pointer transition-all duration-300 hover:scale-105 border-2 border-dashed border-purple-300 hover:border-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50 hover:from-purple-100 hover:to-indigo-100"
+                  onClick={() => {
+                    // Navigate to evaluation page or open evaluation modal
+                    console.log("Opening presentation evaluation");
+                  }}
+                >
+                  <div className="absolute -top-2 -left-2 z-10 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-purple-500 text-white shadow-md">
+                    <Info className="h-3 w-3" />
+                  </div>
+                  
+                  <div className="w-32 aspect-video flex items-center justify-center p-3">
+                    <div className="text-center">
+                      <div className="flex items-center justify-center mb-2">
+                        <Star className="w-4 h-4 text-purple-500 mr-1" />
+                        <BarChart3 className="w-4 h-4 text-purple-500 mr-1" />
+                        <FileText className="w-4 h-4 text-purple-500" />
+                      </div>
+                      <span className="text-xs text-purple-700 font-medium">プレゼン評価</span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-2">
+                    <p className="text-xs font-medium text-purple-700 text-center">
+                      全体評価・コメント
+                    </p>
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="text-center">
+                  <p className="font-medium">プレゼンテーション評価</p>
+                  <p className="text-xs text-gray-400">全体の評価とコメントを記録</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </ScrollArea>

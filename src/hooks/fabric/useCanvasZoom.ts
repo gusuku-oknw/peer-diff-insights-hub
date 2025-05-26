@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useCallback } from 'react';
 import { Canvas } from 'fabric';
 import { debounce } from 'lodash';
@@ -17,7 +16,7 @@ export const useCanvasZoom = ({
   zoomLevel 
 }: UseCanvasZoomProps) => {
   // Keep track of the previous zoom level to avoid unnecessary renders
-  const prevZoomRef = useRef<number>(zoomLevel);
+  const prevZoomRef = useRef<number>(100); // Default to 100%
   const animationFrameRef = useRef<number | null>(null);
   
   // Create a debounced version of the canvas renderAll function with memory cleanup
@@ -46,7 +45,7 @@ export const useCanvasZoom = ({
       canvas.setWidth(originalWidth);
       canvas.setHeight(originalHeight);
       
-      // キャンバス要素のスタイルを一度だけリセット
+      // キャンバス要素のスタイルをリセット
       if (canvas.wrapperEl) {
         canvas.wrapperEl.style.transform = '';
         canvas.wrapperEl.style.width = `${originalWidth}px`;
@@ -56,25 +55,33 @@ export const useCanvasZoom = ({
       // コンテナに最適化されたスタイルを適用
       const container = containerRef.current;
       if (container) {
-        // スムーズなズームのためのスタイル
+        // Ensure the scale factor is valid
+        const validScaleFactor = Math.max(0.25, Math.min(2, scaleFactor));
+        
+        // Calculate scaled dimensions
+        const scaledWidth = originalWidth * validScaleFactor;
+        const scaledHeight = originalHeight * validScaleFactor;
+        
+        // Apply styles for smooth zoom with proper centering
         Object.assign(container.style, {
-          width: `${originalWidth}px`,
-          height: `${originalHeight}px`,
+          width: `${scaledWidth}px`,
+          height: `${scaledHeight}px`,
           transformOrigin: 'center center',
           willChange: 'transform',
-          transition: 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)',
-          transform: `scale(${scaleFactor})`,
-          backfaceVisibility: 'hidden'
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          transform: 'scale(1)', // Let CSS handle the sizing instead of transform scale
+          backfaceVisibility: 'hidden',
+          imageRendering: validScaleFactor < 1 ? 'auto' : 'crisp-edges'
         });
 
-        // 親要素にも最適化スタイルを設定
+        // Parent element styling for proper centering
         const parentElement = container.parentElement;
         if (parentElement) {
           Object.assign(parentElement.style, {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            overflow: 'hidden',
+            overflow: 'auto', // Allow scrolling for large zoom levels
             height: '100%',
             width: '100%',
             perspective: '1000px'
@@ -82,7 +89,7 @@ export const useCanvasZoom = ({
         }
       }
 
-      // デバウンスしたレンダリングで描画を最適化
+      // Render with debouncing for performance
       debouncedRender(canvas);
     } catch (error) {
       console.error("Error applying zoom:", error);
@@ -92,18 +99,33 @@ export const useCanvasZoom = ({
   useEffect(() => {
     if (!canvas || !initialized || !containerRef.current) return;
     
-    // 実際にズームレベルが変更された場合のみ適用
-    if (prevZoomRef.current === zoomLevel) return;
+    // Ensure zoom level is valid
+    const validZoomLevel = Math.max(25, Math.min(200, zoomLevel || 100));
     
-    console.log(`Applying zoom: ${zoomLevel}% (previous: ${prevZoomRef.current}%)`);
+    // Only apply if zoom actually changed
+    if (prevZoomRef.current === validZoomLevel) return;
     
-    const scaleFactor = zoomLevel / 100;
-    prevZoomRef.current = zoomLevel;
+    console.log(`Applying zoom: ${validZoomLevel}% (previous: ${prevZoomRef.current}%)`);
+    
+    const scaleFactor = validZoomLevel / 100;
+    prevZoomRef.current = validZoomLevel;
     
     applyZoom(canvas, scaleFactor);
   }, [zoomLevel, initialized, canvas, containerRef, applyZoom]);
   
-  // アンマウント時のクリーンアップ
+  // Initialize with default zoom on first mount
+  useEffect(() => {
+    if (!canvas || !initialized || !containerRef.current) return;
+    
+    // Set initial zoom to 100% if not already set
+    const initialZoom = zoomLevel || 100;
+    if (prevZoomRef.current === 100 && initialZoom === 100) {
+      const scaleFactor = 1;
+      applyZoom(canvas, scaleFactor);
+    }
+  }, [canvas, initialized, containerRef, zoomLevel, applyZoom]);
+  
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       debouncedRender.cancel();

@@ -30,7 +30,7 @@ export const createPresentationSlice: StateCreator<
   PresentationSlice
 > = (set, get) => ({
   viewerMode: "presentation",
-  zoom: 100,
+  zoom: 100, // Ensure default is 100%
   isFullScreen: false,
   showPresenterNotes: false,
   leftSidebarOpen: false,
@@ -42,9 +42,9 @@ export const createPresentationSlice: StateCreator<
   },
   
   setZoom: (zoom: number) => {
-    if (zoom >= 25 && zoom <= 200) {
-      set({ zoom });
-    }
+    // Ensure zoom stays within bounds and is a valid number
+    const validZoom = Math.min(Math.max(zoom, 25), 200);
+    set({ zoom: validZoom });
   },
   
   setIsFullScreen: (isFullScreen: boolean) => {

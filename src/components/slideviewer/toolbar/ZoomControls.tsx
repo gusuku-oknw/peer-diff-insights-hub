@@ -1,5 +1,5 @@
 
-import React, { useCallback, memo, useState, useEffect, useMemo } from "react";
+import React, { useCallback, memo, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -11,7 +11,10 @@ interface ZoomControlsProps {
 }
 
 const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
-  console.log(`Rendering ZoomControls - Current zoom: ${zoom}%`);
+  // Ensure zoom has a valid default value
+  const currentZoom = zoom || 100;
+  
+  console.log(`Rendering ZoomControls - Current zoom: ${currentZoom}%`);
   
   // プリセットズームレベルをメモ化
   const zoomPresets = useMemo(() => [
@@ -30,21 +33,21 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
     const boundedZoom = Math.min(Math.max(newZoom, 25), 200);
     
     // 変更がない場合は処理をスキップ
-    if (boundedZoom === zoom) return;
+    if (boundedZoom === currentZoom) return;
     
     // 即座に変更を適用
     onZoomChange(boundedZoom);
-  }, [zoom, onZoomChange]);
+  }, [currentZoom, onZoomChange]);
 
-  // Increment/decrement zoom by a fixed percentage
+  // Increment zoom by 10%
   const incrementZoom = useCallback(() => {
-    handleZoomChange(zoom + 10);
-  }, [zoom, handleZoomChange]);
+    handleZoomChange(currentZoom + 10);
+  }, [currentZoom, handleZoomChange]);
 
-  // Decrement zoom by a fixed percentage
+  // Decrement zoom by 10%
   const decrementZoom = useCallback(() => {
-    handleZoomChange(zoom - 10);
-  }, [zoom, handleZoomChange]);
+    handleZoomChange(currentZoom - 10);
+  }, [currentZoom, handleZoomChange]);
   
   // Reset zoom to 100%
   const resetZoom = useCallback(() => {
@@ -62,12 +65,15 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
       <DropdownMenuItem 
         key={preset.value} 
         onClick={() => handleZoomChange(preset.value)}
-        className={zoom === preset.value ? "bg-blue-50 text-blue-700" : ""}
+        className={currentZoom === preset.value ? "bg-blue-50 text-blue-700 font-medium" : ""}
       >
         {preset.label}
+        {currentZoom === preset.value && (
+          <span className="ml-auto text-blue-600">✓</span>
+        )}
       </DropdownMenuItem>
     ))
-  ), [zoomPresets, handleZoomChange, zoom]);
+  ), [zoomPresets, handleZoomChange, currentZoom]);
 
   return (
     <div className="flex items-center space-x-2">
@@ -76,29 +82,37 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
           <Button 
             variant="ghost" 
             size="sm" 
-            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-gray-100"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm hover:bg-blue-50 hover:text-blue-600 transition-colors"
             title="ズーム設定を開く"
           >
-            <span className="font-medium min-w-10 text-center">{zoom}%</span>
+            <span className="font-medium min-w-12 text-center">{currentZoom}%</span>
             <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 rotate-90" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-48">
+        <DropdownMenuContent align="start" className="w-56">
           <DropdownMenuLabel>ズーム設定</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {dropdownItems}
           <DropdownMenuSeparator />
-          <div className="p-2">
-            <div className="text-xs text-gray-500 mb-2">スライダー調整</div>
+          <div className="p-3">
+            <div className="text-xs text-gray-500 mb-2 font-medium">カスタム調整</div>
             <Slider
-              value={[zoom]}
+              value={[currentZoom]}
               onValueChange={handleSliderChange}
               max={200}
               min={25}
               step={5}
               className="w-full"
             />
+            <div className="flex justify-between text-xs text-gray-400 mt-1">
+              <span>25%</span>
+              <span>200%</span>
+            </div>
           </div>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={resetZoom} className="text-center justify-center">
+            <span>100%にリセット</span>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       
@@ -106,22 +120,22 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
         onClick={decrementZoom} 
         variant="ghost" 
         size="icon" 
-        disabled={zoom <= 25}
-        className="rounded-full h-6 w-6 sm:h-8 sm:w-8 flex items-center justify-center hover:bg-blue-50 disabled:opacity-50"
-        title="縮小 (10%)"
+        disabled={currentZoom <= 25}
+        className="rounded-full h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        title={`縮小 (現在: ${currentZoom}%)`}
       >
-        <ZoomOut className="h-4 w-4 sm:h-5 sm:w-5" />
+        <ZoomOut className="h-4 w-4" />
       </Button>
       
       <Button 
         onClick={incrementZoom} 
         variant="ghost" 
         size="icon" 
-        disabled={zoom >= 200}
-        className="rounded-full h-6 w-6 sm:h-8 sm:w-8 flex items-center justify-center hover:bg-blue-50 disabled:opacity-50"
-        title="拡大 (10%)"
+        disabled={currentZoom >= 200}
+        className="rounded-full h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center hover:bg-blue-50 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        title={`拡大 (現在: ${currentZoom}%)`}
       >
-        <ZoomIn className="h-4 w-4 sm:h-5 sm:w-5" />
+        <ZoomIn className="h-4 w-4" />
       </Button>
     </div>
   );
@@ -130,5 +144,5 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
 // メモ化を最適化
 export default memo(ZoomControls, (prevProps, nextProps) => {
   // ズームが変わった時だけ再レンダリング
-  return prevProps.zoom === nextProps.zoom;
+  return (prevProps.zoom || 100) === (nextProps.zoom || 100);
 });
