@@ -1,8 +1,11 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import NotesPanel from "../../slide-viewer/panels/NotesPanel";
 import ReviewPanel from "../../slide-viewer/panels/ReviewPanel";
+import ScriptEditor from "./ScriptEditor";
+import IntegratedReviewPanel from "./IntegratedReviewPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, MessageSquare, X, PanelRightClose, PanelRightOpen, Plus, Edit3, Send } from "lucide-react";
+import { BookOpen, MessageSquare, X, PanelRightClose, PanelRightOpen, Plus, Edit3, Send, CheckCircle2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -22,6 +25,7 @@ const ImprovedSidePanel = ({
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [panelDimensions, setPanelDimensions] = useState({ width: 0, height: 0 });
+  const [scripts, setScripts] = useState<Record<number, string>>(presenterNotes);
   
   // デフォルトタブの決定ロジックを改善
   const getDefaultTab = () => {
@@ -81,6 +85,11 @@ const ImprovedSidePanel = ({
     return null;
   }
 
+  // Script update handler
+  const handleUpdateScript = (slideId: number, script: string) => {
+    setScripts(prev => ({ ...prev, [slideId]: script }));
+  };
+
   // Quick action handlers
   const handleAddComment = () => {
     toast({
@@ -91,9 +100,10 @@ const ImprovedSidePanel = ({
   };
 
   const handleEditNote = () => {
+    setActiveTab("script");
     toast({
-      title: "ノート編集",
-      description: "ノートの編集モードを開始しました",
+      title: "台本編集モード",
+      description: "台本の編集を開始しました",
       variant: "default"
     });
   };
@@ -101,7 +111,7 @@ const ImprovedSidePanel = ({
   const handleSendReview = () => {
     toast({
       title: "レビュー送信",
-      description: "レビューを送信しました",
+      description: "統合レビューを送信しました",
       variant: "default"
     });
   };
@@ -115,34 +125,50 @@ const ImprovedSidePanel = ({
     <div className="h-full flex flex-col" style={{ minWidth: 0 }}>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
         <div className={`${isVeryNarrow ? 'px-2 py-1' : 'px-4 py-2'} border-b border-gray-200 flex items-center justify-between flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50`}>
-          <TabsList className={`grid ${shouldShowNotes && shouldShowReviewPanel ? 'grid-cols-2' : 'grid-cols-1'} flex-1 min-w-0 bg-white shadow-sm`}>
+          <TabsList className={`grid ${shouldShowNotes && shouldShowReviewPanel ? 'grid-cols-4' : shouldShowNotes ? 'grid-cols-2' : 'grid-cols-2'} flex-1 min-w-0 bg-white shadow-sm`}>
             {shouldShowNotes && (
-              <TabsTrigger 
-                value="notes" 
-                className={`flex items-center gap-1 ${isVeryNarrow ? 'px-1' : 'px-2'} min-w-0 relative transition-all hover:bg-blue-50 data-[state=active]:bg-blue-100 data-[state=active]:border-blue-300`}
-                data-testid="notes-tab"
-              >
-                <BookOpen className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0 text-blue-600`} />
-                {!isVeryNarrow && <span className="truncate font-medium">メモ</span>}
-                {presenterNotes[currentSlide] && (
-                  <Badge variant="secondary" className="h-4 w-4 p-0 text-xs rounded-full bg-blue-500 text-white">
-                    1
-                  </Badge>
-                )}
-              </TabsTrigger>
+              <>
+                <TabsTrigger 
+                  value="notes" 
+                  className={`flex items-center gap-1 ${isVeryNarrow ? 'px-1' : 'px-2'} min-w-0 relative transition-all hover:bg-blue-50 data-[state=active]:bg-blue-100 data-[state=active]:border-blue-300`}
+                  data-testid="notes-tab"
+                >
+                  <BookOpen className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0 text-blue-600`} />
+                  {!isVeryNarrow && <span className="truncate font-medium">メモ</span>}
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="script" 
+                  className={`flex items-center gap-1 ${isVeryNarrow ? 'px-1' : 'px-2'} min-w-0 relative transition-all hover:bg-green-50 data-[state=active]:bg-green-100 data-[state=active]:border-green-300`}
+                >
+                  <Edit3 className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0 text-green-600`} />
+                  {!isVeryNarrow && <span className="truncate font-medium">台本</span>}
+                </TabsTrigger>
+              </>
             )}
             {shouldShowReviewPanel && (
-              <TabsTrigger 
-                value="reviews" 
-                className={`flex items-center gap-1 ${isVeryNarrow ? 'px-1' : 'px-2'} min-w-0 relative transition-all hover:bg-red-50 data-[state=active]:bg-red-100 data-[state=active]:border-red-300`}
-                data-testid="reviews-tab"
-              >
-                <MessageSquare className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0 text-red-600`} />
-                {!isVeryNarrow && <span className="truncate font-medium">レビュー</span>}
-                <Badge variant="destructive" className="h-4 w-4 p-0 text-xs rounded-full animate-pulse">
-                  3
-                </Badge>
-              </TabsTrigger>
+              <>
+                <TabsTrigger 
+                  value="reviews" 
+                  className={`flex items-center gap-1 ${isVeryNarrow ? 'px-1' : 'px-2'} min-w-0 relative transition-all hover:bg-red-50 data-[state=active]:bg-red-100 data-[state=active]:border-red-300`}
+                  data-testid="reviews-tab"
+                >
+                  <MessageSquare className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0 text-red-600`} />
+                  {!isVeryNarrow && <span className="truncate font-medium">レビュー</span>}
+                  <Badge variant="destructive" className="h-4 w-4 p-0 text-xs rounded-full animate-pulse">
+                    3
+                  </Badge>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="integrated" 
+                  className={`flex items-center gap-1 ${isVeryNarrow ? 'px-1' : 'px-2'} min-w-0 relative transition-all hover:bg-purple-50 data-[state=active]:bg-purple-100 data-[state=active]:border-purple-300`}
+                >
+                  <CheckCircle2 className={`${isVeryNarrow ? 'h-3 w-3' : 'h-4 w-4'} flex-shrink-0 text-purple-600`} />
+                  {!isVeryNarrow && <span className="truncate font-medium">統合</span>}
+                  <Badge variant="outline" className="h-4 w-4 p-0 text-xs rounded-full border-orange-300 text-orange-600">
+                    !
+                  </Badge>
+                </TabsTrigger>
+              </>
             )}
           </TabsList>
           
@@ -185,13 +211,13 @@ const ImprovedSidePanel = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleEditNote}
-                  className="h-7 px-2 text-xs hover:bg-blue-100 transition-all duration-200 hover:scale-105 bg-blue-50 border border-blue-200"
+                  className="h-7 px-2 text-xs hover:bg-green-100 transition-all duration-200 hover:scale-105 bg-green-50 border border-green-200"
                 >
-                  <Edit3 className="h-3 w-3 mr-1 text-blue-600" />
-                  <span className="text-blue-700 font-medium">編集</span>
+                  <Edit3 className="h-3 w-3 mr-1 text-green-600" />
+                  <span className="text-green-700 font-medium">台本編集</span>
                 </Button>
               )}
-              {activeTab === "reviews" && (
+              {(activeTab === "reviews" || activeTab === "integrated") && (
                 <>
                   <Button
                     variant="ghost"
@@ -233,6 +259,17 @@ const ImprovedSidePanel = ({
             />
           )}
         </TabsContent>
+
+        <TabsContent value="script" className="flex-grow overflow-hidden m-0 p-0 min-h-0">
+          <ScriptEditor
+            currentSlide={currentSlide}
+            totalSlides={totalSlides}
+            presenterNotes={scripts}
+            onUpdateScript={handleUpdateScript}
+            isNarrow={isNarrow}
+            isVeryNarrow={isVeryNarrow}
+          />
+        </TabsContent>
         
         <TabsContent value="reviews" className="flex-grow overflow-hidden m-0 p-0 min-h-0">
           {shouldShowReviewPanel && (
@@ -245,6 +282,16 @@ const ImprovedSidePanel = ({
               isVeryNarrow={isVeryNarrow}
             />
           )}
+        </TabsContent>
+
+        <TabsContent value="integrated" className="flex-grow overflow-hidden m-0 p-0 min-h-0">
+          <IntegratedReviewPanel
+            currentSlide={currentSlide}
+            totalSlides={totalSlides}
+            presenterNotes={scripts}
+            isNarrow={isNarrow}
+            isVeryNarrow={isVeryNarrow}
+          />
         </TabsContent>
       </Tabs>
     </div>
@@ -301,38 +348,67 @@ const ImprovedSidePanel = ({
         {/* Quick access buttons when collapsed */}
         <div className="flex flex-col space-y-2">
           {shouldShowNotes && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 relative hover:bg-blue-100 transition-all duration-200 hover:scale-110 bg-blue-50 border border-blue-200"
-              title="メモパネル"
-              onClick={() => {
-                onToggleCollapse?.();
-                setActiveTab("notes");
-              }}
-            >
-              <BookOpen className="h-4 w-4 text-blue-600" />
-              {presenterNotes[currentSlide] && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-              )}
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 relative hover:bg-blue-100 transition-all duration-200 hover:scale-110 bg-blue-50 border border-blue-200"
+                title="メモパネル"
+                onClick={() => {
+                  onToggleCollapse?.();
+                  setActiveTab("notes");
+                }}
+              >
+                <BookOpen className="h-4 w-4 text-blue-600" />
+                {presenterNotes[currentSlide] && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 relative hover:bg-green-100 transition-all duration-200 hover:scale-110 bg-green-50 border border-green-200"
+                title="台本編集"
+                onClick={() => {
+                  onToggleCollapse?.();
+                  setActiveTab("script");
+                }}
+              >
+                <Edit3 className="h-4 w-4 text-green-600" />
+              </Button>
+            </>
           )}
           {shouldShowReviewPanel && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 relative hover:bg-red-100 transition-all duration-200 hover:scale-110 bg-red-50 border border-red-200"
-              title="レビューパネル"
-              onClick={() => {
-                onToggleCollapse?.();
-                setActiveTab("reviews");
-              }}
-            >
-              <MessageSquare className="h-4 w-4 text-red-600" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
-                <span className="text-white text-xs font-bold">3</span>
-              </div>
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 relative hover:bg-red-100 transition-all duration-200 hover:scale-110 bg-red-50 border border-red-200"
+                title="レビューパネル"
+                onClick={() => {
+                  onToggleCollapse?.();
+                  setActiveTab("reviews");
+                }}
+              >
+                <MessageSquare className="h-4 w-4 text-red-600" />
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+                  <span className="text-white text-xs font-bold">3</span>
+                </div>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 relative hover:bg-purple-100 transition-all duration-200 hover:scale-110 bg-purple-50 border border-purple-200"
+                title="統合レビュー"
+                onClick={() => {
+                  onToggleCollapse?.();
+                  setActiveTab("integrated");
+                }}
+              >
+                <CheckCircle2 className="h-4 w-4 text-purple-600" />
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
+              </Button>
+            </>
           )}
         </div>
 
