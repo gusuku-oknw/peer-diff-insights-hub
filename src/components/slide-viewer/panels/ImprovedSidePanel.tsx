@@ -1,11 +1,13 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { BookOpen, MessageSquare } from "lucide-react";
+import NotesPanel from "../../slide-viewer/panels/NotesPanel";
+import SimplifiedReviewPanel from "../panels/SimplifiedReviewPanel";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BookOpen, MessageSquare, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
 import SidePanelContent from "../slideviewer/panels/components/SidePanelContent";
 import type { SidePanelProps } from "@/types/slide-viewer/panel.types";
 
@@ -38,7 +40,6 @@ const ImprovedSidePanel = ({
   
   const [activeTab, setActiveTab] = useState(getDefaultTab());
   const panelRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
   
   console.log('ImprovedSidePanel render:', {
     shouldShowNotes,
@@ -94,36 +95,20 @@ const ImprovedSidePanel = ({
 
   const handleAddComment = () => {
     if (userType === "enterprise") {
-      toast({
-        title: "権限がありません",
-        description: "企業ユーザーはレビューの閲覧のみ可能です",
-        variant: "destructive"
-      });
+      console.log("Enterprise user cannot add comments");
       return;
     }
     
-    toast({
-      title: "コメント追加",
-      description: "新しいコメントを追加しました",
-      variant: "default"
-    });
+    console.log("Adding comment");
   };
 
   const handleSendReview = () => {
     if (userType === "enterprise") {
-      toast({
-        title: "権限がありません",
-        description: "企業ユーザーはレビューの送信はできません",
-        variant: "destructive"
-      });
+      console.log("Enterprise user cannot send reviews");
       return;
     }
     
-    toast({
-      title: "レビュー送信",
-      description: "レビューを送信しました",
-      variant: "default"
-    });
+    console.log("Sending review");
   };
 
   const isNarrow = panelDimensions.width > 0 && panelDimensions.width < 280;

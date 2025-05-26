@@ -91,6 +91,9 @@ const SlideViewer = () => {
   const isMobile = useIsMobile();
   const totalSlides = slides.length;
 
+  // Ensure userType is properly typed for components
+  const typedUserType: "student" | "enterprise" = userType === "student" ? "student" : "enterprise";
+
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {!(viewerMode === "presentation" && isFullScreen) && <Navigation />}
@@ -107,7 +110,7 @@ const SlideViewer = () => {
             showPresenterNotes={showPresenterNotes}
             presentationStartTime={presentationStartTime}
             displayCount={displayCount}
-            userType={userType}
+            userType={typedUserType}
             onPreviousSlide={handlePreviousSlide}
             onNextSlide={handleNextSlide}
             onZoomChange={handleZoomChange}
@@ -138,7 +141,7 @@ const SlideViewer = () => {
             displayCount={displayCount}
             commentedSlides={commentedSlides}
             mockComments={mockComments}
-            userType={userType}
+            userType={typedUserType}
             onBranchChange={setCurrentBranch}
             onToggleLeftSidebar={() => setLeftSidebarOpen(!leftSidebarOpen)}
             onSlideChange={(slide: number) => useSlideStore.getState().setCurrentSlide(slide)}
