@@ -105,7 +105,7 @@ const SimplifiedReviewPanel: React.FC<SimplifiedReviewPanelProps> = ({
       });
     }
 
-    // DO NOT change activeTab here - this was likely causing the unexpected transitions
+    // 重要: ここでactiveTabを変更しない - これがタブ遷移の原因だった
     console.log('SimplifiedReviewPanel: Checkbox change completed, activeTab remains:', activeTab);
   };
 

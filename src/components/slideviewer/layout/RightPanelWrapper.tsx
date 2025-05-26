@@ -1,6 +1,5 @@
 
 import React from "react";
-import { ResizablePanel } from "@/components/slide-viewer/layout/ResizablePanel";
 import ImprovedSidePanel from "../panels/ImprovedSidePanel";
 import { useSlideStore } from "@/stores/slide-store";
 import type { ViewerMode } from "@/types/slide.types";
@@ -46,14 +45,7 @@ export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
   }
 
   return (
-    <ResizablePanel
-      initialWidth={rightSidebarWidth}
-      minWidth={220}
-      maxWidth={500}
-      onWidthChange={setRightSidebarWidth}
-      resizePosition="left"
-      className="border-l border-gray-200"
-    >
+    <div className="h-full" style={{ width: rightSidebarWidth }}>
       <ImprovedSidePanel
         shouldShowNotes={shouldShowNotes}
         shouldShowReviewPanel={shouldShowReviewPanel}
@@ -63,7 +55,9 @@ export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
         isHidden={false}
         onToggleHide={() => setRightPanelHidden(true)}
         userType={userType}
+        onWidthChange={setRightSidebarWidth}
+        initialWidth={rightSidebarWidth}
       />
-    </ResizablePanel>
+    </div>
   );
 };
