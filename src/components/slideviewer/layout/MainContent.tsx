@@ -30,15 +30,17 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   return (
     <main className="flex-1 flex flex-col h-full overflow-hidden">
-      {/* スライドビューワー - フレキシブルなレイアウト */}
-      <div className="flex-grow flex items-center justify-center overflow-hidden bg-gray-50 p-2">
-        <div className="w-full h-full max-w-full max-h-full flex items-center justify-center">
-          <SlideCanvas
-            currentSlide={currentSlide}
-            zoomLevel={zoom}
-            editable={viewerMode === "edit"}
-            userType={userType}
-          />
+      {/* スライドビューワー - 完全中央配置 */}
+      <div className="flex-1 relative bg-gray-50">
+        <div className="absolute inset-0 flex items-center justify-center p-4">
+          <div className="w-full h-full max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+            <SlideCanvas
+              currentSlide={currentSlide}
+              zoomLevel={zoom}
+              editable={viewerMode === "edit"}
+              userType={userType}
+            />
+          </div>
         </div>
       </div>
 
