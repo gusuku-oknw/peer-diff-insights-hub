@@ -57,7 +57,7 @@ export const createLayoutSlice: StateCreator<
   },
   
   setRightSidebarWidth: (width: number) => {
-    const clampedWidth = Math.max(220, Math.min(500, width));
+    const clampedWidth = Math.max(200, Math.min(500, width));
     set({ rightSidebarWidth: clampedWidth });
   },
   
@@ -91,7 +91,7 @@ export const createLayoutSlice: StateCreator<
     return {
       width: windowWidth,
       availableWidth,
-      thumbnailsWidth: Math.max(400, availableWidth - 20), // Reduced padding from 40px to 20px
+      thumbnailsWidth: Math.max(400, availableWidth - 20),
     };
   },
   
@@ -123,7 +123,7 @@ export const createLayoutSlice: StateCreator<
     }
     
     // Reserve minimal padding for better space utilization
-    const padding = 20; // Reduced from 40px to 20px
+    const padding = 20;
     const availableWidth = Math.max(400, windowWidth - usedWidth - padding);
     
     return availableWidth;

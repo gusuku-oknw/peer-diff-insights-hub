@@ -33,7 +33,7 @@ export const useResizablePanels = ({
     document.body.style.pointerEvents = '';
   }, []);
 
-  // Enhanced mouse move handler with improved delta calculation
+  // Fixed mouse move handler with correct delta calculation for right-anchored panels
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isResizing) return;
     
@@ -41,7 +41,8 @@ export const useResizablePanels = ({
     e.stopPropagation();
     
     const currentPosition = orientation === 'vertical' ? e.clientX : e.clientY;
-    const delta = startPositionRef.current - currentPosition; // For left handle, reversed delta
+    // For right-anchored panels with left handle, moving left increases width, moving right decreases width
+    const delta = startPositionRef.current - currentPosition;
     const newWidth = Math.max(minWidth, Math.min(maxWidth, startWidthRef.current + delta));
     
     console.log('useResizablePanels: Mouse move', { 

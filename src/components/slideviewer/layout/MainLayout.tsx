@@ -41,53 +41,59 @@ const MainLayout = (props: MainLayoutProps) => {
 
   return (
     <LayoutProvider>
-      {/* Left Sidebar */}
-      <LeftSidebarWrapper
-        currentBranch={props.currentBranch}
-        branches={props.branches}
-        commitHistory={props.commitHistory}
-        leftSidebarOpen={props.leftSidebarOpen}
-        onBranchChange={props.onBranchChange}
-        onToggleLeftSidebar={props.onToggleLeftSidebar}
-      />
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden min-w-0">
-        {/* Edit Sidebar */}
-        <EditSidebarWrapper
-          viewerMode={props.viewerMode}
-          userType={props.userType}
-          currentSlide={props.currentSlide}
+      <div className="flex h-full relative">
+        {/* Left Sidebar */}
+        <LeftSidebarWrapper
+          currentBranch={props.currentBranch}
+          branches={props.branches}
+          commitHistory={props.commitHistory}
+          leftSidebarOpen={props.leftSidebarOpen}
+          onBranchChange={props.onBranchChange}
+          onToggleLeftSidebar={props.onToggleLeftSidebar}
         />
 
-        {/* Central Content Area */}
-        <CentralContentArea
-          currentSlide={props.currentSlide}
-          totalSlides={props.totalSlides}
-          zoom={props.zoom}
-          viewerMode={props.viewerMode}
-          showPresenterNotes={props.showPresenterNotes}
-          isFullScreen={props.isFullScreen}
-          presentationStartTime={props.presentationStartTime}
-          presenterNotes={props.presenterNotes}
-          elapsedTime={props.elapsedTime}
-          displayCount={props.displayCount}
-          commentedSlides={props.commentedSlides}
-          mockComments={props.mockComments}
-          userType={props.userType}
-          onSlideChange={props.onSlideChange}
-        />
+        {/* Main Content Area with Edit Sidebar */}
+        <div className="flex-1 flex overflow-hidden min-w-0 relative">
+          {/* Edit Sidebar */}
+          <EditSidebarWrapper
+            viewerMode={props.viewerMode}
+            userType={props.userType}
+            currentSlide={props.currentSlide}
+          />
 
-        {/* Right Panel */}
-        <RightPanelWrapper
-          viewerMode={props.viewerMode}
-          showPresenterNotes={props.showPresenterNotes}
-          isFullScreen={props.isFullScreen}
-          currentSlide={props.currentSlide}
-          totalSlides={props.totalSlides}
-          presenterNotes={props.presenterNotes}
-          userType={props.userType}
-        />
+          {/* Central Content Area */}
+          <div className="flex-1 min-w-0">
+            <CentralContentArea
+              currentSlide={props.currentSlide}
+              totalSlides={props.totalSlides}
+              zoom={props.zoom}
+              viewerMode={props.viewerMode}
+              showPresenterNotes={props.showPresenterNotes}
+              isFullScreen={props.isFullScreen}
+              presentationStartTime={props.presentationStartTime}
+              presenterNotes={props.presenterNotes}
+              elapsedTime={props.elapsedTime}
+              displayCount={props.displayCount}
+              commentedSlides={props.commentedSlides}
+              mockComments={props.mockComments}
+              userType={props.userType}
+              onSlideChange={props.onSlideChange}
+            />
+          </div>
+        </div>
+
+        {/* Right Panel - Fixed to right edge */}
+        <div className="absolute top-0 right-0 h-full z-20">
+          <RightPanelWrapper
+            viewerMode={props.viewerMode}
+            showPresenterNotes={props.showPresenterNotes}
+            isFullScreen={props.isFullScreen}
+            currentSlide={props.currentSlide}
+            totalSlides={props.totalSlides}
+            presenterNotes={props.presenterNotes}
+            userType={props.userType}
+          />
+        </div>
       </div>
 
       {/* Floating Toggle Button */}

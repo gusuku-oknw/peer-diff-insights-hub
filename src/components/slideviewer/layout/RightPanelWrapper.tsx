@@ -45,7 +45,7 @@ export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
   }
 
   return (
-    <div className="h-full" style={{ width: rightSidebarWidth }}>
+    <div className="h-full flex">
       <ImprovedSidePanel
         shouldShowNotes={shouldShowNotes}
         shouldShowReviewPanel={shouldShowReviewPanel}
