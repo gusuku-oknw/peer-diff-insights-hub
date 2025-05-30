@@ -12,7 +12,7 @@ import { useSlideViewerLogic } from "@/hooks/slideviewer/useSlideViewerLogic";
 const commentedSlides = [1, 2];
 const mockComments = [
   { id: 1, text: "とても分かりやすいスライドです！", slideId: 1 },
-  { id: 2, text: "この数値の根拠は？", slideId: 3 }
+  { id: 2, text: "この数値の根拠は？", slideId: 2 }
 ];
 
 const SlideViewer = () => {
