@@ -1,6 +1,6 @@
 
 import React from "react";
-import NotesPanel from "../../../slide-viewer/panels/NotesPanel";
+import NotesPanel from "../../../slideviewer/panels/NotesPanel";
 import SimplifiedReviewPanel from "../SimplifiedReviewPanel";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 

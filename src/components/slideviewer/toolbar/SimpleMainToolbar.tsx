@@ -1,8 +1,8 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button.tsx";
+import { Separator } from "@/components/ui/separator.tsx";
+import { Slider } from "@/components/ui/slider.tsx";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -12,9 +12,9 @@ import {
   Maximize, 
   BookOpen
 } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
-import ModeSelector from "@/components/slideviewer/toolbar/ModeSelector";
-import ModeSpecificActions from "@/components/slideviewer/toolbar/ModeSpecificActions";
+import { useIsMobile } from "@/hooks/use-mobile.tsx";
+import ModeSelector from "@/components/slideviewer/toolbar/ModeSelector.tsx";
+import ModeSpecificActions from "@/components/slideviewer/toolbar/ModeSpecificActions.tsx";
 
 interface SimpleMainToolbarProps {
   currentSlide: number;
