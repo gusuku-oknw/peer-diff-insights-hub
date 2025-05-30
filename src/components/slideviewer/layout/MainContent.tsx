@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from "react";
 import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
 import { useSlideStore } from "@/stores/slide-store";
@@ -51,13 +50,7 @@ const MainContent: React.FC<MainContentProps> = ({
         const rect = containerRef.current.getBoundingClientRect();
         
         // Calculate the actual available width for the canvas
-        // considering the right panel if it's not collapsed
-        let availableWidth = rect.width;
-        
-        // Subtract right panel width if it's visible
-        if (!rightPanelCollapsed) {
-          availableWidth = Math.max(400, availableWidth); // Ensure minimum canvas width
-        }
+        const availableWidth = rect.width;
         
         setContainerSize({
           width: availableWidth,
