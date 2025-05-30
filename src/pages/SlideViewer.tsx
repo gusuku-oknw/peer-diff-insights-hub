@@ -1,7 +1,5 @@
-
 import { useEffect } from "react";
 import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import ResponsiveToolbar from "@/components/slide-viewer/toolbar/ResponsiveToolbar";
 import MainLayout from "@/components/slideviewer/layout/MainLayout";
 import { useSlideStore } from "@/stores/slide-store";
@@ -98,7 +96,7 @@ const SlideViewer = () => {
     <div className="flex flex-col h-screen overflow-hidden">
       {!(viewerMode === "presentation" && isFullScreen) && <Navigation />}
       
-      <div className={`flex-grow flex flex-col ${!(viewerMode === "presentation" && isFullScreen) ? "pt-16 pb-16" : ""} bg-slate-50 h-full`}>
+      <div className={`flex-grow flex flex-col ${!(viewerMode === "presentation" && isFullScreen) ? "pt-16" : ""} bg-slate-50 h-full`}>
         {!(viewerMode === "presentation" && isFullScreen) && (
           <ResponsiveToolbar
             currentSlide={currentSlideNumber}
@@ -123,7 +121,7 @@ const SlideViewer = () => {
           />
         )}
         
-        <div className={`flex flex-grow overflow-hidden ${!(viewerMode === "presentation" && isFullScreen) ? "h-[calc(100vh-10rem)]" : "h-full"}`}>
+        <div className={`flex flex-grow overflow-hidden ${!(viewerMode === "presentation" && isFullScreen) ? "h-[calc(100vh-4rem)]" : "h-full"}`}>
           <MainLayout
             currentBranch={currentBranch}
             branches={branches}
@@ -148,7 +146,6 @@ const SlideViewer = () => {
           />
         </div>
       </div>
-      {!(viewerMode === "presentation" && isFullScreen) && <Footer />}
     </div>
   );
 };

@@ -29,7 +29,7 @@ const ImprovedSidePanel = ({
   onToggleHide,
   userType,
   onWidthChange,
-  initialWidth = 320,
+  initialWidth = 280, // Reduced from 320 to 280
 }: ImprovedSidePanelProps) => {
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -38,7 +38,7 @@ const ImprovedSidePanel = ({
   // リサイズ機能を追加
   const { width, ResizeHandle } = useResizablePanels({
     initialWidth,
-    minWidth: 220,
+    minWidth: 200, // Reduced from 220 to 200
     maxWidth: 500,
     onWidthChange,
     orientation: 'vertical'

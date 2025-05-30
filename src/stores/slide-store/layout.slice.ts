@@ -35,7 +35,7 @@ export interface LayoutSlice {
 
 const DEFAULT_LAYOUT = {
   leftSidebarWidth: 256,
-  rightSidebarWidth: 320,
+  rightSidebarWidth: 280,
   editSidebarWidth: 280,
   thumbnailsHeight: 128,
   leftSidebarOpen: false,
@@ -57,7 +57,7 @@ export const createLayoutSlice: StateCreator<
   },
   
   setRightSidebarWidth: (width: number) => {
-    const clampedWidth = Math.max(240, Math.min(500, width));
+    const clampedWidth = Math.max(220, Math.min(500, width));
     set({ rightSidebarWidth: clampedWidth });
   },
   
@@ -91,7 +91,7 @@ export const createLayoutSlice: StateCreator<
     return {
       width: windowWidth,
       availableWidth,
-      thumbnailsWidth: Math.max(400, availableWidth - 40), // 40px for padding
+      thumbnailsWidth: Math.max(400, availableWidth - 20), // Reduced padding from 40px to 20px
     };
   },
   
@@ -122,8 +122,8 @@ export const createLayoutSlice: StateCreator<
       usedWidth += state.editSidebarWidth;
     }
     
-    // Reserve some padding
-    const padding = 40;
+    // Reserve minimal padding for better space utilization
+    const padding = 20; // Reduced from 40px to 20px
     const availableWidth = Math.max(400, windowWidth - usedWidth - padding);
     
     return availableWidth;
