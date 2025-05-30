@@ -39,6 +39,16 @@ const MainLayout = (props: MainLayoutProps) => {
     currentSlide: props.currentSlide
   });
 
+  // Calculate if right panel should be displayed
+  const shouldShowNotes = props.userType === "enterprise" && 
+                         ((props.viewerMode === "presentation" && props.showPresenterNotes) || 
+                          (props.viewerMode === "review" && props.showPresenterNotes));
+  
+  const shouldShowReviewPanel = props.viewerMode === "review";
+  const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
+  const hideRightPanelCompletely = (props.viewerMode === "presentation" && props.isFullScreen) || 
+                                  !shouldDisplayRightPanel;
+
   return (
     <LayoutProvider>
       <div className="flex h-full relative">
@@ -78,6 +88,7 @@ const MainLayout = (props: MainLayoutProps) => {
               mockComments={props.mockComments}
               userType={props.userType}
               onSlideChange={props.onSlideChange}
+              rightPanelCollapsed={hideRightPanelCompletely}
             />
           </div>
         </div>

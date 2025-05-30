@@ -28,24 +28,29 @@ export const useSlideCanvas = ({
   const currentSlideData = slides.find(slide => slide.id === currentSlide);
   const elements = currentSlideData?.elements || [];
   
-  // Calculate optimal canvas size
+  // Calculate optimal canvas size with better fallback handling
   const calculateOptimalCanvasSize = useCallback(() => {
-    const availableWidth = containerWidth > 0 ? containerWidth - 32 : 1600;
-    const availableHeight = containerHeight > 0 ? containerHeight - 32 : 900;
+    // Use fallback values if container dimensions are not available yet
+    const fallbackWidth = 1600;
+    const fallbackHeight = 900;
+    
+    const availableWidth = containerWidth > 0 ? containerWidth - 32 : fallbackWidth * 0.8;
+    const availableHeight = containerHeight > 0 ? containerHeight - 32 : fallbackHeight * 0.8;
     
     const aspectRatio = 16 / 9;
-    let canvasWidth = availableWidth * 0.95;
+    let canvasWidth = availableWidth * 0.9; // Slightly reduce to ensure proper fit
     let canvasHeight = canvasWidth / aspectRatio;
     
-    if (canvasHeight > availableHeight * 0.95) {
-      canvasHeight = availableHeight * 0.95;
+    if (canvasHeight > availableHeight * 0.9) {
+      canvasHeight = availableHeight * 0.9;
       canvasWidth = canvasHeight * aspectRatio;
     }
     
+    // Ensure minimum and maximum bounds
     canvasWidth = Math.max(400, Math.min(1920, canvasWidth));
     canvasHeight = Math.max(225, Math.min(1080, canvasHeight));
     
-    return { width: canvasWidth, height: canvasHeight };
+    return { width: Math.round(canvasWidth), height: Math.round(canvasHeight) };
   }, [containerWidth, containerHeight]);
   
   // Update canvas size when container size changes

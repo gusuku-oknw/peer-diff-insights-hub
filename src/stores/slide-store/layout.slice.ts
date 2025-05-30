@@ -31,6 +31,7 @@ export interface LayoutSlice {
     thumbnailsWidth: number;
   };
   getSlideThumbnailsWidth: () => number;
+  isRightPanelVisible: () => boolean;
 }
 
 const DEFAULT_LAYOUT = {
@@ -77,13 +78,25 @@ export const createLayoutSlice: StateCreator<
   
   resetLayoutToDefaults: () => set(DEFAULT_LAYOUT),
   
+  isRightPanelVisible: () => {
+    const state = get();
+    const shouldShowNotes = (state.viewerMode === "presentation" && state.showPresenterNotes) || 
+                           (state.viewerMode === "review" && state.showPresenterNotes);
+    const shouldShowReviewPanel = state.viewerMode === "review";
+    const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
+    const hideRightPanelCompletely = (state.viewerMode === "presentation" && state.isFullScreen) || 
+                                    !shouldDisplayRightPanel;
+    
+    return !hideRightPanelCompletely && !state.rightPanelHidden;
+  },
+  
   getContentAreaDimensions: () => {
     const state = get();
     const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
     
     let usedWidth = 0;
     if (state.leftSidebarOpen) usedWidth += state.leftSidebarWidth;
-    if (!state.rightPanelHidden) usedWidth += state.rightSidebarWidth;
+    if (state.isRightPanelVisible()) usedWidth += state.rightSidebarWidth;
     if (state.viewerMode === 'edit') usedWidth += state.editSidebarWidth;
     
     const availableWidth = windowWidth - usedWidth;
@@ -106,15 +119,8 @@ export const createLayoutSlice: StateCreator<
       usedWidth += state.leftSidebarWidth;
     }
     
-    // Check if right panel should be shown
-    const shouldShowNotes = (state.viewerMode === "presentation" && state.showPresenterNotes) || 
-                           (state.viewerMode === "review" && state.showPresenterNotes);
-    const shouldShowReviewPanel = state.viewerMode === "review";
-    const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
-    const hideRightPanelCompletely = (state.viewerMode === "presentation" && state.isFullScreen) || 
-                                    !shouldDisplayRightPanel;
-    
-    if (!hideRightPanelCompletely && shouldDisplayRightPanel && !state.rightPanelHidden) {
+    // Use the centralized right panel visibility logic
+    if (state.isRightPanelVisible()) {
       usedWidth += state.rightSidebarWidth;
     }
     

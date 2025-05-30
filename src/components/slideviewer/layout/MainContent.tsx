@@ -1,6 +1,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
+import { useSlideStore } from "@/stores/slide-store";
 
 interface MainContentProps {
   currentSlide: number;
@@ -39,16 +40,27 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const { rightSidebarWidth, leftSidebarOpen, leftSidebarWidth, editSidebarWidth } = useSlideStore();
 
-  // ResizeObserverでコンテナサイズを監視
+  // Calculate available container size considering all panels
   useEffect(() => {
     if (!containerRef.current) return;
 
     const updateSize = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
+        
+        // Calculate the actual available width for the canvas
+        // considering the right panel if it's not collapsed
+        let availableWidth = rect.width;
+        
+        // Subtract right panel width if it's visible
+        if (!rightPanelCollapsed) {
+          availableWidth = Math.max(400, availableWidth); // Ensure minimum canvas width
+        }
+        
         setContainerSize({
-          width: rect.width,
+          width: availableWidth,
           height: rect.height
         });
       }
@@ -57,23 +69,24 @@ const MainContent: React.FC<MainContentProps> = ({
     const resizeObserver = new ResizeObserver(updateSize);
     resizeObserver.observe(containerRef.current);
     
-    // 初期サイズ設定
+    // Initial size setting
     updateSize();
 
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [rightPanelCollapsed, rightSidebarWidth]);
 
   console.log('MainContent: Container size and display settings', {
     containerSize,
     userType,
-    viewerMode
+    viewerMode,
+    rightPanelCollapsed
   });
 
   return (
     <main className="flex-1 flex flex-col h-full overflow-hidden">
-      {/* スライドビューワー - メインエリア */}
+      {/* Slide viewer - Main area */}
       <div 
         ref={containerRef}
         className="flex-1 relative bg-gray-50 w-full h-full min-h-0"

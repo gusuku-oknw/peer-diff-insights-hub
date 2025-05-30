@@ -21,6 +21,7 @@ interface CentralContentAreaProps {
   mockComments: any[];
   userType: "student" | "enterprise";
   onSlideChange: (slide: number) => void;
+  rightPanelCollapsed: boolean;
 }
 
 export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
@@ -38,6 +39,7 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
   mockComments,
   userType,
   onSlideChange,
+  rightPanelCollapsed,
 }) => {
   const { thumbnailsHeight, setThumbnailsHeight, getSlideThumbnailsWidth } = useSlideStore();
   const thumbnailsWidth = getSlideThumbnailsWidth();
@@ -60,7 +62,7 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
           commentedSlides={commentedSlides}
           mockComments={mockComments}
           userType={userType}
-          rightPanelCollapsed={false}
+          rightPanelCollapsed={rightPanelCollapsed}
           onSlideChange={onSlideChange}
         />
       </div>
