@@ -1,6 +1,6 @@
+
 import React, { useRef, useEffect, useState } from "react";
 import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
-import { useSlideStore } from "@/stores/slide-store";
 
 interface MainContentProps {
   currentSlide: number;
@@ -39,9 +39,8 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const { rightSidebarWidth, leftSidebarOpen, leftSidebarWidth, editSidebarWidth } = useSlideStore();
 
-  // Calculate available container size considering all panels
+  // Calculate available container size
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -49,11 +48,8 @@ const MainContent: React.FC<MainContentProps> = ({
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
         
-        // Calculate the actual available width for the canvas
-        const availableWidth = rect.width;
-        
         setContainerSize({
-          width: availableWidth,
+          width: rect.width,
           height: rect.height
         });
       }
@@ -68,7 +64,7 @@ const MainContent: React.FC<MainContentProps> = ({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [rightPanelCollapsed, rightSidebarWidth]);
+  }, []);
 
   console.log('MainContent: Container size and display settings', {
     containerSize,
@@ -83,10 +79,6 @@ const MainContent: React.FC<MainContentProps> = ({
       <div
         ref={containerRef}
         className="flex-1 relative bg-gray-50 w-full h-full min-h-0 min-h-[300px]"
-        style={{
-          marginRight: !rightPanelCollapsed ? `${rightSidebarWidth}px` : '0px',
-          transition: 'margin-right 0.2s ease-out',
-        }}
       >
         <div className="absolute inset-0 flex items-center justify-center p-4">
           <div className="w-full h-full flex items-center justify-center">
