@@ -76,7 +76,7 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
           onWidthChange={setThumbnailsHeight}
           orientation="horizontal"
           resizePosition="top"
-          className="border-t border-gray-200 bg-white"
+          className="border-t border-gray-200 bg-white mt-auto"
         >
           <SlideThumbnails
             currentSlide={currentSlide}
