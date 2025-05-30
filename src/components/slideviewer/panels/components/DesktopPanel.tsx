@@ -50,11 +50,6 @@ const DesktopPanel: React.FC<DesktopPanelProps> = ({
           className="flex-shrink-0 h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shadow-sm relative z-10"
           style={{ width: `${width}px` }}
       >
-        {/* 左側リサイズハンドル */}
-        <ResizeHandle
-            position="left"
-            className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 z-30"
-        />
 
         {/* タブコンテンツ */}
         <TabsContainer

@@ -32,6 +32,7 @@ export const LeftSidebarWrapper: React.FC<LeftSidebarWrapperProps> = ({
       maxWidth={400}
       onWidthChange={setLeftSidebarWidth}
       className="bg-gray-50 border-r border-gray-200"
+      orientation="vertical"        // 幅を変える
       resizePosition="right"
     >
       <LeftSidebar
