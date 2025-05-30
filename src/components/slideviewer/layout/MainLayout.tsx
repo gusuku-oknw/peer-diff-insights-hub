@@ -51,7 +51,7 @@ const MainLayout = (props: MainLayoutProps) => {
 
   return (
     <LayoutProvider>
-      <div className="flex h-full relative">
+      <div className="flex h-full w-full relative">
         {/* Left Sidebar */}
         <LeftSidebarWrapper
           currentBranch={props.currentBranch}
