@@ -51,13 +51,7 @@ const MainContent: React.FC<MainContentProps> = ({
         const rect = containerRef.current.getBoundingClientRect();
         
         // Calculate the actual available width for the canvas
-        // considering the right panel if it's not collapsed
-        let availableWidth = rect.width;
-        
-        // Subtract right panel width if it's visible
-        if (!rightPanelCollapsed) {
-          availableWidth = Math.max(400, availableWidth); // Ensure minimum canvas width
-        }
+        const availableWidth = rect.width;
         
         setContainerSize({
           width: availableWidth,
@@ -89,7 +83,7 @@ const MainContent: React.FC<MainContentProps> = ({
       {/* Slide viewer - Main area */}
       <div 
         ref={containerRef}
-        className="flex-1 relative bg-gray-50 w-full h-full min-h-0"
+        className="flex-1 relative bg-gray-50 w-full h-full min-h-0 min-h-[300px]"
       >
         <div className="absolute inset-0 flex items-center justify-center p-4">
           <div className="w-full h-full flex items-center justify-center">
