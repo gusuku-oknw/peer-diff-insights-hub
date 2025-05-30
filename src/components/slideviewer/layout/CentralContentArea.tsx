@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ResizablePanel } from "@/components/slide-viewer/layout/ResizablePanel";
+import { ResizablePanel } from "./ResizablePanel";
 import MainContent from "./MainContent";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import { useSlideStore } from "@/stores/slide-store";

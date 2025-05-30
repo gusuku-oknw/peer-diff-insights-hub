@@ -1,6 +1,6 @@
 
 import React from "react";
-import { ResizablePanel } from "@/components/slide-viewer/layout/ResizablePanel";
+import { ResizablePanel } from "./ResizablePanel";
 import EditSidebar from "../editor/EditSidebar";
 import { useSlideStore } from "@/stores/slide-store";
 import type { ViewerMode } from "@/types/slide.types";
