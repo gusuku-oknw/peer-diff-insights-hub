@@ -82,7 +82,7 @@ const MainContent: React.FC<MainContentProps> = ({
       {/* Slide viewer - Main area */}
       <div 
         ref={containerRef}
-        className="flex-1 relative bg-gray-50 w-full h-full min-h-0"
+        className="flex-1 relative bg-gray-50 w-full h-full min-h-0 min-h-[300px]"
       >
         <div className="absolute inset-0 flex items-center justify-center p-4">
           <div className="w-full h-full flex items-center justify-center">
