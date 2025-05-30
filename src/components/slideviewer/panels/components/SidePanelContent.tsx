@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, MessageSquare, X, Plus, Send } from "lucide-react";
@@ -163,7 +164,6 @@ const SidePanelContent: React.FC<SidePanelContentProps> = ({
               panelHeight={panelDimensions.height}
               isNarrow={isNarrow}
               isVeryNarrow={isVeryNarrow}
-              presenterNotes={presenterNotes}
               userType={userType}
             />
           )}
