@@ -80,9 +80,13 @@ const MainContent: React.FC<MainContentProps> = ({
   return (
     <main className="flex-1 flex flex-col h-full overflow-hidden">
       {/* Slide viewer - Main area */}
-      <div 
+      <div
         ref={containerRef}
         className="flex-1 relative bg-gray-50 w-full h-full min-h-0 min-h-[300px]"
+        style={{
+          marginRight: !rightPanelCollapsed ? `${rightSidebarWidth}px` : '0px',
+          transition: 'margin-right 0.2s ease-out',
+        }}
       >
         <div className="absolute inset-0 flex items-center justify-center p-4">
           <div className="w-full h-full flex items-center justify-center">

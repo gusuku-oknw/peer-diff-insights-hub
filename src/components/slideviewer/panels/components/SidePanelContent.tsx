@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, MessageSquare, X, Plus, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import NotesPanel from "../../../slide-viewer/panels/NotesPanel";
+import NotesPanel from "../../../slideviewer/panels/NotesPanel";
 import ReviewPanel from "../../panels/SimplifiedReviewPanel";
 
 interface SidePanelContentProps {

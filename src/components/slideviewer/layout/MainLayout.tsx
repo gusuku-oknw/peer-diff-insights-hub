@@ -1,4 +1,3 @@
-
 import React from "react";
 import { LayoutProvider } from "./LayoutProvider";
 import { LeftSidebarWrapper } from "./LeftSidebarWrapper";
@@ -30,98 +29,117 @@ interface MainLayoutProps {
   onBranchChange: (branch: string) => void;
   onSlideChange: (slide: number) => void;
   onToggleLeftSidebar: () => void;
+  onOpenOverallReview: () => void;
 }
 
-const MainLayout = (props: MainLayoutProps) => {
-  console.log('MainLayout render:', {
-    viewerMode: props.viewerMode,
-    userType: props.userType,
-    currentSlide: props.currentSlide
-  });
+const MainLayout: React.FC<MainLayoutProps> = ({
+                                                 currentBranch,
+                                                 branches,
+                                                 commitHistory,
+                                                 currentSlide,
+                                                 totalSlides,
+                                                 zoom,
+                                                 viewerMode,
+                                                 leftSidebarOpen,
+                                                 showPresenterNotes,
+                                                 isFullScreen,
+                                                 presentationStartTime,
+                                                 presenterNotes,
+                                                 elapsedTime,
+                                                 displayCount,
+                                                 commentedSlides,
+                                                 mockComments,
+                                                 userType,
+                                                 onBranchChange,
+                                                 onSlideChange,
+                                                 onToggleLeftSidebar,
+                                                 onOpenOverallReview,
+                                               }) => {
+  // 右パネル表示判定
+  const shouldShowNotes =
+      userType === "enterprise" &&
+      ((viewerMode === "presentation" && showPresenterNotes) ||
+          (viewerMode === "review" && showPresenterNotes));
 
-  // Calculate if right panel should be displayed
-  const shouldShowNotes = props.userType === "enterprise" && 
-                         ((props.viewerMode === "presentation" && props.showPresenterNotes) || 
-                          (props.viewerMode === "review" && props.showPresenterNotes));
-  
-  const shouldShowReviewPanel = props.viewerMode === "review";
+  const shouldShowReviewPanel = viewerMode === "review";
   const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
-  const hideRightPanelCompletely = (props.viewerMode === "presentation" && props.isFullScreen) || 
-                                  !shouldDisplayRightPanel;
+  const hideRightPanelCompletely =
+      (viewerMode === "presentation" && isFullScreen) || !shouldDisplayRightPanel;
 
   return (
-    <LayoutProvider>
-      <div className="flex h-full w-full relative">
-        {/* Left Sidebar */}
-        <LeftSidebarWrapper
-          currentBranch={props.currentBranch}
-          branches={props.branches}
-          commitHistory={props.commitHistory}
-          leftSidebarOpen={props.leftSidebarOpen}
-          onBranchChange={props.onBranchChange}
-          onToggleLeftSidebar={props.onToggleLeftSidebar}
-        />
-
-        {/* Main Content Area with Edit Sidebar */}
-        <div className="flex-1 flex overflow-hidden min-w-0 relative">
-          {/* Edit Sidebar */}
-          <EditSidebarWrapper
-            viewerMode={props.viewerMode}
-            userType={props.userType}
-            currentSlide={props.currentSlide}
+      <LayoutProvider>
+        <div className="flex h-full w-full">
+          {/* 左サイドバー */}
+          <LeftSidebarWrapper
+              currentBranch={currentBranch}
+              branches={branches}
+              commitHistory={commitHistory}
+              leftSidebarOpen={leftSidebarOpen}
+              onBranchChange={onBranchChange}
+              onToggleLeftSidebar={onToggleLeftSidebar}
           />
 
-          {/* Central Content Area */}
-          <div className="flex-1 min-w-0">
-            <CentralContentArea
-              currentSlide={props.currentSlide}
-              totalSlides={props.totalSlides}
-              zoom={props.zoom}
-              viewerMode={props.viewerMode}
-              showPresenterNotes={props.showPresenterNotes}
-              isFullScreen={props.isFullScreen}
-              presentationStartTime={props.presentationStartTime}
-              presenterNotes={props.presenterNotes}
-              elapsedTime={props.elapsedTime}
-              displayCount={props.displayCount}
-              commentedSlides={props.commentedSlides}
-              mockComments={props.mockComments}
-              userType={props.userType}
-              onSlideChange={props.onSlideChange}
-              rightPanelCollapsed={hideRightPanelCompletely}
+          {/* 中央＋右カラムを flex で並べる */}
+          <div className="flex-1 flex overflow-hidden min-w-0">
+            {/* 編集用サイドバー */}
+            <EditSidebarWrapper
+                viewerMode={viewerMode}
+                userType={userType}
+                currentSlide={currentSlide}
             />
+
+            {/* メインコンテンツ領域 */}
+            <CentralContentArea
+                currentSlide={currentSlide}
+                totalSlides={totalSlides}
+                zoom={zoom}
+                viewerMode={viewerMode}
+                showPresenterNotes={showPresenterNotes}
+                isFullScreen={isFullScreen}
+                presentationStartTime={presentationStartTime}
+                presenterNotes={presenterNotes}
+                elapsedTime={elapsedTime}
+                displayCount={displayCount}
+                commentedSlides={commentedSlides}
+                mockComments={mockComments}
+                userType={userType}
+                onSlideChange={onSlideChange}
+                rightPanelCollapsed={hideRightPanelCompletely}
+                onOpenOverallReview={onOpenOverallReview}
+            />
+
+            {/* 右サイドパネル：collapse 状態に応じて存在を切り替え */}
+            {!hideRightPanelCompletely && (
+                <div className="flex-shrink-0 w-80 border-l border-gray-200 bg-white">
+                  <RightPanelWrapper
+                      viewerMode={viewerMode}
+                      showPresenterNotes={showPresenterNotes}
+                      isFullScreen={isFullScreen}
+                      currentSlide={currentSlide}
+                      totalSlides={totalSlides}
+                      presenterNotes={presenterNotes}
+                      userType={userType}
+                  />
+                </div>
+            )}
           </div>
         </div>
 
-        {/* Right Panel - Fixed to right edge */}
-        <div className="absolute top-0 right-0 h-full z-20">
-          <RightPanelWrapper
-            viewerMode={props.viewerMode}
-            showPresenterNotes={props.showPresenterNotes}
-            isFullScreen={props.isFullScreen}
-            currentSlide={props.currentSlide}
-            totalSlides={props.totalSlides}
-            presenterNotes={props.presenterNotes}
-            userType={props.userType}
-          />
-        </div>
-      </div>
+        {/* 浮遊切り替えボタン */}
+        <FloatingToggleButton
+            viewerMode={viewerMode}
+            showPresenterNotes={showPresenterNotes}
+            isFullScreen={isFullScreen}
+        />
 
-      {/* Floating Toggle Button */}
-      <FloatingToggleButton
-        viewerMode={props.viewerMode}
-        showPresenterNotes={props.showPresenterNotes}
-        isFullScreen={props.isFullScreen}
-      />
-
-      {/* Overall Review Panel */}
-      <OverallReviewPanel
-        isOpen={false}
-        onClose={() => {}}
-        totalSlides={props.totalSlides}
-        presenterNotes={props.presenterNotes}
-      />
-    </LayoutProvider>
+        {/* 全体レビュー用パネル */}
+        <OverallReviewPanel
+            isOpen={false}
+            onClose={() => {}}
+            totalSlides={totalSlides}
+            presenterNotes={presenterNotes}
+        />
+      </LayoutProvider>
   );
 };
 

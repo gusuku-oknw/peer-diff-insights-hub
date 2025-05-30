@@ -29,6 +29,7 @@ export const EditSidebarWrapper: React.FC<EditSidebarWrapperProps> = ({
       maxWidth={400}
       onWidthChange={setEditSidebarWidth}
       className="border-r border-gray-200 bg-white"
+      orientation="vertical"        // 幅を変える
       resizePosition="right"
     >
       <EditSidebar currentSlide={currentSlide} />

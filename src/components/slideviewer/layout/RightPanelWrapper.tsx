@@ -1,4 +1,3 @@
-
 import React from "react";
 import ImprovedSidePanel from "../panels/ImprovedSidePanel";
 import { useSlideStore } from "@/stores/slide-store";
@@ -15,49 +14,59 @@ interface RightPanelWrapperProps {
 }
 
 export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
-  viewerMode,
-  showPresenterNotes,
-  isFullScreen,
-  currentSlide,
-  totalSlides,
-  presenterNotes,
-  userType,
-}) => {
-  const { rightSidebarWidth, rightPanelHidden, setRightSidebarWidth, setRightPanelHidden } = useSlideStore();
+                                                                      viewerMode,
+                                                                      showPresenterNotes,
+                                                                      isFullScreen,
+                                                                      currentSlide,
+                                                                      totalSlides,
+                                                                      presenterNotes,
+                                                                      userType,
+                                                                    }) => {
+  const {
+    rightSidebarWidth,
+    rightPanelHidden,
+    setRightSidebarWidth,
+    setRightPanelHidden,
+  } = useSlideStore();
 
-  // Simplified panel display logic
-  const shouldShowNotes = userType === "enterprise" && 
-                         ((viewerMode === "presentation" && showPresenterNotes) || 
-                          (viewerMode === "review" && showPresenterNotes));
-  
-  // Review panel is available for both student and enterprise users in review mode
+  // ノート表示判定
+  const shouldShowNotes =
+      userType === "enterprise" &&
+      ((viewerMode === "presentation" && showPresenterNotes) ||
+          (viewerMode === "review" && showPresenterNotes));
+
+  // レビューパネル表示判定
   const shouldShowReviewPanel = viewerMode === "review";
-  
-  // Panel should display if either notes or review panel should be shown
-  const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
-  
-  // Hide panel completely in fullscreen presentation mode or when no content to show
-  const hideRightPanelCompletely = (viewerMode === "presentation" && isFullScreen) || 
-                                  !shouldDisplayRightPanel;
 
+  // 右パネルを表示すべきか
+  const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
+
+  // フルスクリーン発表時 or 表示内容なしのときは非表示
+  const hideRightPanelCompletely =
+      (viewerMode === "presentation" && isFullScreen) || !shouldDisplayRightPanel;
+
+  // 非表示フラグ or ユーザーが隠した時は何もレンダーしない
   if (hideRightPanelCompletely || rightPanelHidden) {
     return null;
   }
 
   return (
-    <div className="h-full flex">
-      <ImprovedSidePanel
-        shouldShowNotes={shouldShowNotes}
-        shouldShowReviewPanel={shouldShowReviewPanel}
-        currentSlide={currentSlide}
-        totalSlides={totalSlides}
-        presenterNotes={presenterNotes}
-        isHidden={false}
-        onToggleHide={() => setRightPanelHidden(true)}
-        userType={userType}
-        onWidthChange={setRightSidebarWidth}
-        initialWidth={rightSidebarWidth}
-      />
-    </div>
+      <div
+          className="h-full flex-shrink-0"
+          style={{ width: `${rightSidebarWidth}px` }}
+      >
+        <ImprovedSidePanel
+            shouldShowNotes={shouldShowNotes}
+            shouldShowReviewPanel={shouldShowReviewPanel}
+            currentSlide={currentSlide}
+            totalSlides={totalSlides}
+            presenterNotes={presenterNotes}
+            isHidden={false}
+            onToggleHide={() => setRightPanelHidden(true)}
+            userType={userType}
+            onWidthChange={setRightSidebarWidth}
+            initialWidth={rightSidebarWidth}
+        />
+      </div>
   );
 };

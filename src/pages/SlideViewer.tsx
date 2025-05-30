@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import Navigation from "@/components/Navigation";
-import ResponsiveToolbar from "@/components/slide-viewer/toolbar/ResponsiveToolbar";
+import ResponsiveToolbar from "@/components/slideviewer/toolbar/ResponsiveToolbar";
 import MainLayout from "@/components/slideviewer/layout/MainLayout";
 import { useSlideStore } from "@/stores/slide-store";
 import { useIsMobile } from "@/hooks/use-mobile";
