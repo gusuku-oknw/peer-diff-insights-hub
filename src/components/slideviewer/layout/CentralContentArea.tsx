@@ -2,7 +2,7 @@
 import React from "react";
 import { ResizablePanel } from "@/components/slide-viewer/layout/ResizablePanel";
 import MainContent from "./MainContent";
-import SlideThumbnails from "@/components/slide-viewer/SlideThumbnails";
+import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import { useSlideStore } from "@/stores/slide-store";
 import type { ViewerMode } from "@/types/slide.types";
 
