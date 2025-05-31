@@ -1,6 +1,6 @@
 
 import React from "react";
-import SplitPane from "react-split-pane";
+import { SplitPaneLayout } from "./sections/SplitPaneLayout";
 import MainContent from "./MainContent";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import { useSlideStore } from "@/stores/slide-store";
@@ -51,7 +51,7 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
     return (
         <div className="flex-1 flex flex-col overflow-hidden min-w-0 h-full">
             {showThumbnails ? (
-                <SplitPane
+                <SplitPaneLayout
                     split="horizontal"
                     primary="first"
                     minSize={300}
@@ -98,7 +98,7 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
                             userType={userType}
                         />
                     </div>
-                </SplitPane>
+                </SplitPaneLayout>
             ) : (
                 <MainContent
                     currentSlide={currentSlide}

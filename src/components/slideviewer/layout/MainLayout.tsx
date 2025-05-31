@@ -1,11 +1,8 @@
 
 import React from "react";
-import SplitPane from "react-split-pane";
 import { LayoutProvider } from "./LayoutProvider";
-import { LeftSidebarWrapper } from "./LeftSidebarWrapper";
-import { EditSidebarWrapper } from "./EditSidebarWrapper";
-import { CentralContentArea } from "./CentralContentArea";
-import { RightPanelWrapper } from "./RightPanelWrapper";
+import { LeftSidebarSection } from "./sections/LeftSidebarSection";
+import { CentralSection } from "./sections/CentralSection";
 import { FloatingToggleButton } from "./FloatingToggleButton";
 import OverallReviewPanel from "../panels/OverallReviewPanel";
 import type { ViewerMode } from "@/types/slide.types";
@@ -58,17 +55,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   onToggleLeftSidebar,
   onOpenOverallReview,
 }) => {
-  const { 
-    leftSidebarWidth, 
-    rightSidebarWidth, 
-    editSidebarWidth,
-    setLeftSidebarWidth, 
-    setRightSidebarWidth,
-    setEditSidebarWidth,
-    isRightPanelVisible 
-  } = useSlideStore();
+  const { isRightPanelVisible } = useSlideStore();
 
-  // 右パネル表示判定
+  // Right panel display logic
   const shouldShowNotes =
       userType === "enterprise" &&
       ((viewerMode === "presentation" && showPresenterNotes) ||
@@ -84,120 +73,34 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   return (
       <LayoutProvider>
         <div className="flex h-full w-full">
-          <SplitPane
-              split="vertical"
-              minSize={leftSidebarOpen ? 180 : 0}
-              maxSize={leftSidebarOpen ? 400 : 0}
-              defaultSize={leftSidebarOpen ? leftSidebarWidth : 0}
-              size={leftSidebarOpen ? leftSidebarWidth : 0}
-              onDragFinished={(size) => {
-                if (leftSidebarOpen) {
-                  setLeftSidebarWidth(size);
-                }
-              }}
-              allowResize={leftSidebarOpen}
-              resizerStyle={leftSidebarOpen ? { 
-                backgroundColor: '#e5e7eb', 
-                width: '4px',
-                cursor: 'col-resize'
-              } : { display: 'none' }}
+          <LeftSidebarSection
+            leftSidebarOpen={leftSidebarOpen}
+            currentBranch={currentBranch}
+            branches={branches}
+            commitHistory={commitHistory}
+            onBranchChange={onBranchChange}
+            onToggleLeftSidebar={onToggleLeftSidebar}
           >
-            {leftSidebarOpen ? (
-                <LeftSidebarWrapper
-                    currentBranch={currentBranch}
-                    branches={branches}
-                    commitHistory={commitHistory}
-                    leftSidebarOpen={leftSidebarOpen}
-                    onBranchChange={onBranchChange}
-                    onToggleLeftSidebar={onToggleLeftSidebar}
-                />
-            ) : (
-                <div style={{ width: 0 }} />
-            )}
-
-            <SplitPane
-                split="vertical"
-                primary="first"
-                minSize={400}
-                maxSize={rightPanelVisible ? -200 : undefined}
-                defaultSize={rightPanelVisible ? `calc(100% - ${rightSidebarWidth}px)` : "100%"}
-                size={rightPanelVisible ? `calc(100% - ${rightSidebarWidth}px)` : "100%"}
-                onDragFinished={(size) => {
-                  if (rightPanelVisible) {
-                    const containerWidth = window.innerWidth - (leftSidebarOpen ? leftSidebarWidth : 0);
-                    const newRightPanelWidth = containerWidth - size;
-                    setRightSidebarWidth(Math.max(200, Math.min(500, newRightPanelWidth)));
-                  }
-                }}
-                allowResize={rightPanelVisible}
-                resizerStyle={rightPanelVisible ? { 
-                  backgroundColor: '#e5e7eb', 
-                  width: '4px',
-                  cursor: 'col-resize'
-                } : { display: 'none' }}
-            >
-              <SplitPane
-                  split="vertical"
-                  primary="first"
-                  minSize={viewerMode === "edit" && userType === "enterprise" ? 220 : 0}
-                  maxSize={viewerMode === "edit" && userType === "enterprise" ? 400 : 0}
-                  defaultSize={viewerMode === "edit" && userType === "enterprise" ? editSidebarWidth : 0}
-                  size={viewerMode === "edit" && userType === "enterprise" ? editSidebarWidth : 0}
-                  onDragFinished={(size) => {
-                    if (viewerMode === "edit" && userType === "enterprise") {
-                      setEditSidebarWidth(size);
-                    }
-                  }}
-                  allowResize={viewerMode === "edit" && userType === "enterprise"}
-                  resizerStyle={viewerMode === "edit" && userType === "enterprise" ? { 
-                    backgroundColor: '#e5e7eb', 
-                    width: '4px',
-                    cursor: 'col-resize'
-                  } : { display: 'none' }}
-              >
-                {viewerMode === "edit" && userType === "enterprise" ? (
-                    <EditSidebarWrapper
-                        viewerMode={viewerMode}
-                        userType={userType}
-                        currentSlide={currentSlide}
-                    />
-                ) : (
-                    <div style={{ width: 0 }} />
-                )}
-
-                <CentralContentArea
-                    currentSlide={currentSlide}
-                    totalSlides={totalSlides}
-                    zoom={zoom}
-                    viewerMode={viewerMode}
-                    showPresenterNotes={showPresenterNotes}
-                    isFullScreen={isFullScreen}
-                    presentationStartTime={presentationStartTime}
-                    presenterNotes={presenterNotes}
-                    elapsedTime={elapsedTime}
-                    displayCount={displayCount}
-                    commentedSlides={commentedSlides}
-                    mockComments={mockComments}
-                    userType={userType}
-                    onSlideChange={onSlideChange}
-                    rightPanelCollapsed={hideRightPanelCompletely}
-                    onOpenOverallReview={onOpenOverallReview}
-                />
-              </SplitPane>
-
-              {rightPanelVisible && (
-                  <RightPanelWrapper
-                      viewerMode={viewerMode}
-                      showPresenterNotes={showPresenterNotes}
-                      isFullScreen={isFullScreen}
-                      currentSlide={currentSlide}
-                      totalSlides={totalSlides}
-                      presenterNotes={presenterNotes}
-                      userType={userType}
-                  />
-              )}
-            </SplitPane>
-          </SplitPane>
+            <CentralSection
+              viewerMode={viewerMode}
+              userType={userType}
+              currentSlide={currentSlide}
+              totalSlides={totalSlides}
+              zoom={zoom}
+              showPresenterNotes={showPresenterNotes}
+              isFullScreen={isFullScreen}
+              presentationStartTime={presentationStartTime}
+              presenterNotes={presenterNotes}
+              elapsedTime={elapsedTime}
+              displayCount={displayCount}
+              commentedSlides={commentedSlides}
+              mockComments={mockComments}
+              onSlideChange={onSlideChange}
+              rightPanelVisible={rightPanelVisible}
+              hideRightPanelCompletely={hideRightPanelCompletely}
+              leftSidebarOpen={leftSidebarOpen}
+            />
+          </LeftSidebarSection>
         </div>
 
         <FloatingToggleButton
