@@ -92,6 +92,11 @@ const SlideViewer = () => {
   // Ensure userType is properly typed for components
   const typedUserType: "student" | "enterprise" = userType === "student" ? "student" : "enterprise";
 
+  const handleOpenOverallReview = () => {
+    console.log('Opening overall review panel');
+    // TODO: Implement overall review panel opening logic
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {!(viewerMode === "presentation" && isFullScreen) && <Navigation />}
@@ -143,6 +148,7 @@ const SlideViewer = () => {
             onBranchChange={setCurrentBranch}
             onToggleLeftSidebar={() => setLeftSidebarOpen(!leftSidebarOpen)}
             onSlideChange={(slide: number) => useSlideStore.getState().setCurrentSlide(slide)}
+            onOpenOverallReview={handleOpenOverallReview}
           />
         </div>
       </div>

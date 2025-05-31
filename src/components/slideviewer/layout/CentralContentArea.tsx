@@ -43,9 +43,10 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
     rightPanelCollapsed,
     onOpenOverallReview,
 }) => {
-    const { thumbnailsHeight, setThumbnailsHeight } = useSlideStore();
+    const { thumbnailsHeight, setThumbnailsHeight, getSlideThumbnailsWidth } = useSlideStore();
 
     const showThumbnails = !(viewerMode === "presentation" && isFullScreen);
+    const containerWidth = getSlideThumbnailsWidth();
 
     return (
         <div className="flex-1 flex flex-col overflow-hidden min-w-0 h-full">
@@ -95,6 +96,7 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
                             onSlideClick={onSlideChange}
                             onOpenOverallReview={onOpenOverallReview}
                             height={thumbnailsHeight}
+                            containerWidth={containerWidth}
                             userType={userType}
                         />
                     </div>
