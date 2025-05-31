@@ -40,9 +40,11 @@ export const SplitPaneLayout: React.FC<SplitPaneLayoutProps> = ({
       onDragFinished={onDragFinished}
       allowResize={allowResize}
       resizerStyle={resizerStyle}
+      pane1Style={{ overflow: 'hidden' }}
+      pane2Style={{ overflow: 'hidden' }}
     >
-      {firstPane}
-      {secondPane}
+      <div style={{ height: '100%', overflow: 'hidden' }}>{firstPane}</div>
+      <div style={{ height: '100%', overflow: 'hidden' }}>{secondPane}</div>
     </SplitPane>
   );
 };
