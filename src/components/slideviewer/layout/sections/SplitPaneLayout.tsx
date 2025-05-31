@@ -3,7 +3,8 @@ import React from "react";
 import SplitPane from "react-split-pane";
 
 interface SplitPaneLayoutProps {
-  children: [React.ReactElement, React.ReactElement];
+  firstPane: React.ReactElement;
+  secondPane: React.ReactElement;
   split: "vertical" | "horizontal";
   primary?: "first" | "second";
   minSize: number;
@@ -16,7 +17,8 @@ interface SplitPaneLayoutProps {
 }
 
 export const SplitPaneLayout: React.FC<SplitPaneLayoutProps> = ({
-  children,
+  firstPane,
+  secondPane,
   split,
   primary,
   minSize,
@@ -39,8 +41,8 @@ export const SplitPaneLayout: React.FC<SplitPaneLayoutProps> = ({
       allowResize={allowResize}
       resizerStyle={resizerStyle}
     >
-      {children[0]}
-      {children[1]}
+      {firstPane}
+      {secondPane}
     </SplitPane>
   );
 };

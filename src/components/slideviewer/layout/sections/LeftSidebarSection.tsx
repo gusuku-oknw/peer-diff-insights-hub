@@ -43,20 +43,21 @@ export const LeftSidebarSection: React.FC<LeftSidebarSectionProps> = ({
         width: '4px',
         cursor: 'col-resize'
       } : { display: 'none' }}
-    >
-      {leftSidebarOpen ? (
-        <LeftSidebarWrapper
-          currentBranch={currentBranch}
-          branches={branches}
-          commitHistory={commitHistory}
-          leftSidebarOpen={leftSidebarOpen}
-          onBranchChange={onBranchChange}
-          onToggleLeftSidebar={onToggleLeftSidebar}
-        />
-      ) : (
-        <div style={{ width: 0 }} />
-      )}
-      {children}
-    </SplitPaneLayout>
+      firstPane={
+        leftSidebarOpen ? (
+          <LeftSidebarWrapper
+            currentBranch={currentBranch}
+            branches={branches}
+            commitHistory={commitHistory}
+            leftSidebarOpen={leftSidebarOpen}
+            onBranchChange={onBranchChange}
+            onToggleLeftSidebar={onToggleLeftSidebar}
+          />
+        ) : (
+          <div style={{ width: 0 }} />
+        )
+      }
+      secondPane={children}
+    />
   );
 };

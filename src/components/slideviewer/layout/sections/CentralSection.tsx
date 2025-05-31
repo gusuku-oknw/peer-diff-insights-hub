@@ -74,61 +74,69 @@ export const CentralSection: React.FC<CentralSectionProps> = ({
         width: '4px',
         cursor: 'col-resize'
       } : { display: 'none' }}
-    >
-      <SplitPaneLayout
-        split="vertical"
-        primary="first"
-        minSize={viewerMode === "edit" && userType === "enterprise" ? 220 : 0}
-        maxSize={viewerMode === "edit" && userType === "enterprise" ? 400 : 0}
-        defaultSize={viewerMode === "edit" && userType === "enterprise" ? editSidebarWidth : 0}
-        size={viewerMode === "edit" && userType === "enterprise" ? editSidebarWidth : 0}
-        onDragFinished={() => {}}
-        allowResize={viewerMode === "edit" && userType === "enterprise"}
-        resizerStyle={viewerMode === "edit" && userType === "enterprise" ? { 
-          backgroundColor: '#e5e7eb', 
-          width: '4px',
-          cursor: 'col-resize'
-        } : { display: 'none' }}
-      >
-        {viewerMode === "edit" && userType === "enterprise" ? (
-          <EditSidebarWrapper
+      firstPane={
+        <SplitPaneLayout
+          split="vertical"
+          primary="first"
+          minSize={viewerMode === "edit" && userType === "enterprise" ? 220 : 0}
+          maxSize={viewerMode === "edit" && userType === "enterprise" ? 400 : 0}
+          defaultSize={viewerMode === "edit" && userType === "enterprise" ? editSidebarWidth : 0}
+          size={viewerMode === "edit" && userType === "enterprise" ? editSidebarWidth : 0}
+          onDragFinished={() => {}}
+          allowResize={viewerMode === "edit" && userType === "enterprise"}
+          resizerStyle={viewerMode === "edit" && userType === "enterprise" ? { 
+            backgroundColor: '#e5e7eb', 
+            width: '4px',
+            cursor: 'col-resize'
+          } : { display: 'none' }}
+          firstPane={
+            viewerMode === "edit" && userType === "enterprise" ? (
+              <EditSidebarWrapper
+                viewerMode={viewerMode}
+                userType={userType}
+                currentSlide={currentSlide}
+              />
+            ) : (
+              <div style={{ width: 0 }} />
+            )
+          }
+          secondPane={
+            <CentralContentArea
+              currentSlide={currentSlide}
+              totalSlides={totalSlides}
+              zoom={zoom}
+              viewerMode={viewerMode}
+              showPresenterNotes={showPresenterNotes}
+              isFullScreen={isFullScreen}
+              presentationStartTime={presentationStartTime}
+              presenterNotes={presenterNotes}
+              elapsedTime={elapsedTime}
+              displayCount={displayCount}
+              commentedSlides={commentedSlides}
+              mockComments={mockComments}
+              userType={userType}
+              onSlideChange={onSlideChange}
+              rightPanelCollapsed={hideRightPanelCompletely}
+              onOpenOverallReview={() => {}}
+            />
+          }
+        />
+      }
+      secondPane={
+        rightPanelVisible ? (
+          <RightPanelWrapper
             viewerMode={viewerMode}
-            userType={userType}
+            showPresenterNotes={showPresenterNotes}
+            isFullScreen={isFullScreen}
             currentSlide={currentSlide}
+            totalSlides={totalSlides}
+            presenterNotes={presenterNotes}
+            userType={userType}
           />
         ) : (
           <div style={{ width: 0 }} />
-        )}
-        <CentralContentArea
-          currentSlide={currentSlide}
-          totalSlides={totalSlides}
-          zoom={zoom}
-          viewerMode={viewerMode}
-          showPresenterNotes={showPresenterNotes}
-          isFullScreen={isFullScreen}
-          presentationStartTime={presentationStartTime}
-          presenterNotes={presenterNotes}
-          elapsedTime={elapsedTime}
-          displayCount={displayCount}
-          commentedSlides={commentedSlides}
-          mockComments={mockComments}
-          userType={userType}
-          onSlideChange={onSlideChange}
-          rightPanelCollapsed={hideRightPanelCompletely}
-          onOpenOverallReview={() => {}}
-        />
-      </SplitPaneLayout>
-      {rightPanelVisible && (
-        <RightPanelWrapper
-          viewerMode={viewerMode}
-          showPresenterNotes={showPresenterNotes}
-          isFullScreen={isFullScreen}
-          currentSlide={currentSlide}
-          totalSlides={totalSlides}
-          presenterNotes={presenterNotes}
-          userType={userType}
-        />
-      )}
-    </SplitPaneLayout>
+        )
+      }
+    />
   );
 };
