@@ -1,6 +1,6 @@
 
 import React from "react";
-import { SplitPaneLayout } from "./sections/SplitPaneLayout";
+import { ResizablePanel } from "./ResizablePanel";
 import MainContent from "./MainContent";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import { useSlideStore } from "@/stores/slide-store";
@@ -69,7 +69,7 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
     );
 
     const thumbnailsSection = (
-        <div className="border-t border-gray-200 bg-white">
+        <div className="border-t border-gray-200 bg-white h-full">
             <SlideThumbnails
                 currentSlide={currentSlide}
                 onSlideClick={onSlideChange}
@@ -84,27 +84,22 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
     return (
         <div className="flex-1 flex flex-col overflow-hidden min-w-0 h-full">
             {showThumbnails ? (
-                <SplitPaneLayout
-                    split="horizontal"
-                    primary="first"
-                    minSize={300}
-                    maxSize={-100}
-                    defaultSize={`calc(100% - ${thumbnailsHeight}px)`}
-                    size={`calc(100% - ${thumbnailsHeight}px)`}
-                    onDragFinished={(size) => {
-                        const containerHeight = window.innerHeight - 64; // Navigation height
-                        const newThumbnailsHeight = containerHeight - size;
-                        setThumbnailsHeight(Math.max(100, Math.min(300, newThumbnailsHeight)));
-                    }}
-                    allowResize={true}
-                    resizerStyle={{ 
-                        backgroundColor: '#e5e7eb', 
-                        height: '4px',
-                        cursor: 'row-resize'
-                    }}
-                    firstPane={mainContent}
-                    secondPane={thumbnailsSection}
-                />
+                <div className="flex flex-col h-full">
+                    <div className="flex-1 min-h-0">
+                        {mainContent}
+                    </div>
+                    <ResizablePanel
+                        initialWidth={thumbnailsHeight}
+                        minWidth={100}
+                        maxWidth={300}
+                        onWidthChange={setThumbnailsHeight}
+                        className="border-t border-gray-200 bg-white"
+                        orientation="horizontal"
+                        resizePosition="top"
+                    >
+                        {thumbnailsSection}
+                    </ResizablePanel>
+                </div>
             ) : (
                 mainContent
             )}

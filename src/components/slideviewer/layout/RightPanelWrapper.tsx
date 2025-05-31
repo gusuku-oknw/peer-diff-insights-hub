@@ -1,4 +1,6 @@
+
 import React from "react";
+import { ResizablePanel } from "./ResizablePanel";
 import ImprovedSidePanel from "../panels/ImprovedSidePanel";
 import { useSlideStore } from "@/stores/slide-store";
 import type { ViewerMode } from "@/types/slide.types";
@@ -14,14 +16,14 @@ interface RightPanelWrapperProps {
 }
 
 export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
-                                                                      viewerMode,
-                                                                      showPresenterNotes,
-                                                                      isFullScreen,
-                                                                      currentSlide,
-                                                                      totalSlides,
-                                                                      presenterNotes,
-                                                                      userType,
-                                                                    }) => {
+  viewerMode,
+  showPresenterNotes,
+  isFullScreen,
+  currentSlide,
+  totalSlides,
+  presenterNotes,
+  userType,
+}) => {
   const {
     rightSidebarWidth,
     rightPanelHidden,
@@ -51,22 +53,27 @@ export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
   }
 
   return (
-      <div
-          className="h-full flex-shrink-0"
-          style={{ width: `${rightSidebarWidth}px` }}
-      >
-        <ImprovedSidePanel
-            shouldShowNotes={shouldShowNotes}
-            shouldShowReviewPanel={shouldShowReviewPanel}
-            currentSlide={currentSlide}
-            totalSlides={totalSlides}
-            presenterNotes={presenterNotes}
-            isHidden={false}
-            onToggleHide={() => setRightPanelHidden(true)}
-            userType={userType}
-            onWidthChange={setRightSidebarWidth}
-            initialWidth={rightSidebarWidth}
-        />
-      </div>
+    <ResizablePanel
+      initialWidth={rightSidebarWidth}
+      minWidth={200}
+      maxWidth={500}
+      onWidthChange={setRightSidebarWidth}
+      className="border-l border-gray-200 bg-white"
+      orientation="vertical"
+      resizePosition="left"
+    >
+      <ImprovedSidePanel
+        shouldShowNotes={shouldShowNotes}
+        shouldShowReviewPanel={shouldShowReviewPanel}
+        currentSlide={currentSlide}
+        totalSlides={totalSlides}
+        presenterNotes={presenterNotes}
+        isHidden={false}
+        onToggleHide={() => setRightPanelHidden(true)}
+        userType={userType}
+        onWidthChange={setRightSidebarWidth}
+        initialWidth={rightSidebarWidth}
+      />
+    </ResizablePanel>
   );
 };
