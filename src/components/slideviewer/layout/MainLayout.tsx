@@ -84,7 +84,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   return (
       <LayoutProvider>
         <div className="flex h-full w-full">
-          {/* メイン水平分割: 左サイドバー | メインコンテンツ */}
           <SplitPane
               split="vertical"
               minSize={leftSidebarOpen ? 180 : 0}
@@ -103,7 +102,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 cursor: 'col-resize'
               } : { display: 'none' }}
           >
-            {/* 左サイドバー */}
             {leftSidebarOpen ? (
                 <LeftSidebarWrapper
                     currentBranch={currentBranch}
@@ -117,7 +115,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 <div style={{ width: 0 }} />
             )}
 
-            {/* 右パネルとの分割 */}
             <SplitPane
                 split="vertical"
                 primary="first"
@@ -139,7 +136,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                   cursor: 'col-resize'
                 } : { display: 'none' }}
             >
-              {/* 編集サイドバーとメインコンテンツエリア */}
               <SplitPane
                   split="vertical"
                   primary="first"
@@ -159,7 +155,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                     cursor: 'col-resize'
                   } : { display: 'none' }}
               >
-                {/* 編集サイドバー */}
                 {viewerMode === "edit" && userType === "enterprise" ? (
                     <EditSidebarWrapper
                         viewerMode={viewerMode}
@@ -170,7 +165,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                     <div style={{ width: 0 }} />
                 )}
 
-                {/* 中央コンテンツエリア */}
                 <CentralContentArea
                     currentSlide={currentSlide}
                     totalSlides={totalSlides}
@@ -191,7 +185,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                 />
               </SplitPane>
 
-              {/* 右サイドパネル */}
               {rightPanelVisible && (
                   <RightPanelWrapper
                       viewerMode={viewerMode}
@@ -207,14 +200,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </SplitPane>
         </div>
 
-        {/* 浮遊切り替えボタン */}
         <FloatingToggleButton
             viewerMode={viewerMode}
             showPresenterNotes={showPresenterNotes}
             isFullScreen={isFullScreen}
         />
 
-        {/* 全体レビュー用パネル */}
         <OverallReviewPanel
             isOpen={false}
             onClose={() => {}}

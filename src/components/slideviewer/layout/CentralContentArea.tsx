@@ -70,7 +70,6 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
                         cursor: 'row-resize'
                     }}
                 >
-                    {/* メインコンテンツ */}
                     <MainContent
                         currentSlide={currentSlide}
                         totalSlides={totalSlides}
@@ -89,7 +88,6 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
                         onSlideChange={onSlideChange}
                     />
 
-                    {/* 下部サムネイル */}
                     <div className="border-t border-gray-200 bg-white">
                         <SlideThumbnails
                             currentSlide={currentSlide}
