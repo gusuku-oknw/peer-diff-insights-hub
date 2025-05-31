@@ -48,6 +48,39 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
     const showThumbnails = !(viewerMode === "presentation" && isFullScreen);
     const containerWidth = getSlideThumbnailsWidth();
 
+    const mainContent = (
+        <MainContent
+            currentSlide={currentSlide}
+            totalSlides={totalSlides}
+            zoom={zoom}
+            viewerMode={viewerMode}
+            showPresenterNotes={showPresenterNotes}
+            isFullScreen={isFullScreen}
+            presentationStartTime={presentationStartTime}
+            presenterNotes={presenterNotes}
+            elapsedTime={elapsedTime}
+            displayCount={displayCount}
+            commentedSlides={commentedSlides}
+            mockComments={mockComments}
+            userType={userType}
+            rightPanelCollapsed={rightPanelCollapsed}
+            onSlideChange={onSlideChange}
+        />
+    );
+
+    const thumbnailsSection = (
+        <div className="border-t border-gray-200 bg-white">
+            <SlideThumbnails
+                currentSlide={currentSlide}
+                onSlideClick={onSlideChange}
+                onOpenOverallReview={onOpenOverallReview}
+                height={thumbnailsHeight}
+                containerWidth={containerWidth}
+                userType={userType}
+            />
+        </div>
+    );
+
     return (
         <div className="flex-1 flex flex-col overflow-hidden min-w-0 h-full">
             {showThumbnails ? (
@@ -69,54 +102,11 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
                         height: '4px',
                         cursor: 'row-resize'
                     }}
-                >
-                    <MainContent
-                        currentSlide={currentSlide}
-                        totalSlides={totalSlides}
-                        zoom={zoom}
-                        viewerMode={viewerMode}
-                        showPresenterNotes={showPresenterNotes}
-                        isFullScreen={isFullScreen}
-                        presentationStartTime={presentationStartTime}
-                        presenterNotes={presenterNotes}
-                        elapsedTime={elapsedTime}
-                        displayCount={displayCount}
-                        commentedSlides={commentedSlides}
-                        mockComments={mockComments}
-                        userType={userType}
-                        rightPanelCollapsed={rightPanelCollapsed}
-                        onSlideChange={onSlideChange}
-                    />
-
-                    <div className="border-t border-gray-200 bg-white">
-                        <SlideThumbnails
-                            currentSlide={currentSlide}
-                            onSlideClick={onSlideChange}
-                            onOpenOverallReview={onOpenOverallReview}
-                            height={thumbnailsHeight}
-                            containerWidth={containerWidth}
-                            userType={userType}
-                        />
-                    </div>
-                </SplitPaneLayout>
-            ) : (
-                <MainContent
-                    currentSlide={currentSlide}
-                    totalSlides={totalSlides}
-                    zoom={zoom}
-                    viewerMode={viewerMode}
-                    showPresenterNotes={showPresenterNotes}
-                    isFullScreen={isFullScreen}
-                    presentationStartTime={presentationStartTime}
-                    presenterNotes={presenterNotes}
-                    elapsedTime={elapsedTime}
-                    displayCount={displayCount}
-                    commentedSlides={commentedSlides}
-                    mockComments={mockComments}
-                    userType={userType}
-                    rightPanelCollapsed={rightPanelCollapsed}
-                    onSlideChange={onSlideChange}
+                    firstPane={mainContent}
+                    secondPane={thumbnailsSection}
                 />
+            ) : (
+                mainContent
             )}
         </div>
     );
