@@ -41,8 +41,8 @@ export const SplitPaneLayout: React.FC<SplitPaneLayoutProps> = ({
       allowResize={allowResize}
       resizerStyle={resizerStyle}
     >
-      <div key="first-pane">{firstPane}</div>
-      <div key="second-pane">{secondPane}</div>
+      {firstPane}
+      {secondPane}
     </SplitPane>
   );
 };
