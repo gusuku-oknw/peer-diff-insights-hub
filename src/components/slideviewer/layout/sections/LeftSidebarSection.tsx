@@ -1,5 +1,6 @@
 
 import React from "react";
+import SplitPane from "react-split-pane";
 import { LeftSidebarWrapper } from "../LeftSidebarWrapper";
 
 interface LeftSidebarSectionProps {
@@ -21,9 +22,23 @@ export const LeftSidebarSection: React.FC<LeftSidebarSectionProps> = ({
   onToggleLeftSidebar,
   children,
 }) => {
+  if (!leftSidebarOpen) {
+    return (
+      <div className="flex-1 min-w-0">
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full w-full">
-      {leftSidebarOpen && (
+      <SplitPane
+        split="vertical"
+        minSize={180}
+        maxSize={400}
+        defaultSize={300}
+        style={{ position: 'relative' }}
+      >
         <LeftSidebarWrapper
           currentBranch={currentBranch}
           branches={branches}
@@ -32,10 +47,10 @@ export const LeftSidebarSection: React.FC<LeftSidebarSectionProps> = ({
           onBranchChange={onBranchChange}
           onToggleLeftSidebar={onToggleLeftSidebar}
         />
-      )}
-      <div className="flex-1 min-w-0">
-        {children}
-      </div>
+        <div className="flex-1 min-w-0">
+          {children}
+        </div>
+      </SplitPane>
     </div>
   );
 };

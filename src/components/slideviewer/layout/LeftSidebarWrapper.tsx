@@ -1,8 +1,6 @@
 
 import React from "react";
-import { ResizablePanel } from "./ResizablePanel";
 import LeftSidebar from "./LeftSidebar";
-import { useSlideStore } from "@/stores/slide-store";
 
 interface LeftSidebarWrapperProps {
   currentBranch: string;
@@ -21,20 +19,10 @@ export const LeftSidebarWrapper: React.FC<LeftSidebarWrapperProps> = ({
   onBranchChange,
   onToggleLeftSidebar,
 }) => {
-  const { leftSidebarWidth, setLeftSidebarWidth } = useSlideStore();
-
   if (!leftSidebarOpen) return null;
 
   return (
-    <ResizablePanel
-      initialWidth={leftSidebarWidth}
-      minWidth={180}
-      maxWidth={400}
-      onWidthChange={setLeftSidebarWidth}
-      className="bg-gray-50 border-r border-gray-200"
-      orientation="vertical"        // 幅を変える
-      resizePosition="right"
-    >
+    <div className="h-full bg-gray-50 border-r border-gray-200">
       <LeftSidebar
         currentBranch={currentBranch}
         branches={branches}
@@ -43,6 +31,6 @@ export const LeftSidebarWrapper: React.FC<LeftSidebarWrapperProps> = ({
         onBranchChange={onBranchChange}
         onToggleLeftSidebar={onToggleLeftSidebar}
       />
-    </ResizablePanel>
+    </div>
   );
 };
