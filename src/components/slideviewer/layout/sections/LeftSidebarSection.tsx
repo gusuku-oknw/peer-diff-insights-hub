@@ -1,6 +1,10 @@
 
 import React from "react";
-import SplitPane from "react-split-pane";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
 import { LeftSidebarWrapper } from "../LeftSidebarWrapper";
 
 interface LeftSidebarSectionProps {
@@ -32,25 +36,31 @@ export const LeftSidebarSection: React.FC<LeftSidebarSectionProps> = ({
 
   return (
     <div className="flex h-full w-full">
-      <SplitPane
-        split="vertical"
-        minSize={180}
-        maxSize={400}
-        defaultSize={300}
-        style={{ position: 'relative' }}
-      >
-        <LeftSidebarWrapper
-          currentBranch={currentBranch}
-          branches={branches}
-          commitHistory={commitHistory}
-          leftSidebarOpen={leftSidebarOpen}
-          onBranchChange={onBranchChange}
-          onToggleLeftSidebar={onToggleLeftSidebar}
-        />
-        <div className="flex-1 min-w-0">
-          {children}
-        </div>
-      </SplitPane>
+      <ResizablePanelGroup direction="horizontal" className="h-full">
+        <ResizablePanel
+          defaultSize={25}
+          minSize={15}
+          maxSize={35}
+          className="min-w-[180px] max-w-[400px]"
+        >
+          <LeftSidebarWrapper
+            currentBranch={currentBranch}
+            branches={branches}
+            commitHistory={commitHistory}
+            leftSidebarOpen={leftSidebarOpen}
+            onBranchChange={onBranchChange}
+            onToggleLeftSidebar={onToggleLeftSidebar}
+          />
+        </ResizablePanel>
+        
+        <ResizableHandle withHandle />
+        
+        <ResizablePanel defaultSize={75} minSize={65}>
+          <div className="flex-1 min-w-0 h-full">
+            {children}
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 };
