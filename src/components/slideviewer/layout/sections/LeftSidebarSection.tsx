@@ -39,6 +39,7 @@ export const LeftSidebarSection: React.FC<LeftSidebarSectionProps> = ({
         defaultSize={300}
         style={{ position: 'relative' }}
       >
+        {/* First pane - Left Sidebar */}
         <LeftSidebarWrapper
           currentBranch={currentBranch}
           branches={branches}
@@ -47,9 +48,8 @@ export const LeftSidebarSection: React.FC<LeftSidebarSectionProps> = ({
           onBranchChange={onBranchChange}
           onToggleLeftSidebar={onToggleLeftSidebar}
         />
-        <div className="flex-1 min-w-0">
-          {children}
-        </div>
+        {/* Second pane - Main Content */}
+        {children}
       </SplitPane>
     </div>
   );
