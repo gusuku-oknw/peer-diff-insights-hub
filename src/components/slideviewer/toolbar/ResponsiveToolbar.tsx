@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -9,9 +8,7 @@ import {
   ZoomIn, 
   ZoomOut, 
   PanelLeft, 
-  Maximize, 
-  BookOpen,
-  Menu,
+  Maximize,
   MoreHorizontal
 } from "lucide-react";
 import {
@@ -105,12 +102,6 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-white border border-gray-200 shadow-lg z-50">
-        {(viewerMode === "presentation" || viewerMode === "review") && (
-          <DropdownMenuItem onClick={onShowPresenterNotesToggle}>
-            <BookOpen className="h-4 w-4 mr-2" />
-            {showPresenterNotes ? "メモ非表示" : "メモ表示"}
-          </DropdownMenuItem>
-        )}
         <DropdownMenuItem onClick={onFullScreenToggle}>
           <Maximize className="h-4 w-4 mr-2" />
           全画面表示
@@ -168,7 +159,7 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
   if (isSmall) {
     // Small screens - compact with essential controls
     return (
-      <div className="flex items-center justify-between p-2 bg-white border-b border-gray-200 h-14 shadow-sm overflow-x-auto">
+      <div className="flex items-center justify-between p-2 bg-white border-b border-gray-200 h-14 shadow-sm overflow-x-hidden">
         {/* Left: Sidebar + Navigation */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <Button
@@ -246,7 +237,7 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
   if (isMedium) {
     // Medium screens - balanced layout
     return (
-      <div className="flex items-center justify-between p-3 bg-white border-b border-gray-200 h-16 shadow-sm overflow-x-auto">
+      <div className="flex items-center justify-between p-3 bg-white border-b border-gray-200 h-16 shadow-sm overflow-x-hidden">
         {/* Left section */}
         <div className="flex items-center gap-3 flex-shrink-0">
           <Button
@@ -329,17 +320,6 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
           <Separator orientation="vertical" className="h-8 bg-gray-300" />
           
           <div className="flex items-center gap-2">
-            {(viewerMode === "presentation" || viewerMode === "review") && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onShowPresenterNotesToggle}
-                className={`${showPresenterNotes ? "bg-blue-50 text-blue-700" : "hover:bg-gray-50"} h-8 w-8 p-0`}
-              >
-                <BookOpen className="h-4 w-4" />
-              </Button>
-            )}
-            
             <Button
               variant="ghost"
               size="sm"
@@ -367,7 +347,7 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
 
   // Large screens - full layout with all controls
   return (
-    <div className="modern-toolbar flex items-center justify-between p-3 bg-white border-b border-gray-200 h-16 shadow-sm overflow-x-auto">
+    <div className="modern-toolbar flex items-center justify-between p-3 bg-white border-b border-gray-200 h-16 shadow-sm overflow-x-hidden">
       {/* Left section - Sidebar toggle and navigation */}
       <div className="flex items-center gap-3 flex-shrink-0">
         <Button
@@ -465,18 +445,6 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
         <Separator orientation="vertical" className="h-8 bg-gray-300" />
         
         <div className="flex items-center gap-2">
-          {(viewerMode === "presentation" || viewerMode === "review") && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onShowPresenterNotesToggle}
-              className={`modern-button ${showPresenterNotes ? "bg-blue-50 text-blue-700 border-blue-200" : "hover:bg-gray-50"} transition-all duration-200 h-auto w-auto p-2`}
-              title="メモ表示/非表示"
-            >
-              <BookOpen className="h-4 w-4" />
-            </Button>
-          )}
-          
           <Button
             variant="ghost"
             size="sm"

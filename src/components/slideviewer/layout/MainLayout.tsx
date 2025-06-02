@@ -72,7 +72,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
   return (
       <LayoutProvider>
-        <div className="flex h-full w-full">
+        <div className="flex h-full w-full main-layout-container overflow-hidden">
           <LeftSidebarSection
             leftSidebarOpen={leftSidebarOpen}
             currentBranch={currentBranch}

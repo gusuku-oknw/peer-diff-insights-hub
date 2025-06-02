@@ -71,8 +71,14 @@
   * {
     @apply border-border;
   }
-  body {
+  html, body {
     @apply bg-background text-foreground;
+    overflow: hidden; /* Disable page scrolling */
+    height: 100vh; /* Full viewport height */
+  }
+  #root {
+    height: 100vh;
+    overflow: hidden;
   }
 }
 
@@ -178,12 +184,14 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   contain: layout paint size;
+  overflow: hidden; /* Prevent canvas scrolling */
 }
 
 /* モダンなキャンバスコンテナ */
 .modern-canvas-container {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   position: relative;
+  overflow: hidden; /* Prevent scrolling */
 }
 
 .modern-canvas-container::before {
@@ -255,6 +263,7 @@ canvas:focus {
   backdrop-filter: blur(10px);
   background: rgba(255, 255, 255, 0.95);
   border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 .modern-button {
@@ -305,6 +314,7 @@ canvas:focus {
 /* モダンサムネイルスタイル - 横スクロール対応 */
 .modern-thumbnails {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  overflow: hidden; /* Prevent scrolling */
 }
 
 .thumbnail-card {
@@ -321,28 +331,10 @@ canvas:focus {
   border-color: rgba(59, 130, 246, 0.3);
 }
 
-/* 横スクロール最適化 */
-.horizontal-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-}
-
-.horizontal-scroll::-webkit-scrollbar {
-  height: 6px;
-}
-
-.horizontal-scroll::-webkit-scrollbar-track {
-  background: rgba(243, 244, 246, 0.5);
-  border-radius: 3px;
-}
-
-.horizontal-scroll::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.5);
-  border-radius: 3px;
-}
-
-.horizontal-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.8);
+/* Main layout containers */
+.main-layout-container {
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* タイムライン用スタイル */
@@ -384,11 +376,13 @@ canvas:focus {
     width: 100%;
     max-width: 320px;
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
   }
 
   .modern-toolbar {
     padding: 0.5rem;
     height: 3.5rem;
+    overflow-x: hidden;
   }
 
   .mode-button {
@@ -398,11 +392,6 @@ canvas:focus {
 
   .thumbnail-card {
     min-width: 120px;
-  }
-
-  /* モバイルでの横スクロール改善 */
-  .horizontal-scroll {
-    -webkit-overflow-scrolling: touch;
   }
 }
 

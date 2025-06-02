@@ -9,8 +9,7 @@ import {
   ZoomIn, 
   ZoomOut, 
   PanelLeft, 
-  Maximize, 
-  BookOpen
+  Maximize
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile.tsx";
 import ModeSelector from "@/components/slideviewer/toolbar/ModeSelector.tsx";
@@ -76,7 +75,7 @@ const SimpleMainToolbar: React.FC<SimpleMainToolbarProps> = ({
   };
 
   return (
-    <div className="modern-toolbar flex items-center justify-between p-2 lg:p-3 bg-white border-b border-gray-200 h-14 lg:h-16 shadow-sm overflow-x-auto">
+    <div className="modern-toolbar flex items-center justify-between p-2 lg:p-3 bg-white border-b border-gray-200 h-14 lg:h-16 shadow-sm overflow-x-hidden">
       {/* Left section - Sidebar toggle and navigation */}
       <div className="flex items-center gap-1 lg:gap-3 flex-shrink-0">
         {/* Sidebar toggle */}
@@ -181,18 +180,6 @@ const SimpleMainToolbar: React.FC<SimpleMainToolbarProps> = ({
         <Separator orientation="vertical" className="h-6 lg:h-8 bg-gray-300" />
         
         <div className="flex items-center gap-1 lg:gap-2">
-          {(viewerMode === "presentation" || viewerMode === "review") && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onShowPresenterNotesToggle}
-              className={`modern-button ${showPresenterNotes ? "bg-blue-50 text-blue-700 border-blue-200" : "hover:bg-gray-50"} transition-all duration-200 h-8 w-8 p-0 lg:h-auto lg:w-auto lg:p-2`}
-              title="メモ表示/非表示"
-            >
-              <BookOpen className="h-4 w-4" />
-            </Button>
-          )}
-          
           <Button
             variant="ghost"
             size="sm"

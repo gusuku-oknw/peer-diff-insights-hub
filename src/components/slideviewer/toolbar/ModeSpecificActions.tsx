@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ViewerMode } from "@/stores/slideStore";
-import { Save, Filter, Presentation, Play } from "lucide-react";
+import { Save, Presentation, Play } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ModeSpecificActionsProps {
@@ -73,14 +73,6 @@ const ModeSpecificActions = ({
     case "review":
       return (
         <div className="flex items-center space-x-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex items-center gap-1 sm:gap-2 p-1 sm:p-2"
-          >
-            <Filter className="h-4 w-4" />
-            <span className="hidden md:inline">フィルター</span>
-          </Button>
           {/* Only students can send feedback */}
           {userType === "student" && (
             <Button 
@@ -97,18 +89,6 @@ const ModeSpecificActions = ({
     case "presentation":
       return (
         <div className="flex items-center space-x-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="flex items-center gap-1 sm:gap-2 p-1 sm:p-2" 
-            onClick={onShowPresenterNotesToggle} 
-            disabled={displayCount < 2 && isFullScreen}
-          >
-            <Presentation className="h-4 w-4" />
-            <span className="hidden md:inline">
-              発表者メモ {showPresenterNotes ? '非表示' : '表示'}
-            </span>
-          </Button>
           <Button 
             variant="default" 
             size="sm" 
