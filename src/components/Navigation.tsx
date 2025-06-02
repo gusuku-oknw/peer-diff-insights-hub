@@ -1,5 +1,5 @@
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/common/button";
 import { Menu, X, LogOut, UserCircle, Shield, GraduationCap, Building, ArrowLeft, FileText, Presentation } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -13,9 +13,9 @@ import {
   DropdownMenuTrigger,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/common/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/common/avatar";
+import { Badge } from "@/components/common/badge";
 import { toast } from "sonner";
 
 const Navigation = () => {

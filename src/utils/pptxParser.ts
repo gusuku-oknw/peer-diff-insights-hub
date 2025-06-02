@@ -1,6 +1,6 @@
 
 import JSZip from 'jszip';
-import { Slide } from '@/stores/slideStore';
+import { Slide } from '@/state/slideStore';
 import { xml2js } from 'xml-js';
 
 // Parse a PPTX file and extract slides

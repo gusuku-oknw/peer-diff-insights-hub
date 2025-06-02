@@ -1,5 +1,5 @@
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/common/button";
 import { ArrowRight, GitBranch, Users, Sparkles, Play, Star, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 

@@ -1,5 +1,5 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/common/card";
 import { GitBranch, MessageSquare, Sparkles, TrendingUp, Users, Zap } from "lucide-react";
 
 const FeaturesSection = () => {

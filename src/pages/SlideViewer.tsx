@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import Navigation from "@/components/Navigation";
-import ResponsiveToolbar from "@/components/slideviewer/toolbar/ResponsiveToolbar";
-import MainLayout from "@/components/slideviewer/layout/MainLayout";
-import { useSlideStore } from "@/stores/slide-store";
+import ResponsiveToolbar from "@/components/SlideViewer/toolbar/ResponsiveToolbar";
+import MainLayout from "@/components/SlideViewer/layout/MainLayout";
+import { useSlideStore } from "@/state/slide-store";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSlideViewerLogic } from "@/hooks/slideviewer/useSlideViewerLogic";
 

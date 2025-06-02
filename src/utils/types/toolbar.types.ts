@@ -1,5 +1,5 @@
 
-import type { ViewerMode } from "@/stores/slideStore";
+import type { ViewerMode } from "@/state/slideStore";
 
 // Toolbar base properties
 export interface BaseToolbarProps {

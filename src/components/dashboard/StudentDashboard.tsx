@@ -4,9 +4,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/common/card";
+import { Button } from "@/components/common/button";
+import { Badge } from "@/components/common/badge";
 import { Link } from "react-router-dom";
 import { 
   Award, 

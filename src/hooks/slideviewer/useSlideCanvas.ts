@@ -1,7 +1,7 @@
 
 import { useRef, useEffect, useState, useCallback } from "react";
 import { Canvas } from 'fabric';
-import { useSlideStore } from "@/stores/slide-store";
+import { useSlideStore } from "@/state/slide-store";
 
 interface UseSlideCanvasProps {
   currentSlide: number;

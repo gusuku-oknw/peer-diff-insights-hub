@@ -1,23 +1,23 @@
 
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/common/tabs";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import StudentDashboard from "@/components/dashboard/StudentDashboard";
 import BusinessDashboard from "@/components/dashboard/BusinessDashboard";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/common/button";
 import { FileText, GraduationCap, Building, Plus, ArrowRight, RefreshCw, Eye, Pencil, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Card, CardContent } from "@/components/ui/card";
+import { ToggleGroup, ToggleGroupItem } from "@/components/common/toggle-group";
+import { Card, CardContent } from "@/components/common/card";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+} from "@/components/common/dropdown-menu";
 
 const Dashboard = () => {
   const { userProfile } = useAuth();

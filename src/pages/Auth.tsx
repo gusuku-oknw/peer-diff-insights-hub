@@ -1,15 +1,15 @@
 
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/common/card";
+import { Button } from "@/components/common/button";
+import { Input } from "@/components/common/input";
+import { Label } from "@/components/common/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/common/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/common/radio-group";
 import { useLocation, Navigate, Link } from "react-router-dom";
 import { AlertCircle, LogIn, UserPlus, Loader2 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/common/alert";
 
 const Auth = () => {
   const { user, isLoading, signIn, signUp } = useAuth();

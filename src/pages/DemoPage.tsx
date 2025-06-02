@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/common/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/common/tabs";
 import { Check, Building, GraduationCap, Play, FileText, ArrowRight, Monitor, Edit3, MessageSquare } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
