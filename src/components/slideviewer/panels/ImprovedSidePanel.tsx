@@ -1,7 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useResizablePanels } from "@/hooks/useResizablePanels";
 import type { SidePanelProps } from "@/types/slide-viewer/panel.types";
 import MobileSheet from "./components/MobileSheet";
 import DesktopPanel from "./components/DesktopPanel";
@@ -30,15 +29,6 @@ const ImprovedSidePanel: React.FC<ImprovedSidePanelProps> = ({
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [panelDimensions, setPanelDimensions] = useState({ width: 0, height: 0 });
   
-  // Resize functionality
-  const { width, ResizeHandle } = useResizablePanels({
-    initialWidth,
-    minWidth: 200,
-    maxWidth: 500,
-    onWidthChange,
-    orientation: 'vertical'
-  });
-  
   // Simplified default tab logic
   const getDefaultTab = () => {
     if (shouldShowReviewPanel) return "reviews";
@@ -54,7 +44,7 @@ const ImprovedSidePanel: React.FC<ImprovedSidePanelProps> = ({
     userType,
     currentSlide,
     activeTab,
-    width
+    initialWidth
   });
   
   // Update tab when panel visibility changes
@@ -146,14 +136,14 @@ const ImprovedSidePanel: React.FC<ImprovedSidePanelProps> = ({
     );
   }
 
-  // Desktop implementation with resizable functionality
+  // Desktop implementation without custom resize functionality
   return (
     <DesktopPanel
       {...sharedProps}
       onToggleHide={onToggleHide}
       panelRef={panelRef}
-      width={width}
-      ResizeHandle={ResizeHandle}
+      width={initialWidth}
+      ResizeHandle={null}
     />
   );
 };
