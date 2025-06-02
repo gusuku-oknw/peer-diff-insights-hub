@@ -136,7 +136,7 @@ const ImprovedSidePanel: React.FC<ImprovedSidePanelProps> = ({
     );
   }
 
-  // Desktop implementation without custom resize functionality
+  // Desktop implementation - simplified without custom resize functionality
   return (
     <DesktopPanel
       {...sharedProps}

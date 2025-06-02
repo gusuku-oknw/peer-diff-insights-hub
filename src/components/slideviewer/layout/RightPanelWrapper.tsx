@@ -1,10 +1,5 @@
 
 import React from "react";
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable";
 import ImprovedSidePanel from "../panels/ImprovedSidePanel";
 import { useSlideStore } from "@/stores/slide-store";
 import type { ViewerMode } from "@/types/slide.types";
@@ -56,46 +51,20 @@ export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
     return null;
   }
 
-  // Calculate size percentage based on rightSidebarWidth
-  const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
-  const sizePercentage = Math.min(40, Math.max(15, (rightSidebarWidth / windowWidth) * 100));
-
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-full">
-      <ResizablePanel
-        defaultSize={100 - sizePercentage}
-        minSize={60}
-        maxSize={85}
-      >
-        {/* This panel is handled by the parent component */}
-        <div className="w-full h-full" />
-      </ResizablePanel>
-      
-      <ResizableHandle withHandle />
-      
-      <ResizablePanel
-        defaultSize={sizePercentage}
-        minSize={15}
-        maxSize={40}
-        className="border-l border-gray-200 bg-white"
-        onResize={(size) => {
-          const newWidth = (size / 100) * windowWidth;
-          setRightSidebarWidth(Math.max(200, Math.min(500, newWidth)));
-        }}
-      >
-        <ImprovedSidePanel
-          shouldShowNotes={shouldShowNotes}
-          shouldShowReviewPanel={shouldShowReviewPanel}
-          currentSlide={currentSlide}
-          totalSlides={totalSlides}
-          presenterNotes={presenterNotes}
-          isHidden={false}
-          onToggleHide={() => setRightPanelHidden(true)}
-          userType={userType}
-          onWidthChange={setRightSidebarWidth}
-          initialWidth={rightSidebarWidth}
-        />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+    <div className="h-full bg-white border-l border-gray-200">
+      <ImprovedSidePanel
+        shouldShowNotes={shouldShowNotes}
+        shouldShowReviewPanel={shouldShowReviewPanel}
+        currentSlide={currentSlide}
+        totalSlides={totalSlides}
+        presenterNotes={presenterNotes}
+        isHidden={false}
+        onToggleHide={() => setRightPanelHidden(true)}
+        userType={userType}
+        onWidthChange={setRightSidebarWidth}
+        initialWidth={rightSidebarWidth}
+      />
+    </div>
   );
 };

@@ -5,9 +5,9 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import { EditSidebarWrapper } from "../EditSidebarWrapper";
+import EditSidebar from "../../../slideviewer/editor/EditSidebar";
 import { CentralContentArea } from "../CentralContentArea";
-import { RightPanelWrapper } from "../RightPanelWrapper";
+import ImprovedSidePanel from "../../panels/ImprovedSidePanel";
 import { useSlideStore } from "@/stores/slide-store";
 import type { ViewerMode } from "@/types/slide.types";
 
@@ -50,6 +50,8 @@ export const CentralSection: React.FC<CentralSectionProps> = ({
   hideRightPanelCompletely,
   leftSidebarOpen,
 }) => {
+  const { editSidebarWidth, rightSidebarWidth, setEditSidebarWidth, setRightSidebarWidth } = useSlideStore();
+  
   const showEditSidebar = viewerMode === "edit" && userType === "enterprise";
 
   // If no sidebars are shown, just render the central content
@@ -79,7 +81,6 @@ export const CentralSection: React.FC<CentralSectionProps> = ({
   }
 
   // Calculate layout percentages
-  const { editSidebarWidth, rightSidebarWidth } = useSlideStore();
   const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
   
   let editSidebarPercentage = 0;
@@ -100,11 +101,18 @@ export const CentralSection: React.FC<CentralSectionProps> = ({
       <ResizablePanelGroup direction="horizontal" className="h-full">
         {showEditSidebar && (
           <>
-            <EditSidebarWrapper
-              viewerMode={viewerMode}
-              userType={userType}
-              currentSlide={currentSlide}
-            />
+            <ResizablePanel
+              defaultSize={editSidebarPercentage}
+              minSize={15}
+              maxSize={35}
+              className="border-r border-gray-200 bg-white"
+              onResize={(size) => {
+                const newWidth = (size / 100) * windowWidth;
+                setEditSidebarWidth(Math.max(220, Math.min(400, newWidth)));
+              }}
+            >
+              <EditSidebar currentSlide={currentSlide} />
+            </ResizablePanel>
             <ResizableHandle withHandle />
           </>
         )}
@@ -136,15 +144,29 @@ export const CentralSection: React.FC<CentralSectionProps> = ({
         {rightPanelVisible && (
           <>
             <ResizableHandle withHandle />
-            <RightPanelWrapper
-              viewerMode={viewerMode}
-              showPresenterNotes={showPresenterNotes}
-              isFullScreen={isFullScreen}
-              currentSlide={currentSlide}
-              totalSlides={totalSlides}
-              presenterNotes={presenterNotes}
-              userType={userType}
-            />
+            <ResizablePanel
+              defaultSize={rightPanelPercentage}
+              minSize={15}
+              maxSize={40}
+              className="border-l border-gray-200 bg-white"
+              onResize={(size) => {
+                const newWidth = (size / 100) * windowWidth;
+                setRightSidebarWidth(Math.max(200, Math.min(500, newWidth)));
+              }}
+            >
+              <ImprovedSidePanel
+                shouldShowNotes={showPresenterNotes && userType === "enterprise"}
+                shouldShowReviewPanel={viewerMode === "review"}
+                currentSlide={currentSlide}
+                totalSlides={totalSlides}
+                presenterNotes={presenterNotes}
+                isHidden={false}
+                onToggleHide={() => {}}
+                userType={userType}
+                onWidthChange={setRightSidebarWidth}
+                initialWidth={rightSidebarWidth}
+              />
+            </ResizablePanel>
           </>
         )}
       </ResizablePanelGroup>
