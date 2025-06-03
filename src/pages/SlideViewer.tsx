@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import ResponsiveToolbar from "@/components/slideviewer/toolbar/ResponsiveToolbar";
