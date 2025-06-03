@@ -50,7 +50,11 @@ export const CentralSection: React.FC<CentralSectionProps> = ({
     <div className="flex-1 flex overflow-hidden min-w-0 h-full">
       {/* Edit Sidebar (left of content) */}
       {viewerMode === "edit" && (
-        <EditSidebarWrapper viewerMode={viewerMode} />
+        <EditSidebarWrapper 
+          viewerMode={viewerMode}
+          userType={userType}
+          currentSlide={currentSlide}
+        />
       )}
 
       {/* Central Content */}
