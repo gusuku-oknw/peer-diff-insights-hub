@@ -1,14 +1,10 @@
+
 // OverviewTab.tsx
 import React from "react";
+import { BarChart3, TrendingUp, MessageSquare, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-    Star,
-    ThumbsUp,
-    AlertCircle,
-    CheckCircle,
-    TrendingUp,
-    Clock
-} from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 interface OverviewTabProps {
     overallScore: number;
@@ -18,166 +14,132 @@ interface OverviewTabProps {
 }
 
 const OverviewTab: React.FC<OverviewTabProps> = ({
-                                                     overallScore,
-                                                     totalComments,
-                                                     positiveComments,
-                                                     negativeComments
-                                                 }) => {
+    overallScore,
+    totalComments,
+    positiveComments,
+    negativeComments
+}) => {
+    const scoreColor = overallScore >= 80 ? "text-green-600" : 
+                      overallScore >= 60 ? "text-yellow-600" : "text-red-600";
+    
+    const scoreBarColor = overallScore >= 80 ? "bg-green-500" : 
+                         overallScore >= 60 ? "bg-yellow-500" : "bg-red-500";
+
     return (
         <div className="p-4 space-y-6">
             {/* 総合スコア */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-6 text-center">
-                    <div className="text-3xl font-bold text-blue-600 mb-2">{overallScore}</div>
-                    <div className="text-sm text-blue-800">総合スコア</div>
-                    <div className="flex justify-center mt-2">
-                        {[1, 2, 3, 4].map((star) => (
-                            <Star key={star} className="h-4 w-4 text-yellow-400 fill-current" />
-                        ))}
-                        <Star className="h-4 w-4 text-gray-300" />
+            <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50">
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-lg font-bold text-purple-800 flex items-center">
+                        <BarChart3 className="h-5 w-5 mr-2" />
+                        総合評価スコア
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center justify-between mb-4">
+                        <span className={`text-4xl font-bold ${scoreColor}`}>
+                            {overallScore}
+                        </span>
+                        <span className="text-2xl text-gray-400">/100</span>
                     </div>
-                </div>
+                    <Progress value={overallScore} className="h-3 mb-2" />
+                    <div className="flex items-center justify-between text-sm text-gray-600">
+                        <span>プレゼンテーション品質</span>
+                        <Badge variant={overallScore >= 80 ? "default" : overallScore >= 60 ? "secondary" : "destructive"}>
+                            {overallScore >= 80 ? "優秀" : overallScore >= 60 ? "良好" : "要改善"}
+                        </Badge>
+                    </div>
+                </CardContent>
+            </Card>
 
-                <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-6 text-center">
-                    <div className="text-3xl font-bold text-green-600 mb-2">{positiveComments}</div>
-                    <div className="text-sm text-green-800">ポジティブコメント</div>
-                    <div className="flex justify-center items-center mt-2">
-                        <ThumbsUp className="h-4 w-4 text-green-500 mr-1" />
-                        <span className="text-xs text-green-700">
-              {Math.round((positiveComments / totalComments) * 100)}%
-            </span>
-                    </div>
-                </div>
+            {/* コメント統計 */}
+            <div className="grid grid-cols-3 gap-4">
+                <Card>
+                    <CardContent className="p-4 text-center">
+                        <MessageSquare className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                        <div className="text-2xl font-bold text-gray-900">{totalComments}</div>
+                        <div className="text-sm text-gray-600">総コメント数</div>
+                    </CardContent>
+                </Card>
 
-                <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-6 text-center">
-                    <div className="text-3xl font-bold text-orange-600 mb-2">{negativeComments}</div>
-                    <div className="text-sm text-orange-800">改善提案</div>
-                    <div className="flex justify-center items-center mt-2">
-                        <AlertCircle className="h-4 w-4 text-orange-500 mr-1" />
-                        <span className="text-xs text-orange-700">
-              {Math.round((negativeComments / totalComments) * 100)}%
-            </span>
-                    </div>
-                </div>
+                <Card>
+                    <CardContent className="p-4 text-center">
+                        <ThumbsUp className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                        <div className="text-2xl font-bold text-green-600">{positiveComments}</div>
+                        <div className="text-sm text-gray-600">ポジティブ</div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="p-4 text-center">
+                        <ThumbsDown className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                        <div className="text-2xl font-bold text-red-600">{negativeComments}</div>
+                        <div className="text-sm text-gray-600">改善提案</div>
+                    </CardContent>
+                </Card>
             </div>
 
-            {/* 主要な洞察 */}
-            <div className="bg-purple-50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-purple-900 mb-4 flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-                    <span className="ml-2">主要な洞察</span>
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* 詳細分析 */}
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-gray-900 flex items-center">
+                        <TrendingUp className="h-5 w-5 mr-2 text-green-600" />
+                        評価詳細
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                     <div className="space-y-3">
-                        <div className="flex items-start space-x-3">
-                            <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-                            <div>
-                                <p className="font-medium text-gray-900">強み</p>
-                                <p className="text-sm text-gray-600">視覚的な表現が効果的で、データの説得力が高い</p>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">構成・論理性</span>
+                            <div className="flex items-center space-x-2">
+                                <Progress value={85} className="w-20 h-2" />
+                                <span className="text-sm font-medium text-gray-900">85%</span>
                             </div>
                         </div>
-                        <div className="flex items-start space-x-3">
-                            <TrendingUp className="h-5 w-5 text-blue-500 mt-0.5" />
-                            <div>
-                                <p className="font-medium text-gray-900">パフォーマンス</p>
-                                <p className="text-sm text-gray-600">前回比15%スコア向上</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="space-y-3">
-                        <div className="flex items-start space-x-3">
-                            <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5" />
-                            <div>
-                                <p className="font-medium text-gray-900">改善点</p>
-                                <p className="text-sm text-gray-600">スライド3-5の情報密度が高すぎる</p>
-                            </div>
-                        </div>
-                        <div className="flex items-start space-x-3">
-                            <Users className="h-5 w-5 text-purple-500 mt-0.5" />
-                            <div>
-                                <p className="font-medium text-gray-900">受講者反応</p>
-                                <p className="text-sm text-gray-600">82%が内容に満足と回答</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            {/* カテゴリ別評価 & 最新コメント */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-900 mb-4">カテゴリ別評価</h4>
-                    <div className="space-y-3">
-                        {[
-                            { name: "内容の質", score: 85, color: "bg-blue-500" },
-                            { name: "デザイン", score: 72, color: "bg-purple-500" },
-                            { name: "構成", score: 80, color: "bg-green-500" },
-                            { name: "視認性", score: 75, color: "bg-orange-500" }
-                        ].map((category) => (
-                            <div key={category.name} className="flex items-center justify-between">
-                                <span className="text-sm text-gray-700">{category.name}</span>
-                                <div className="flex items-center space-x-2">
-                                    <div className="w-20 h-2 bg-gray-200 rounded-full">
-                                        <div
-                                            className={`h-2 ${category.color} rounded-full`}
-                                            style={{ width: `${category.score}%` }}
-                                        />
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-900 w-8">{category.score}</span>
-                                </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">視覚的効果</span>
+                            <div className="flex items-center space-x-2">
+                                <Progress value={78} className="w-20 h-2" />
+                                <span className="text-sm font-medium text-gray-900">78%</span>
                             </div>
-                        ))}
-                    </div>
-                </div>
+                        </div>
 
-                <div className="border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-900 mb-4">最新コメント</h4>
-                    <div className="space-y-3">
-                        {[
-                            { user: "田中先生", comment: "グラフの使い方が効果的ですね", time: "2分前", type: "positive" },
-                            { user: "佐藤教授", comment: "スライド4の文字サイズを大きくしては？", time: "5分前", type: "suggestion" },
-                            { user: "山田さん", comment: "結論部分が明確で分かりやすい", time: "8分前", type: "positive" }
-                        ].map((comment, index) => (
-                            <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                                <div
-                                    className={`w-2 h-2 rounded-full mt-2 ${
-                                        comment.type === "positive" ? "bg-green-400" : "bg-orange-400"
-                                    }`}
-                                />
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className="text-sm font-medium text-gray-900">{comment.user}</span>
-                                        <span className="text-xs text-gray-500">{comment.time}</span>
-                                    </div>
-                                    <p className="text-sm text-gray-700">{comment.comment}</p>
-                                </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">内容の充実度</span>
+                            <div className="flex items-center space-x-2">
+                                <Progress value={72} className="w-20 h-2" />
+                                <span className="text-sm font-medium text-gray-900">72%</span>
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
+                        </div>
 
-            {/* 推奨アクション */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <h4 className="font-semibold text-yellow-800 mb-3 flex items-center">
-                    <Clock className="h-4 w-4 mr-2" />
-                    推奨アクション
-                </h4>
-                <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                        <Badge variant="outline" className="bg-white text-yellow-700 border-yellow-300">高優先度</Badge>
-                        <span className="text-sm text-yellow-800">スライド3-5の情報密度を調整する</span>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">台本との整合性</span>
+                            <div className="flex items-center space-x-2">
+                                <Progress value={80} className="w-20 h-2" />
+                                <span className="text-sm font-medium text-gray-900">80%</span>
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                        <Badge variant="outline" className="bg-white text-yellow-700 border-yellow-300">中優先度</Badge>
-                        <span className="text-sm text-yellow-800">グラフの色使いを統一する</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <Badge variant="outline" className="bg-white text-yellow-700 border-yellow-300">低優先度</Badge>
-                        <span className="text-sm text-yellow-800">フォントサイズの一貫性を確保する</span>
-                    </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
+
+            {/* 改善提案 */}
+            <Card className="border-orange-200 bg-orange-50">
+                <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-orange-800">
+                        主な改善提案
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ul className="space-y-2 text-sm text-orange-700">
+                        <li>• スライド3のグラフの説明をより詳細に</li>
+                        <li>• 結論部分でのインパクトを強化</li>
+                        <li>• フォントサイズの統一を推奨</li>
+                        <li>• 台本の時間配分を見直し</li>
+                    </ul>
+                </CardContent>
+            </Card>
         </div>
     );
 };

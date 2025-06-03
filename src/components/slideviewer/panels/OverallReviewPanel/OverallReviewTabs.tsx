@@ -1,3 +1,4 @@
+
 // OverallReviewTabs.tsx
 import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -20,17 +21,17 @@ interface OverallReviewTabsProps {
 }
 
 const OverallReviewTabs: React.FC<OverallReviewTabsProps> = ({
-                                                                 overallScore,
-                                                                 totalComments,
-                                                                 positiveComments,
-                                                                 negativeComments,
-                                                                 reviewText,
-                                                                 setReviewText,
-                                                                 overallRating,
-                                                                 setOverallRating,
-                                                                 onSubmitReview,
-                                                                 presenterNotes
-                                                             }) => {
+    overallScore,
+    totalComments,
+    positiveComments,
+    negativeComments,
+    reviewText,
+    setReviewText,
+    overallRating,
+    setOverallRating,
+    onSubmitReview,
+    presenterNotes
+}) => {
     return (
         <Tabs defaultValue="overview" className="h-full flex flex-col">
             {/* タブトリガー部分 */}
