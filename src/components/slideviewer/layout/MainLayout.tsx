@@ -4,7 +4,7 @@ import { LayoutProvider } from "./LayoutProvider";
 import { LeftSidebarSection } from "./sections/LeftSidebarSection";
 import { CentralSection } from "./sections/CentralSection";
 import { FloatingToggleButton } from "./FloatingToggleButton";
-import OverallReviewPanel from "../panels/OverallReviewPanel";
+import OverallReviewPanel from "../panels/OverallReviewPanel/OverallReviewPanel.tsx";
 import type { ViewerMode } from "@/types/slide.types";
 import { useSlideStore } from "@/stores/slide-store";
 
