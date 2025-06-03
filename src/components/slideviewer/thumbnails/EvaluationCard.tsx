@@ -8,6 +8,11 @@ interface EvaluationCardProps {
 }
 
 const EvaluationCard = ({ thumbnailWidth, onOpenOverallReview }: EvaluationCardProps) => {
+  // Dynamic sizing based on thumbnail width
+  const isSmall = thumbnailWidth < 120;
+  const isMedium = thumbnailWidth >= 120 && thumbnailWidth < 160;
+  const isLarge = thumbnailWidth >= 160;
+
   const handleClick = () => {
     console.log("Opening presentation evaluation");
     onOpenOverallReview?.();
@@ -24,20 +29,24 @@ const EvaluationCard = ({ thumbnailWidth, onOpenOverallReview }: EvaluationCardP
           <div className="w-full aspect-video flex items-center justify-center p-3 mb-3">
             <div className="text-center">
               <div className="flex items-center justify-center mb-2">
-                <Star className="w-3 h-3 lg:w-4 lg:h-4 text-purple-500 mr-1" />
-                <BarChart3 className="w-3 h-3 lg:w-4 lg:h-4 text-purple-500 mr-1" />
-                <FileText className="w-3 h-3 lg:w-4 lg:h-4 text-purple-500" />
+                <Star className={`${isSmall ? 'w-3 h-3' : isMedium ? 'w-3 h-3' : 'w-4 h-4'} text-purple-500 mr-1`} />
+                <BarChart3 className={`${isSmall ? 'w-3 h-3' : isMedium ? 'w-3 h-3' : 'w-4 h-4'} text-purple-500 mr-1`} />
+                <FileText className={`${isSmall ? 'w-3 h-3' : isMedium ? 'w-3 h-3' : 'w-4 h-4'} text-purple-500`} />
               </div>
-              <span className="text-xs text-purple-700 font-medium">プレゼン評価</span>
+              <span className={`text-purple-700 font-medium ${isSmall ? 'text-xs' : 'text-xs'}`}>
+                {isSmall ? 'AI評価' : 'プレゼン評価'}
+              </span>
             </div>
           </div>
           
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold mb-2 bg-purple-500 text-white shadow-md">
-              <Info className="h-3 w-3" />
+            <div className={`inline-flex items-center justify-center rounded-full font-bold mb-2 bg-purple-500 text-white shadow-md ${
+              isSmall ? 'w-5 h-5' : isMedium ? 'w-6 h-6' : 'w-6 h-6'
+            }`}>
+              <Info className={`${isSmall ? 'h-2 w-2' : 'h-3 w-3'}`} />
             </div>
-            <p className="text-xs font-medium text-purple-700">
-              全体評価・コメント
+            <p className={`font-medium text-purple-700 ${isSmall ? 'text-xs' : 'text-xs'}`}>
+              {isSmall ? '評価・コメント' : '全体評価・コメント'}
             </p>
           </div>
         </div>

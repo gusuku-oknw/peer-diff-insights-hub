@@ -28,7 +28,24 @@ const SlideThumbnails = ({
   const { slides } = useSlideStore();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  const thumbnailWidth = Math.max(120, Math.min(180, containerWidth * 0.15));
+  // Enhanced responsive thumbnail size calculation
+  const calculateThumbnailSize = (width: number) => {
+    // Base size depends on container width
+    if (width < 600) {
+      return Math.max(80, Math.min(120, width * 0.12)); // Very small screens
+    } else if (width < 900) {
+      return Math.max(100, Math.min(150, width * 0.14)); // Small screens
+    } else if (width < 1200) {
+      return Math.max(120, Math.min(180, width * 0.15)); // Medium screens
+    } else if (width < 1600) {
+      return Math.max(140, Math.min(200, width * 0.16)); // Large screens
+    } else {
+      return Math.max(160, Math.min(220, width * 0.17)); // Extra large screens
+    }
+  };
+  
+  const thumbnailWidth = calculateThumbnailSize(containerWidth);
+  const gap = Math.max(8, Math.min(16, containerWidth * 0.01)); // Dynamic gap
   const showAddSlide = userType === "enterprise";
   
   const mockSlideData = slides.map((slide, index) => ({
@@ -67,7 +84,7 @@ const SlideThumbnails = ({
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const scrollAmount = thumbnailWidth * 3;
+      const scrollAmount = (thumbnailWidth + gap) * 3; // Account for gap in scroll amount
       const newScrollLeft = scrollContainerRef.current.scrollLeft + 
         (direction === 'right' ? scrollAmount : -scrollAmount);
       
@@ -108,11 +125,18 @@ const SlideThumbnails = ({
         
         <div
           ref={scrollContainerRef}
-          className="flex items-center h-full px-4 lg:px-6 py-3 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 gap-4"
-          style={{ scrollbarWidth: 'thin' }}
+          className="flex items-center h-full px-4 lg:px-6 py-3 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 transition-all duration-300 ease-in-out"
+          style={{ 
+            scrollbarWidth: 'thin',
+            gap: `${gap}px`
+          }}
         >
           {mockSlideData.map((slide, index) => (
-            <div key={slide.id} data-slide={index + 1}>
+            <div 
+              key={slide.id} 
+              data-slide={index + 1}
+              className="flex-shrink-0 transition-all duration-300 ease-in-out"
+            >
               <ThumbnailCard
                 slide={slide}
                 slideIndex={index + 1}
@@ -125,13 +149,17 @@ const SlideThumbnails = ({
           ))}
           
           {showAddSlide && (
-            <AddSlideCard thumbnailWidth={thumbnailWidth} />
+            <div className="flex-shrink-0 transition-all duration-300 ease-in-out">
+              <AddSlideCard thumbnailWidth={thumbnailWidth} />
+            </div>
           )}
           
-          <EvaluationCard 
-            thumbnailWidth={thumbnailWidth}
-            onOpenOverallReview={onOpenOverallReview}
-          />
+          <div className="flex-shrink-0 transition-all duration-300 ease-in-out">
+            <EvaluationCard 
+              thumbnailWidth={thumbnailWidth}
+              onOpenOverallReview={onOpenOverallReview}
+            />
+          </div>
         </div>
       </div>
     </div>

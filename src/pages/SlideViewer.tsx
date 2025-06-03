@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import ResponsiveToolbar from "@/components/slideviewer/toolbar/ResponsiveToolbar";
 import MainLayout from "@/components/slideviewer/layout/MainLayout";
@@ -14,6 +15,8 @@ const mockComments = [
 ];
 
 const SlideViewer = () => {
+  const [isOverallReviewPanelOpen, setIsOverallReviewPanelOpen] = useState(false);
+  
   const {
     currentSlideNumber,
     userType,
@@ -94,7 +97,12 @@ const SlideViewer = () => {
 
   const handleOpenOverallReview = () => {
     console.log('Opening overall review panel');
-    // TODO: Implement overall review panel opening logic
+    setIsOverallReviewPanelOpen(true);
+  };
+
+  const handleCloseOverallReview = () => {
+    console.log('Closing overall review panel');
+    setIsOverallReviewPanelOpen(false);
   };
 
   return (
@@ -149,6 +157,8 @@ const SlideViewer = () => {
             onToggleLeftSidebar={() => setLeftSidebarOpen(!leftSidebarOpen)}
             onSlideChange={(slide: number) => useSlideStore.getState().setCurrentSlide(slide)}
             onOpenOverallReview={handleOpenOverallReview}
+            isOverallReviewPanelOpen={isOverallReviewPanelOpen}
+            onCloseOverallReview={handleCloseOverallReview}
           />
         </div>
       </div>

@@ -26,10 +26,12 @@ interface MainLayoutProps {
   commentedSlides: number[];
   mockComments: any[];
   userType: "student" | "enterprise";
+  isOverallReviewPanelOpen: boolean;
   onBranchChange: (branch: string) => void;
   onSlideChange: (slide: number) => void;
   onToggleLeftSidebar: () => void;
   onOpenOverallReview: () => void;
+  onCloseOverallReview: () => void;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({
@@ -50,10 +52,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   commentedSlides,
   mockComments,
   userType,
+  isOverallReviewPanelOpen,
   onBranchChange,
   onSlideChange,
   onToggleLeftSidebar,
   onOpenOverallReview,
+  onCloseOverallReview,
 }) => {
   const { isRightPanelVisible } = useSlideStore();
 
@@ -99,6 +103,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               rightPanelVisible={rightPanelVisible}
               hideRightPanelCompletely={hideRightPanelCompletely}
               leftSidebarOpen={leftSidebarOpen}
+              onOpenOverallReview={onOpenOverallReview}
             />
           </LeftSidebarSection>
         </div>
@@ -110,8 +115,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         />
 
         <OverallReviewPanel
-            isOpen={false}
-            onClose={() => {}}
+            isOpen={isOverallReviewPanelOpen}
+            onClose={onCloseOverallReview}
             totalSlides={totalSlides}
             presenterNotes={presenterNotes}
         />
