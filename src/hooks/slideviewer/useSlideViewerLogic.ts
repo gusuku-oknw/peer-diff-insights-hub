@@ -31,7 +31,7 @@ export const useSlideViewerLogic = () => {
   
   const currentSlideNumber = typeof currentSlide === 'string' ? parseInt(currentSlide, 10) : currentSlide;
   
-  const userType = useMemo(() => {
+  const userType = useMemo((): "student" | "enterprise" => {
     const role = userProfile?.role;
     console.log('SlideViewer: User profile role:', role);
     
