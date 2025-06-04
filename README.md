@@ -51,9 +51,8 @@ peer-diff-insights-hub/
 │   │   ├─ dateUtils.ts      ← 日付整形ユーティリティ
 │   │   └─ diffParser.ts     ← XML レベル差分 JSON への変換処理
 │   │
-│   ├─ styles/              ← TailwindCSS の設定やグローバル CSS、ユーティリティクラス
-│   │   ├─ globals.css       ← リセット CSS やプロジェクト共通スタイル
-│   │   └─ tailwind.css      ← Tailwind のインポートエントリ
+│   ├─ stores/              ← Zustand ストア管理
+│   │   └─ slide/           ← スライドビューア用状態管理
 │   │
 │   ├─ types/               ← TypeScript 型定義（API レスポンス、DB スキーマ、画面用型 など）
 │   │   ├─ Project.ts        ← プロジェクト情報型

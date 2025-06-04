@@ -1,7 +1,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { checklistCategories } from "@/components/slideviewer/panels/components/ChecklistCategories";
+import { checklistCategories } from "@/components/slide-viewer/panels/components/ChecklistCategories";
 
 interface Comment {
   id: string;

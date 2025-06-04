@@ -2,7 +2,7 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { parsePPTX, convertPPTXToSlides } from '@/utils/pptxParser';
-import { useSlideStore } from '@/stores/slideStore';
+import { useSlideStore } from '@/stores/slide';
 
 export function usePPTXLoader() {
   const [isLoading, setIsLoading] = useState(false);
