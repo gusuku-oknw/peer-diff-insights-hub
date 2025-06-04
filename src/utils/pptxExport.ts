@@ -1,5 +1,5 @@
 
-import { Slide } from '@/stores/slideStore';
+import { Slide } from '@/stores/slide';
 
 // This is a placeholder for actual PPTX export functionality
 // In a real implementation, you would use a library like pptxgenjs
