@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ImprovedSidePanel from "../panels/ImprovedSidePanel";
 import { useSlideStore } from "@/stores/slide-store";
 import type { ViewerMode } from "@/types/slide.types";
@@ -24,11 +24,24 @@ export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
   userType,
 }) => {
   const {
-    rightSidebarWidth,
     rightPanelHidden,
-    setRightSidebarWidth,
     setRightPanelHidden,
+    getRightSidebarWidth,
   } = useSlideStore();
+
+  const [panelWidth, setPanelWidth] = useState(() => getRightSidebarWidth());
+
+  // Update panel width on window resize
+  useEffect(() => {
+    const updatePanelWidth = () => {
+      setPanelWidth(getRightSidebarWidth());
+    };
+
+    updatePanelWidth(); // Initial calculation
+    
+    window.addEventListener('resize', updatePanelWidth);
+    return () => window.removeEventListener('resize', updatePanelWidth);
+  }, [getRightSidebarWidth]);
 
   // ノート表示判定
   const shouldShowNotes =
@@ -52,7 +65,10 @@ export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
   }
 
   return (
-    <div className="h-full bg-white border-l border-gray-200">
+    <div 
+      className="h-full bg-white border-l border-gray-200 flex-shrink-0 transition-all duration-300 ease-in-out"
+      style={{ width: `${panelWidth}px` }}
+    >
       <ImprovedSidePanel
         shouldShowNotes={shouldShowNotes}
         shouldShowReviewPanel={shouldShowReviewPanel}
@@ -62,8 +78,8 @@ export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
         isHidden={false}
         onToggleHide={() => setRightPanelHidden(true)}
         userType={userType}
-        onWidthChange={setRightSidebarWidth}
-        initialWidth={rightSidebarWidth}
+        onWidthChange={() => {}} // Disable manual width change as it's now responsive
+        initialWidth={panelWidth}
       />
     </div>
   );

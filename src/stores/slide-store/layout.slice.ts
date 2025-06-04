@@ -32,6 +32,7 @@ export interface LayoutSlice {
   };
   getSlideThumbnailsWidth: () => number;
   isRightPanelVisible: () => boolean;
+  getRightSidebarWidth: () => number;
 }
 
 const DEFAULT_LAYOUT = {
@@ -78,6 +79,36 @@ export const createLayoutSlice: StateCreator<
   
   resetLayoutToDefaults: () => set(DEFAULT_LAYOUT),
   
+  getRightSidebarWidth: () => {
+    const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
+    
+    // Calculate responsive width based on screen size
+    let targetWidth: number;
+    
+    if (windowWidth >= 1920) {
+      // Large screens: use 1/4 of screen width
+      targetWidth = windowWidth / 4;
+    } else if (windowWidth >= 1440) {
+      // Medium-large screens: use 1/3 of screen width
+      targetWidth = windowWidth / 3;
+    } else if (windowWidth >= 1024) {
+      // Medium screens: use 1/3 of screen width
+      targetWidth = windowWidth / 3;
+    } else if (windowWidth >= 768) {
+      // Small-medium screens: use 2/5 of screen width
+      targetWidth = (windowWidth * 2) / 5;
+    } else {
+      // Small screens: use 1/2 of screen width
+      targetWidth = windowWidth / 2;
+    }
+    
+    // Apply min/max constraints
+    const minWidth = 280;
+    const maxWidth = Math.min(500, windowWidth * 0.6); // Never exceed 60% of screen
+    
+    return Math.max(minWidth, Math.min(maxWidth, targetWidth));
+  },
+  
   isRightPanelVisible: () => {
     const state = get();
     const shouldShowNotes = (state.viewerMode === "presentation" && state.showPresenterNotes) || 
@@ -96,7 +127,7 @@ export const createLayoutSlice: StateCreator<
     
     let usedWidth = 0;
     if (state.leftSidebarOpen) usedWidth += state.leftSidebarWidth;
-    if (state.isRightPanelVisible()) usedWidth += state.rightSidebarWidth;
+    if (state.isRightPanelVisible()) usedWidth += state.getRightSidebarWidth();
     if (state.viewerMode === 'edit') usedWidth += state.editSidebarWidth;
     
     const availableWidth = windowWidth - usedWidth;
@@ -119,9 +150,9 @@ export const createLayoutSlice: StateCreator<
       usedWidth += state.leftSidebarWidth;
     }
     
-    // Use the centralized right panel visibility logic
+    // Use the centralized right panel visibility logic with responsive width
     if (state.isRightPanelVisible()) {
-      usedWidth += state.rightSidebarWidth;
+      usedWidth += state.getRightSidebarWidth();
     }
     
     if (state.viewerMode === 'edit') {

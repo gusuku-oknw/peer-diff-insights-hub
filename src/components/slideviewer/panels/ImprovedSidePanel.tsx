@@ -28,6 +28,7 @@ const ImprovedSidePanel: React.FC<ImprovedSidePanelProps> = ({
   const isMobile = useIsMobile();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [panelDimensions, setPanelDimensions] = useState({ width: 0, height: 0 });
+  const [currentWidth, setCurrentWidth] = useState(initialWidth);
   
   // Simplified default tab logic
   const getDefaultTab = () => {
@@ -44,8 +45,13 @@ const ImprovedSidePanel: React.FC<ImprovedSidePanelProps> = ({
     userType,
     currentSlide,
     activeTab,
-    initialWidth
+    currentWidth
   });
+
+  // Update width when initialWidth changes (responsive)
+  useEffect(() => {
+    setCurrentWidth(initialWidth);
+  }, [initialWidth]);
   
   // Update tab when panel visibility changes
   useEffect(() => {
@@ -136,13 +142,13 @@ const ImprovedSidePanel: React.FC<ImprovedSidePanelProps> = ({
     );
   }
 
-  // Desktop implementation - simplified without custom resize functionality
+  // Desktop implementation - now uses currentWidth instead of initialWidth
   return (
     <DesktopPanel
       {...sharedProps}
       onToggleHide={onToggleHide}
       panelRef={panelRef}
-      width={initialWidth}
+      width={currentWidth}
       ResizeHandle={null}
     />
   );
