@@ -1,6 +1,6 @@
 
 import React from "react";
-import LeftSidebarWrapper from "./LeftSidebarWrapper";
+import { LeftSidebarWrapper } from "./LeftSidebarWrapper";
 
 interface SidebarLeftProps {
   leftSidebarOpen: boolean;
