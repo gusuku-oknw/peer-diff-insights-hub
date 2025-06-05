@@ -1,14 +1,15 @@
 
 import React from "react";
 import { LayoutProvider } from "./LayoutProvider";
-import { LeftSidebarSection } from "./sections/LeftSidebarSection";
-import { CentralSection } from "./sections/CentralSection";
+import SidebarLeft from "./SidebarLeft";
+import ContentArea from "./ContentArea";
+import SidebarRight from "./SidebarRight";
 import { FloatingToggleButton } from "./FloatingToggleButton";
 import OverallReviewPanel from "../panels/OverallReviewPanel/OverallReviewPanel.tsx";
 import type { ViewerMode } from "@/types/slide.types";
 import { useSlideStore } from "@/stores/slide-store";
 
-interface MainLayoutProps {
+interface MainContainerProps {
   currentBranch: string;
   branches: string[];
   commitHistory: any[];
@@ -34,7 +35,7 @@ interface MainLayoutProps {
   onCloseOverallReview: () => void;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({
+const MainContainer: React.FC<MainContainerProps> = ({
   currentBranch,
   branches,
   commitHistory,
@@ -77,35 +78,47 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   return (
       <LayoutProvider>
         <div className="flex h-full w-full main-layout-container overflow-hidden">
-          <LeftSidebarSection
+          <SidebarLeft
             leftSidebarOpen={leftSidebarOpen}
             currentBranch={currentBranch}
             branches={branches}
             commitHistory={commitHistory}
             onBranchChange={onBranchChange}
             onToggleLeftSidebar={onToggleLeftSidebar}
-          >
-            <CentralSection
+          />
+          
+          <ContentArea
+            viewerMode={viewerMode}
+            userType={userType}
+            currentSlide={currentSlide}
+            totalSlides={totalSlides}
+            zoom={zoom}
+            showPresenterNotes={showPresenterNotes}
+            isFullScreen={isFullScreen}
+            presentationStartTime={presentationStartTime}
+            presenterNotes={presenterNotes}
+            elapsedTime={elapsedTime}
+            displayCount={displayCount}
+            commentedSlides={commentedSlides}
+            mockComments={mockComments}
+            onSlideChange={onSlideChange}
+            rightPanelVisible={rightPanelVisible}
+            hideRightPanelCompletely={hideRightPanelCompletely}
+            leftSidebarOpen={leftSidebarOpen}
+            onOpenOverallReview={onOpenOverallReview}
+          />
+          
+          {rightPanelVisible && (
+            <SidebarRight
               viewerMode={viewerMode}
-              userType={userType}
-              currentSlide={currentSlide}
-              totalSlides={totalSlides}
-              zoom={zoom}
               showPresenterNotes={showPresenterNotes}
               isFullScreen={isFullScreen}
-              presentationStartTime={presentationStartTime}
+              currentSlide={currentSlide}
+              totalSlides={totalSlides}
               presenterNotes={presenterNotes}
-              elapsedTime={elapsedTime}
-              displayCount={displayCount}
-              commentedSlides={commentedSlides}
-              mockComments={mockComments}
-              onSlideChange={onSlideChange}
-              rightPanelVisible={rightPanelVisible}
-              hideRightPanelCompletely={hideRightPanelCompletely}
-              leftSidebarOpen={leftSidebarOpen}
-              onOpenOverallReview={onOpenOverallReview}
+              userType={userType}
             />
-          </LeftSidebarSection>
+          )}
         </div>
 
         <FloatingToggleButton
@@ -124,4 +137,4 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   );
 };
 
-export default MainLayout;
+export default MainContainer;

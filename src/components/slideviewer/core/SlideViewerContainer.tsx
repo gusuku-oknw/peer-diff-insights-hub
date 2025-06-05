@@ -1,19 +1,10 @@
 
 import React from "react";
-import { useSlideViewerLogic } from "@/hooks/slideviewer/useSlideViewerLogic";
-import { useResponsiveLayout } from "@/hooks/slideviewer/useResponsiveLayout";
-import SlideViewerLayout from "./SlideViewerLayout";
+import SlideViewerContainer from "../containers/SlideViewerContainer";
 
-const SlideViewerContainer: React.FC = () => {
-  const slideViewerLogic = useSlideViewerLogic();
-  const responsiveLayout = useResponsiveLayout();
-
-  return (
-    <SlideViewerLayout
-      {...slideViewerLogic}
-      {...responsiveLayout}
-    />
-  );
+// Legacy wrapper for backward compatibility
+const LegacySlideViewerContainer: React.FC = () => {
+  return <SlideViewerContainer />;
 };
 
-export default SlideViewerContainer;
+export default LegacySlideViewerContainer;

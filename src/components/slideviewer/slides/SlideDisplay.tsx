@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
 
-interface MainContentProps {
+interface SlideDisplayProps {
   currentSlide: number;
   totalSlides: number;
   zoom: number;
@@ -20,7 +20,7 @@ interface MainContentProps {
   onSlideChange: (slide: number) => void;
 }
 
-const MainContent: React.FC<MainContentProps> = ({
+const SlideDisplay: React.FC<SlideDisplayProps> = ({
   currentSlide,
   totalSlides,
   zoom,
@@ -66,7 +66,7 @@ const MainContent: React.FC<MainContentProps> = ({
     };
   }, []);
 
-  console.log('MainContent: Container size and display settings', {
+  console.log('SlideDisplay: Container size and display settings', {
     containerSize,
     userType,
     viewerMode,
@@ -97,4 +97,4 @@ const MainContent: React.FC<MainContentProps> = ({
   );
 };
 
-export default MainContent;
+export default SlideDisplay;

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import ResponsiveToolbar from "../toolbar/ResponsiveToolbar";
-import MainLayout from "../layout/MainLayout";
+import MainContainer from "../layout/MainContainer";
 import { useSlideStore } from "@/stores/slide-store";
 import type { ViewerMode } from "@/types/slide.types";
 
@@ -168,7 +168,7 @@ const SlideViewerLayout: React.FC<SlideViewerLayoutProps> = ({
         )}
         
         <div className={`flex flex-grow overflow-hidden ${!(viewerMode === "presentation" && isFullScreen) ? "h-[calc(100vh-4rem)]" : "h-full"}`}>
-          <MainLayout
+          <MainContainer
             currentBranch={currentBranch}
             branches={branches}
             commitHistory={commitHistory}

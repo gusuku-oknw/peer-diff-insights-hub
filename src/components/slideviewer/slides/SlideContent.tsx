@@ -5,12 +5,12 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import MainContent from "./MainContent";
+import SlideDisplay from "./SlideDisplay";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import { useSlideStore } from "@/stores/slide-store";
 import type { ViewerMode } from "@/types/slide.types";
 
-interface CentralContentAreaProps {
+interface SlideContentProps {
     currentSlide: number;
     totalSlides: number;
     zoom: number;
@@ -29,7 +29,7 @@ interface CentralContentAreaProps {
     onOpenOverallReview: () => void;
 }
 
-export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
+const SlideContent: React.FC<SlideContentProps> = ({
     currentSlide,
     totalSlides,
     zoom,
@@ -57,7 +57,7 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
     const thumbnailSizePercentage = Math.min(40, Math.max(10, (thumbnailsHeight / windowHeight) * 100));
 
     const mainContent = (
-        <MainContent
+        <SlideDisplay
             currentSlide={currentSlide}
             totalSlides={totalSlides}
             zoom={zoom}
@@ -126,3 +126,5 @@ export const CentralContentArea: React.FC<CentralContentAreaProps> = ({
         </div>
     );
 };
+
+export default SlideContent;

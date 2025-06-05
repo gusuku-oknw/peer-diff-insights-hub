@@ -1,11 +1,10 @@
 
 import React from "react";
-import { EditSidebarWrapper } from "../EditSidebarWrapper";
-import { CentralContentArea } from "../CentralContentArea";
-import { RightPanelWrapper } from "../RightPanelWrapper";
+import { EditSidebarWrapper } from "./EditSidebarWrapper";
+import SlideContent from "../slides/SlideContent";
 import type { ViewerMode } from "@/types/slide.types";
 
-interface CentralSectionProps {
+interface ContentAreaProps {
   viewerMode: ViewerMode;
   userType: "student" | "enterprise";
   currentSlide: number;
@@ -26,7 +25,7 @@ interface CentralSectionProps {
   onOpenOverallReview: () => void;
 }
 
-export const CentralSection: React.FC<CentralSectionProps> = ({
+const ContentArea: React.FC<ContentAreaProps> = ({
   viewerMode,
   userType,
   currentSlide,
@@ -58,7 +57,7 @@ export const CentralSection: React.FC<CentralSectionProps> = ({
       )}
 
       {/* Central Content */}
-      <CentralContentArea
+      <SlideContent
         currentSlide={currentSlide}
         totalSlides={totalSlides}
         zoom={zoom}
@@ -76,19 +75,8 @@ export const CentralSection: React.FC<CentralSectionProps> = ({
         rightPanelCollapsed={!rightPanelVisible}
         onOpenOverallReview={onOpenOverallReview}
       />
-
-      {/* Right Panel */}
-      {rightPanelVisible && (
-        <RightPanelWrapper
-          viewerMode={viewerMode}
-          showPresenterNotes={showPresenterNotes}
-          isFullScreen={isFullScreen}
-          currentSlide={currentSlide}
-          totalSlides={totalSlides}
-          presenterNotes={presenterNotes}
-          userType={userType}
-        />
-      )}
     </div>
   );
 };
+
+export default ContentArea;
