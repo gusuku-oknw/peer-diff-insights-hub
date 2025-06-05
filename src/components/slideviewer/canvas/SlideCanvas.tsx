@@ -1,6 +1,7 @@
 
 import React, { useRef, useEffect, useCallback } from "react";
 import { useSlideCanvas } from "@/hooks/slideviewer/useSlideCanvas";
+import { useResponsiveCanvas } from "@/hooks/slideviewer/useResponsiveCanvas";
 import { renderElements } from "@/utils/slideCanvas/elementRenderer";
 
 interface SlideCanvasProps {
@@ -22,24 +23,35 @@ const SlideCanvas = ({
 }: SlideCanvasProps) => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   
-  console.log(`SlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}`);
+  console.log(`SlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}, Zoom: ${zoomLevel}%`);
+  
+  // レスポンシブキャンバスサイズの計算
+  const {
+    canvasSize,
+    actualDisplaySize,
+    getScaleFactors,
+    isResponsive
+  } = useResponsiveCanvas({
+    containerWidth,
+    containerHeight,
+    zoom: zoomLevel
+  });
   
   const {
     canvasRef,
     fabricCanvasRef,
     isReady,
     error,
-    canvasSize,
     elements,
     slides
   } = useSlideCanvas({
     currentSlide,
     editable,
-    containerWidth,
-    containerHeight
+    containerWidth: canvasSize.width,
+    containerHeight: canvasSize.height
   });
   
-  // Render elements to canvas
+  // 要素をキャンバスにレンダリング（改善版）
   const handleRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady) return;
@@ -57,9 +69,12 @@ const SlideCanvas = ({
     }
   }, [handleRenderElements, isReady]);
   
-  const zoomStyle = {
-    transform: `scale(${zoomLevel / 100})`,
-    transformOrigin: 'center center',
+  // ズームとレスポンシブサイズを組み合わせたスタイル
+  const containerStyle = {
+    width: actualDisplaySize.width || 'auto',
+    height: actualDisplaySize.height || 'auto',
+    maxWidth: '100%',
+    maxHeight: '100%',
   };
   
   if (!slides || slides.length === 0) {
@@ -83,16 +98,28 @@ const SlideCanvas = ({
       ref={canvasContainerRef}
       className="w-full h-full flex items-center justify-center bg-gray-50 overflow-hidden"
     >
-      <div className="relative" style={zoomStyle}>
-        <div className="bg-white rounded-lg shadow-lg border">
+      <div 
+        className="relative transition-all duration-300 ease-in-out"
+        style={containerStyle}
+      >
+        <div className="bg-white rounded-lg shadow-lg border relative">
           <canvas 
             ref={canvasRef}
-            className="block rounded-lg"
+            className="block rounded-lg transition-all duration-300 ease-in-out"
             style={{
+              width: '100%',
+              height: '100%',
               maxWidth: '100%',
               maxHeight: '100%',
             }}
           />
+          
+          {/* ズームレベル表示 */}
+          {zoomLevel !== 100 && (
+            <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+              {zoomLevel}%
+            </div>
+          )}
           
           {!isReady && (
             <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 rounded-lg">
