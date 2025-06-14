@@ -1,8 +1,9 @@
 
 import React, { useRef, useEffect, useCallback } from "react";
 import { useSlideCanvas } from "@/hooks/slideviewer/useSlideCanvas";
-import { useResponsiveCanvas } from "@/hooks/slideviewer/useResponsiveCanvas";
+import { useEnhancedResponsive } from "@/hooks/slideviewer/useEnhancedResponsive";
 import { renderElements } from "@/utils/slideCanvas/elementRenderer";
+import TouchOptimizedCanvas from "./TouchOptimizedCanvas";
 
 interface SlideCanvasProps {
   currentSlide: number;
@@ -21,19 +22,34 @@ const SlideCanvas = ({
   containerWidth = 0,
   containerHeight = 0
 }: SlideCanvasProps) => {
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
-  
   console.log(`SlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}`);
   
-  // レスポンシブキャンバスサイズの計算（ズーム処理は除外）
+  // Enhanced responsive canvas sizing
   const {
     canvasSize,
-    getScaleFactors,
+    deviceInfo,
     isResponsive
-  } = useResponsiveCanvas({
+  } = useEnhancedResponsive({
     containerWidth,
     containerHeight
   });
+
+  // Use TouchOptimizedCanvas for mobile devices
+  if (deviceInfo.isMobile) {
+    return (
+      <TouchOptimizedCanvas
+        currentSlide={currentSlide}
+        zoomLevel={zoomLevel}
+        editable={editable}
+        userType={userType}
+        containerWidth={containerWidth}
+        containerHeight={containerHeight}
+      />
+    );
+  }
+  
+  // Desktop/tablet rendering with enhanced responsive sizing
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
   
   const {
     canvasRef,
@@ -49,7 +65,7 @@ const SlideCanvas = ({
     containerHeight: canvasSize.height
   });
   
-  // 要素をキャンバスにレンダリング
+  // Enhanced element rendering
   const handleRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady) return;
@@ -57,7 +73,7 @@ const SlideCanvas = ({
     try {
       renderElements(canvas, elements, canvasSize, editable, currentSlide);
     } catch (err) {
-      console.error('Rendering failed:', err);
+      console.error('Enhanced rendering failed:', err);
     }
   }, [elements, currentSlide, editable, isReady, canvasSize]);
   
@@ -93,7 +109,10 @@ const SlideCanvas = ({
           className="bg-white rounded-lg shadow-lg border relative"
           style={{
             width: canvasSize.width,
-            height: canvasSize.height
+            height: canvasSize.height,
+            transform: `scale(${zoomLevel / 100})`,
+            transformOrigin: 'center center',
+            transition: 'transform 0.2s ease-out'
           }}
         >
           <canvas 
@@ -128,6 +147,13 @@ const SlideCanvas = ({
             </div>
           )}
         </div>
+
+        {/* Performance indicator for high DPI displays */}
+        {deviceInfo.devicePixelRatio > 2 && (
+          <div className="absolute bottom-2 right-2 text-xs text-gray-500 bg-white bg-opacity-75 px-2 py-1 rounded">
+            高解像度最適化
+          </div>
+        )}
       </div>
     </div>
   );
