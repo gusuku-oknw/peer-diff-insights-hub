@@ -28,30 +28,36 @@ export const useSlideCanvas = ({
   const currentSlideData = slides.find(slide => slide.id === currentSlide);
   const elements = currentSlideData?.elements || [];
   
-  // メモ化されたキャンバスサイズ計算
+  // 改善されたキャンバスサイズ計算
   const canvasSize = useMemo(() => {
-    const fallbackWidth = 1600;
-    const fallbackHeight = 900;
-    
-    const availableWidth = containerWidth > 0 ? containerWidth - 32 : fallbackWidth * 0.8;
-    const availableHeight = containerHeight > 0 ? containerHeight - 32 : fallbackHeight * 0.8;
+    const padding = 40;
+    const availableWidth = Math.max(320, containerWidth - padding);
+    const availableHeight = Math.max(240, containerHeight - padding);
     
     const aspectRatio = 16 / 9;
-    let canvasWidth = availableWidth * 0.9;
+    let canvasWidth = availableWidth * 0.92;
     let canvasHeight = canvasWidth / aspectRatio;
     
-    if (canvasHeight > availableHeight * 0.9) {
-      canvasHeight = availableHeight * 0.9;
+    if (canvasHeight > availableHeight * 0.92) {
+      canvasHeight = availableHeight * 0.92;
       canvasWidth = canvasHeight * aspectRatio;
     }
     
-    canvasWidth = Math.max(400, Math.min(1920, canvasWidth));
-    canvasHeight = Math.max(225, Math.min(1080, canvasHeight));
+    // デバイス別の最適化
+    const isMobile = containerWidth < 768;
+    const multiplier = isMobile ? 0.9 : 1.0;
     
-    return { width: Math.round(canvasWidth), height: Math.round(canvasHeight) };
+    const finalWidth = Math.max(320, Math.min(1920, Math.round(canvasWidth * multiplier)));
+    const finalHeight = Math.max(180, Math.min(1080, Math.round(canvasHeight * multiplier)));
+    
+    return { 
+      width: finalWidth, 
+      height: finalHeight,
+      scale: finalWidth / 1600 // 基準サイズとの比率
+    };
   }, [containerWidth, containerHeight]);
   
-  // キャンバスイベントハンドラー（メモ化）
+  // 最適化されたキャンバスイベントハンドラー
   const setupCanvasEvents = useCallback((canvas: Canvas) => {
     if (!editable) return;
     
@@ -73,22 +79,30 @@ export const useSlideCanvas = ({
         updateSlideElement(currentSlide, obj.customData.id, updates);
       }
     };
+
+    // パフォーマンス最適化のためのイベント
+    const handleRenderComplete = () => {
+      // レンダリング完了時の処理
+      console.log('Canvas render completed');
+    };
     
     canvas.on('selection:created', handleSelectionCreated);
     canvas.on('object:modified', handleObjectModified);
+    canvas.on('after:render', handleRenderComplete);
     
     return () => {
       canvas.off('selection:created', handleSelectionCreated);
       canvas.off('object:modified', handleObjectModified);
+      canvas.off('after:render', handleRenderComplete);
     };
   }, [editable, currentSlide, updateSlideElement]);
   
-  // キャンバス初期化（最適化版）
+  // 改善されたキャンバス初期化
   useEffect(() => {
     if (!canvasRef.current || initializationRef.current) return;
     
     try {
-      // 既存のキャンバスを破棄
+      // 既存のキャンバスを適切に破棄
       if (fabricCanvasRef.current) {
         fabricCanvasRef.current.dispose();
         fabricCanvasRef.current = null;
@@ -104,6 +118,10 @@ export const useSlideCanvas = ({
         selectionLineWidth: 2,
         controlsAboveOverlay: true,
         allowTouchScrolling: false,
+        // パフォーマンス最適化
+        renderOnAddRemove: true,
+        skipTargetFind: false,
+        imageSmoothingEnabled: true,
       });
       
       fabricCanvasRef.current = canvas;
@@ -111,7 +129,11 @@ export const useSlideCanvas = ({
       setIsReady(true);
       setError(null);
       
-      console.log('Canvas initialized with size:', canvasSize);
+      console.log('Enhanced canvas initialized:', {
+        size: canvasSize,
+        scale: canvasSize.scale,
+        editable
+      });
       
       // イベントハンドラーのセットアップ
       const cleanup = setupCanvasEvents(canvas);
@@ -126,18 +148,25 @@ export const useSlideCanvas = ({
     }
   }, [canvasSize, editable, setupCanvasEvents]);
   
-  // キャンバスサイズ更新（デバウンス処理）
+  // 改善されたキャンバスサイズ更新
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady) return;
     
     const timeoutId = setTimeout(() => {
-      canvas.setDimensions({
-        width: canvasSize.width,
-        height: canvasSize.height
-      });
-      canvas.renderAll();
-      console.log('Canvas resized to:', canvasSize);
+      try {
+        canvas.setDimensions({
+          width: canvasSize.width,
+          height: canvasSize.height
+        });
+        
+        // ズーム関連の処理を削除（上位コンポーネントで管理）
+        canvas.renderAll();
+        
+        console.log('Canvas resized:', canvasSize);
+      } catch (err) {
+        console.error('Canvas resize error:', err);
+      }
     }, 100);
     
     return () => clearTimeout(timeoutId);
@@ -147,7 +176,11 @@ export const useSlideCanvas = ({
   useEffect(() => {
     return () => {
       if (fabricCanvasRef.current) {
-        fabricCanvasRef.current.dispose();
+        try {
+          fabricCanvasRef.current.dispose();
+        } catch (err) {
+          console.error('Canvas disposal error:', err);
+        }
         fabricCanvasRef.current = null;
         initializationRef.current = false;
       }
@@ -161,6 +194,9 @@ export const useSlideCanvas = ({
     error,
     canvasSize,
     elements,
-    slides
+    slides,
+    // 追加の有用な情報
+    scale: canvasSize.scale,
+    isResponsive: containerWidth > 0 && containerHeight > 0
   };
 };

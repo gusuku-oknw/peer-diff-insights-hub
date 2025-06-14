@@ -1,12 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
 import { 
   ChevronLeft, 
   ChevronRight, 
-  ZoomIn, 
-  ZoomOut, 
   PanelLeft, 
   Maximize,
   MoreHorizontal
@@ -20,6 +18,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import ModeSelector from "@/components/slideviewer/toolbar/ModeSelector";
 import ModeSpecificActions from "@/components/slideviewer/toolbar/ModeSpecificActions";
+import ZoomControlsEnhanced from "@/components/slideviewer/toolbar/ZoomControlsEnhanced";
 
 interface ResponsiveToolbarProps {
   currentSlide: number;
@@ -74,24 +73,9 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
   }, []);
 
   // Responsive breakpoints
-  const isVerySmall = windowWidth < 640; // sm
-  const isSmall = windowWidth < 768; // md
-  const isMedium = windowWidth < 1024; // lg
-  const isLarge = windowWidth >= 1024;
-
-  const handleZoomSliderChange = (value: number[]) => {
-    onZoomChange(value[0]);
-  };
-
-  const handleZoomIn = () => {
-    const newZoom = Math.min(200, zoom + 10);
-    onZoomChange(newZoom);
-  };
-
-  const handleZoomOut = () => {
-    const newZoom = Math.max(25, zoom - 10);
-    onZoomChange(newZoom);
-  };
+  const isVerySmall = windowWidth < 640;
+  const isSmall = windowWidth < 768;
+  const isMedium = windowWidth < 1024;
 
   // Mobile dropdown menu for secondary actions
   const SecondaryActionsDropdown = () => (
@@ -115,10 +99,8 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
   );
 
   if (isVerySmall) {
-    // Very small screens - most compact layout
     return (
       <div className="flex items-center justify-between p-2 bg-white border-b border-gray-200 h-12 shadow-sm overflow-hidden">
-        {/* Left: Navigation only */}
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
@@ -145,7 +127,6 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
           </Button>
         </div>
 
-        {/* Right: Mode and menu */}
         <div className="flex items-center gap-2">
           <div className="text-xs bg-gray-100 px-2 py-1 rounded">
             {viewerMode === "presentation" ? "発表" : viewerMode === "edit" ? "編集" : "確認"}
@@ -157,10 +138,8 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
   }
 
   if (isSmall) {
-    // Small screens - compact with essential controls
     return (
       <div className="flex items-center justify-between p-2 bg-white border-b border-gray-200 h-14 shadow-sm overflow-x-hidden">
-        {/* Left: Sidebar + Navigation */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <Button
             variant="ghost"
@@ -198,7 +177,6 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
           </div>
         </div>
 
-        {/* Center: Mode selector */}
         <div className="flex-shrink-0">
           <ModeSelector 
             currentMode={viewerMode} 
@@ -207,27 +185,12 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
           />
         </div>
 
-        {/* Right: Zoom and menu */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="flex items-center gap-1 bg-gray-50 rounded px-2 py-1">
-            <span className="text-xs">{zoom}%</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleZoomOut}
-              className="h-6 w-6 p-0"
-            >
-              <ZoomOut className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleZoomIn}
-              className="h-6 w-6 p-0"
-            >
-              <ZoomIn className="h-3 w-3" />
-            </Button>
-          </div>
+          <ZoomControlsEnhanced 
+            zoom={zoom} 
+            onZoomChange={onZoomChange} 
+            isCompact={true}
+          />
           <SecondaryActionsDropdown />
         </div>
       </div>
@@ -235,10 +198,8 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
   }
 
   if (isMedium) {
-    // Medium screens - balanced layout
     return (
       <div className="flex items-center justify-between p-3 bg-white border-b border-gray-200 h-16 shadow-sm overflow-x-hidden">
-        {/* Left section */}
         <div className="flex items-center gap-3 flex-shrink-0">
           <Button
             variant="ghost"
@@ -280,7 +241,6 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
           </div>
         </div>
 
-        {/* Center section */}
         <div className="flex items-center mx-4 flex-shrink-0">
           <ModeSelector 
             currentMode={viewerMode} 
@@ -289,33 +249,8 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
           />
         </div>
 
-        {/* Right section */}
         <div className="flex items-center gap-4 flex-shrink-0">
-          <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleZoomOut}
-              disabled={zoom <= 25}
-              className="h-7 w-7 p-0"
-            >
-              <ZoomOut className="h-3 w-3" />
-            </Button>
-            
-            <span className="text-sm font-mono text-gray-600 min-w-12 text-center bg-white rounded px-2 py-1 border">
-              {zoom}%
-            </span>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleZoomIn}
-              disabled={zoom >= 200}
-              className="h-7 w-7 p-0"
-            >
-              <ZoomIn className="h-3 w-3" />
-            </Button>
-          </div>
+          <ZoomControlsEnhanced zoom={zoom} onZoomChange={onZoomChange} />
           
           <Separator orientation="vertical" className="h-8 bg-gray-300" />
           
@@ -345,10 +280,9 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
     );
   }
 
-  // Large screens - full layout with all controls
+  // Large screens
   return (
     <div className="modern-toolbar flex items-center justify-between p-3 bg-white border-b border-gray-200 h-16 shadow-sm overflow-x-hidden">
-      {/* Left section - Sidebar toggle and navigation */}
       <div className="flex items-center gap-3 flex-shrink-0">
         <Button
           variant="ghost"
@@ -393,7 +327,6 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
         </div>
       </div>
 
-      {/* Center section - Mode selector */}
       <div className="flex items-center mx-4 flex-shrink-0">
         <ModeSelector 
           currentMode={viewerMode} 
@@ -402,45 +335,8 @@ const ResponsiveToolbar: React.FC<ResponsiveToolbarProps> = ({
         />
       </div>
 
-      {/* Right section - Zoom and actions */}
       <div className="flex items-center gap-4 flex-shrink-0">
-        <div className="zoom-controls flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-2 border border-gray-200">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleZoomOut}
-            disabled={zoom <= 25}
-            className="modern-button h-7 w-7 p-0 disabled:opacity-50"
-            title="縮小 (-)"
-          >
-            <ZoomOut className="h-3 w-3" />
-          </Button>
-          
-          <div className="flex items-center gap-3 min-w-24">
-            <Slider
-              value={[zoom]}
-              onValueChange={handleZoomSliderChange}
-              max={200}
-              min={25}
-              step={5}
-              className="w-20 zoom-slider"
-            />
-            <span className="text-sm font-mono text-gray-600 min-w-12 text-center bg-white rounded px-2 py-1 border border-gray-200">
-              {zoom}%
-            </span>
-          </div>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleZoomIn}
-            disabled={zoom >= 200}
-            className="modern-button h-7 w-7 p-0 disabled:opacity-50"
-            title="拡大 (+)"
-          >
-            <ZoomIn className="h-3 w-3" />
-          </Button>
-        </div>
+        <ZoomControlsEnhanced zoom={zoom} onZoomChange={onZoomChange} />
         
         <Separator orientation="vertical" className="h-8 bg-gray-300" />
         
