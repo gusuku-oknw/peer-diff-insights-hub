@@ -1,6 +1,6 @@
 
 import React, { useRef, useEffect, useState } from "react";
-import OptimizedSlideCanvas from "@/features/slideviewer/components/canvas/OptimizedSlideCanvas";
+import UnifiedSlideCanvas from "@/components/slideviewer/canvas/UnifiedSlideCanvas";
 
 interface SlideDisplayProps {
   currentSlide: number;
@@ -21,7 +21,7 @@ const SlideDisplay: React.FC<SlideDisplayProps> = ({
 }) => {
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <OptimizedSlideCanvas
+      <UnifiedSlideCanvas
         currentSlide={currentSlide}
         zoomLevel={zoomLevel}
         editable={editable}
