@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useSlideStore } from "@/stores/slide-store";
 import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
 import EnhancedSlideThumbnails from "./thumbnails/EnhancedSlideThumbnails";
+import ImprovedSlideThumbnails from "./thumbnails/ImprovedSlideThumbnails";
 import SimplifiedSlideThumbnails from "./thumbnails/SimplifiedSlideThumbnails";
 import SimplifiedThumbnailHeader from "./thumbnails/SimplifiedThumbnailHeader";
 import ThumbnailNavigationButtons from "./thumbnails/ThumbnailNavigationButtons";
@@ -19,6 +20,8 @@ interface SlideThumbnailsProps {
   userType?: "student" | "enterprise";
   enhanced?: boolean;
   showAsPopup?: boolean;
+  // 新しいプロパティ：改善版UI/UXを使用するかどうか
+  useImprovedUI?: boolean;
 }
 
 const SlideThumbnails = ({
@@ -29,7 +32,8 @@ const SlideThumbnails = ({
   containerWidth,
   userType = "enterprise",
   enhanced = false,
-  showAsPopup = false
+  showAsPopup = false,
+  useImprovedUI = true // デフォルトで改善版を使用
 }: SlideThumbnailsProps) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { slides } = useSlideStore();
@@ -72,7 +76,22 @@ const SlideThumbnails = ({
     );
   }
 
-  // 拡張版を使用する場合
+  // 改善版UI/UXを使用する場合
+  if (useImprovedUI) {
+    return (
+      <ImprovedSlideThumbnails
+        currentSlide={currentSlide}
+        onSlideClick={onSlideClick}
+        onOpenOverallReview={onOpenOverallReview}
+        height={Math.max(height, optimalHeight)}
+        containerWidth={containerWidth}
+        userType={userType}
+        showAsPopup={showAsPopup}
+      />
+    );
+  }
+
+  // 拡張版を使用する場合（従来版）
   if (enhanced) {
     return (
       <EnhancedSlideThumbnails
@@ -86,7 +105,7 @@ const SlideThumbnails = ({
     );
   }
 
-  // 固定表示モード（デスクトップ・大画面タブレット）
+  // 固定表示モード（従来版）
   const {
     containerRef,
     scrollContainerRef,
