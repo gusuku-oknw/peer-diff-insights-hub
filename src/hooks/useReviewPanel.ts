@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { checklistCategories } from "@/components/slideviewer/panels/components/ChecklistCategories";
@@ -28,6 +27,7 @@ export const useReviewPanel = ({
   activeTab: externalActiveTab,
   onTabChange: externalOnTabChange
 }: UseReviewPanelProps) => {
+  // Default to dashboard instead of review to prevent confusion
   const [internalActiveTab, setInternalActiveTab] = useState("dashboard");
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState<Comment[]>([

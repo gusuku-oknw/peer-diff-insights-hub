@@ -1,8 +1,7 @@
 
 import React from "react";
+import ReviewDashboard from "../components/ReviewDashboard";
 import { useReviewPanel } from "@/hooks/useReviewPanel";
-import ReviewTabs from "./ReviewTabs";
-import { checklistCategories } from "../components/ChecklistCategories";
 
 interface ReviewPanelProps {
   currentSlide: number;
@@ -23,38 +22,22 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
   isNarrow = false,
   isVeryNarrow = false,
 }) => {
-  const {
-    activeTab,
-    handleTabChange,
-    newComment,
-    setNewComment,
-    comments,
-    checklistState,
-    completionPercentage,
-    canView,
-    canInteract,
-    handleCheckboxChange,
-    handleSubmitComment
-  } = useReviewPanel({ userType });
+  const { completionPercentage } = useReviewPanel({ userType });
 
+  // Simple dashboard view without internal tabs
   return (
-    <div className="h-full flex flex-col bg-white">
-      <ReviewTabs
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        canInteract={canInteract}
-        comments={comments}
-        checklistCategories={checklistCategories}
-        newComment={newComment}
+    <div className="h-full bg-white">
+      <ReviewDashboard
         currentSlide={currentSlide}
-        isVeryNarrow={isVeryNarrow}
-        checklistState={checklistState}
+        totalSlides={totalSlides}
         completionPercentage={completionPercentage}
-        onCommentChange={setNewComment}
-        onSubmitComment={handleSubmitComment}
-        onCheckboxChange={handleCheckboxChange}
+        pendingItems={3}
+        urgentItems={1}
+        completedToday={5}
+        isVeryNarrow={isVeryNarrow}
       />
     </div>
   );
 };
+
 export default ReviewPanel;

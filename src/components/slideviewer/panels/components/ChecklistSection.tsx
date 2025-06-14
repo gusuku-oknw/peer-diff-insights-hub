@@ -16,7 +16,7 @@ const ChecklistSection: React.FC<ChecklistSectionProps> = ({
   canInteract
 }) => {
   return (
-    <div className="flex-grow mx-4 mt-3 overflow-hidden">
+    <div className="h-full overflow-hidden">
       <ReviewChecklistPanel
         checklistState={checklistState}
         onCheckboxChange={onCheckboxChange}

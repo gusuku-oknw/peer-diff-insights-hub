@@ -23,18 +23,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   onSubmitComment
 }) => {
   return (
-    <div className="flex-grow mx-4 mt-3 space-y-3 overflow-hidden">
-      <ReviewCommentsList 
-        comments={comments}
-        checklistCategories={checklistCategories}
-      />
-      <ReviewCommentInput
-        newComment={newComment}
-        currentSlide={currentSlide}
-        isVeryNarrow={isVeryNarrow}
-        onCommentChange={onCommentChange}
-        onSubmitComment={onSubmitComment}
-      />
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-hidden">
+        <ReviewCommentsList 
+          comments={comments}
+          checklistCategories={checklistCategories}
+        />
+      </div>
+      <div className="flex-shrink-0">
+        <ReviewCommentInput
+          newComment={newComment}
+          currentSlide={currentSlide}
+          isVeryNarrow={isVeryNarrow}
+          onCommentChange={onCommentChange}
+          onSubmitComment={onSubmitComment}
+        />
+      </div>
     </div>
   );
 };
