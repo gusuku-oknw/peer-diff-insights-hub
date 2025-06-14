@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Users, Clock, FileText } from "lucide-react";
+import { ArrowLeft, Users, Clock, FileText, Home } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -24,16 +24,19 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   const isMobile = useIsMobile();
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-3">
-      <div className="flex items-center justify-start">
+    <div className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
+      <div className="flex items-center justify-between">
         {/* Left side - Back button and project info */}
         <div className="flex items-center space-x-4 min-w-0">
-          <Link to="/dashboard">
-            <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-              <ArrowLeft className="h-4 w-4" />
-              {!isMobile && <span>ダッシュボード</span>}
-            </Button>
-          </Link>
+          <div className="flex items-center space-x-2">
+            <Link to="/dashboard">
+              <Button variant="outline" size="sm" className="flex items-center space-x-2 hover:bg-blue-50 border-blue-200 text-blue-700">
+                <ArrowLeft className="h-4 w-4" />
+                <span className={isMobile ? "hidden" : ""}>ダッシュボード</span>
+                {isMobile && <Home className="h-4 w-4" />}
+              </Button>
+            </Link>
+          </div>
           
           {!isMobile && (
             <>
@@ -76,7 +79,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
 
         {/* Mobile project name */}
         {isMobile && (
-          <div className="ml-4">
+          <div className="ml-4 flex-1 min-w-0">
             <h1 className="text-base font-semibold text-gray-900 truncate">
               {projectName}
             </h1>

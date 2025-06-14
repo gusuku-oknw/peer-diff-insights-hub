@@ -1,9 +1,17 @@
 
 import React from "react";
 import SlideViewerCore from "@/components/slideviewer/containers/SlideViewerCore";
+import ProjectHeader from "@/components/slideviewer/layout/ProjectHeader";
 
 const SlideViewer: React.FC = () => {
-  return <SlideViewerCore />;
+  return (
+    <div className="h-screen flex flex-col">
+      <ProjectHeader />
+      <div className="flex-1 min-h-0">
+        <SlideViewerCore />
+      </div>
+    </div>
+  );
 };
 
 export default SlideViewer;
