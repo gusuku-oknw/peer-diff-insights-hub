@@ -1,22 +1,9 @@
 
-import React, { useRef, useEffect } from "react";
-import { useSlideStore } from "@/stores/slide-store";
-import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
-import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
+import React from "react";
+import { useSimplifiedThumbnails } from "@/hooks/slideviewer/useSimplifiedThumbnails";
 import SimplifiedSlideThumbnailsHeader from "./SimplifiedSlideThumbnailsHeader";
 import SimplifiedSlideThumbnailsContent from "./SimplifiedSlideThumbnailsContent";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+import SimplifiedSlideThumbnailsDialog from "./SimplifiedSlideThumbnailsDialog";
 
 interface SimplifiedSlideThumbnailsProps {
   currentSlide: number;
@@ -37,68 +24,26 @@ const SimplifiedSlideThumbnails = ({
   isOpen,
   onClose
 }: SimplifiedSlideThumbnailsProps) => {
-  const { slides } = useSlideStore();
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  const { 
-    thumbnailWidth, 
-    gap, 
-    isMobile,
-    isTablet 
-  } = useResponsiveThumbnails({
-    containerWidth,
-    isPopupMode: true
-  });
-
-  const showAddSlide = userType === "enterprise";
-  
   const {
+    containerRef,
+    slideData,
+    slides,
+    thumbnailWidth,
+    gap,
+    isMobile,
+    isTablet,
+    showAddSlide,
     scrollContainerRef,
-    scrollToItem,
-    scrollByDirection,
-    handleKeyboardNavigation,
-  } = useSmoothScroll({ itemWidth: thumbnailWidth, gap });
-  
-  const slideData = slides.map((slide, index) => ({
-    id: slide.id,
-    title: slide.title || `スライド ${index + 1}`,
-    thumbnail: slide.thumbnail,
-    elements: slide.elements || [],
-    hasComments: (slide as any).comments?.length > 0 || false,
-    isReviewed: (slide as any).isReviewed || false
-  }));
-
-  const handleSlideClick = (slideIndex: number) => {
-    onSlideClick(slideIndex);
-    onClose();
-  };
-
-  useEffect(() => {
-    if (isOpen) {
-      scrollToItem(currentSlide);
-    }
-  }, [currentSlide, scrollToItem, isOpen]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (isOpen && containerRef.current?.contains(event.target as Node)) {
-        handleKeyboardNavigation(event, currentSlide, slides.length, handleSlideClick);
-        
-        if (event.key === 'Escape') {
-          onClose();
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [currentSlide, slides.length, handleSlideClick, handleKeyboardNavigation, isOpen, onClose]);
-
-  const getOptimalHeight = () => {
-    if (isMobile) return 'h-[95vh]';
-    if (isTablet) return 'h-[90vh]';
-    return 'h-[85vh]';
-  };
+    handleSlideClick,
+    scrollByDirection
+  } = useSimplifiedThumbnails({
+    currentSlide,
+    containerWidth,
+    userType,
+    isOpen,
+    onSlideClick,
+    onClose
+  });
 
   const thumbnailsContent = (
     <div 
@@ -130,28 +75,15 @@ const SimplifiedSlideThumbnails = ({
     </div>
   );
 
-  if (isMobile) {
-    return (
-      <Drawer open={isOpen} onOpenChange={onClose}>
-        <DrawerContent className={`${getOptimalHeight()} max-h-[95vh]`}>
-          <DrawerHeader className="sr-only">
-            <DrawerTitle>スライド一覧</DrawerTitle>
-          </DrawerHeader>
-          {thumbnailsContent}
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`max-w-7xl ${getOptimalHeight()} max-h-[85vh] p-0`}>
-        <DialogHeader className="sr-only">
-          <DialogTitle>スライド一覧</DialogTitle>
-        </DialogHeader>
-        {thumbnailsContent}
-      </DialogContent>
-    </Dialog>
+    <SimplifiedSlideThumbnailsDialog
+      isOpen={isOpen}
+      onClose={onClose}
+      isMobile={isMobile}
+      isTablet={isTablet}
+    >
+      {thumbnailsContent}
+    </SimplifiedSlideThumbnailsDialog>
   );
 };
 
