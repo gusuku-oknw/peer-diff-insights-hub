@@ -8,7 +8,19 @@ import MainLayout from "../layout/MainLayout";
 const SlideViewerCore: React.FC = () => {
   const slideViewerLogic = useSlideViewerLogic();
   const responsiveLayout = useResponsiveLayout();
-  return <MainLayout {...slideViewerLogic} {...responsiveLayout} />;
+  // 型変換: number | null → Date | null
+  const presentationStartTime =
+    typeof slideViewerLogic.presentationStartTime === "number" && slideViewerLogic.presentationStartTime !== null
+      ? new Date(slideViewerLogic.presentationStartTime)
+      : slideViewerLogic.presentationStartTime ?? null;
+
+  return (
+    <MainLayout
+      {...slideViewerLogic}
+      {...responsiveLayout}
+      presentationStartTime={presentationStartTime}
+    />
+  );
 };
 
 export default SlideViewerCore;

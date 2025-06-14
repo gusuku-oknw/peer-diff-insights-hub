@@ -24,10 +24,15 @@ interface PresentationContentProps {
   onOpenOverallReview: () => void;
 }
 
-const PresentationContent: React.FC<PresentationContentProps> = (props) => {
+const PresentationContent: React.FC<PresentationContentProps> = ({
+  rightPanelVisible,
+  ...props
+}) => {
+  // rightPanelCollapsed: "パネルが閉じているとき = 非表示"
+  const rightPanelCollapsed = !rightPanelVisible;
   return (
     <div className="flex-1 flex overflow-hidden min-w-0 h-full">
-      <SlideContent {...props} />
+      <SlideContent {...props} rightPanelCollapsed={rightPanelCollapsed} />
     </div>
   );
 };
