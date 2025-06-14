@@ -49,17 +49,16 @@ const GridItem = ({ columnIndex, rowIndex, style, data }: GridItemProps) => {
   }
 
   const slideIndex = index + 1;
-  const enhancedSlide = {
-    ...slide,
-    isActive: currentSlide === slideIndex
-  };
+  const isActive = currentSlide === slideIndex;
 
   return (
     <div style={{ ...style, padding: '8px' }}>
       <EnhancedThumbnailCard
-        slide={enhancedSlide}
+        slide={slide}
         slideIndex={slideIndex}
+        isActive={isActive}
         thumbnailSize={thumbnailSize}
+        showDetails={true}
         onClick={onSlideClick}
         onContextMenu={onContextMenu}
         userType={userType}

@@ -1,7 +1,8 @@
 
 import { useMemo } from 'react';
 import { useSlideStore } from '@/stores/slide-store';
-import type { EnhancedSlideData, SlideSearchFilters } from '@/types/slide.types';
+import type { EnhancedSlideData } from '@/types/slide.types';
+import type { SlideSearchFilters } from '@/types/slide-viewer/thumbnail.types';
 
 export const useEnhancedSlideData = () => {
   const { slides } = useSlideStore();

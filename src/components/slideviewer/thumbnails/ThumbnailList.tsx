@@ -3,7 +3,8 @@ import React from 'react';
 import EnhancedThumbnailCard from './EnhancedThumbnailCard';
 import AddSlideCard from './AddSlideCard';
 import EvaluationCard from './EvaluationCard';
-import type { EnhancedSlideData, ThumbnailDisplaySettings } from '@/types/slide.types';
+import type { EnhancedSlideData } from '@/types/slide.types';
+import type { ThumbnailDisplaySettings } from '@/types/slide-viewer/thumbnail.types';
 
 interface ThumbnailListProps {
   filteredSlides: EnhancedSlideData[];
