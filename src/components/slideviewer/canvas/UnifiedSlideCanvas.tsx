@@ -1,10 +1,10 @@
-
 import React, { useRef, useEffect, useCallback } from "react";
 import { useOptimizedSlideCanvas } from "@/hooks/slideviewer/useOptimizedSlideCanvas";
 import { useEnhancedCanvasActions } from "@/hooks/slideviewer/canvas/useEnhancedCanvasActions";
 import { useCanvasShortcuts } from "@/hooks/slideviewer/canvas/useCanvasShortcuts";
 import { useCanvasState } from "@/hooks/slideviewer/canvas/useCanvasState";
 import { useCanvasConfig } from "@/hooks/slideviewer/canvas/useCanvasConfig";
+import { useCustomZoom } from "@/hooks/slideviewer/canvas/useCustomZoom";
 import { renderElementsWithEmptyState } from "@/utils/slideCanvas/enhancedElementRenderer";
 import TouchOptimizedCanvas from "@/features/slideviewer/components/canvas/TouchOptimizedCanvas";
 import CanvasContainer from "./CanvasContainer";
@@ -56,6 +56,13 @@ const UnifiedSlideCanvas = React.memo(({
     enablePerformanceMode
   });
 
+  // Custom zoom implementation
+  const { applyZoomTransform, resetZoom } = useCustomZoom({
+    canvas: fabricCanvasRef.current,
+    isReady,
+    canvasConfig
+  });
+
   // Canvas state management
   const {
     showGuide,
@@ -103,20 +110,17 @@ const UnifiedSlideCanvas = React.memo(({
     onPasteSelected: paste
   });
 
-  // Handle zoom changes - apply zoom only via Fabric.js
+  // Handle zoom changes - use CSS transform instead of Fabric.js setZoom
   useEffect(() => {
-    const canvas = fabricCanvasRef.current;
-    if (!canvas || !isReady || !canvasConfig) return;
+    if (!isReady || !canvasConfig) return;
     
     try {
-      const zoomValue = zoomLevel / 100;
-      canvas.setZoom(zoomValue);
-      canvas.renderAll();
-      console.log(`Canvas zoom applied: ${zoomLevel}% (value: ${zoomValue}) on canvas ${canvasConfig.displayWidth}x${canvasConfig.displayHeight}`);
+      applyZoomTransform(zoomLevel);
+      console.log(`CSS zoom applied: ${zoomLevel}%`);
     } catch (err) {
-      console.error('Canvas zoom error:', err);
+      console.error('Zoom application error:', err);
     }
-  }, [zoomLevel, isReady, fabricCanvasRef.current, canvasConfig]);
+  }, [zoomLevel, isReady, canvasConfig, applyZoomTransform]);
 
   // Track selected object for context menu
   useEffect(() => {
@@ -251,31 +255,34 @@ const UnifiedSlideCanvas = React.memo(({
           onZoomChange={handleZoomChange}
         />
 
-        <CanvasContainer
-          canvasRef={canvasRef}
-          canvasConfig={canvasConfig}
-          zoomLevel={zoomLevel}
-          selectedObject={selectedObject}
-          isEmpty={elements.length === 0}
-          isReady={isReady}
-          error={error}
-          editable={editable}
-          currentSlide={currentSlide}
-          performance={performance}
-          onCopy={copySelected}
-          onPaste={paste}
-          onDelete={deleteSelected}
-          onBringToFront={bringToFront}
-          onSendToBack={sendToBack}
-          onDuplicate={duplicate}
-          onRotate={() => rotateObject()}
-          onAddText={handleAddText}
-          onAddShape={handleAddShape}
-          onAddImage={handleAddImage}
-          onRetry={handleRetry}
-          onReset={handleReset}
-          hasClipboard={hasClipboard}
-        />
+        {/* Zoom container for CSS transform */}
+        <div className="zoom-container">
+          <CanvasContainer
+            canvasRef={canvasRef}
+            canvasConfig={canvasConfig}
+            zoomLevel={zoomLevel}
+            selectedObject={selectedObject}
+            isEmpty={elements.length === 0}
+            isReady={isReady}
+            error={error}
+            editable={editable}
+            currentSlide={currentSlide}
+            performance={performance}
+            onCopy={copySelected}
+            onPaste={paste}
+            onDelete={deleteSelected}
+            onBringToFront={bringToFront}
+            onSendToBack={sendToBack}
+            onDuplicate={duplicate}
+            onRotate={() => rotateObject()}
+            onAddText={handleAddText}
+            onAddShape={handleAddShape}
+            onAddImage={handleAddImage}
+            onRetry={handleRetry}
+            onReset={handleReset}
+            hasClipboard={hasClipboard}
+          />
+        </div>
       </div>
 
       {/* Enhanced Information Bar - Bottom */}

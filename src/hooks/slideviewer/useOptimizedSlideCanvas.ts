@@ -50,10 +50,9 @@ export const useOptimizedSlideCanvas = ({
         fabricCanvasRef.current = null;
       }
 
-      console.log('Initializing canvas with unified config:', {
+      console.log('Initializing canvas with simplified config:', {
         canvasSize: `${canvasConfig.width}x${canvasConfig.height}`,
-        displaySize: `${canvasConfig.displayWidth}x${canvasConfig.displayHeight}`,
-        pixelRatio: canvasConfig.pixelRatio
+        displaySize: `${canvasConfig.displayWidth}x${canvasConfig.displayHeight}`
       });
 
       const canvas = new Canvas(canvasRef.current, {
@@ -63,39 +62,41 @@ export const useOptimizedSlideCanvas = ({
         selection: editable,
         preserveObjectStacking: true,
         selectionBorderColor: '#2563eb',
-        selectionLineWidth: 2,
+        selectionLineWidth: 1, // Fixed small line width
         controlsAboveOverlay: true,
         allowTouchScrolling: false,
         renderOnAddRemove: false,
         skipTargetFind: false,
         imageSmoothingEnabled: true,
-        enableRetinaScaling: true
+        enableRetinaScaling: false // Disable to prevent scaling conflicts
       });
 
-      // Set canvas element attributes directly
+      // Set fixed control sizes that won't scale with zoom
+      canvas.controlsAboveOverlay = true;
+      
+      // Override default control rendering to maintain fixed sizes
+      if (editable) {
+        canvas.selectionLineWidth = 1;
+        canvas.selectionBorderColor = '#2563eb';
+        
+        // Set fixed control corner size
+        (canvas as any).controlSize = 8;
+        (canvas as any).borderOpacityWhenMoving = 0.4;
+      }
+
+      // Set canvas element attributes for 1:1 rendering
       const canvasElement = canvasRef.current;
       canvasElement.width = canvasConfig.width;
       canvasElement.height = canvasConfig.height;
-
-      // Apply high DPI optimization only if needed
-      if (canvasConfig.pixelRatio > 1) {
-        const ctx = canvasElement.getContext('2d');
-        if (ctx) {
-          ctx.imageSmoothingEnabled = true;
-          try {
-            (ctx as any).imageSmoothingQuality = 'high';
-          } catch (e) {
-            // Fallback for browsers that don't support imageSmoothingQuality
-          }
-        }
-      }
+      canvasElement.style.width = `${canvasConfig.displayWidth}px`;
+      canvasElement.style.height = `${canvasConfig.displayHeight}px`;
 
       fabricCanvasRef.current = canvas;
       initializationRef.current = true;
       setIsReady(true);
       setError(null);
 
-      console.log(`Canvas successfully initialized - Canvas: ${canvasConfig.width}x${canvasConfig.height}, Display: ${canvasConfig.displayWidth}x${canvasConfig.displayHeight}`);
+      console.log(`Canvas successfully initialized - 1:1 rendering: ${canvasConfig.width}x${canvasConfig.height}`);
     } catch (err) {
       console.error('Canvas initialization failed:', err);
       setError('キャンバスの初期化に失敗しました');

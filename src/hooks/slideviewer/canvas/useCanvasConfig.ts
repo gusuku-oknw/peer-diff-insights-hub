@@ -12,12 +12,6 @@ interface CanvasConfig {
   displayWidth: number;
   displayHeight: number;
   pixelRatio: number;
-  displayCapabilities?: {
-    physicalWidth: number;
-    physicalHeight: number;
-    is4KCapable: boolean;
-    is8KCapable: boolean;
-  };
 }
 
 export const useCanvasConfig = ({ containerWidth, containerHeight }: UseCanvasConfigProps) => {
@@ -35,31 +29,19 @@ export const useCanvasConfig = ({ containerWidth, containerHeight }: UseCanvasCo
       displayWidth = displayHeight * aspectRatio;
     }
     
-    // Use device pixel ratio for high DPI displays but cap for performance
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const pixelRatio = Math.min(devicePixelRatio, 2);
-    
     const finalDisplayWidth = Math.max(320, Math.min(1200, Math.round(displayWidth)));
     const finalDisplayHeight = Math.max(180, Math.min(675, Math.round(displayHeight)));
     
-    // Canvas rendering size - use pixel ratio only for actual canvas rendering
-    const canvasWidth = Math.round(finalDisplayWidth * pixelRatio);
-    const canvasHeight = Math.round(finalDisplayHeight * pixelRatio);
+    // Simple 1:1 rendering - no pixel ratio scaling
+    const pixelRatio = 1;
+    const canvasWidth = finalDisplayWidth;
+    const canvasHeight = finalDisplayHeight;
     
-    const displayCapabilities = {
-      physicalWidth: Math.round(window.screen.width * devicePixelRatio),
-      physicalHeight: Math.round(window.screen.height * devicePixelRatio),
-      is4KCapable: window.screen.width >= 3840 || window.screen.height >= 2160,
-      is8KCapable: window.screen.width >= 7680 || window.screen.height >= 4320,
-    };
-    
-    console.log('Unified canvas config:', {
+    console.log('Simplified canvas config:', {
       container: `${containerWidth}x${containerHeight}`,
-      available: `${availableWidth}x${availableHeight}`,
       display: `${finalDisplayWidth}x${finalDisplayHeight}`,
       canvas: `${canvasWidth}x${canvasHeight}`,
-      pixelRatio,
-      devicePixelRatio
+      pixelRatio
     });
     
     return {
@@ -67,8 +49,7 @@ export const useCanvasConfig = ({ containerWidth, containerHeight }: UseCanvasCo
       height: canvasHeight,
       displayWidth: finalDisplayWidth,
       displayHeight: finalDisplayHeight,
-      pixelRatio,
-      displayCapabilities
+      pixelRatio
     };
   }, [containerWidth, containerHeight]);
 

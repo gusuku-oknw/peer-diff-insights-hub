@@ -1,4 +1,3 @@
-
 import React from "react";
 import CanvasContextMenu from "./CanvasContextMenu";
 import EmptyCanvasState from "@/features/slideviewer/components/canvas/states/EmptyCanvasState";
@@ -69,13 +68,11 @@ const CanvasContainer: React.FC<CanvasContainerProps> = ({
       hasClipboard={hasClipboard}
     >
       <div className="bg-white rounded-lg shadow-lg border relative transition-all duration-200 ease-out">
-        {/* Canvas element with direct sizing - no wrapper div constraints */}
+        {/* Canvas element with direct sizing */}
         <canvas 
           ref={canvasRef}
           className="block rounded-lg"
           style={{
-            width: `${canvasConfig.displayWidth}px`,
-            height: `${canvasConfig.displayHeight}px`,
             imageRendering: 'auto'
           }}
         />
