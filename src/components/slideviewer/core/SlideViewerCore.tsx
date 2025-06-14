@@ -44,9 +44,21 @@ const SlideViewerCore: React.FC = () => {
 
   return (
     <MainLayout
-      {...slideViewerLogic}
-      {...responsiveLayout}
+      currentSlide={slideViewerLogic.currentSlide}
+      totalSlides={slideViewerLogic.totalSlides}
+      presenterNotes={slideViewerLogic.presenterNotes}
+      userType={slideViewerLogic.userType}
       presentationStartTime={finalPresentationStartTime}
+      windowDimensions={responsiveLayout.windowDimensions}
+      rightPanelWidth={responsiveLayout.rightPanelWidth}
+      isRightPanelOpen={responsiveLayout.isRightPanelOpen}
+      contentAreaDimensions={responsiveLayout.contentAreaDimensions}
+      mobile={responsiveLayout.mobile}
+      tablet={responsiveLayout.tablet}
+      desktop={responsiveLayout.desktop}
+      isMobile={responsiveLayout.isMobile}
+      isTablet={responsiveLayout.isTablet}
+      isDesktop={responsiveLayout.isDesktop}
     />
   );
 };

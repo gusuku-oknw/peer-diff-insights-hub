@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import { useOptimizedSlideCanvas } from "@/hooks/slideviewer/useOptimizedSlideCanvas";
 import { useEnhancedResponsive } from "@/hooks/slideviewer/useEnhancedResponsive";
@@ -64,6 +63,19 @@ const OptimizedSlideCanvas = ({
     currentSlide,
     canvas: fabricCanvasRef.current
   });
+
+  // Create wrapper functions to match EmptyCanvasState expectations
+  const handleAddText = useCallback(() => {
+    addText();
+  }, [addText]);
+
+  const handleAddShape = useCallback(() => {
+    addShape('rect'); // Default to rectangle
+  }, [addShape]);
+
+  const handleAddImage = useCallback(() => {
+    addImage();
+  }, [addImage]);
   
   const handleOptimizedRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
@@ -77,15 +89,15 @@ const OptimizedSlideCanvas = ({
         canvasSize, 
         editable, 
         currentSlide,
-        addText,
-        addShape,
-        addImage
+        handleAddText,
+        handleAddShape,
+        handleAddImage
       );
       setIsEmpty(result.isEmpty);
     } catch (err) {
       console.error('Optimized rendering failed:', err);
     }
-  }, [elements, currentSlide, editable, isReady, canvasSize, performance, addText, addShape, addImage]);
+  }, [elements, currentSlide, editable, isReady, canvasSize, performance, handleAddText, handleAddShape, handleAddImage]);
   
   useEffect(() => {
     if (isReady) {
@@ -179,9 +191,9 @@ const OptimizedSlideCanvas = ({
           {isEmpty && isReady && (
             <div className="absolute inset-0 flex items-center justify-center rounded-lg">
               <EmptyCanvasState
-                onAddText={addText}
-                onAddShape={addShape}
-                onAddImage={addImage}
+                onAddText={handleAddText}
+                onAddShape={handleAddShape}
+                onAddImage={handleAddImage}
                 slideNumber={currentSlide}
                 editable={editable}
               />

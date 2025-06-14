@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { X, MousePointer, Touch, Keyboard } from "lucide-react";
+import { X, MousePointer, Smartphone, Keyboard } from "lucide-react";
 
 interface CanvasGuideOverlayProps {
   deviceType: 'mobile' | 'tablet' | 'desktop';
@@ -16,7 +16,7 @@ const CanvasGuideOverlay: React.FC<CanvasGuideOverlayProps> = ({
     switch (deviceType) {
       case 'mobile':
         return {
-          icon: <Touch className="h-6 w-6" />,
+          icon: <Smartphone className="h-6 w-6" />,
           title: "タッチ操作ガイド",
           instructions: [
             "タップして要素を選択",
@@ -26,7 +26,7 @@ const CanvasGuideOverlay: React.FC<CanvasGuideOverlayProps> = ({
         };
       case 'tablet':
         return {
-          icon: <Touch className="h-6 w-6" />,
+          icon: <Smartphone className="h-6 w-6" />,
           title: "タブレット操作ガイド",
           instructions: [
             "タップまたはクリックで選択",

@@ -50,7 +50,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     zoom,
     goToSlide,
     toggleLeftSidebar,
-    toggleRightPanel,
+    toggleRightPanelHidden,
     setZoom,
   } = useSlideStore();
 
@@ -103,7 +103,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         totalSlides={totalSlides}
         presenterNotes={presenterNotes}
         userType={userType}
-        onToggle={toggleRightPanel}
+        onToggle={toggleRightPanelHidden}
         isMobile={isMobile}
       />
 
@@ -111,7 +111,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       {isMobile && (
         <FloatingToggleButton
           onToggleLeft={toggleLeftSidebar}
-          onToggleRight={toggleRightPanel}
+          onToggleRight={toggleRightPanelHidden}
           leftOpen={leftSidebarOpen}
           rightOpen={isRightPanelOpen}
         />
