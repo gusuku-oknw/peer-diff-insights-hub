@@ -5,26 +5,27 @@ import { useEnhancedResponsive } from "@/hooks/slideviewer/useEnhancedResponsive
 import { renderElements } from "@/utils/slideCanvas/elementRenderer";
 import TouchOptimizedCanvas from "./TouchOptimizedCanvas";
 
-interface SlideCanvasProps {
+interface OptimizedSlideCanvasProps {
   currentSlide: number;
   zoomLevel?: number;
   editable?: boolean;
   userType?: "student" | "enterprise";
   containerWidth?: number;
   containerHeight?: number;
+  enablePerformanceMode?: boolean;
 }
 
-const SlideCanvas = ({ 
+const OptimizedSlideCanvas = ({ 
   currentSlide, 
   zoomLevel = 100, 
   editable = false,
   userType = "enterprise",
   containerWidth = 0,
-  containerHeight = 0
-}: SlideCanvasProps) => {
-  console.log(`SlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}`);
+  containerHeight = 0,
+  enablePerformanceMode = true
+}: OptimizedSlideCanvasProps) => {
+  console.log(`OptimizedSlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}, Performance Mode: ${enablePerformanceMode}`);
   
-  // Enhanced responsive canvas sizing
   const {
     canvasSize,
     deviceInfo,
@@ -34,7 +35,7 @@ const SlideCanvas = ({
     containerHeight
   });
 
-  // Use TouchOptimizedCanvas for mobile devices
+  // モバイルデバイスでは TouchOptimizedCanvas を使用
   if (deviceInfo.isMobile) {
     return (
       <TouchOptimizedCanvas
@@ -50,7 +51,6 @@ const SlideCanvas = ({
   
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   
-  // 最適化されたキャンバスフックを使用
   const {
     canvasRef,
     fabricCanvasRef,
@@ -64,26 +64,27 @@ const SlideCanvas = ({
     editable,
     containerWidth: canvasSize.width,
     containerHeight: canvasSize.height,
-    enablePerformanceMode: true
+    enablePerformanceMode
   });
   
-  // Enhanced element rendering with performance optimization
-  const handleRenderElements = useCallback(() => {
+  // 最適化された要素レンダリング
+  const handleOptimizedRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady) return;
     
     try {
+      performance.metrics && console.log('Performance metrics:', performance.metrics);
       renderElements(canvas, elements, canvasSize, editable, currentSlide);
     } catch (err) {
-      console.error('Enhanced rendering failed:', err);
+      console.error('Optimized rendering failed:', err);
     }
-  }, [elements, currentSlide, editable, isReady, canvasSize]);
+  }, [elements, currentSlide, editable, isReady, canvasSize, performance]);
   
   useEffect(() => {
     if (isReady) {
-      handleRenderElements();
+      handleOptimizedRenderElements();
     }
-  }, [handleRenderElements, isReady]);
+  }, [handleOptimizedRenderElements, isReady]);
   
   if (!slides || slides.length === 0) {
     return (
@@ -130,7 +131,7 @@ const SlideCanvas = ({
             <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 rounded-lg">
               <div className="flex flex-col items-center">
                 <div className="w-8 h-8 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
-                <p className="mt-2 text-blue-600 text-sm">読み込み中...</p>
+                <p className="mt-2 text-blue-600 text-sm">最適化中...</p>
               </div>
             </div>
           )}
@@ -150,17 +151,20 @@ const SlideCanvas = ({
           )}
         </div>
 
-        {/* Performance indicator for high DPI displays */}
-        {deviceInfo.devicePixelRatio > 2 && (
-          <div className="absolute bottom-2 right-2 text-xs text-gray-500 bg-white bg-opacity-75 px-2 py-1 rounded">
-            高解像度最適化
+        {/* パフォーマンス指標表示 */}
+        {enablePerformanceMode && performance.metrics && (
+          <div className="absolute bottom-2 left-2 text-xs bg-black bg-opacity-70 text-white px-2 py-1 rounded">
+            FPS: {performance.metrics.fps} | Render: {performance.metrics.renderTime}ms
+            {!performance.isPerformanceGood && (
+              <span className="text-yellow-300 ml-2">⚡ 高速モード</span>
+            )}
           </div>
         )}
 
-        {/* パフォーマンス情報表示（開発時のみ） */}
-        {process.env.NODE_ENV === 'development' && performance.metrics && (
-          <div className="absolute top-2 left-2 text-xs bg-blue-500 text-white px-2 py-1 rounded opacity-75">
-            FPS: {performance.metrics.fps} | {performance.metrics.renderTime}ms
+        {/* 高解像度最適化指標 */}
+        {deviceInfo.devicePixelRatio > 2 && (
+          <div className="absolute bottom-2 right-2 text-xs text-gray-500 bg-white bg-opacity-75 px-2 py-1 rounded">
+            高解像度最適化済み
           </div>
         )}
       </div>
@@ -168,4 +172,4 @@ const SlideCanvas = ({
   );
 };
 
-export default React.memo(SlideCanvas);
+export default React.memo(OptimizedSlideCanvas);
