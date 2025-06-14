@@ -1,88 +1,51 @@
 
-import { useRef, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useRef, useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSlideStore } from "@/stores/slide-store";
 import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
-import SimplifiedThumbnailHeader from "./thumbnails/SimplifiedThumbnailHeader";
-import MinimalThumbnailCard from "./thumbnails/MinimalThumbnailCard";
-import EnhancedSlideThumbnails from "./thumbnails/EnhancedSlideThumbnails";
-import SimplifiedSlideThumbnails from "./thumbnails/SimplifiedSlideThumbnails";
-import AddSlideCard from "./thumbnails/AddSlideCard";
-import EvaluationCard from "./thumbnails/EvaluationCard";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MinimalThumbnailCard from "./MinimalThumbnailCard";
+import AddSlideCard from "./AddSlideCard";
+import EvaluationCard from "./EvaluationCard";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 
-interface SlideThumbnailsProps {
+interface SimplifiedSlideThumbnailsProps {
   currentSlide: number;
   onSlideClick: (slideIndex: number) => void;
   onOpenOverallReview: () => void;
-  height: number;
   containerWidth: number;
   userType?: "student" | "enterprise";
-  enhanced?: boolean;
-  showAsPopup?: boolean; // 新しいプロパティ
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const SlideThumbnails = ({
+const SimplifiedSlideThumbnails = ({
   currentSlide,
   onSlideClick,
   onOpenOverallReview,
-  height,
   containerWidth,
   userType = "enterprise",
-  enhanced = false, // デフォルトで簡素化版を使用
-  showAsPopup = false
-}: SlideThumbnailsProps) => {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-
-  // ポップアップモードの場合
-  if (showAsPopup) {
-    return (
-      <>
-        {/* ポップアップ開くトリガーボタン */}
-        <div className="flex items-center justify-center p-4 border-t border-gray-200 bg-white">
-          <Button
-            onClick={() => setIsPopupOpen(true)}
-            variant="outline"
-            className="w-full max-w-sm"
-          >
-            スライド一覧を表示 ({currentSlide}/{useSlideStore.getState().slides.length})
-          </Button>
-        </div>
-        
-        {/* ポップアップ */}
-        <SimplifiedSlideThumbnails
-          currentSlide={currentSlide}
-          onSlideClick={onSlideClick}
-          onOpenOverallReview={onOpenOverallReview}
-          containerWidth={containerWidth}
-          userType={userType}
-          isOpen={isPopupOpen}
-          onClose={() => setIsPopupOpen(false)}
-        />
-      </>
-    );
-  }
-
-  // 拡張版を使用する場合
-  if (enhanced) {
-    return (
-      <EnhancedSlideThumbnails
-        currentSlide={currentSlide}
-        onSlideClick={onSlideClick}
-        onOpenOverallReview={onOpenOverallReview}
-        height={height}
-        containerWidth={containerWidth}
-        userType={userType}
-      />
-    );
-  }
-
-  // 従来のUI実装（簡素化版）
+  isOpen,
+  onClose
+}: SimplifiedSlideThumbnailsProps) => {
   const { slides } = useSlideStore();
+  const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // 簡素化されたサムネイルサイズ計算
-  const thumbnailWidth = Math.max(140, Math.min(180, containerWidth * 0.15));
+  // 固定サイズで簡素化
+  const thumbnailWidth = 160;
   const gap = 12;
   const showAddSlide = userType === "enterprise";
   
@@ -104,36 +67,68 @@ const SlideThumbnails = ({
     isReviewed: Math.random() > 0.6
   }));
 
+  // スライドクリック時の処理（ポップアップを閉じる）
+  const handleSlideClick = (slideIndex: number) => {
+    onSlideClick(slideIndex);
+    onClose(); // 自動でポップアップを閉じる
+  };
+
   // 現在のスライドに自動スクロール
   useEffect(() => {
-    scrollToItem(currentSlide);
-  }, [currentSlide, scrollToItem]);
+    if (isOpen) {
+      scrollToItem(currentSlide);
+    }
+  }, [currentSlide, scrollToItem, isOpen]);
 
   // キーボードナビゲーション
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (containerRef.current?.contains(event.target as Node)) {
-        handleKeyboardNavigation(event, currentSlide, slides.length, onSlideClick);
+      if (isOpen && containerRef.current?.contains(event.target as Node)) {
+        handleKeyboardNavigation(event, currentSlide, slides.length, handleSlideClick);
+        
+        // Escapeキーで閉じる
+        if (event.key === 'Escape') {
+          onClose();
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [currentSlide, slides.length, onSlideClick, handleKeyboardNavigation]);
+  }, [currentSlide, slides.length, handleSlideClick, handleKeyboardNavigation, isOpen, onClose]);
 
-  return (
+  // サムネイル一覧のコンテンツ
+  const thumbnailsContent = (
     <div 
       ref={containerRef}
-      className="flex flex-col h-full bg-white border-t border-gray-200"
+      className="flex flex-col h-full bg-white"
       tabIndex={0}
       role="region"
       aria-label="スライド一覧"
     >
-      <SimplifiedThumbnailHeader 
-        slideCount={slides.length}
-        userType={userType}
-      />
+      {/* 簡素化されたヘッダー */}
+      <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 bg-white">
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold text-sm text-gray-800">
+            スライド一覧
+          </h3>
+          <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full font-medium">
+            {slides.length} スライド
+          </span>
+        </div>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0 hover:bg-gray-100"
+          onClick={onClose}
+          aria-label="スライド一覧を閉じる"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
       
+      {/* サムネイル一覧 */}
       <div className="flex-1 relative overflow-hidden">
         <Button
           variant="ghost"
@@ -157,7 +152,7 @@ const SlideThumbnails = ({
         
         <div
           ref={scrollContainerRef}
-          className="flex items-center h-full px-4 lg:px-6 py-3 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 transition-all duration-300 ease-in-out scroll-smooth"
+          className="flex items-center h-full px-4 py-3 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 transition-all duration-300 ease-in-out scroll-smooth"
           style={{ gap: `${gap}px` }}
           role="tablist"
           aria-label="スライドサムネイル"
@@ -175,7 +170,7 @@ const SlideThumbnails = ({
                 slideIndex={index + 1}
                 isActive={currentSlide === index + 1}
                 thumbnailWidth={thumbnailWidth}
-                onClick={onSlideClick}
+                onClick={handleSlideClick}
                 userType={userType}
               />
             </div>
@@ -197,6 +192,32 @@ const SlideThumbnails = ({
       </div>
     </div>
   );
+
+  // モバイル・タブレット：Drawer表示
+  if (isMobile) {
+    return (
+      <Drawer open={isOpen} onOpenChange={onClose}>
+        <DrawerContent className="h-[60vh] max-h-[60vh]">
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>スライド一覧</DrawerTitle>
+          </DrawerHeader>
+          {thumbnailsContent}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  // デスクトップ：Dialog表示
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-5xl h-[60vh] max-h-[60vh] p-0">
+        <DialogHeader className="sr-only">
+          <DialogTitle>スライド一覧</DialogTitle>
+        </DialogHeader>
+        {thumbnailsContent}
+      </DialogContent>
+    </Dialog>
+  );
 };
 
-export default SlideThumbnails;
+export default SimplifiedSlideThumbnails;

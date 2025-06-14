@@ -1,13 +1,9 @@
 
 import React from "react";
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable";
 import EnhancedSlideDisplay from "./EnhancedSlideDisplay";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import { useSlideStore } from "@/stores/slide-store";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { ViewerMode } from "@/types/slide.types";
 
 interface SlideContentProps {
@@ -49,14 +45,14 @@ const SlideContent: React.FC<SlideContentProps> = ({
     onOpenOverallReview,
     onZoomChange,
 }) => {
-    const { thumbnailsHeight, setThumbnailsHeight, getSlideThumbnailsWidth } = useSlideStore();
+    const { getSlideThumbnailsWidth } = useSlideStore();
+    const isMobile = useIsMobile();
 
     const showThumbnails = !(viewerMode === "presentation" && isFullScreen);
     const containerWidth = getSlideThumbnailsWidth();
 
-    // Calculate size percentage based on thumbnailsHeight
-    const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 1080;
-    const thumbnailSizePercentage = Math.min(40, Math.max(10, (thumbnailsHeight / windowHeight) * 100));
+    // 画面サイズに応じてポップアップモードを決定
+    const shouldUsePopup = isMobile || containerWidth < 800;
 
     const mainContent = (
         <EnhancedSlideDisplay
@@ -79,19 +75,6 @@ const SlideContent: React.FC<SlideContentProps> = ({
         />
     );
 
-    const thumbnailsSection = (
-        <div className="border-t border-gray-200 bg-white h-full">
-            <SlideThumbnails
-                currentSlide={currentSlide}
-                onSlideClick={onSlideChange}
-                onOpenOverallReview={onOpenOverallReview}
-                height={thumbnailsHeight}
-                containerWidth={containerWidth}
-                userType={userType}
-            />
-        </div>
-    );
-
     if (!showThumbnails) {
         return (
             <div className="flex-1 flex flex-col overflow-hidden min-w-0 h-full">
@@ -100,32 +83,53 @@ const SlideContent: React.FC<SlideContentProps> = ({
         );
     }
 
+    // ポップアップモードの場合
+    if (shouldUsePopup) {
+        return (
+            <div className="flex-1 flex flex-col overflow-hidden min-w-0 h-full">
+                <div className="flex-1">
+                    {mainContent}
+                </div>
+                
+                <SlideThumbnails
+                    currentSlide={currentSlide}
+                    onSlideClick={onSlideChange}
+                    onOpenOverallReview={onOpenOverallReview}
+                    height={120} // 固定値（使用されない）
+                    containerWidth={containerWidth}
+                    userType={userType}
+                    showAsPopup={true}
+                />
+            </div>
+        );
+    }
+
+    // デスクトップ：固定サイズのサムネイル一覧（リサイズ不可）
+    const thumbnailsHeight = 180; // 固定高さ
+
     return (
         <div className="flex-1 flex flex-col overflow-hidden min-w-0 h-full">
-            <ResizablePanelGroup direction="vertical" className="h-full">
-                <ResizablePanel
-                    defaultSize={100 - thumbnailSizePercentage}
-                    minSize={60}
-                    maxSize={90}
-                >
-                    {mainContent}
-                </ResizablePanel>
-                
-                <ResizableHandle withHandle />
-                
-                <ResizablePanel
-                    defaultSize={thumbnailSizePercentage}
-                    minSize={10}
-                    maxSize={40}
-                    className="border-t border-gray-200 bg-white"
-                    onResize={(size) => {
-                        const newHeight = (size / 100) * windowHeight;
-                        setThumbnailsHeight(Math.max(100, Math.min(300, newHeight)));
-                    }}
-                >
-                    {thumbnailsSection}
-                </ResizablePanel>
-            </ResizablePanelGroup>
+            <div 
+                className="flex-1 overflow-hidden"
+                style={{ height: `calc(100% - ${thumbnailsHeight}px)` }}
+            >
+                {mainContent}
+            </div>
+            
+            <div 
+                className="border-t border-gray-200 bg-white"
+                style={{ height: `${thumbnailsHeight}px` }}
+            >
+                <SlideThumbnails
+                    currentSlide={currentSlide}
+                    onSlideClick={onSlideChange}
+                    onOpenOverallReview={onOpenOverallReview}
+                    height={thumbnailsHeight}
+                    containerWidth={containerWidth}
+                    userType={userType}
+                    enhanced={false}
+                />
+            </div>
         </div>
     );
 };
