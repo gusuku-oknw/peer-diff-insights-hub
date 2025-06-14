@@ -20,56 +20,44 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
 
     canvas.add(element);
 
-    // Animate to final state using Fabric.js v6 API - updated syntax
-    element.animate('opacity', {
-      to: 1,
-      duration: 300,
-      easing: 'easeOutCubic',
-    });
-
-    element.animate('scaleX', {
-      to: 1,
-      duration: 300,
-      easing: 'easeOutCubic',
-    });
-
-    element.animate('scaleY', {
-      to: 1,
-      duration: 300,
-      easing: 'easeOutCubic',
-      onChange: () => canvas.renderAll(),
-      onComplete: () => {
-        canvas.setActiveObject(element);
-        canvas.renderAll();
+    // Animate to final state using Fabric.js v6 API - correct syntax
+    element.animate(
+      {
+        opacity: 1,
+        scaleX: 1,
+        scaleY: 1,
+      },
+      {
+        duration: 300,
+        easing: 'easeOutCubic',
+        onChange: () => canvas.renderAll(),
+        onComplete: () => {
+          canvas.setActiveObject(element);
+          canvas.renderAll();
+        }
       }
-    });
+    );
   }, [canvas]);
 
   const removeElementWithAnimation = useCallback((element: FabricObject) => {
     if (!canvas) return;
 
-    element.animate('opacity', {
-      to: 0,
-      duration: 200,
-      easing: 'easeInQuad',
-    });
-
-    element.animate('scaleX', {
-      to: 0.1,
-      duration: 200,
-      easing: 'easeInQuad',
-    });
-
-    element.animate('scaleY', {
-      to: 0.1,
-      duration: 200,
-      easing: 'easeInQuad',
-      onChange: () => canvas.renderAll(),
-      onComplete: () => {
-        canvas.remove(element);
-        canvas.renderAll();
+    element.animate(
+      {
+        opacity: 0,
+        scaleX: 0.1,
+        scaleY: 0.1,
+      },
+      {
+        duration: 200,
+        easing: 'easeInQuad',
+        onChange: () => canvas.renderAll(),
+        onComplete: () => {
+          canvas.remove(element);
+          canvas.renderAll();
+        }
       }
-    });
+    );
   }, [canvas]);
 
   const highlightElement = useCallback((element: FabricObject) => {
@@ -77,20 +65,24 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
 
     const originalOpacity = element.opacity || 1;
     
-    element.animate('opacity', {
-      to: 0.5,
-      duration: 150,
-      easing: 'easeInQuad',
-      onChange: () => canvas.renderAll(),
-      onComplete: () => {
-        element.animate('opacity', {
-          to: originalOpacity,
-          duration: 150,
-          easing: 'easeOutCubic',
-          onChange: () => canvas.renderAll()
-        });
+    element.animate(
+      { opacity: 0.5 },
+      {
+        duration: 150,
+        easing: 'easeInQuad',
+        onChange: () => canvas.renderAll(),
+        onComplete: () => {
+          element.animate(
+            { opacity: originalOpacity },
+            {
+              duration: 150,
+              easing: 'easeOutCubic',
+              onChange: () => canvas.renderAll()
+            }
+          );
+        }
       }
-    });
+    );
   }, [canvas]);
 
   const smoothZoom = useCallback((targetZoom: number, centerPoint?: { x: number; y: number }) => {
