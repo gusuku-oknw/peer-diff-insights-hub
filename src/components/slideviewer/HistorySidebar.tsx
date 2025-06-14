@@ -2,7 +2,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { GitBranch, Clock, User, CheckCircle, AlertCircle } from "lucide-react";
-import LeftPanelHeader from "./panels/components/LeftPanelHeader";
 
 interface CommitHistoryItem {
   id: string;
@@ -42,10 +41,19 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({
 
   return (
     <div className="h-full flex flex-col">
-      <LeftPanelHeader
-        currentBranch={currentBranch}
-        onClose={onClose}
-      />
+      <div className="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-800">履歴</h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="h-8 w-8 p-0"
+          >
+            ×
+          </Button>
+        </div>
+      </div>
       
       <div className="flex-1 overflow-y-auto p-4">
         <div className="mb-6">

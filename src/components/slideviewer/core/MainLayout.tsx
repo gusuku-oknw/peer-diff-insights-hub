@@ -1,10 +1,9 @@
-
 import React from "react";
 import { useSlideStore } from "@/stores/slide.store";
 import { useIsMobile } from "@/hooks/use-mobile";
 import LeftSidebar from "../layout/LeftSidebar";
 import RightSidebar from "../layout/RightSidebar";
-import OptimizedSlideCanvas from "@/features/slideviewer/components/canvas/OptimizedSlideCanvas";
+import OptimizedSlideCanvas from "../canvas/OptimizedSlideCanvas";
 import SlideThumbnails from "../SlideThumbnails";
 import LeftFloatingButton from "../layout/LeftFloatingButton";
 import RightFloatingButton from "../layout/RightFloatingButton";
