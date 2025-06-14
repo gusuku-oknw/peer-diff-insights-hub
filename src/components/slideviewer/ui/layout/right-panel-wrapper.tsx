@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import ImprovedSidePanel from "../panels/improved-side-panel";
+import SidePanel from "../../panels/core/SidePanel";
 import { useSlideStore } from "@/stores/slide.store";
 import type { ViewerMode } from "@/types/slide.types";
 
@@ -61,7 +61,7 @@ export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
       className="h-full bg-white border-l border-gray-200 flex-shrink-0 transition-all duration-300 ease-in-out"
       style={{ width: `${panelWidth}px` }}
     >
-      <ImprovedSidePanel
+      <SidePanel
         shouldShowNotes={shouldShowNotes}
         shouldShowReviewPanel={shouldShowReviewPanel}
         currentSlide={currentSlide}

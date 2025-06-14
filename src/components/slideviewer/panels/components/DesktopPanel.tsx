@@ -1,6 +1,6 @@
 
 import React from "react";
-import PanelContent from "../../ui/panels/components/panel-content";
+import PanelContent from "../../core/PanelContent";
 
 interface DesktopPanelProps {
   shouldShowNotes: boolean;
@@ -50,15 +50,12 @@ const DesktopPanel: React.FC<DesktopPanelProps> = ({
         totalSlides={totalSlides}
         presenterNotes={presenterNotes}
         userType={userType}
-        panelDimensions={panelDimensions}
+        panelWidth={panelDimensions.width}
         isNarrow={isNarrow}
         isVeryNarrow={isVeryNarrow}
         activeTab={activeTab}
         onTabChange={onTabChange}
-        onClose={onToggleHide}
-        isMobile={false}
       />
-      
       {ResizeHandle && <ResizeHandle />}
     </div>
   );

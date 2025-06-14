@@ -1,8 +1,8 @@
 
 import React from "react";
 import { Tabs } from "@/components/ui/tabs";
-import PanelHeader from "../../ui/panels/components/panel-header";
-import PanelContent from "../../ui/panels/components/panel-content";
+import PanelHeader from "../../core/PanelHeader";
+import PanelContent from "../../core/PanelContent";
 
 interface TabsContainerProps {
   shouldShowNotes: boolean;
@@ -49,7 +49,6 @@ const TabsContainer: React.FC<TabsContainerProps> = ({
             onToggleHide={onToggleHide}
             onSheetClose={onSheetClose}
           />
-          
           <PanelContent
             shouldShowNotes={shouldShowNotes}
             shouldShowReviewPanel={shouldShowReviewPanel}
@@ -57,7 +56,7 @@ const TabsContainer: React.FC<TabsContainerProps> = ({
             totalSlides={totalSlides}
             presenterNotes={presenterNotes}
             userType={userType}
-            panelDimensions={panelDimensions}
+            panelWidth={panelDimensions.width}
             isNarrow={isNarrow}
             isVeryNarrow={isVeryNarrow}
             activeTab={activeTab}
@@ -65,7 +64,6 @@ const TabsContainer: React.FC<TabsContainerProps> = ({
           />
         </Tabs>
       )}
-      
       {!shouldShowNotes && shouldShowReviewPanel && (
         <PanelContent
           shouldShowNotes={shouldShowNotes}
@@ -74,14 +72,13 @@ const TabsContainer: React.FC<TabsContainerProps> = ({
           totalSlides={totalSlides}
           presenterNotes={presenterNotes}
           userType={userType}
-          panelDimensions={panelDimensions}
+          panelWidth={panelDimensions.width}
           isNarrow={isNarrow}
           isVeryNarrow={isVeryNarrow}
           activeTab={activeTab}
           onTabChange={onTabChange}
         />
       )}
-      
       {shouldShowNotes && !shouldShowReviewPanel && (
         <PanelContent
           shouldShowNotes={shouldShowNotes}
@@ -90,7 +87,7 @@ const TabsContainer: React.FC<TabsContainerProps> = ({
           totalSlides={totalSlides}
           presenterNotes={presenterNotes}
           userType={userType}
-          panelDimensions={panelDimensions}
+          panelWidth={panelDimensions.width}
           isNarrow={isNarrow}
           isVeryNarrow={isVeryNarrow}
           activeTab={activeTab}

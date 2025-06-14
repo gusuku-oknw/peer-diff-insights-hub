@@ -3,7 +3,7 @@ import React from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, BookOpen } from "lucide-react";
-import PanelContent from "../../ui/panels/components/panel-content";
+import PanelContent from "../../core/PanelContent";
 
 interface MobileSheetProps {
   shouldShowNotes: boolean;
@@ -58,7 +58,6 @@ const MobileSheet: React.FC<MobileSheetProps> = ({
           </span>
         </Button>
       </SheetTrigger>
-      
       <SheetContent 
         side="right" 
         className="w-full sm:w-96 p-0 bg-white"
@@ -76,13 +75,11 @@ const MobileSheet: React.FC<MobileSheetProps> = ({
             totalSlides={totalSlides}
             presenterNotes={presenterNotes}
             userType={userType}
-            panelDimensions={panelDimensions}
+            panelWidth={panelDimensions.width}
             isNarrow={isNarrow}
             isVeryNarrow={isVeryNarrow}
             activeTab={activeTab}
             onTabChange={onTabChange}
-            onClose={handleCloseSheet}
-            isMobile={true}
           />
         </div>
       </SheetContent>

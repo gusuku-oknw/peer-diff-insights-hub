@@ -1,6 +1,6 @@
 
 import React from "react";
-import ImprovedSidePanel from "../panels/ImprovedSidePanel";
+import SidePanel from "../panels/core/SidePanel";
 
 interface RightSidebarProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ const RightSidebar: React.FC<RightSidebarProps> = ({
   const shouldShowReviewPanel = userType === "enterprise" || userType === "student";
 
   return (
-    <ImprovedSidePanel
+    <SidePanel
       shouldShowNotes={shouldShowNotes}
       shouldShowReviewPanel={shouldShowReviewPanel}
       currentSlide={currentSlide}
