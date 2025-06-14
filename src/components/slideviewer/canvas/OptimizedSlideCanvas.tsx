@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import { useOptimizedSlideCanvas } from "@/hooks/slideviewer/useOptimizedSlideCanvas";
 import { useStandardSlideSize } from "@/hooks/slideviewer/useStandardSlideSize";
@@ -359,7 +360,7 @@ const OptimizedSlideCanvas = React.memo(({
               style={{
                 width: '100%',
                 height: '100%',
-                imageRendering: 'high-quality'
+                imageRendering: 'auto'
               }}
             />
 
