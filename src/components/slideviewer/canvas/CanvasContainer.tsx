@@ -68,53 +68,70 @@ const CanvasContainer: React.FC<CanvasContainerProps> = ({
       onRotate={onRotate}
       hasClipboard={hasClipboard}
     >
-      <div 
-        className="bg-white rounded-lg shadow-lg border relative transition-all duration-200 ease-out"
-        style={{
-          width: canvasConfig.displayWidth,
-          height: canvasConfig.displayHeight,
-          // Removed CSS transform scaling - let Fabric.js handle all scaling
-        }}
-      >
-        {/* Canvas element with proper sizing */}
+      <div className="bg-white rounded-lg shadow-lg border relative transition-all duration-200 ease-out">
+        {/* Canvas element with direct sizing - no wrapper div constraints */}
         <canvas 
           ref={canvasRef}
           className="block rounded-lg"
           style={{
-            width: '100%',
-            height: '100%',
+            width: `${canvasConfig.displayWidth}px`,
+            height: `${canvasConfig.displayHeight}px`,
             imageRendering: 'auto'
           }}
         />
 
-        {/* Empty state overlay */}
+        {/* Empty state overlay positioned absolutely */}
         {isEmpty && isReady && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-lg">
-            <EmptyCanvasState
-              onAddText={onAddText}
-              onAddShape={onAddShape}
-              onAddImage={onAddImage}
-              slideNumber={currentSlide}
-              editable={editable}
-            />
+          <div 
+            className="absolute inset-0 flex items-center justify-center rounded-lg pointer-events-none"
+            style={{
+              width: `${canvasConfig.displayWidth}px`,
+              height: `${canvasConfig.displayHeight}px`
+            }}
+          >
+            <div className="pointer-events-auto">
+              <EmptyCanvasState
+                onAddText={onAddText}
+                onAddShape={onAddShape}
+                onAddImage={onAddImage}
+                slideNumber={currentSlide}
+                editable={editable}
+              />
+            </div>
           </div>
         )}
         
         {/* Loading state */}
         {!isReady && !error && (
-          <CanvasLoadingState 
-            progress={performance.metrics?.fps || 0}
-            message="キャンバスを初期化中..."
-          />
+          <div 
+            className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 rounded-lg"
+            style={{
+              width: `${canvasConfig.displayWidth}px`,
+              height: `${canvasConfig.displayHeight}px`
+            }}
+          >
+            <CanvasLoadingState 
+              progress={performance.metrics?.fps || 0}
+              message="キャンバスを初期化中..."
+            />
+          </div>
         )}
         
         {/* Error state */}
         {error && (
-          <CanvasErrorState
-            error={error}
-            onRetry={onRetry}
-            onReset={onReset}
-          />
+          <div 
+            className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 rounded-lg"
+            style={{
+              width: `${canvasConfig.displayWidth}px`,
+              height: `${canvasConfig.displayHeight}px`
+            }}
+          >
+            <CanvasErrorState
+              error={error}
+              onRetry={onRetry}
+              onReset={onReset}
+            />
+          </div>
         )}
       </div>
     </CanvasContextMenu>

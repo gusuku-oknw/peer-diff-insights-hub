@@ -35,14 +35,14 @@ export const useCanvasConfig = ({ containerWidth, containerHeight }: UseCanvasCo
       displayWidth = displayHeight * aspectRatio;
     }
     
-    // Respect device DPI without forcing high resolution
+    // Use device pixel ratio for high DPI displays but cap for performance
     const devicePixelRatio = window.devicePixelRatio || 1;
-    const pixelRatio = Math.min(devicePixelRatio, 2); // Cap at 2x for performance
+    const pixelRatio = Math.min(devicePixelRatio, 2);
     
     const finalDisplayWidth = Math.max(320, Math.min(1200, Math.round(displayWidth)));
     const finalDisplayHeight = Math.max(180, Math.min(675, Math.round(displayHeight)));
     
-    // Canvas rendering size (for high DPI)
+    // Canvas rendering size - use pixel ratio only for actual canvas rendering
     const canvasWidth = Math.round(finalDisplayWidth * pixelRatio);
     const canvasHeight = Math.round(finalDisplayHeight * pixelRatio);
     
@@ -53,7 +53,9 @@ export const useCanvasConfig = ({ containerWidth, containerHeight }: UseCanvasCo
       is8KCapable: window.screen.width >= 7680 || window.screen.height >= 4320,
     };
     
-    console.log('Canvas config calculated:', {
+    console.log('Unified canvas config:', {
+      container: `${containerWidth}x${containerHeight}`,
+      available: `${availableWidth}x${availableHeight}`,
       display: `${finalDisplayWidth}x${finalDisplayHeight}`,
       canvas: `${canvasWidth}x${canvasHeight}`,
       pixelRatio,

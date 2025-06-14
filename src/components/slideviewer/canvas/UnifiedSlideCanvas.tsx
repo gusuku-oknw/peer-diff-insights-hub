@@ -34,13 +34,13 @@ const UnifiedSlideCanvas = React.memo(({
 }: UnifiedSlideCanvasProps) => {
   console.log(`UnifiedSlideCanvas rendering - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Container: ${containerWidth}x${containerHeight}`);
   
-  // Use improved canvas configuration
+  // Use unified canvas configuration
   const { canvasConfig } = useCanvasConfig({
     containerWidth,
     containerHeight
   });
 
-  // Use unified canvas hook with proper config
+  // Use optimized canvas hook with simplified config
   const {
     canvasRef,
     fabricCanvasRef,
@@ -103,7 +103,7 @@ const UnifiedSlideCanvas = React.memo(({
     onPasteSelected: paste
   });
 
-  // Handle zoom changes properly - only apply zoom level, not pixel ratio
+  // Handle zoom changes - apply zoom only via Fabric.js
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady || !canvasConfig) return;
@@ -112,7 +112,7 @@ const UnifiedSlideCanvas = React.memo(({
       const zoomValue = zoomLevel / 100;
       canvas.setZoom(zoomValue);
       canvas.renderAll();
-      console.log(`Canvas zoom updated to: ${zoomLevel}% (zoom value: ${zoomValue})`);
+      console.log(`Canvas zoom applied: ${zoomLevel}% (value: ${zoomValue}) on canvas ${canvasConfig.displayWidth}x${canvasConfig.displayHeight}`);
     } catch (err) {
       console.error('Canvas zoom error:', err);
     }

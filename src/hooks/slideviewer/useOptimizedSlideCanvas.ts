@@ -50,7 +50,11 @@ export const useOptimizedSlideCanvas = ({
         fabricCanvasRef.current = null;
       }
 
-      console.log('Initializing canvas with config:', canvasConfig);
+      console.log('Initializing canvas with unified config:', {
+        canvasSize: `${canvasConfig.width}x${canvasConfig.height}`,
+        displaySize: `${canvasConfig.displayWidth}x${canvasConfig.displayHeight}`,
+        pixelRatio: canvasConfig.pixelRatio
+      });
 
       const canvas = new Canvas(canvasRef.current, {
         width: canvasConfig.width,
@@ -68,14 +72,12 @@ export const useOptimizedSlideCanvas = ({
         enableRetinaScaling: true
       });
 
-      // Set canvas element size properly
+      // Set canvas element attributes directly
       const canvasElement = canvasRef.current;
       canvasElement.width = canvasConfig.width;
       canvasElement.height = canvasConfig.height;
-      canvasElement.style.width = `${canvasConfig.displayWidth}px`;
-      canvasElement.style.height = `${canvasConfig.displayHeight}px`;
 
-      // Apply proper scaling only if needed
+      // Apply high DPI optimization only if needed
       if (canvasConfig.pixelRatio > 1) {
         const ctx = canvasElement.getContext('2d');
         if (ctx) {
@@ -93,7 +95,7 @@ export const useOptimizedSlideCanvas = ({
       setIsReady(true);
       setError(null);
 
-      console.log(`Canvas initialized: ${canvasConfig.width}x${canvasConfig.height} (display: ${canvasConfig.displayWidth}x${canvasConfig.displayHeight})`);
+      console.log(`Canvas successfully initialized - Canvas: ${canvasConfig.width}x${canvasConfig.height}, Display: ${canvasConfig.displayWidth}x${canvasConfig.displayHeight}`);
     } catch (err) {
       console.error('Canvas initialization failed:', err);
       setError('キャンバスの初期化に失敗しました');
