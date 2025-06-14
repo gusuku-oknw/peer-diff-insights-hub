@@ -33,7 +33,7 @@ const EnhancedSlideThumbnails = ({
   // 表示設定とフィルター状態
   const [displaySettings, setDisplaySettings] = useState<ThumbnailDisplaySettings>({
     viewMode: 'horizontal',
-    thumbnailSize: 'medium',
+    thumbnailSize: 'normal', // Changed from 'medium' to 'normal' to match ThumbnailSize type
     showDetails: true,
     showProgress: userType === "student"
   });
@@ -50,8 +50,8 @@ const EnhancedSlideThumbnails = ({
     if (mode === 'list' || mode === 'compact') return width - 40;
     
     const sizeMultipliers = {
-      small: 0.12,
-      medium: 0.15,
+      compact: 0.12, // Changed from 'small' to 'compact'
+      normal: 0.15,  // Changed from 'medium' to 'normal'
       large: 0.18
     };
     
