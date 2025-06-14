@@ -2,18 +2,13 @@
 import React from "react";
 import { useSlideViewerLogic } from "@/hooks/slideviewer/useSlideViewerLogic";
 import { useResponsiveLayout } from "@/hooks/slideviewer/useResponsiveLayout";
-import SlideViewerLayout from "./SlideViewerLayout";
+import MainLayout from "../layout/MainLayout";
 
-const SlideViewerContainer: React.FC = () => {
+// SlideViewer全体のロジック+レイアウト統合
+const SlideViewerCore: React.FC = () => {
   const slideViewerLogic = useSlideViewerLogic();
   const responsiveLayout = useResponsiveLayout();
-
-  return (
-    <SlideViewerLayout
-      {...slideViewerLogic}
-      {...responsiveLayout}
-    />
-  );
+  return <MainLayout {...slideViewerLogic} {...responsiveLayout} />;
 };
 
-export default SlideViewerContainer;
+export default SlideViewerCore;

@@ -1,9 +1,9 @@
 
 import React from "react";
-import SlideViewerContainer from "@/components/slideviewer/containers/SlideViewerContainer";
+import SlideViewerCore from "@/components/slideviewer/containers/SlideViewerCore";
 
 const SlideViewer: React.FC = () => {
-  return <SlideViewerContainer />;
+  return <SlideViewerCore />;
 };
 
 export default SlideViewer;
