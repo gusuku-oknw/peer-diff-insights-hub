@@ -19,7 +19,7 @@ interface SlideThumbnailsProps {
   containerWidth: number;
   userType?: "student" | "enterprise";
   enhanced?: boolean;
-  showAsPopup?: boolean; // 新しいプロパティ
+  showAsPopup?: boolean;
 }
 
 const SlideThumbnails = ({
@@ -29,7 +29,7 @@ const SlideThumbnails = ({
   height,
   containerWidth,
   userType = "enterprise",
-  enhanced = false, // デフォルトで簡素化版を使用
+  enhanced = false,
   showAsPopup = false
 }: SlideThumbnailsProps) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -77,13 +77,22 @@ const SlideThumbnails = ({
     );
   }
 
-  // 従来のUI実装（簡素化版）
+  // 従来のUI実装（簡素化版・サイズ改善）
   const { slides } = useSlideStore();
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // 簡素化されたサムネイルサイズ計算
-  const thumbnailWidth = Math.max(140, Math.min(180, containerWidth * 0.15));
-  const gap = 12;
+  // 改善されたサムネイルサイズ計算（大幅に拡大）
+  const calculateThumbnailSize = (width: number) => {
+    // コンテナ幅の20-25%をベースとし、大きめに設定
+    const basePercentage = 0.22; // 22%
+    const calculatedSize = width * basePercentage;
+    
+    // 最小200px、最大300pxの範囲で調整（従来の140-180pxから大幅改善）
+    return Math.max(200, Math.min(300, calculatedSize));
+  };
+
+  const thumbnailWidth = calculateThumbnailSize(containerWidth);
+  const gap = Math.max(16, Math.min(24, containerWidth * 0.02)); // ギャップも少し拡大
   const showAddSlide = userType === "enterprise";
   
   // スムーズスクロールフック
@@ -104,12 +113,10 @@ const SlideThumbnails = ({
     isReviewed: Math.random() > 0.6
   }));
 
-  // 現在のスライドに自動スクロール
   useEffect(() => {
     scrollToItem(currentSlide);
   }, [currentSlide, scrollToItem]);
 
-  // キーボードナビゲーション
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (containerRef.current?.contains(event.target as Node)) {
@@ -138,26 +145,26 @@ const SlideThumbnails = ({
         <Button
           variant="ghost"
           size="icon"
-          className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 h-8 w-8 bg-white shadow-md hover:bg-gray-50 transition-all duration-200"
+          className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 h-10 w-10 bg-white shadow-lg hover:bg-gray-50 transition-all duration-200"
           onClick={() => scrollByDirection('left')}
           aria-label="前のスライドへスクロール"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 h-8 w-8 bg-white shadow-md hover:bg-gray-50 transition-all duration-200"
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 h-10 w-10 bg-white shadow-lg hover:bg-gray-50 transition-all duration-200"
           onClick={() => scrollByDirection('right')}
           aria-label="次のスライドへスクロール"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-5 w-5" />
         </Button>
         
         <div
           ref={scrollContainerRef}
-          className="flex items-center h-full px-4 lg:px-6 py-3 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 transition-all duration-300 ease-in-out scroll-smooth"
+          className="flex items-center h-full px-6 py-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 transition-all duration-300 ease-in-out scroll-smooth"
           style={{ gap: `${gap}px` }}
           role="tablist"
           aria-label="スライドサムネイル"

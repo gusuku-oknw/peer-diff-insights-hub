@@ -44,9 +44,19 @@ const SimplifiedSlideThumbnails = ({
   const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // 固定サイズで簡素化
-  const thumbnailWidth = 160;
-  const gap = 12;
+  // 改善されたサムネイルサイズ（ポップアップ用・大きめ設定）
+  const calculateThumbnailSize = (width: number, mobile: boolean) => {
+    if (mobile) {
+      // モバイル：160-200px（従来より大きく）
+      return Math.max(160, Math.min(200, width * 0.35));
+    } else {
+      // デスクトップ：220-280px（大幅に拡大）
+      return Math.max(220, Math.min(280, width * 0.2));
+    }
+  };
+
+  const thumbnailWidth = calculateThumbnailSize(containerWidth, isMobile);
+  const gap = isMobile ? 12 : 20; // ギャップも拡大
   const showAddSlide = userType === "enterprise";
   
   // スムーズスクロールフック
@@ -67,26 +77,22 @@ const SimplifiedSlideThumbnails = ({
     isReviewed: Math.random() > 0.6
   }));
 
-  // スライドクリック時の処理（ポップアップを閉じる）
   const handleSlideClick = (slideIndex: number) => {
     onSlideClick(slideIndex);
-    onClose(); // 自動でポップアップを閉じる
+    onClose();
   };
 
-  // 現在のスライドに自動スクロール
   useEffect(() => {
     if (isOpen) {
       scrollToItem(currentSlide);
     }
   }, [currentSlide, scrollToItem, isOpen]);
 
-  // キーボードナビゲーション
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (isOpen && containerRef.current?.contains(event.target as Node)) {
         handleKeyboardNavigation(event, currentSlide, slides.length, handleSlideClick);
         
-        // Escapeキーで閉じる
         if (event.key === 'Escape') {
           onClose();
         }
@@ -97,7 +103,7 @@ const SimplifiedSlideThumbnails = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [currentSlide, slides.length, handleSlideClick, handleKeyboardNavigation, isOpen, onClose]);
 
-  // サムネイル一覧のコンテンツ
+  // サムネイル一覧のコンテンツ（拡大対応）
   const thumbnailsContent = (
     <div 
       ref={containerRef}
@@ -106,13 +112,13 @@ const SimplifiedSlideThumbnails = ({
       role="region"
       aria-label="スライド一覧"
     >
-      {/* 簡素化されたヘッダー */}
-      <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 bg-white">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-sm text-gray-800">
+      {/* 改善されたヘッダー */}
+      <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-white">
+        <div className="flex items-center gap-3">
+          <h3 className="font-semibold text-lg text-gray-800">
             スライド一覧
           </h3>
-          <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full font-medium">
+          <span className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-600 text-sm rounded-full font-medium">
             {slides.length} スライド
           </span>
         </div>
@@ -120,39 +126,39 @@ const SimplifiedSlideThumbnails = ({
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0 hover:bg-gray-100"
+          className="h-10 w-10 p-0 hover:bg-gray-100"
           onClick={onClose}
           aria-label="スライド一覧を閉じる"
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
         </Button>
       </div>
       
-      {/* サムネイル一覧 */}
+      {/* サムネイル一覧（拡大版） */}
       <div className="flex-1 relative overflow-hidden">
         <Button
           variant="ghost"
           size="icon"
-          className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 h-8 w-8 bg-white shadow-md hover:bg-gray-50 transition-all duration-200"
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 h-10 w-10 bg-white shadow-lg hover:bg-gray-50 transition-all duration-200"
           onClick={() => scrollByDirection('left')}
           aria-label="前のスライドへスクロール"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="h-5 w-5" />
         </Button>
         
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 h-8 w-8 bg-white shadow-md hover:bg-gray-50 transition-all duration-200"
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10 h-10 w-10 bg-white shadow-lg hover:bg-gray-50 transition-all duration-200"
           onClick={() => scrollByDirection('right')}
           aria-label="次のスライドへスクロール"
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="h-5 w-5" />
         </Button>
         
         <div
           ref={scrollContainerRef}
-          className="flex items-center h-full px-4 py-3 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 transition-all duration-300 ease-in-out scroll-smooth"
+          className="flex items-center h-full px-6 py-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 transition-all duration-300 ease-in-out scroll-smooth"
           style={{ gap: `${gap}px` }}
           role="tablist"
           aria-label="スライドサムネイル"
@@ -193,11 +199,11 @@ const SimplifiedSlideThumbnails = ({
     </div>
   );
 
-  // モバイル・タブレット：Drawer表示
+  // モバイル・タブレット：Drawer表示（高さ拡大）
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={onClose}>
-        <DrawerContent className="h-[60vh] max-h-[60vh]">
+        <DrawerContent className="h-[75vh] max-h-[75vh]">
           <DrawerHeader className="sr-only">
             <DrawerTitle>スライド一覧</DrawerTitle>
           </DrawerHeader>
@@ -207,10 +213,10 @@ const SimplifiedSlideThumbnails = ({
     );
   }
 
-  // デスクトップ：Dialog表示
+  // デスクトップ：Dialog表示（サイズ拡大）
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl h-[60vh] max-h-[60vh] p-0">
+      <DialogContent className="max-w-6xl h-[75vh] max-h-[75vh] p-0">
         <DialogHeader className="sr-only">
           <DialogTitle>スライド一覧</DialogTitle>
         </DialogHeader>

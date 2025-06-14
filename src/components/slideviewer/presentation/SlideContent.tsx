@@ -51,8 +51,8 @@ const SlideContent: React.FC<SlideContentProps> = ({
     const showThumbnails = !(viewerMode === "presentation" && isFullScreen);
     const containerWidth = getSlideThumbnailsWidth();
 
-    // 画面サイズに応じてポップアップモードを決定
-    const shouldUsePopup = isMobile || containerWidth < 800;
+    // 画面サイズに応じてポップアップモードを決定（基準を緩和）
+    const shouldUsePopup = isMobile || containerWidth < 1000;
 
     const mainContent = (
         <EnhancedSlideDisplay
@@ -95,7 +95,7 @@ const SlideContent: React.FC<SlideContentProps> = ({
                     currentSlide={currentSlide}
                     onSlideClick={onSlideChange}
                     onOpenOverallReview={onOpenOverallReview}
-                    height={120} // 固定値（使用されない）
+                    height={120}
                     containerWidth={containerWidth}
                     userType={userType}
                     showAsPopup={true}
@@ -104,8 +104,8 @@ const SlideContent: React.FC<SlideContentProps> = ({
         );
     }
 
-    // デスクトップ：固定サイズのサムネイル一覧（リサイズ不可）
-    const thumbnailsHeight = 180; // 固定高さ
+    // デスクトップ：固定サイズのサムネイル一覧（高さ拡大）
+    const thumbnailsHeight = 220; // 180pxから220pxに拡大（大きなサムネイルに対応）
 
     return (
         <div className="flex-1 flex flex-col overflow-hidden min-w-0 h-full">
