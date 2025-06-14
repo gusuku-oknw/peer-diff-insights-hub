@@ -119,13 +119,13 @@ const MinimalThumbnailCard = ({
             )}
           </div>
           
-          {/* Enhanced slide information section */}
-          <div className="p-3 text-center bg-white">
-            {/* Enhanced slide number badge with better contrast */}
-            <div className={`inline-flex items-center justify-center rounded-full font-bold mb-2 transition-all duration-300 shadow-sm ${
-              isSmall ? 'w-6 h-6 text-xs' : 
-              isMedium ? 'w-7 h-7 text-sm' : 
-              'w-8 h-8 text-sm'
+          {/* Compact slide information section with reduced padding */}
+          <div className="p-1.5 text-center bg-white">
+            {/* Smaller slide number badge */}
+            <div className={`inline-flex items-center justify-center rounded-full font-bold mb-1 transition-all duration-300 shadow-sm ${
+              isSmall ? 'w-4 h-4 text-xs' : 
+              isMedium ? 'w-5 h-5 text-xs' : 
+              'w-5 h-5 text-xs'
             } ${
               isActive 
                 ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md ring-2 ring-blue-200' 
@@ -134,44 +134,40 @@ const MinimalThumbnailCard = ({
               {slideIndex}
             </div>
             
-            {/* Enhanced title with better typography */}
-            <p className={`font-semibold truncate transition-colors duration-300 ${
-              isSmall ? 'text-xs' :
-              isMedium ? 'text-sm' :
-              'text-sm'
-            } ${
+            {/* Smaller title with compact typography */}
+            <p className={`font-medium truncate transition-colors duration-300 text-xs ${
               isActive ? 'text-blue-700' : 'text-gray-700 group-hover:text-gray-900'
             }`} title={slideTitle}>
               {slideTitle}
             </p>
             
-            {/* Enhanced status indicators with better design */}
+            {/* Compact status indicators for medium and large sizes */}
             {(isMedium || isLarge) && (showStudentFeatures || slide.hasComments) && (
-              <div className="mt-2 flex items-center justify-center gap-1.5 text-xs">
+              <div className="mt-1 flex items-center justify-center gap-1 text-xs">
                 {showStudentFeatures && slide.isReviewed && (
-                  <span className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-green-100 to-green-50 text-green-700 rounded-full shadow-sm border border-green-200">
-                    <div className="w-2 h-2 bg-green-500 rounded-full shadow-sm animate-pulse"></div>
-                    済
+                  <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-gradient-to-r from-green-100 to-green-50 text-green-700 rounded-full shadow-sm border border-green-200">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-sm animate-pulse"></div>
+                    <span className="text-xs">済</span>
                   </span>
                 )}
                 {slide.hasComments && (
-                  <span className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-purple-100 to-purple-50 text-purple-700 rounded-full shadow-sm border border-purple-200">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full shadow-sm"></div>
-                    ※
+                  <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-gradient-to-r from-purple-100 to-purple-50 text-purple-700 rounded-full shadow-sm border border-purple-200">
+                    <div className="w-1.5 h-1.5 bg-purple-500 rounded-full shadow-sm"></div>
+                    <span className="text-xs">※</span>
                   </span>
                 )}
               </div>
             )}
           </div>
           
-          {/* Compact status indicators for small sizes with better positioning */}
+          {/* Smaller compact status indicators for small sizes */}
           {isSmall && (
-            <div className="absolute top-2 right-2 flex gap-1">
+            <div className="absolute top-1.5 right-1.5 flex gap-0.5">
               {showStudentFeatures && slide.isReviewed && (
-                <div className="w-3 h-3 bg-green-500 rounded-full shadow-md border border-white animate-pulse"></div>
+                <div className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-md border border-white animate-pulse"></div>
               )}
               {slide.hasComments && (
-                <div className="w-3 h-3 bg-purple-500 rounded-full shadow-md border border-white"></div>
+                <div className="w-2.5 h-2.5 bg-purple-500 rounded-full shadow-md border border-white"></div>
               )}
             </div>
           )}
