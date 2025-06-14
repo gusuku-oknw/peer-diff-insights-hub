@@ -1,16 +1,14 @@
 
-import React, { useRef, useEffect, useCallback, useState, useMemo } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { useOptimizedSlideCanvas } from "@/hooks/slideviewer/useOptimizedSlideCanvas";
 import { useEnhancedCanvasActions } from "@/hooks/slideviewer/canvas/useEnhancedCanvasActions";
 import { useCanvasShortcuts } from "@/hooks/slideviewer/canvas/useCanvasShortcuts";
+import { useCanvasState } from "@/hooks/slideviewer/canvas/useCanvasState";
 import { renderElementsWithEmptyState } from "@/utils/slideCanvas/enhancedElementRenderer";
 import TouchOptimizedCanvas from "@/features/slideviewer/components/canvas/TouchOptimizedCanvas";
-import EmptyCanvasState from "@/features/slideviewer/components/canvas/states/EmptyCanvasState";
-import CanvasLoadingState from "@/features/slideviewer/components/canvas/states/CanvasLoadingState";
-import CanvasErrorState from "@/features/slideviewer/components/canvas/states/CanvasErrorState";
-import CanvasGuideOverlay from "@/features/slideviewer/components/canvas/states/CanvasGuideOverlay";
-import CanvasContextMenu from "./CanvasContextMenu";
-import CanvasShortcutsGuide from "./CanvasShortcutsGuide";
+import CanvasContainer from "./CanvasContainer";
+import CanvasHeader from "./CanvasHeader";
+import CanvasInfoBar from "./CanvasInfoBar";
 
 interface UnifiedSlideCanvasProps {
   currentSlide: number;
@@ -33,10 +31,6 @@ const UnifiedSlideCanvas = React.memo(({
 }: UnifiedSlideCanvasProps) => {
   console.log(`UnifiedSlideCanvas rendering - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Container: ${containerWidth}x${containerHeight}`);
   
-  const [showGuide, setShowGuide] = useState(false);
-  const [isEmpty, setIsEmpty] = useState(false);
-  const [selectedObject, setSelectedObject] = useState<any>(null);
-
   // Use unified high-resolution canvas hook
   const {
     canvasRef,
@@ -52,6 +46,23 @@ const UnifiedSlideCanvas = React.memo(({
     editable,
     containerWidth,
     containerHeight,
+    enablePerformanceMode
+  });
+
+  // Canvas state management
+  const {
+    showGuide,
+    selectedObject,
+    deviceType,
+    setSelectedObject,
+    handleRetry,
+    handleCloseGuide
+  } = useCanvasState({
+    currentSlide,
+    containerWidth,
+    editable,
+    isReady,
+    isEmpty: elements.length === 0,
     enablePerformanceMode
   });
 
@@ -111,7 +122,7 @@ const UnifiedSlideCanvas = React.memo(({
       canvas.off('selection:cleared', handleSelectionCleared);
       canvas.off('selection:updated', handleSelectionUpdated);
     };
-  }, [fabricCanvasRef.current]);
+  }, [fabricCanvasRef.current, setSelectedObject]);
 
   // Create wrapper functions for EmptyCanvasState compatibility
   const handleAddText = useCallback(() => addText(), [addText]);
@@ -120,13 +131,21 @@ const UnifiedSlideCanvas = React.memo(({
     console.log('Image functionality coming soon');
   }, []);
   
+  const handleReset = useCallback(() => {
+    if (fabricCanvasRef.current) {
+      fabricCanvasRef.current.clear();
+      fabricCanvasRef.current.backgroundColor = '#ffffff';
+      fabricCanvasRef.current.renderAll();
+    }
+  }, []);
+
   // High resolution element rendering - memoized to prevent unnecessary re-renders
   const handleRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady || !canvasConfig) return;
     
     try {
-      const result = renderElementsWithEmptyState(
+      renderElementsWithEmptyState(
         canvas, 
         elements, 
         canvasConfig,
@@ -136,7 +155,6 @@ const UnifiedSlideCanvas = React.memo(({
         handleAddShape,
         handleAddImage
       );
-      setIsEmpty(result.isEmpty);
       
       console.log(`Unified canvas rendered ${elements.length} elements at ${canvasConfig.width}x${canvasConfig.height} resolution`);
     } catch (err) {
@@ -149,36 +167,6 @@ const UnifiedSlideCanvas = React.memo(({
       handleRenderElements();
     }
   }, [handleRenderElements, isReady, canvasConfig]);
-
-  // Show guide for first-time users
-  useEffect(() => {
-    if (isReady && editable && isEmpty && enablePerformanceMode) {
-      const hasSeenGuide = localStorage.getItem('unified-slide-guide-seen');
-      if (!hasSeenGuide) {
-        setShowGuide(true);
-        localStorage.setItem('unified-slide-guide-seen', 'true');
-      }
-    }
-  }, [isReady, editable, isEmpty, enablePerformanceMode]);
-
-  const handleRetry = useCallback(() => {
-    window.location.reload();
-  }, []);
-
-  const handleReset = useCallback(() => {
-    if (fabricCanvasRef.current) {
-      fabricCanvasRef.current.clear();
-      fabricCanvasRef.current.backgroundColor = '#ffffff';
-      fabricCanvasRef.current.renderAll();
-    }
-  }, []);
-
-  // Device type detection for mobile optimization
-  const deviceType = useMemo(() => {
-    if (containerWidth < 768) return 'mobile';
-    if (containerWidth < 1024) return 'tablet';
-    return 'desktop';
-  }, [containerWidth]);
 
   // Use TouchOptimizedCanvas for mobile devices
   if (deviceType === 'mobile') {
@@ -213,10 +201,12 @@ const UnifiedSlideCanvas = React.memo(({
   
   if (!canvasConfig) {
     return (
-      <CanvasLoadingState 
-        progress={0}
-        message="高解像度設定を初期化中..."
-      />
+      <div className="flex items-center justify-center w-full h-full bg-gray-50">
+        <div className="text-center p-8">
+          <div className="w-12 h-12 border-3 border-blue-200 border-t-blue-500 rounded-full animate-spin mb-4 mx-auto"></div>
+          <p className="text-gray-600">高解像度設定を初期化中...</p>
+        </div>
+      </div>
     );
   }
   
@@ -224,129 +214,46 @@ const UnifiedSlideCanvas = React.memo(({
     <div className="w-full h-full flex flex-col bg-gray-50 overflow-auto relative">
       {/* Canvas Container */}
       <div className="flex-1 flex items-center justify-center p-4 relative">
-        {/* Guide overlay */}
-        {showGuide && (
-          <CanvasGuideOverlay
-            deviceType={deviceType}
-            onClose={() => setShowGuide(false)}
-          />
-        )}
+        <CanvasHeader
+          showGuide={showGuide}
+          editable={editable}
+          deviceType={deviceType}
+          onCloseGuide={handleCloseGuide}
+        />
 
-        {/* Shortcuts guide in top-right corner */}
-        {editable && (
-          <div className="absolute top-4 right-4 z-10">
-            <CanvasShortcutsGuide />
-          </div>
-        )}
-
-        {/* High resolution slide container with context menu */}
-        <CanvasContextMenu
+        <CanvasContainer
+          canvasRef={canvasRef}
+          canvasConfig={canvasConfig}
+          zoomLevel={zoomLevel}
           selectedObject={selectedObject}
+          isEmpty={elements.length === 0}
+          isReady={isReady}
+          error={error}
+          editable={editable}
+          currentSlide={currentSlide}
+          performance={performance}
           onCopy={copySelected}
           onPaste={paste}
           onDelete={deleteSelected}
           onBringToFront={bringToFront}
           onSendToBack={sendToBack}
           onDuplicate={duplicate}
-          onRotate={rotateObject}
+          onRotate={() => rotateObject(90)}
+          onAddText={handleAddText}
+          onAddShape={handleAddShape}
+          onAddImage={handleAddImage}
+          onRetry={handleRetry}
+          onReset={handleReset}
           hasClipboard={hasClipboard}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-lg border relative"
-            style={{
-              width: canvasConfig.displayWidth,
-              height: canvasConfig.displayHeight,
-              // Apply zoom only once here - no duplicate scaling
-              transform: `scale(${zoomLevel / 100})`,
-              transformOrigin: 'center center',
-              transition: 'transform 0.2s ease-out'
-            }}
-          >
-            {/* High Resolution Fabric.js Canvas */}
-            <canvas 
-              ref={canvasRef}
-              className="block rounded-lg"
-              style={{
-                width: '100%',
-                height: '100%',
-                imageRendering: 'auto'
-              }}
-            />
-
-            {/* Empty state overlay */}
-            {isEmpty && isReady && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-lg">
-                <EmptyCanvasState
-                  onAddText={handleAddText}
-                  onAddShape={handleAddShape}
-                  onAddImage={handleAddImage}
-                  slideNumber={currentSlide}
-                  editable={editable}
-                />
-              </div>
-            )}
-            
-            {/* Loading state */}
-            {!isReady && !error && (
-              <CanvasLoadingState 
-                progress={performance.metrics?.fps || 0}
-                message="統合キャンバスを初期化中..."
-              />
-            )}
-            
-            {/* Error state */}
-            {error && (
-              <CanvasErrorState
-                error={error}
-                onRetry={handleRetry}
-                onReset={handleReset}
-              />
-            )}
-          </div>
-        </CanvasContextMenu>
+        />
       </div>
 
       {/* Information Bar - Bottom */}
-      <div className="flex justify-between items-center p-2 bg-gray-100 border-t border-gray-200">
-        {/* Left: Performance Information */}
-        <div className="flex items-center gap-4">
-          {enablePerformanceMode && performance.metrics && (
-            <div className="text-xs bg-black text-white px-2 py-1 rounded">
-              FPS: {performance.metrics.fps} | Render: {performance.metrics.renderTime}ms
-            </div>
-          )}
-          <div className="text-xs bg-green-600 text-white px-2 py-1 rounded">
-            統合解像度: {canvasConfig.width}×{canvasConfig.height} ({canvasConfig.pixelRatio}x)
-          </div>
-          {canvasConfig.displayCapabilities?.is8KCapable && (
-            <div className="text-xs bg-purple-600 text-white px-2 py-1 rounded">
-              8K対応
-            </div>
-          )}
-          {canvasConfig.displayCapabilities?.is4KCapable && (
-            <div className="text-xs bg-blue-600 text-white px-2 py-1 rounded">
-              4K対応
-            </div>
-          )}
-        </div>
-
-        {/* Right: Display & Resolution Information */}
-        <div className="flex items-center gap-2">
-          <div className="text-xs bg-blue-500 text-white px-2 py-1 rounded">
-            表示: {canvasConfig.displayWidth}×{canvasConfig.displayHeight}
-          </div>
-          {canvasConfig.displayCapabilities && (
-            <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
-              物理: {canvasConfig.displayCapabilities.physicalWidth}×{canvasConfig.displayCapabilities.physicalHeight}
-            </div>
-          )}
-          {canvasConfig.pixelRatio > 2 && (
-            <div className="text-xs text-purple-700 bg-purple-100 px-2 py-1 rounded border">
-              統合High-DPI ({canvasConfig.pixelRatio}x)
-            </div>
-          )}
-        </div>
-      </div>
+      <CanvasInfoBar
+        enablePerformanceMode={enablePerformanceMode}
+        performance={performance}
+        canvasConfig={canvasConfig}
+      />
     </div>
   );
 });
