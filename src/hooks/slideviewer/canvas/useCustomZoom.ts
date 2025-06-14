@@ -5,7 +5,16 @@ import { Canvas } from 'fabric';
 interface UseCustomZoomProps {
   canvas: Canvas | null;
   isReady: boolean;
-  canvasConfig: any;
+  canvasConfig: {
+    width: number;
+    height: number;
+    displayWidth: number;
+    displayHeight: number;
+    pixelRatio: number;
+    actualWidth: number;
+    actualHeight: number;
+    useActualSizing: boolean;
+  };
   zoomLevel: number;
 }
 
@@ -13,13 +22,27 @@ export const useCustomZoom = ({ canvas, isReady, canvasConfig, zoomLevel }: UseC
   const zoomTransformRef = useRef<string>('scale(1)');
   
   const applyZoomTransform = useCallback((currentZoomLevel: number) => {
-    if (!canvas || !isReady || !canvasConfig) return;
+    if (!canvas || !isReady || !canvasConfig) {
+      console.log('Zoom transform skipped - missing dependencies:', {
+        canvas: !!canvas,
+        isReady,
+        canvasConfig: !!canvasConfig
+      });
+      return;
+    }
     
     try {
       const canvasElement = canvas.getElement();
+      if (!canvasElement) {
+        console.log('Canvas element not found');
+        return;
+      }
+
       const canvasContainer = canvasElement.parentElement;
-      
-      if (!canvasContainer) return;
+      if (!canvasContainer) {
+        console.log('Canvas container not found');
+        return;
+      }
       
       if (canvasConfig.useActualSizing) {
         // For zoom ≤ 100%: no CSS transform needed, canvas size handles it
@@ -28,7 +51,7 @@ export const useCustomZoom = ({ canvas, isReady, canvasConfig, zoomLevel }: UseC
         canvasContainer.style.transition = 'transform 0.2s ease-out';
         zoomTransformRef.current = 'scale(1)';
         
-        console.log(`Actual sizing mode: ${currentZoomLevel}% (no CSS transform)`);
+        console.log(`✓ Actual sizing mode applied: ${currentZoomLevel}% (no CSS transform needed)`);
       } else {
         // For zoom > 100%: use CSS transform
         const zoomValue = currentZoomLevel / 100;
@@ -38,24 +61,42 @@ export const useCustomZoom = ({ canvas, isReady, canvasConfig, zoomLevel }: UseC
         canvasContainer.style.transition = 'transform 0.2s ease-out';
         zoomTransformRef.current = transform;
         
-        console.log(`CSS transform mode: ${currentZoomLevel}% (transform: ${transform})`);
+        console.log(`✓ CSS transform mode applied: ${currentZoomLevel}% (transform: ${transform})`);
       }
+
+      // Force a re-render to ensure the transform is applied
+      canvas.renderAll();
+      
     } catch (err) {
-      console.error('Zoom application error:', err);
+      console.error('❌ Zoom application error:', err);
     }
   }, [canvas, isReady, canvasConfig]);
   
   const resetZoom = useCallback(() => {
     if (!canvas) return;
     
-    const canvasElement = canvas.getElement();
-    const canvasContainer = canvasElement.parentElement;
-    
-    if (canvasContainer) {
-      canvasContainer.style.transform = 'scale(1)';
-      zoomTransformRef.current = 'scale(1)';
+    try {
+      const canvasElement = canvas.getElement();
+      const canvasContainer = canvasElement?.parentElement;
+      
+      if (canvasContainer) {
+        canvasContainer.style.transform = 'scale(1)';
+        canvasContainer.style.transformOrigin = 'center center';
+        zoomTransformRef.current = 'scale(1)';
+        console.log('✓ Zoom reset to 100%');
+      }
+    } catch (err) {
+      console.error('❌ Zoom reset error:', err);
     }
   }, [canvas]);
+  
+  // Apply zoom when dependencies change
+  useEffect(() => {
+    if (isReady && canvasConfig && canvas) {
+      console.log(`🔄 Applying zoom: ${zoomLevel}% (useActualSizing: ${canvasConfig.useActualSizing})`);
+      applyZoomTransform(zoomLevel);
+    }
+  }, [zoomLevel, isReady, canvasConfig, canvas, applyZoomTransform]);
   
   return {
     applyZoomTransform,

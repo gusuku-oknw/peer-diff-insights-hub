@@ -32,7 +32,7 @@ const UnifiedSlideCanvas = React.memo(({
   enablePerformanceMode = true,
   onZoomChange
 }: UnifiedSlideCanvasProps) => {
-  console.log(`UnifiedSlideCanvas rendering - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Container: ${containerWidth}x${containerHeight}`);
+  console.log(`🎯 UnifiedSlideCanvas rendering - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Container: ${containerWidth}x${containerHeight}`);
   
   // Use unified canvas configuration with zoom level
   const { canvasConfig } = useCanvasConfig({
@@ -57,8 +57,8 @@ const UnifiedSlideCanvas = React.memo(({
     enablePerformanceMode
   });
 
-  // Custom zoom implementation with hybrid approach
-  const { applyZoomTransform, resetZoom } = useCustomZoom({
+  // Custom zoom implementation with hybrid approach - this now handles zoom automatically
+  const { resetZoom } = useCustomZoom({
     canvas: fabricCanvasRef.current,
     isReady,
     canvasConfig,
@@ -111,18 +111,6 @@ const UnifiedSlideCanvas = React.memo(({
     onCopySelected: copySelected,
     onPasteSelected: paste
   });
-
-  // Handle zoom changes with hybrid approach
-  useEffect(() => {
-    if (!isReady || !canvasConfig) return;
-    
-    try {
-      applyZoomTransform(zoomLevel);
-      console.log(`Hybrid zoom applied: ${zoomLevel}%, useActualSizing: ${canvasConfig.useActualSizing}`);
-    } catch (err) {
-      console.error('Zoom application error:', err);
-    }
-  }, [zoomLevel, isReady, canvasConfig, applyZoomTransform]);
 
   // Track selected object for context menu
   useEffect(() => {
@@ -190,9 +178,9 @@ const UnifiedSlideCanvas = React.memo(({
         handleAddImage
       );
       
-      console.log(`Canvas rendered ${elements.length} elements`);
+      console.log(`✅ Canvas rendered ${elements.length} elements`);
     } catch (err) {
-      console.error('Canvas rendering failed:', err);
+      console.error('❌ Canvas rendering failed:', err);
     }
   }, [elements, currentSlide, editable, isReady, canvasConfig, handleAddText, handleAddShape, handleAddImage, fabricCanvasRef.current]);
   

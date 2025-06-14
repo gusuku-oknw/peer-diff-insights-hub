@@ -12,6 +12,9 @@ interface UseOptimizedSlideCanvasProps {
     displayWidth: number;
     displayHeight: number;
     pixelRatio: number;
+    actualWidth: number;
+    actualHeight: number;
+    useActualSizing: boolean;
   };
   enablePerformanceMode?: boolean;
 }
@@ -50,10 +53,11 @@ export const useOptimizedSlideCanvas = ({
         fabricCanvasRef.current = null;
       }
 
-      console.log('Initializing canvas with dynamic config:', {
+      console.log('Initializing canvas with hybrid config:', {
         canvasSize: `${canvasConfig.width}x${canvasConfig.height}`,
         displaySize: `${canvasConfig.displayWidth}x${canvasConfig.displayHeight}`,
-        useActualSizing: canvasConfig.useActualSizing
+        useActualSizing: canvasConfig.useActualSizing,
+        actualSize: `${canvasConfig.actualWidth}x${canvasConfig.actualHeight}`
       });
 
       const canvas = new Canvas(canvasRef.current, {
@@ -82,7 +86,7 @@ export const useOptimizedSlideCanvas = ({
         (canvas as any).borderOpacityWhenMoving = 0.4;
       }
 
-      // Set canvas element attributes for dynamic sizing
+      // Set canvas element attributes for hybrid sizing
       const canvasElement = canvasRef.current;
       canvasElement.width = canvasConfig.width;
       canvasElement.height = canvasConfig.height;
@@ -94,7 +98,7 @@ export const useOptimizedSlideCanvas = ({
       setIsReady(true);
       setError(null);
 
-      console.log(`Canvas initialized - Size: ${canvasConfig.width}x${canvasConfig.height}, Display: ${canvasConfig.displayWidth}x${canvasConfig.displayHeight}`);
+      console.log(`Canvas initialized successfully - Size: ${canvasConfig.width}x${canvasConfig.height}, Display: ${canvasConfig.displayWidth}x${canvasConfig.displayHeight}, Hybrid mode: ${canvasConfig.useActualSizing ? 'actual sizing' : 'CSS transform'}`);
     } catch (err) {
       console.error('Canvas initialization failed:', err);
       setError('キャンバスの初期化に失敗しました');
