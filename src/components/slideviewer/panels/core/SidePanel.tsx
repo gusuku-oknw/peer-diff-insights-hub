@@ -77,19 +77,20 @@ const SidePanel: React.FC<SidePanelProps> = ({
       {/* タブシステム（複数タブがある場合のみ） */}
       {showTabSystem && (
         <div className={`flex-shrink-0 ${
-          layout.sizeClass === 'xs' ? 'px-1 pt-1' : 'px-3 pt-2'
-        } relative z-10`}>
+          layout.sizeClass === 'xs' ? 'px-2 py-2' : 'px-4 py-3'
+        } bg-white/80 border-b border-gray-100`}>
           <UnifiedTabSystem
             activeTab={activeTab}
             onTabChange={setActiveTab}
             availableTabs={availableTabs}
             sizeClass={layout.sizeClass}
+            className="w-full"
           />
         </div>
       )}
 
       {/* コンテンツエリア */}
-      <div className="flex-1 min-h-0 overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-hidden bg-white">
         <PanelContent
           shouldShowNotes={shouldShowNotes}
           shouldShowReviewPanel={shouldShowReviewPanel}

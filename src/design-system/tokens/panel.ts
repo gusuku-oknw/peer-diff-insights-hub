@@ -1,4 +1,3 @@
-
 // デザイントークン: パネルシステム
 export const panelTokens = {
   // パネル幅とブレークポイント
@@ -58,32 +57,43 @@ export const panelTokens = {
     }
   },
   
-  // タブシステム色
+  // タブシステム色（強化版）
   tabColors: {
     notes: {
       primary: '#3b82f6',
       background: '#eff6ff',
       hover: '#dbeafe',
-      active: '#bfdbfe'
+      active: '#bfdbfe',
+      shadow: '#3b82f625'
     },
     review: {
       primary: '#8b5cf6',
       background: '#f3e8ff',
       hover: '#e9d5ff',
-      active: '#d8b4fe'
+      active: '#d8b4fe',
+      shadow: '#8b5cf625'
     },
     dashboard: {
       primary: '#06b6d4',
       background: '#ecfeff',
       hover: '#cffafe',
-      active: '#a5f3fc'
+      active: '#a5f3fc',
+      shadow: '#06b6d425'
     },
     checklist: {
       primary: '#10b981',
       background: '#ecfdf5',
       hover: '#d1fae5',
-      active: '#a7f3d0'
+      active: '#a7f3d0',
+      shadow: '#10b98125'
     }
+  },
+
+  // アニメーション設定
+  animations: {
+    tabTransition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    hoverScale: 'transform 0.2s ease-out',
+    textSlide: 'all 0.3s ease-out'
   }
 } as const;
 

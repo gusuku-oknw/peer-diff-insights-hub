@@ -30,10 +30,6 @@ const UnifiedTabSystem: React.FC<UnifiedTabSystemProps> = ({
   sizeClass,
   className = ""
 }) => {
-  // パネルサイズに応じた表示モード
-  const isIconOnly = sizeClass === 'xs';
-  const isCompact = sizeClass === 'xs' || sizeClass === 'sm';
-  
   const tabConfigs: Record<string, TabConfig> = {
     notes: {
       id: 'notes',
@@ -80,67 +76,59 @@ const UnifiedTabSystem: React.FC<UnifiedTabSystemProps> = ({
   const getTabStyle = (tabConfig: TabConfig, isActive: boolean) => {
     if (isActive) {
       return {
-        backgroundColor: `${tabConfig.color}15`,
-        borderColor: `${tabConfig.color}40`,
-        color: tabConfig.color
+        backgroundColor: `${tabConfig.color}20`,
+        borderColor: `${tabConfig.color}60`,
+        color: tabConfig.color,
+        transform: 'scale(1.02)',
+        boxShadow: `0 2px 8px ${tabConfig.color}25`
       };
     }
-    return {};
+    return {
+      backgroundColor: 'transparent',
+      borderColor: 'transparent',
+      color: panelTokens.colors.text.secondary
+    };
   };
 
+  // テキストは選択されたタブのみ表示
   const shouldShowText = (tabConfig: TabConfig) => {
-    const isActive = activeTab === tabConfig.id;
-    
-    // アイコンオンリーモード：アクティブタブのみテキスト表示
-    if (isIconOnly) {
-      return isActive;
-    }
-    
-    // コンパクトモード：アクティブタブのみテキスト表示
-    if (isCompact) {
-      return isActive;
-    }
-    
-    // 通常モード：すべてのタブでテキスト表示
-    return true;
+    return activeTab === tabConfig.id;
   };
 
   const TabButton = ({ tabConfig }: { tabConfig: TabConfig }) => {
     const IconComponent = tabConfig.icon;
     const isActive = activeTab === tabConfig.id;
     const showText = shouldShowText(tabConfig);
-    const needsTooltip = !showText && !isActive;
+    const needsTooltip = !showText;
 
     const buttonContent = (
       <TabsTrigger
         value={tabConfig.id}
-        className={`flex items-center transition-all duration-200 relative border border-transparent ${
-          isIconOnly 
-            ? 'px-2 py-2 min-w-[40px] justify-center' 
-            : isCompact 
-              ? 'px-2 py-1.5 text-xs gap-1.5' 
-              : 'px-3 py-2 text-sm gap-2'
-        }`}
+        className={`flex items-center transition-all duration-300 ease-out relative border ${
+          showText 
+            ? 'px-3 py-2 gap-2 min-w-fit' 
+            : 'px-2.5 py-2 min-w-[44px] justify-center'
+        } rounded-lg hover:scale-105`}
         style={getTabStyle(tabConfig, isActive)}
         disabled={tabConfig.disabled}
       >
         <IconComponent 
-          className={`flex-shrink-0 ${
-            isIconOnly ? 'h-4 w-4' : isCompact ? 'h-3 w-3' : 'h-4 w-4'
+          className={`flex-shrink-0 transition-all duration-300 ${
+            isActive ? 'h-4 w-4' : 'h-4 w-4'
           }`}
         />
         {showText && (
-          <span className={`truncate font-medium transition-all duration-200 ${
-            isActive ? 'opacity-100' : 'opacity-80'
-          }`}>
-            {isCompact ? tabConfig.shortLabel : tabConfig.label}
+          <span className="truncate font-medium transition-all duration-300 ease-out transform">
+            {sizeClass === 'xs' || sizeClass === 'sm' ? tabConfig.shortLabel : tabConfig.label}
           </span>
         )}
         {tabConfig.badge && tabConfig.badge > 0 && (
           <span 
             className={`${
-              isIconOnly ? 'absolute -top-1 -right-1 h-4 w-4 text-xs' : 'h-5 w-5 text-xs'
-            } bg-red-500 text-white rounded-full flex items-center justify-center font-bold animate-pulse`}
+              showText 
+                ? 'h-5 w-5 text-xs ml-1' 
+                : 'absolute -top-1 -right-1 h-4 w-4 text-xs'
+            } bg-red-500 text-white rounded-full flex items-center justify-center font-bold animate-pulse transition-all duration-300`}
           >
             {tabConfig.badge}
           </span>
@@ -154,7 +142,7 @@ const UnifiedTabSystem: React.FC<UnifiedTabSystemProps> = ({
           <TooltipTrigger asChild>
             {buttonContent}
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-sm">
+          <TooltipContent side="bottom" className="text-sm font-medium">
             {tabConfig.label}
           </TooltipContent>
         </Tooltip>
@@ -165,12 +153,12 @@ const UnifiedTabSystem: React.FC<UnifiedTabSystemProps> = ({
   };
 
   return (
-    <TooltipProvider delayDuration={300}>
+    <TooltipProvider delayDuration={200}>
       <Tabs value={activeTab} onValueChange={onTabChange} className={className}>
         <TabsList 
-          className={`grid bg-gray-50 ${
-            isIconOnly ? 'gap-0.5 p-0.5' : isCompact ? 'gap-0.5 p-1' : 'gap-1 p-1.5'
-          }`}
+          className={`grid bg-gray-50/80 backdrop-blur-sm border border-gray-200/50 ${
+            sizeClass === 'xs' ? 'gap-1 p-1' : 'gap-1.5 p-1.5'
+          } rounded-xl shadow-sm`}
           style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, 1fr)` }}
         >
           {visibleTabs.map((tabConfig) => (
