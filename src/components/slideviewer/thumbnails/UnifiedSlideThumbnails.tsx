@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useSlideStore } from "@/stores/slide-store";
 import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
@@ -8,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { ChevronDown, ChevronUp } from "lucide-react";
 import ThumbnailControlsBar from './ThumbnailControlsBar';
 import ThumbnailMainContent from './ThumbnailMainContent';
+import UnifiedSlideThumbnailsContainer from './UnifiedSlideThumbnailsContainer';
 
 type ViewMode = 'horizontal' | 'grid' | 'list';
 type FilterMode = 'all' | 'reviewed' | 'unreviewed' | 'commented';
@@ -30,18 +30,14 @@ const UnifiedSlideThumbnails = ({
   userType = "enterprise"
 }: UnifiedSlideThumbnailsProps) => {
   const { slides } = useSlideStore();
-  const containerRef = useRef<HTMLDivElement>(null);
   
-  // State management with better defaults
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('horizontal');
   const [thumbnailWidth, setThumbnailWidth] = useState(160);
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
 
-  // Responsive calculations
   const { isMobile, isTablet } = useResponsiveThumbnails({ containerWidth });
   
-  // Enhanced slide data with consistent mock properties
   const enhancedSlides = useMemo(() => {
     return slides.map((slide, index) => ({
       ...slide,
@@ -51,7 +47,6 @@ const UnifiedSlideThumbnails = ({
     }));
   }, [slides]);
 
-  // Filtered slides with improved logic
   const filteredSlides = useMemo(() => {
     let filtered = [...enhancedSlides];
     
@@ -70,16 +65,13 @@ const UnifiedSlideThumbnails = ({
     return filtered;
   }, [enhancedSlides, filterMode]);
 
-  // Dynamic gap calculation
   const gap = useMemo(() => (isMobile ? 12 : 16), [isMobile]);
 
-  // Enhanced smooth scroll
   const { scrollContainerRef, scrollToItem, scrollByDirection } = useSmoothScroll({
     itemWidth: thumbnailWidth,
     gap
   });
 
-  // Auto-scroll to current slide with smooth animation
   useEffect(() => {
     if (viewMode === 'horizontal' && !isCollapsed) {
       const timer = setTimeout(() => {
@@ -89,7 +81,6 @@ const UnifiedSlideThumbnails = ({
     }
   }, [currentSlide, scrollToItem, viewMode, isCollapsed]);
 
-  // Keyboard navigation with better accessibility
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!containerRef.current?.contains(document.activeElement)) return;
@@ -122,61 +113,25 @@ const UnifiedSlideThumbnails = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [currentSlide, slides.length, onSlideClick]);
 
-  // Size constraints based on screen size
   const { minSize, maxSize } = useMemo(() => {
     if (isMobile) return { minSize: 120, maxSize: 180 };
     if (isTablet) return { minSize: 140, maxSize: 200 };
     return { minSize: 160, maxSize: 240 };
   }, [isMobile, isTablet]);
 
-  // Virtualization threshold
   const useVirtualization = slides.length > 20;
 
-  // Enhanced layout calculations with better height utilization
   const controlsHeight = 28;
-  const collapseButtonHeight = 56; // Increased for better UX
+  const collapseButtonHeight = 56;
   const enhancedHeight = Math.max(height, isMobile ? 160 : isTablet ? 200 : 240);
   const currentHeight = isCollapsed ? collapseButtonHeight : enhancedHeight;
   const contentHeight = currentHeight - controlsHeight;
 
-  const renderEnhancedCollapseButton = () => (
-    <div className="absolute bottom-4 right-4 z-30">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`h-12 w-12 p-0 bg-white shadow-xl hover:shadow-2xl transition-all duration-300 border-gray-300 rounded-full ${
-              isCollapsed ? 'hover:scale-110 ring-2 ring-blue-200' : 'hover:scale-105'
-            }`}
-            aria-label={isCollapsed ? "スライド一覧を表示" : "スライド一覧を隠す"}
-          >
-            {isCollapsed ? (
-              <ChevronUp className="h-6 w-6 transition-transform duration-300 text-blue-600" />
-            ) : (
-              <ChevronDown className="h-6 w-6 transition-transform duration-300 text-gray-600" />
-            )}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="top" className="bg-gray-900 text-white text-sm">
-          {isCollapsed ? "スライド一覧を表示" : "スライド一覧を隠す"}
-        </TooltipContent>
-      </Tooltip>
-    </div>
-  );
-
   return (
-    <div 
-      ref={containerRef}
-      className={`flex flex-col bg-white border-t border-gray-200 transition-all duration-300 ease-in-out shadow-lg ${
-        isCollapsed ? 'overflow-hidden' : ''
-      }`}
-      style={{ height: `${currentHeight}px` }}
-      tabIndex={0}
-      role="region"
-      aria-label="スライド一覧"
-      aria-expanded={!isCollapsed}
+    <UnifiedSlideThumbnailsContainer
+      currentHeight={currentHeight}
+      isCollapsed={isCollapsed}
+      onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
     >
       {!isCollapsed && (
         <>
@@ -212,9 +167,6 @@ const UnifiedSlideThumbnails = ({
         </>
       )}
       
-      {renderEnhancedCollapseButton()}
-      
-      {/* Enhanced loading indicator */}
       {slides.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-sm">
           <div className="text-center">
@@ -224,7 +176,7 @@ const UnifiedSlideThumbnails = ({
           </div>
         </div>
       )}
-    </div>
+    </UnifiedSlideThumbnailsContainer>
   );
 };
 
