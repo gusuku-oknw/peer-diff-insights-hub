@@ -1,7 +1,7 @@
 
 import React from "react";
 import NotesPanel from "../../../slideviewer/panels/NotesPanel";
-import SimplifiedReviewPanel from "../SimplifiedReviewPanel";
+import EnhancedReviewPanel from "../EnhancedReviewPanel";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 
 interface PanelContentProps {
@@ -47,7 +47,7 @@ const PanelContent: React.FC<PanelContentProps> = ({
         </TabsContent>
         
         <TabsContent value="reviews" className="flex-grow overflow-hidden m-0 p-0 min-h-0">
-          <SimplifiedReviewPanel
+          <EnhancedReviewPanel
             currentSlide={currentSlide}
             totalSlides={totalSlides}
             userType={userType}
@@ -65,7 +65,7 @@ const PanelContent: React.FC<PanelContentProps> = ({
 
   if (shouldShowReviewPanel) {
     return (
-      <SimplifiedReviewPanel
+      <EnhancedReviewPanel
         currentSlide={currentSlide}
         totalSlides={totalSlides}
         userType={userType}

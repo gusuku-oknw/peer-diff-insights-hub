@@ -5,7 +5,7 @@ import { BookOpen, MessageSquare, X, Plus, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import NotesPanel from "../../../slideviewer/panels/NotesPanel";
-import ReviewPanel from "../../panels/SimplifiedReviewPanel";
+import EnhancedReviewPanel from "../EnhancedReviewPanel";
 
 interface SidePanelContentProps {
   activeTab: string;
@@ -98,37 +98,8 @@ const SidePanelContent: React.FC<SidePanelContentProps> = ({
           )}
         </div>
 
-        {/* Quick action buttons - Only show for students in review mode */}
-        {!isVeryNarrow && activeTab === "reviews" && userType === "student" && (
-          <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-100">
-            <div className="flex items-center space-x-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onAddComment}
-                className="h-7 px-2 text-xs hover:bg-green-100 transition-all duration-200 hover:scale-105 bg-green-50 border border-green-200"
-              >
-                <Plus className="h-3 w-3 mr-1 text-green-600" />
-                <span className="text-green-700 font-medium">追加</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onSendReview}
-                className="h-7 px-2 text-xs hover:bg-purple-100 transition-all duration-200 hover:scale-105 bg-purple-50 border border-purple-200"
-              >
-                <Send className="h-3 w-3 mr-1 text-purple-600" />
-                <span className="text-purple-700 font-medium">送信</span>
-              </Button>
-            </div>
-            <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full border">
-              スライド {currentSlide}/{totalSlides}
-            </div>
-          </div>
-        )}
-
-        {/* Show slide info for enterprise users or when not in review mode */}
-        {!isVeryNarrow && (activeTab !== "reviews" || userType === "enterprise") && (
+        {/* Show slide info for all modes in enhanced version */}
+        {!isVeryNarrow && (
           <div className="flex items-center justify-end px-4 py-2 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-100">
             {userType === "enterprise" && activeTab === "reviews" && (
               <div className="text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded-full border border-amber-200 mr-2">
@@ -157,7 +128,7 @@ const SidePanelContent: React.FC<SidePanelContentProps> = ({
         
         <TabsContent value="reviews" className="flex-grow overflow-hidden m-0 p-0 min-h-0">
           {shouldShowReviewPanel && (
-            <ReviewPanel
+            <EnhancedReviewPanel
               currentSlide={currentSlide}
               totalSlides={totalSlides}
               panelWidth={panelDimensions.width}
