@@ -1,9 +1,8 @@
-
 import React, { createContext, useContext, ReactNode } from 'react';
 import { colors, modeColors } from '../tokens/colors';
 import { typography, textStyles } from '../tokens/typography';
 import { spacing, semanticSpacing } from '../tokens/spacing';
-import { shadows, coloredShadows } from '../shadows';
+import { shadows, coloredShadows } from '../tokens/shadows';
 
 // デザインシステムコンテキストの型定義
 interface DesignSystemContextType {
