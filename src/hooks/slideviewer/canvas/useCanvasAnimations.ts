@@ -20,18 +20,21 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
 
     canvas.add(element);
 
-    // Animate to final state using Fabric.js v6 API
-    element.animate('opacity', 1, {
+    // Animate to final state using Fabric.js v6 API - updated syntax
+    element.animate('opacity', {
+      to: 1,
       duration: 300,
       easing: 'easeOutCubic',
     });
 
-    element.animate('scaleX', 1, {
+    element.animate('scaleX', {
+      to: 1,
       duration: 300,
       easing: 'easeOutCubic',
     });
 
-    element.animate('scaleY', 1, {
+    element.animate('scaleY', {
+      to: 1,
       duration: 300,
       easing: 'easeOutCubic',
       onChange: () => canvas.renderAll(),
@@ -45,17 +48,20 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
   const removeElementWithAnimation = useCallback((element: FabricObject) => {
     if (!canvas) return;
 
-    element.animate('opacity', 0, {
+    element.animate('opacity', {
+      to: 0,
       duration: 200,
       easing: 'easeInQuad',
     });
 
-    element.animate('scaleX', 0.1, {
+    element.animate('scaleX', {
+      to: 0.1,
       duration: 200,
       easing: 'easeInQuad',
     });
 
-    element.animate('scaleY', 0.1, {
+    element.animate('scaleY', {
+      to: 0.1,
       duration: 200,
       easing: 'easeInQuad',
       onChange: () => canvas.renderAll(),
@@ -71,12 +77,14 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
 
     const originalOpacity = element.opacity || 1;
     
-    element.animate('opacity', 0.5, {
+    element.animate('opacity', {
+      to: 0.5,
       duration: 150,
       easing: 'easeInQuad',
       onChange: () => canvas.renderAll(),
       onComplete: () => {
-        element.animate('opacity', originalOpacity, {
+        element.animate('opacity', {
+          to: originalOpacity,
           duration: 150,
           easing: 'easeOutCubic',
           onChange: () => canvas.renderAll()
