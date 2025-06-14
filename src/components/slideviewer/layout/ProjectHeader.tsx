@@ -14,7 +14,7 @@ const ProjectHeader: React.FC = () => {
 
   const handleToggleRightPanel = () => {
     const currentVisible = isRightPanelVisible();
-    setRightPanelHidden(currentVisible);
+    setRightPanelHidden(currentVisible); // Hide if currently visible, show if currently hidden
   };
 
   return (

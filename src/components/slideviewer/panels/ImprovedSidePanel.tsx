@@ -45,7 +45,8 @@ const ImprovedSidePanel: React.FC<ImprovedSidePanelProps> = ({
     userType,
     currentSlide,
     activeTab,
-    currentWidth
+    currentWidth,
+    isHidden
   });
 
   // Update width when initialWidth changes (responsive)
@@ -101,7 +102,8 @@ const ImprovedSidePanel: React.FC<ImprovedSidePanelProps> = ({
   // Determine if we should display the panel at all
   const shouldDisplay = shouldShowNotes || shouldShowReviewPanel;
   
-  if (!shouldDisplay || isHidden) {
+  // Don't render if explicitly hidden or if there's nothing to show
+  if (isHidden || !shouldDisplay) {
     return null;
   }
 

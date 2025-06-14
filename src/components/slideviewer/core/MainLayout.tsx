@@ -80,7 +80,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const canvasHeight = windowDimensions.height - (isMobile ? 260 : 280); // Adjusted for toolbar
 
   const handleToggleRightPanel = () => {
-    setRightPanelHidden(!isRightPanelVisible());
+    const currentVisible = isRightPanelVisible();
+    setRightPanelHidden(currentVisible); // Hide if currently visible, show if currently hidden
   };
 
   const handleFullScreenToggle = () => {
