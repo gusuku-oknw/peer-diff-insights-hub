@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSlideStore } from "@/stores/slide-store";
+import { useSlideStore } from "@/stores/slide.store";
 import usePresentationMode from "./usePresentationMode";
 import useSlideNavigation from "./useSlideNavigation";
 import type { ViewerMode } from "@/types/slide.types";

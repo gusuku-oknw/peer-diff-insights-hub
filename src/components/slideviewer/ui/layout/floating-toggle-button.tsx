@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { PanelRightOpen } from "lucide-react";
-import { useSlideStore } from "@/stores/slide-store";
+import { useSlideStore } from "@/stores/slide.store";
 import type { ViewerMode } from "@/types/slide.types";
 
 interface FloatingToggleButtonProps {

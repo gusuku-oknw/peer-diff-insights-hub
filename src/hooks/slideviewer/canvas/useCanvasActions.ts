@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { useSlideStore } from "@/stores/slide-store";
+import { useSlideStore } from "@/stores/slide.store";
 import { IText, Rect, Circle } from 'fabric';
 import { Canvas } from 'fabric';
 

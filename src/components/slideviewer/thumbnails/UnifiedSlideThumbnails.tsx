@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { useSlideStore } from "@/stores/slide.store";
 import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
 import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
-import { useEnhancedThumbnailUI } from "@/hooks/slideviewer/useEnhancedThumbnailUI";
+import { useEnhancedThumbnailUI } from "@/features/slideviewer/hooks/useEnhancedThumbnailUI";
 import UnifiedSlideThumbnailsContainer from "./UnifiedSlideThumbnailsContainer";
 import SimplifiedSlideThumbnailsContent from "./SimplifiedSlideThumbnailsContent";
 import SimplifiedThumbnailHeader from "./SimplifiedThumbnailHeader";

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import ImprovedSidePanel from "../panels/improved-side-panel";
-import { useSlideStore } from "@/stores/slide-store";
+import { useSlideStore } from "@/stores/slide.store";
 import type { ViewerMode } from "@/types/slide.types";
 
 interface RightPanelWrapperProps {

@@ -2,7 +2,7 @@
 import React from "react";
 import EnhancedSlideDisplay from "./EnhancedSlideDisplay";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
-import { useSlideStore } from "@/stores/slide-store";
+import { useSlideStore } from "@/stores/slide.store";
 import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
 import type { ViewerMode } from "@/types/slide.types";
 

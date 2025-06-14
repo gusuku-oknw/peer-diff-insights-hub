@@ -1,6 +1,6 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
+import OptimizedSlideCanvas from "@/features/slideviewer/components/canvas/OptimizedSlideCanvas";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";

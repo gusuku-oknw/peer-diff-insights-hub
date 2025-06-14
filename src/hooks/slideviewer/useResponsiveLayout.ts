@@ -1,6 +1,5 @@
-
 import { useState, useEffect, useMemo } from 'react';
-import { useSlideStore } from '@/stores/slide-store';
+import { useSlideStore } from '@/stores/slide.store';
 
 export const useResponsiveLayout = () => {
   const { getRightSidebarWidth, isRightPanelVisible } = useSlideStore();

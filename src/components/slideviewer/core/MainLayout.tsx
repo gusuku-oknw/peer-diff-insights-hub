@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useSlideStore } from "@/stores/slide-store";
+import { useSlideStore } from "@/stores/slide.store";
 import { useIsMobile } from "@/hooks/use-mobile";
 import LeftSidebar from "../layout/LeftSidebar";
 import RightSidebar from "../layout/RightSidebar";

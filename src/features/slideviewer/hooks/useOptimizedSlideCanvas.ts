@@ -1,11 +1,10 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Canvas } from 'fabric';
-import { useSlideStore } from '@/stores/slide-store';
+import { useSlideStore } from '@/stores/slide.store';
 import { useCanvasInitialization } from './canvas/useCanvasInitialization';
 import { useCanvasResize } from './canvas/useCanvasResize';
 import { usePerformanceMonitor } from './usePerformanceMonitor';
-import { usePerformanceOptimization } from './canvas/usePerformanceOptimization';
 
 interface UseOptimizedSlideCanvasProps {
   currentSlide: number;
@@ -53,13 +52,6 @@ export const useOptimizedSlideCanvas = ({
     canvas: fabricCanvasRef.current,
     containerWidth,
     containerHeight
-  });
-  
-  // Performance optimization
-  usePerformanceOptimization({
-    canvas: fabricCanvasRef.current,
-    enablePerformanceMode,
-    isPerformanceGood
   });
   
   // Initialize canvas when container dimensions are available

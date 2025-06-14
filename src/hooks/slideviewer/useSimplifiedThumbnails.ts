@@ -1,6 +1,6 @@
 
 import { useRef, useEffect } from 'react';
-import { useSlideStore } from '@/stores/slide-store';
+import { useSlideStore } from '@/stores/slide.store';
 import { useSmoothScroll } from './useSmoothScroll';
 import { useResponsiveThumbnails } from './useResponsiveThumbnails';
 import type { UserType } from '@/types/slideviewer/thumbnail-common.types';

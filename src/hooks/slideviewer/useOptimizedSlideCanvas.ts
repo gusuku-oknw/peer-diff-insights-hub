@@ -1,11 +1,9 @@
-
-import { useSlideStore } from "@/stores/slide-store";
+import { useSlideStore } from "@/stores/slide.store";
 import { usePerformanceMonitor } from "./usePerformanceMonitor";
 import { useCanvasConfig } from "./canvas/useCanvasConfig";
 import { useCanvasEvents } from "./canvas/useCanvasEvents";
 import { useCanvasInitialization } from "./canvas/useCanvasInitialization";
 import { useCanvasResize } from "./canvas/useCanvasResize";
-import { usePerformanceOptimization } from "./canvas/usePerformanceOptimization";
 
 interface UseOptimizedSlideCanvasProps {
   currentSlide: number;
@@ -69,13 +67,6 @@ export const useOptimizedSlideCanvas = ({
     canvasSize,
     startRenderMeasure,
     endRenderMeasure
-  });
-  
-  // パフォーマンス最適化
-  usePerformanceOptimization({
-    canvas: fabricCanvasRef.current,
-    enablePerformanceMode,
-    isPerformanceGood
   });
   
   const currentSlideData = slides.find(slide => slide.id === currentSlide);

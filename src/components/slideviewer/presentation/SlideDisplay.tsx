@@ -1,6 +1,5 @@
-
 import React, { useRef, useEffect, useState } from "react";
-import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
+import OptimizedSlideCanvas from "@/features/slideviewer/components/canvas/OptimizedSlideCanvas";
 
 interface SlideDisplayProps {
   currentSlide: number;
@@ -80,7 +79,7 @@ const SlideDisplay: React.FC<SlideDisplayProps> = ({
               transform: `scale(${zoomScale})`,
             }}
           >
-            <SlideCanvas
+            <OptimizedSlideCanvas
               currentSlide={currentSlide}
               zoomLevel={100}
               editable={viewerMode === "edit"}

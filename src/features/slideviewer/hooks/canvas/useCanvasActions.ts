@@ -1,7 +1,6 @@
-
 import { useCallback } from 'react';
 import { Canvas, FabricText, Rect } from 'fabric';
-import { useSlideStore } from '@/stores/slide-store';
+import { useSlideStore } from '@/stores/slide.store';
 
 interface UseCanvasActionsProps {
   currentSlide: number;
