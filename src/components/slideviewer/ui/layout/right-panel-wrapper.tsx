@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import ImprovedSidePanel from "../panels/ImprovedSidePanel";
+import ImprovedSidePanel from "../panels/improved-side-panel";
 import { useSlideStore } from "@/stores/slide-store";
 import type { ViewerMode } from "@/types/slide.types";
 
@@ -31,35 +31,27 @@ export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
 
   const [panelWidth, setPanelWidth] = useState(() => getRightSidebarWidth());
 
-  // Update panel width on window resize
   useEffect(() => {
     const updatePanelWidth = () => {
       setPanelWidth(getRightSidebarWidth());
     };
 
-    updatePanelWidth(); // Initial calculation
+    updatePanelWidth();
     
     window.addEventListener('resize', updatePanelWidth);
     return () => window.removeEventListener('resize', updatePanelWidth);
   }, [getRightSidebarWidth]);
 
-  // ノート表示判定
   const shouldShowNotes =
       userType === "enterprise" &&
       ((viewerMode === "presentation" && showPresenterNotes) ||
           (viewerMode === "review" && showPresenterNotes));
 
-  // レビューパネル表示判定
   const shouldShowReviewPanel = viewerMode === "review";
-
-  // 右パネルを表示すべきか
   const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
-
-  // フルスクリーン発表時 or 表示内容なしのときは非表示
   const hideRightPanelCompletely =
       (viewerMode === "presentation" && isFullScreen) || !shouldDisplayRightPanel;
 
-  // 非表示フラグ or ユーザーが隠した時は何もレンダーしない
   if (hideRightPanelCompletely || rightPanelHidden) {
     return null;
   }
@@ -78,7 +70,7 @@ export const RightPanelWrapper: React.FC<RightPanelWrapperProps> = ({
         isHidden={false}
         onToggleHide={() => setRightPanelHidden(true)}
         userType={userType}
-        onWidthChange={() => {}} // Disable manual width change as it's now responsive
+        onWidthChange={() => {}}
         initialWidth={panelWidth}
       />
     </div>

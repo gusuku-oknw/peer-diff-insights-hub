@@ -1,6 +1,6 @@
 
 import React from "react";
-import LeftSidebar from "./LeftSidebar";
+import LeftSidebarCore from "./left-sidebar-core";
 
 interface LeftSidebarWrapperProps {
   currentBranch: string;
@@ -23,7 +23,7 @@ export const LeftSidebarWrapper: React.FC<LeftSidebarWrapperProps> = ({
 
   return (
     <div className="h-full bg-gray-50 border-r border-gray-200 shadow-lg transition-all duration-300 ease-in-out">
-      <LeftSidebar
+      <LeftSidebarCore
         currentBranch={currentBranch}
         branches={branches}
         commitHistory={commitHistory}

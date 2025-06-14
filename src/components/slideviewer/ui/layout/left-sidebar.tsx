@@ -1,8 +1,8 @@
 
 import React from "react";
-import { LeftSidebarWrapper } from "./LeftSidebarWrapper";
+import { LeftSidebarWrapper } from "./left-sidebar-wrapper";
 
-interface SidebarLeftProps {
+interface LeftSidebarProps {
   leftSidebarOpen: boolean;
   currentBranch: string;
   branches: string[];
@@ -11,7 +11,7 @@ interface SidebarLeftProps {
   onToggleLeftSidebar: () => void;
 }
 
-const SidebarLeft: React.FC<SidebarLeftProps> = ({
+const LeftSidebar: React.FC<LeftSidebarProps> = ({
   leftSidebarOpen,
   currentBranch,
   branches,
@@ -33,4 +33,4 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
   );
 };
 
-export default SidebarLeft;
+export default LeftSidebar;

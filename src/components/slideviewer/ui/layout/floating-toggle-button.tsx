@@ -18,7 +18,6 @@ export const FloatingToggleButton: React.FC<FloatingToggleButtonProps> = ({
 }) => {
   const { rightPanelHidden, setRightPanelHidden } = useSlideStore();
 
-  // 右パネル表示ロジック
   const shouldShowNotes = (viewerMode === "presentation" && showPresenterNotes) || 
                          (viewerMode === "review" && showPresenterNotes);
   const shouldShowReviewPanel = viewerMode === "review";

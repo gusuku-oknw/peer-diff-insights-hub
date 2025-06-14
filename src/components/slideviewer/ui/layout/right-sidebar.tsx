@@ -1,9 +1,9 @@
 
 import React from "react";
-import { RightPanelWrapper } from "./RightPanelWrapper";
+import { RightPanelWrapper } from "./right-panel-wrapper";
 import type { ViewerMode } from "@/types/slide.types";
 
-interface SidebarRightProps {
+interface RightSidebarProps {
   viewerMode: ViewerMode;
   showPresenterNotes: boolean;
   isFullScreen: boolean;
@@ -13,7 +13,7 @@ interface SidebarRightProps {
   userType: "student" | "enterprise";
 }
 
-const SidebarRight: React.FC<SidebarRightProps> = ({
+const RightSidebar: React.FC<RightSidebarProps> = ({
   viewerMode,
   showPresenterNotes,
   isFullScreen,
@@ -35,4 +35,4 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
   );
 };
 
-export default SidebarRight;
+export default RightSidebar;
