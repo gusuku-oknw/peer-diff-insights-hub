@@ -40,23 +40,35 @@ export const useCanvasConfig = ({
     const baseDisplayWidth = Math.max(320, Math.min(1200, Math.round(displayWidth)));
     const baseDisplayHeight = Math.max(180, Math.min(675, Math.round(displayHeight)));
     
-    // Simplified: Always use actual sizing since max zoom is now 100%
-    const useActualSizing = true;
-    const zoomFactor = Math.max(0.25, Math.min(1.0, zoomLevel / 100)); // Ensure zoom is between 25% and 100%
+    // Hybrid zoom approach: 25%-100% actual sizing, 100%-200% CSS transform
+    const useActualSizing = zoomLevel <= 100;
+    const effectiveZoomLevel = Math.max(0.25, Math.min(2.0, zoomLevel / 100));
     
-    // Adjust actual canvas size based on zoom
-    const actualWidth = Math.round(baseDisplayWidth * zoomFactor);
-    const actualHeight = Math.round(baseDisplayHeight * zoomFactor);
-    const finalDisplayWidth = actualWidth;
-    const finalDisplayHeight = actualHeight;
+    let actualWidth, actualHeight, finalDisplayWidth, finalDisplayHeight;
+    
+    if (useActualSizing) {
+      // For zoom <= 100%, adjust actual canvas size
+      const zoomFactor = Math.max(0.25, Math.min(1.0, zoomLevel / 100));
+      actualWidth = Math.round(baseDisplayWidth * zoomFactor);
+      actualHeight = Math.round(baseDisplayHeight * zoomFactor);
+      finalDisplayWidth = actualWidth;
+      finalDisplayHeight = actualHeight;
+    } else {
+      // For zoom > 100%, use base size (CSS transform will handle the scaling)
+      actualWidth = baseDisplayWidth;
+      actualHeight = baseDisplayHeight;
+      finalDisplayWidth = baseDisplayWidth;
+      finalDisplayHeight = baseDisplayHeight;
+    }
     
     // Simple 1:1 rendering - no pixel ratio scaling
     const pixelRatio = 1;
     
-    console.log('Canvas config (max 100% zoom):', {
+    console.log('Canvas config (hybrid zoom 25%-200%):', {
       container: `${containerWidth}x${containerHeight}`,
       zoomLevel: `${zoomLevel}%`,
       useActualSizing,
+      mode: useActualSizing ? 'actual sizing' : 'CSS transform',
       base: `${baseDisplayWidth}x${baseDisplayHeight}`,
       actual: `${actualWidth}x${actualHeight}`,
       display: `${finalDisplayWidth}x${finalDisplayHeight}`,

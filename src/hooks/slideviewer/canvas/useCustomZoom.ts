@@ -44,14 +44,24 @@ export const useCustomZoom = ({ canvas, isReady, canvasConfig, zoomLevel }: UseC
         return;
       }
       
-      // Simplified: Always use actual sizing (no CSS transforms)
-      // Since max zoom is now 100%, we only need actual canvas size adjustments
-      canvasContainer.style.transform = 'scale(1)';
-      canvasContainer.style.transformOrigin = 'center center';
-      canvasContainer.style.transition = 'transform 0.2s ease-out';
-      zoomTransformRef.current = 'scale(1)';
-      
-      console.log(`✓ Zoom applied: ${currentZoomLevel}% (actual sizing mode)`);
+      // Hybrid zoom approach: 25%-100% actual sizing, 100%-200% CSS transform
+      if (currentZoomLevel <= 100) {
+        // Use actual sizing for zoom levels up to 100%
+        canvasContainer.style.transform = 'scale(1)';
+        canvasContainer.style.transformOrigin = 'center center';
+        canvasContainer.style.transition = 'transform 0.2s ease-out';
+        zoomTransformRef.current = 'scale(1)';
+        console.log(`✓ Zoom applied: ${currentZoomLevel}% (actual sizing mode)`);
+      } else {
+        // Use CSS transform for zoom levels above 100%
+        const transformScale = currentZoomLevel / 100;
+        const scaleTransform = `scale(${transformScale})`;
+        canvasContainer.style.transform = scaleTransform;
+        canvasContainer.style.transformOrigin = 'center center';
+        canvasContainer.style.transition = 'transform 0.2s ease-out';
+        zoomTransformRef.current = scaleTransform;
+        console.log(`✓ Zoom applied: ${currentZoomLevel}% (CSS transform mode, scale: ${transformScale})`);
+      }
 
       // Force a re-render to ensure the transform is applied
       canvas.renderAll();
@@ -82,7 +92,7 @@ export const useCustomZoom = ({ canvas, isReady, canvasConfig, zoomLevel }: UseC
   // Apply zoom when dependencies change
   useEffect(() => {
     if (isReady && canvasConfig && canvas) {
-      console.log(`🔄 Applying zoom: ${zoomLevel}% (simplified actual sizing)`);
+      console.log(`🔄 Applying hybrid zoom: ${zoomLevel}% (25%-100% actual, 100%-200% transform)`);
       applyZoomTransform(zoomLevel);
     }
   }, [zoomLevel, isReady, canvasConfig, canvas, applyZoomTransform]);
