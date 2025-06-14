@@ -44,8 +44,8 @@ const SlideViewerCore: React.FC = () => {
 
   return (
     <MainLayout
-      currentSlide={slideViewerLogic.currentSlide}
-      totalSlides={slideViewerLogic.totalSlides}
+      currentSlide={slideViewerLogic.currentSlideNumber}
+      totalSlides={slideViewerLogic.slides.length}
       presenterNotes={slideViewerLogic.presenterNotes}
       userType={slideViewerLogic.userType}
       presentationStartTime={finalPresentationStartTime}
