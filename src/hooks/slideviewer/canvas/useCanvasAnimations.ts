@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { Canvas, FabricObject, Point } from 'fabric';
+import { Canvas, FabricObject, Point, util } from 'fabric';
 
 interface UseCanvasAnimationsProps {
   canvas: Canvas | null;
@@ -20,7 +20,7 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
 
     canvas.add(element);
 
-    // Animate to final state using Fabric.js v6 API - correct syntax
+    // Animate to final state using Fabric.js v6 API - correct syntax with proper easing
     element.animate(
       {
         opacity: 1,
@@ -29,7 +29,7 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
       },
       {
         duration: 300,
-        easing: 'easeOutCubic',
+        easing: util.ease.easeOutCubic,
         onChange: () => canvas.renderAll(),
         onComplete: () => {
           canvas.setActiveObject(element);
@@ -50,7 +50,7 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
       },
       {
         duration: 200,
-        easing: 'easeInQuad',
+        easing: util.ease.easeInQuad,
         onChange: () => canvas.renderAll(),
         onComplete: () => {
           canvas.remove(element);
@@ -69,14 +69,14 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
       { opacity: 0.5 },
       {
         duration: 150,
-        easing: 'easeInQuad',
+        easing: util.ease.easeInQuad,
         onChange: () => canvas.renderAll(),
         onComplete: () => {
           element.animate(
             { opacity: originalOpacity },
             {
               duration: 150,
-              easing: 'easeOutCubic',
+              easing: util.ease.easeOutCubic,
               onChange: () => canvas.renderAll()
             }
           );
