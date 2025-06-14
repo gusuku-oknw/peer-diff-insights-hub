@@ -22,7 +22,7 @@ export const LeftSidebarWrapper: React.FC<LeftSidebarWrapperProps> = ({
   if (!leftSidebarOpen) return null;
 
   return (
-    <div className="h-full bg-gray-50 border-r border-gray-200">
+    <div className="h-full bg-gray-50 border-r border-gray-200 shadow-lg transition-all duration-300 ease-in-out">
       <LeftSidebar
         currentBranch={currentBranch}
         branches={branches}

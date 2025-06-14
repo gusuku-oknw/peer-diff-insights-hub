@@ -20,14 +20,16 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
   onToggleLeftSidebar,
 }) => {
   return (
-    <LeftSidebarWrapper
-      leftSidebarOpen={leftSidebarOpen}
-      currentBranch={currentBranch}
-      branches={branches}
-      commitHistory={commitHistory}
-      onBranchChange={onBranchChange}
-      onToggleLeftSidebar={onToggleLeftSidebar}
-    />
+    <div className={`transition-all duration-300 ease-in-out ${leftSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <LeftSidebarWrapper
+        leftSidebarOpen={leftSidebarOpen}
+        currentBranch={currentBranch}
+        branches={branches}
+        commitHistory={commitHistory}
+        onBranchChange={onBranchChange}
+        onToggleLeftSidebar={onToggleLeftSidebar}
+      />
+    </div>
   );
 };
 

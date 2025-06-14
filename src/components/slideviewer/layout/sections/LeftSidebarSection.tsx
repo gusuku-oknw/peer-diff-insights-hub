@@ -28,7 +28,7 @@ export const LeftSidebarSection: React.FC<LeftSidebarSectionProps> = ({
 }) => {
   if (!leftSidebarOpen) {
     return (
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 transition-all duration-300 ease-in-out">
         {children}
       </div>
     );
@@ -41,7 +41,7 @@ export const LeftSidebarSection: React.FC<LeftSidebarSectionProps> = ({
           defaultSize={25}
           minSize={15}
           maxSize={35}
-          className="min-w-[180px] max-w-[400px]"
+          className="min-w-[180px] max-w-[400px] transition-all duration-300 ease-in-out"
         >
           <LeftSidebarWrapper
             currentBranch={currentBranch}
@@ -53,10 +53,10 @@ export const LeftSidebarSection: React.FC<LeftSidebarSectionProps> = ({
           />
         </ResizablePanel>
         
-        <ResizableHandle withHandle />
+        <ResizableHandle withHandle className="hover:bg-blue-200 transition-colors duration-200" />
         
         <ResizablePanel defaultSize={75} minSize={65}>
-          <div className="flex-1 min-w-0 h-full">
+          <div className="flex-1 min-w-0 h-full transition-all duration-300 ease-in-out">
             {children}
           </div>
         </ResizablePanel>
