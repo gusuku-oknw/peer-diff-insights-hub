@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MessageSquare, CheckCircle, Clock, Star, MoreHorizontal, Copy, Trash2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -17,7 +16,9 @@ import type { EnhancedSlideData, ThumbnailSize } from "@/types/slide.types";
 interface EnhancedThumbnailCardProps {
   slide: EnhancedSlideData;
   slideIndex: number;
+  isActive: boolean;
   thumbnailSize: ThumbnailSize;
+  showDetails: boolean;
   onClick: (slideIndex: number) => void;
   onContextMenu?: (slideIndex: number, action: string) => void;
   userType?: "student" | "enterprise";
@@ -26,8 +27,10 @@ interface EnhancedThumbnailCardProps {
 
 const EnhancedThumbnailCard = ({ 
   slide, 
-  slideIndex, 
+  slideIndex,
+  isActive,
   thumbnailSize,
+  showDetails,
   onClick,
   onContextMenu,
   userType = "enterprise",
@@ -37,7 +40,6 @@ const EnhancedThumbnailCard = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   
   const isStudent = userType === "student";
-  const isActive = slide.isActive;
 
   // サイズ設定
   const sizeConfig = {
@@ -205,7 +207,7 @@ const EnhancedThumbnailCard = ({
         </div>
 
         {/* プログレスバー（学生用） */}
-        {isStudent && thumbnailSize !== 'compact' && (
+        {isStudent && thumbnailSize !== 'compact' && showDetails && (
           <div className="mb-3">
             <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
               <span>進捗</span>
@@ -216,44 +218,46 @@ const EnhancedThumbnailCard = ({
         )}
 
         {/* 統計情報 */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* コメント */}
-            {slide.hasComments && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-1 text-purple-600">
-                    <MessageSquare className="w-3 h-3" />
-                    <span className="text-xs font-medium">{slide.commentCount}</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{slide.commentCount}件のコメント</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
+        {showDetails && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {/* コメント */}
+              {slide.hasComments && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 text-purple-600">
+                      <MessageSquare className="w-3 h-3" />
+                      <span className="text-xs font-medium">{slide.commentCount}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{slide.commentCount}件のコメント</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
 
-            {/* レビュー完了 */}
-            {slide.isReviewed && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>レビュー完了</p>
-                </TooltipContent>
-              </Tooltip>
+              {/* レビュー完了 */}
+              {slide.isReviewed && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>レビュー完了</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
+
+            {/* 最終更新時間 */}
+            {thumbnailSize !== 'compact' && (
+              <div className="flex items-center gap-1 text-gray-400">
+                <Clock className="w-3 h-3" />
+                <span className="text-xs">{slide.lastUpdated}</span>
+              </div>
             )}
           </div>
-
-          {/* 最終更新時間 */}
-          {thumbnailSize !== 'compact' && (
-            <div className="flex items-center gap-1 text-gray-400">
-              <Clock className="w-3 h-3" />
-              <span className="text-xs">{slide.lastUpdated}</span>
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       {/* フォーカスインジケーター */}
