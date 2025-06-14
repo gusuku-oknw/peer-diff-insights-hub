@@ -172,7 +172,7 @@ export const useOptimizedSlideCanvas = ({
     }
   }, [canvasSize, editable, setupOptimizedCanvasEvents, startRenderMeasure, endRenderMeasure, enablePerformanceMode, isPerformanceGood]);
   
-  // 最適化されたキャンバスサイズ更新
+  // 最適化されたキャンバスサイズ更新 - 安全性チェックを追加
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady) return;
@@ -181,12 +181,17 @@ export const useOptimizedSlideCanvas = ({
       try {
         startRenderMeasure();
         
-        canvasOptimizer.queueRender(() => {
-          canvas.setDimensions({
-            width: canvasSize.width,
-            height: canvasSize.height
+        // キャンバスが適切に初期化されているかチェック
+        if (canvas.upperCanvasEl && canvas.lowerCanvasEl) {
+          canvasOptimizer.queueRender(() => {
+            canvas.setDimensions({
+              width: canvasSize.width,
+              height: canvasSize.height
+            });
           });
-        });
+        } else {
+          console.warn('Canvas elements not properly initialized, skipping resize');
+        }
         
         endRenderMeasure();
         console.log('Canvas resized with optimization:', canvasSize);

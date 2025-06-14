@@ -24,7 +24,9 @@ const SlideCanvas = ({
 }: SlideCanvasProps) => {
   console.log(`SlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}`);
   
-  // Enhanced responsive canvas sizing
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+
+  // Always call all hooks at the top level - never conditionally
   const {
     canvasSize,
     deviceInfo,
@@ -34,23 +36,6 @@ const SlideCanvas = ({
     containerHeight
   });
 
-  // Use TouchOptimizedCanvas for mobile devices
-  if (deviceInfo.isMobile) {
-    return (
-      <TouchOptimizedCanvas
-        currentSlide={currentSlide}
-        zoomLevel={zoomLevel}
-        editable={editable}
-        userType={userType}
-        containerWidth={containerWidth}
-        containerHeight={containerHeight}
-      />
-    );
-  }
-  
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
-  
-  // 最適化されたキャンバスフックを使用
   const {
     canvasRef,
     fabricCanvasRef,
@@ -66,7 +51,7 @@ const SlideCanvas = ({
     containerHeight: canvasSize.height,
     enablePerformanceMode: true
   });
-  
+
   // Enhanced element rendering with performance optimization
   const handleRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
@@ -84,6 +69,20 @@ const SlideCanvas = ({
       handleRenderElements();
     }
   }, [handleRenderElements, isReady]);
+
+  // Now we can conditionally render based on device type AFTER all hooks are called
+  if (deviceInfo.isMobile) {
+    return (
+      <TouchOptimizedCanvas
+        currentSlide={currentSlide}
+        zoomLevel={zoomLevel}
+        editable={editable}
+        userType={userType}
+        containerWidth={containerWidth}
+        containerHeight={containerHeight}
+      />
+    );
+  }
   
   if (!slides || slides.length === 0) {
     return (

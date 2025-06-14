@@ -26,6 +26,9 @@ const OptimizedSlideCanvas = ({
 }: OptimizedSlideCanvasProps) => {
   console.log(`OptimizedSlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}, Performance Mode: ${enablePerformanceMode}`);
   
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+
+  // Always call all hooks at the top level - never conditionally
   const {
     canvasSize,
     deviceInfo,
@@ -35,22 +38,6 @@ const OptimizedSlideCanvas = ({
     containerHeight
   });
 
-  // モバイルデバイスでは TouchOptimizedCanvas を使用
-  if (deviceInfo.isMobile) {
-    return (
-      <TouchOptimizedCanvas
-        currentSlide={currentSlide}
-        zoomLevel={zoomLevel}
-        editable={editable}
-        userType={userType}
-        containerWidth={containerWidth}
-        containerHeight={containerHeight}
-      />
-    );
-  }
-  
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
-  
   const {
     canvasRef,
     fabricCanvasRef,
@@ -85,6 +72,20 @@ const OptimizedSlideCanvas = ({
       handleOptimizedRenderElements();
     }
   }, [handleOptimizedRenderElements, isReady]);
+
+  // モバイルデバイスでは TouchOptimizedCanvas を使用 (hooks呼び出し後)
+  if (deviceInfo.isMobile) {
+    return (
+      <TouchOptimizedCanvas
+        currentSlide={currentSlide}
+        zoomLevel={zoomLevel}
+        editable={editable}
+        userType={userType}
+        containerWidth={containerWidth}
+        containerHeight={containerHeight}
+      />
+    );
+  }
   
   if (!slides || slides.length === 0) {
     return (
