@@ -26,17 +26,17 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
 
   return (
     <div className="h-full flex flex-col bg-gray-50 shadow-sm border-r border-gray-200">
-      {/* 改善されたヘッダー */}
+      {/* Enhanced Header */}
       <LeftPanelHeader
         currentBranch={currentBranch}
         isMobile={isMobile}
         onClose={onToggleLeftSidebar}
       />
 
-      {/* Branch Selector */}
-      <div className="px-4 py-3 border-b border-gray-100 bg-white/50">
-        <div className="mb-2">
-          <label className="text-xs font-medium text-gray-700 mb-1 block">
+      {/* Compact Branch Selector */}
+      <div className="px-3 py-2 border-b border-gray-100 bg-white/50 flex-shrink-0">
+        <div className="mb-1">
+          <label className="text-xs font-medium text-gray-700 block">
             ブランチ選択
           </label>
         </div>
@@ -47,17 +47,19 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
         />
       </div>
 
-      {/* Commit History */}
-      <div className="flex-grow p-4 overflow-auto bg-gradient-to-b from-white/30 to-gray-50/50">
-        <div className="mb-2">
+      {/* Expanded Commit History */}
+      <div className="flex-1 min-h-0 p-3 overflow-hidden bg-gradient-to-b from-white/30 to-gray-50/50">
+        <div className="mb-2 flex-shrink-0">
           <h3 className="text-sm font-medium text-gray-700 flex items-center">
             コミット履歴
           </h3>
-          <p className="text-xs text-gray-500 mt-1">
-            最新のコミットから表示されています
+          <p className="text-xs text-gray-500 mt-0.5">
+            {commitHistory.length} 件のコミット
           </p>
         </div>
-        <CommitHistory commitHistory={commitHistory} />
+        <div className="h-full overflow-hidden">
+          <CommitHistory commitHistory={commitHistory} />
+        </div>
       </div>
     </div>
   );
