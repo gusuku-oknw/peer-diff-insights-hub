@@ -107,6 +107,8 @@ const EnhancedReviewTabs: React.FC<EnhancedReviewTabsProps> = ({
     }
   ];
 
+  console.log('EnhancedReviewTabs: Rendering with activeTab:', activeTab);
+
   return (
     <Tabs value={activeTab} onValueChange={handleExplicitTabChange} className="flex-grow flex flex-col">
       <TabsList className={`mx-4 mt-3 grid grid-cols-4 bg-gray-50 ${isVeryNarrow ? 'gap-0' : 'gap-1'}`}>

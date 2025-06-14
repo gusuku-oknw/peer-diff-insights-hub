@@ -1,4 +1,3 @@
-
 import React from "react";
 import EnhancedReviewPanelHeader from "./components/EnhancedReviewPanelHeader";
 import ReviewPermissionNotice from "./components/ReviewPermissionNotice";
@@ -42,6 +41,7 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
     comments,
     checklistState,
     completionPercentage,
+    canView,
     canInteract,
     handleCheckboxChange,
     handleSubmitComment
@@ -58,6 +58,7 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
     externalActiveTab, 
     currentSlide, 
     userType, 
+    canView,
     canInteract 
   });
 
@@ -92,6 +93,13 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
         description: "レビュータブでコメントを追加できます",
         duration: 2000
       });
+    } else {
+      toast({
+        title: "権限がありません",
+        description: "企業ユーザーはコメントの追加はできません",
+        variant: "destructive",
+        duration: 2000
+      });
     }
   };
 
@@ -101,6 +109,13 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
         title: "レビューを送信しました",
         description: "チームメンバーに通知されました",
         duration: 3000
+      });
+    } else {
+      toast({
+        title: "権限がありません",
+        description: "企業ユーザーはレビューの送信はできません",
+        variant: "destructive",
+        duration: 2000
       });
     }
   };
@@ -145,6 +160,13 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
         description: "このスライドのレビューが完了しました",
         duration: 2000
       });
+    } else {
+      toast({
+        title: "権限がありません",
+        description: "企業ユーザーは完了マークの追加はできません",
+        variant: "destructive",
+        duration: 2000
+      });
     }
   };
 
@@ -154,6 +176,13 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
       toast({
         title: "ディスカッション開始",
         description: "チームディスカッションを開始しました",
+        duration: 2000
+      });
+    } else {
+      toast({
+        title: "権限がありません",
+        description: "企業ユーザーはディスカッションの開始はできません",
+        variant: "destructive",
         duration: 2000
       });
     }
@@ -174,12 +203,12 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
         urgentItems={urgentItems}
       />
 
-      {!canInteract && (
+      {!canInteract && !isVeryNarrow && (
         <ReviewPermissionNotice isVeryNarrow={isVeryNarrow} />
       )}
 
       <div className="flex-grow flex flex-col min-h-0">
-        {canInteract && !isVeryNarrow ? (
+        {canView && !isVeryNarrow ? (
           <>
             <EnhancedReviewTabs
               activeTab={activeTab}
@@ -197,18 +226,20 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
               onCheckboxChange={handleCheckboxChange}
             />
             
-            <QuickActionBar
-              canInteract={canInteract}
-              onAddComment={handleAddComment}
-              onSendReview={handleSendReview}
-              onBookmark={handleBookmark}
-              onUndo={handleUndo}
-              onShare={handleShare}
-              onSuggest={handleSuggest}
-              onMarkComplete={handleMarkComplete}
-              onStartDiscussion={handleStartDiscussion}
-              isVeryNarrow={isVeryNarrow}
-            />
+            {canInteract && (
+              <QuickActionBar
+                canInteract={canInteract}
+                onAddComment={handleAddComment}
+                onSendReview={handleSendReview}
+                onBookmark={handleBookmark}
+                onUndo={handleUndo}
+                onShare={handleShare}
+                onSuggest={handleSuggest}
+                onMarkComplete={handleMarkComplete}
+                onStartDiscussion={handleStartDiscussion}
+                isVeryNarrow={isVeryNarrow}
+              />
+            )}
           </>
         ) : (
           <ReviewSimplifiedView

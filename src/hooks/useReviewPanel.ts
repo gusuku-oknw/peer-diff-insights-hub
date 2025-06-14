@@ -28,7 +28,7 @@ export const useReviewPanel = ({
   activeTab: externalActiveTab,
   onTabChange: externalOnTabChange
 }: UseReviewPanelProps) => {
-  const [internalActiveTab, setInternalActiveTab] = useState("review");
+  const [internalActiveTab, setInternalActiveTab] = useState("dashboard");
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState<Comment[]>([
     {
@@ -49,9 +49,12 @@ export const useReviewPanel = ({
   });
 
   const { toast } = useToast();
+  
+  // Allow viewing for all users, but restrict interactions to students
+  const canView = true;
   const canInteract = userType === "student";
 
-  // Use external tab control if provided, otherwise use internal
+  // Use external tab control if provided, otherwise use internal with dashboard as default
   const activeTab = externalActiveTab !== undefined ? externalActiveTab : internalActiveTab;
   const handleTabChange = externalOnTabChange || setInternalActiveTab;
 
@@ -86,6 +89,11 @@ export const useReviewPanel = ({
     
     if (!canInteract) {
       console.log('useReviewPanel: User cannot interact, blocking checkbox change');
+      toast({
+        title: "権限がありません",
+        description: "企業ユーザーはチェックボックスの変更はできません",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -111,7 +119,7 @@ export const useReviewPanel = ({
     }
 
     console.log('useReviewPanel: Checkbox change completed, activeTab should remain:', activeTab);
-  }, [canInteract, activeTab, debouncedToast]);
+  }, [canInteract, activeTab, debouncedToast, toast]);
 
   const handleSubmitComment = useCallback(() => {
     console.log('useReviewPanel: handleSubmitComment called', { canInteract, newComment });
@@ -152,6 +160,7 @@ export const useReviewPanel = ({
     comments,
     checklistState,
     completionPercentage,
+    canView,
     canInteract,
     handleCheckboxChange,
     handleSubmitComment
