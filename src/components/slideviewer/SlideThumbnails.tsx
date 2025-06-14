@@ -1,4 +1,3 @@
-
 import { useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { useSlideStore } from "@/stores/slide-store";
 import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
 import SimplifiedThumbnailHeader from "./thumbnails/SimplifiedThumbnailHeader";
 import MinimalThumbnailCard from "./thumbnails/MinimalThumbnailCard";
+import EnhancedSlideThumbnails from "./thumbnails/EnhancedSlideThumbnails";
 import AddSlideCard from "./thumbnails/AddSlideCard";
 import EvaluationCard from "./thumbnails/EvaluationCard";
 
@@ -16,6 +16,7 @@ interface SlideThumbnailsProps {
   height: number;
   containerWidth: number;
   userType?: "student" | "enterprise";
+  enhanced?: boolean; // 新しいUIを使用するかどうか
 }
 
 const SlideThumbnails = ({
@@ -24,8 +25,24 @@ const SlideThumbnails = ({
   onOpenOverallReview,
   height,
   containerWidth,
-  userType = "enterprise"
+  userType = "enterprise",
+  enhanced = true // デフォルトで新しいUIを使用
 }: SlideThumbnailsProps) => {
+  // 新しいUI/UXを使用する場合
+  if (enhanced) {
+    return (
+      <EnhancedSlideThumbnails
+        currentSlide={currentSlide}
+        onSlideClick={onSlideClick}
+        onOpenOverallReview={onOpenOverallReview}
+        height={height}
+        containerWidth={containerWidth}
+        userType={userType}
+      />
+    );
+  }
+
+  // ... keep existing code (従来のUI実装)
   const { slides } = useSlideStore();
   const containerRef = useRef<HTMLDivElement>(null);
   
