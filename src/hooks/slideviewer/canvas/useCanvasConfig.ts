@@ -1,3 +1,4 @@
+
 import { useMemo } from 'react';
 
 interface UseCanvasConfigProps {
@@ -39,33 +40,20 @@ export const useCanvasConfig = ({
     const baseDisplayWidth = Math.max(320, Math.min(1200, Math.round(displayWidth)));
     const baseDisplayHeight = Math.max(180, Math.min(675, Math.round(displayHeight)));
     
-    // Determine sizing strategy based on zoom level
-    const useActualSizing = zoomLevel <= 100;
-    const zoomFactor = zoomLevel / 100;
+    // Simplified: Always use actual sizing since max zoom is now 100%
+    const useActualSizing = true;
+    const zoomFactor = Math.max(0.25, Math.min(1.0, zoomLevel / 100)); // Ensure zoom is between 25% and 100%
     
-    let actualWidth: number;
-    let actualHeight: number;
-    let finalDisplayWidth: number;
-    let finalDisplayHeight: number;
-    
-    if (useActualSizing) {
-      // For zoom ≤ 100%: adjust actual canvas size
-      actualWidth = Math.round(baseDisplayWidth * zoomFactor);
-      actualHeight = Math.round(baseDisplayHeight * zoomFactor);
-      finalDisplayWidth = actualWidth;
-      finalDisplayHeight = actualHeight;
-    } else {
-      // For zoom > 100%: keep base size, use CSS transform
-      actualWidth = baseDisplayWidth;
-      actualHeight = baseDisplayHeight;
-      finalDisplayWidth = baseDisplayWidth;
-      finalDisplayHeight = baseDisplayHeight;
-    }
+    // Adjust actual canvas size based on zoom
+    const actualWidth = Math.round(baseDisplayWidth * zoomFactor);
+    const actualHeight = Math.round(baseDisplayHeight * zoomFactor);
+    const finalDisplayWidth = actualWidth;
+    const finalDisplayHeight = actualHeight;
     
     // Simple 1:1 rendering - no pixel ratio scaling
     const pixelRatio = 1;
     
-    console.log('Canvas config with zoom:', {
+    console.log('Canvas config (max 100% zoom):', {
       container: `${containerWidth}x${containerHeight}`,
       zoomLevel: `${zoomLevel}%`,
       useActualSizing,

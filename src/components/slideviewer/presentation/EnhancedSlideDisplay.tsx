@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import UnifiedSlideCanvas from "@/components/slideviewer/canvas/UnifiedSlideCanvas";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,7 @@ const EnhancedSlideDisplay: React.FC<EnhancedSlideDisplayProps> = ({
   const { toast } = useToast();
   
   const handleZoomIn = useCallback(() => {
-    const newZoom = Math.min(200, zoomLevel + 10);
+    const newZoom = Math.min(100, zoomLevel + 10); // Changed max from 200 to 100
     onZoomChange(newZoom);
     toast({
       title: "ズーム",
@@ -79,7 +80,7 @@ const EnhancedSlideDisplay: React.FC<EnhancedSlideDisplayProps> = ({
           variant="outline"
           size="sm"
           onClick={handleZoomIn}
-          disabled={zoomLevel >= 200}
+          disabled={zoomLevel >= 100} // Changed max from 200 to 100
           className="bg-white shadow-md"
         >
           <ZoomIn className="h-4 w-4" />

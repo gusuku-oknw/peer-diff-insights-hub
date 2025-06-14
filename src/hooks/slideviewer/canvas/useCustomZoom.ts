@@ -44,25 +44,14 @@ export const useCustomZoom = ({ canvas, isReady, canvasConfig, zoomLevel }: UseC
         return;
       }
       
-      if (canvasConfig.useActualSizing) {
-        // For zoom ≤ 100%: no CSS transform needed, canvas size handles it
-        canvasContainer.style.transform = 'scale(1)';
-        canvasContainer.style.transformOrigin = 'center center';
-        canvasContainer.style.transition = 'transform 0.2s ease-out';
-        zoomTransformRef.current = 'scale(1)';
-        
-        console.log(`✓ Actual sizing mode applied: ${currentZoomLevel}% (no CSS transform needed)`);
-      } else {
-        // For zoom > 100%: use CSS transform
-        const zoomValue = currentZoomLevel / 100;
-        const transform = `scale(${zoomValue})`;
-        canvasContainer.style.transform = transform;
-        canvasContainer.style.transformOrigin = 'center center';
-        canvasContainer.style.transition = 'transform 0.2s ease-out';
-        zoomTransformRef.current = transform;
-        
-        console.log(`✓ CSS transform mode applied: ${currentZoomLevel}% (transform: ${transform})`);
-      }
+      // Simplified: Always use actual sizing (no CSS transforms)
+      // Since max zoom is now 100%, we only need actual canvas size adjustments
+      canvasContainer.style.transform = 'scale(1)';
+      canvasContainer.style.transformOrigin = 'center center';
+      canvasContainer.style.transition = 'transform 0.2s ease-out';
+      zoomTransformRef.current = 'scale(1)';
+      
+      console.log(`✓ Zoom applied: ${currentZoomLevel}% (actual sizing mode)`);
 
       // Force a re-render to ensure the transform is applied
       canvas.renderAll();
@@ -93,7 +82,7 @@ export const useCustomZoom = ({ canvas, isReady, canvasConfig, zoomLevel }: UseC
   // Apply zoom when dependencies change
   useEffect(() => {
     if (isReady && canvasConfig && canvas) {
-      console.log(`🔄 Applying zoom: ${zoomLevel}% (useActualSizing: ${canvasConfig.useActualSizing})`);
+      console.log(`🔄 Applying zoom: ${zoomLevel}% (simplified actual sizing)`);
       applyZoomTransform(zoomLevel);
     }
   }, [zoomLevel, isReady, canvasConfig, canvas, applyZoomTransform]);
