@@ -2,7 +2,7 @@
 import React from "react";
 import { useSlideViewerLogic } from "@/hooks/slideviewer/useSlideViewerLogic";
 import { useResponsiveLayout } from "@/hooks/slideviewer/useResponsiveLayout";
-import MainLayout from "../ui/layout/main-layout";
+import MainLayout from "./MainLayout";
 
 // Helper to check if a value is a Date instance
 function isValidDate(val: unknown): val is Date {

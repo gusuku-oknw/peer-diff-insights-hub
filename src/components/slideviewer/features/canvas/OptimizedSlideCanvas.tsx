@@ -5,10 +5,10 @@ import { useEnhancedResponsive } from "@/hooks/slideviewer/useEnhancedResponsive
 import { useCanvasActions } from "@/hooks/slideviewer/canvas/useCanvasActions";
 import { renderElementsWithEmptyState } from "@/utils/slideCanvas/enhancedElementRenderer";
 import TouchOptimizedCanvas from "./TouchOptimizedCanvas";
-import EmptyCanvasState from "./EmptyCanvasState";
-import CanvasLoadingState from "./CanvasLoadingState";
-import CanvasErrorState from "./CanvasErrorState";
-import CanvasGuideOverlay from "./CanvasGuideOverlay";
+import EmptyCanvasState from "./states/EmptyCanvasState";
+import CanvasLoadingState from "./states/CanvasLoadingState";
+import CanvasErrorState from "./states/CanvasErrorState";
+import CanvasGuideOverlay from "./states/CanvasGuideOverlay";
 
 interface OptimizedSlideCanvasProps {
   currentSlide: number;
@@ -35,7 +35,6 @@ const OptimizedSlideCanvas = ({
   const [showGuide, setShowGuide] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
 
-  // Always call all hooks at the top level - never conditionally
   const {
     canvasSize,
     deviceInfo,
@@ -66,7 +65,6 @@ const OptimizedSlideCanvas = ({
     canvas: fabricCanvasRef.current
   });
   
-  // 最適化された要素レンダリング
   const handleOptimizedRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady) return;
@@ -95,7 +93,6 @@ const OptimizedSlideCanvas = ({
     }
   }, [handleOptimizedRenderElements, isReady]);
 
-  // Show guide for first-time users
   useEffect(() => {
     if (isReady && editable && isEmpty && enablePerformanceMode) {
       const hasSeenOptimizedGuide = localStorage.getItem('optimized-canvas-guide-seen');
@@ -118,7 +115,6 @@ const OptimizedSlideCanvas = ({
     }
   }, []);
 
-  // モバイルデバイスでは TouchOptimizedCanvas を使用 (hooks呼び出し後)
   if (deviceInfo.isMobile) {
     return (
       <TouchOptimizedCanvas
@@ -153,7 +149,6 @@ const OptimizedSlideCanvas = ({
       ref={canvasContainerRef}
       className="w-full h-full flex items-center justify-center bg-gray-50 overflow-hidden relative"
     >
-      {/* Enhanced guide overlay for optimized canvas */}
       {showGuide && (
         <CanvasGuideOverlay
           deviceType={deviceInfo.isMobile ? 'mobile' : deviceInfo.isTablet ? 'tablet' : 'desktop'}
@@ -181,7 +176,6 @@ const OptimizedSlideCanvas = ({
             }}
           />
 
-          {/* Enhanced empty state for optimized canvas */}
           {isEmpty && isReady && (
             <div className="absolute inset-0 flex items-center justify-center rounded-lg">
               <EmptyCanvasState
@@ -194,7 +188,6 @@ const OptimizedSlideCanvas = ({
             </div>
           )}
           
-          {/* Enhanced loading state */}
           {!isReady && !error && (
             <CanvasLoadingState 
               progress={performance.metrics?.fps || 0}
@@ -202,7 +195,6 @@ const OptimizedSlideCanvas = ({
             />
           )}
           
-          {/* Enhanced error state */}
           {error && (
             <CanvasErrorState
               error={error}
@@ -212,7 +204,6 @@ const OptimizedSlideCanvas = ({
           )}
         </div>
 
-        {/* パフォーマンス指標表示 */}
         {enablePerformanceMode && performance.metrics && (
           <div className="absolute bottom-2 left-2 text-xs bg-black bg-opacity-70 text-white px-2 py-1 rounded">
             FPS: {performance.metrics.fps} | Render: {performance.metrics.renderTime}ms
@@ -222,7 +213,6 @@ const OptimizedSlideCanvas = ({
           </div>
         )}
 
-        {/* 高解像度最適化指標 */}
         {deviceInfo.devicePixelRatio > 2 && (
           <div className="absolute bottom-2 right-2 text-xs text-gray-500 bg-white bg-opacity-75 px-2 py-1 rounded">
             高解像度最適化済み
