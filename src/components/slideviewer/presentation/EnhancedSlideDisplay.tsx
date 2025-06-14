@@ -1,6 +1,6 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import OptimizedSlideCanvas from "@/features/slideviewer/components/canvas/OptimizedSlideCanvas";
+import UnifiedSlideCanvas from "@/components/slideviewer/canvas/UnifiedSlideCanvas";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -25,7 +25,6 @@ const EnhancedSlideDisplay: React.FC<EnhancedSlideDisplayProps> = ({
   onZoomChange
 }) => {
   const { toast } = useToast();
-  const [isReady, setIsReady] = useState(false);
   
   const handleZoomIn = useCallback(() => {
     const newZoom = Math.min(200, zoomLevel + 10);
@@ -88,9 +87,9 @@ const EnhancedSlideDisplay: React.FC<EnhancedSlideDisplayProps> = ({
         </Button>
       </div>
 
-      {/* Canvas Container */}
+      {/* Unified Canvas Container - Single rendering path */}
       <div className="flex-1 flex items-center justify-center p-4">
-        <OptimizedSlideCanvas
+        <UnifiedSlideCanvas
           currentSlide={currentSlide}
           zoomLevel={zoomLevel}
           editable={editable}

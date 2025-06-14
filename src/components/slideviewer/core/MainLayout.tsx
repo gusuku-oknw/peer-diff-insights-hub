@@ -1,9 +1,10 @@
+
 import React from "react";
 import { useSlideStore } from "@/stores/slide.store";
 import { useIsMobile } from "@/hooks/use-mobile";
 import LeftSidebar from "../layout/LeftSidebar";
 import RightSidebar from "../layout/RightSidebar";
-import OptimizedSlideCanvas from "../canvas/OptimizedSlideCanvas";
+import EnhancedSlideDisplay from "../presentation/EnhancedSlideDisplay";
 import SlideThumbnails from "../SlideThumbnails";
 import LeftFloatingButton from "../layout/LeftFloatingButton";
 import RightFloatingButton from "../layout/RightFloatingButton";
@@ -154,16 +155,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           />
         )}
 
-        {/* Canvas Area */}
+        {/* Enhanced Slide Display - Single Canvas path via EnhancedSlideDisplay */}
         <div className="flex-1 flex items-center justify-center p-4">
-          <OptimizedSlideCanvas
+          <EnhancedSlideDisplay
             currentSlide={currentSlide}
             zoomLevel={zoom}
             editable={viewerMode === "edit"}
             userType={userType}
             containerWidth={canvasWidth}
             containerHeight={canvasHeight}
-            enablePerformanceMode={true}
+            onZoomChange={handleZoomChange}
           />
         </div>
 

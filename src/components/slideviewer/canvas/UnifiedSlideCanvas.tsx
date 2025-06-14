@@ -12,7 +12,7 @@ import CanvasGuideOverlay from "@/features/slideviewer/components/canvas/states/
 import CanvasContextMenu from "./CanvasContextMenu";
 import CanvasShortcutsGuide from "./CanvasShortcutsGuide";
 
-interface OptimizedSlideCanvasProps {
+interface UnifiedSlideCanvasProps {
   currentSlide: number;
   zoomLevel?: number;
   editable?: boolean;
@@ -22,7 +22,7 @@ interface OptimizedSlideCanvasProps {
   enablePerformanceMode?: boolean;
 }
 
-const OptimizedSlideCanvas = React.memo(({ 
+const UnifiedSlideCanvas = React.memo(({ 
   currentSlide, 
   zoomLevel = 100, 
   editable = false,
@@ -30,14 +30,14 @@ const OptimizedSlideCanvas = React.memo(({
   containerWidth = 0,
   containerHeight = 0,
   enablePerformanceMode = true
-}: OptimizedSlideCanvasProps) => {
-  console.log(`OptimizedSlideCanvas rendering - Slide: ${currentSlide}, Zoom: ${zoomLevel}%`);
+}: UnifiedSlideCanvasProps) => {
+  console.log(`UnifiedSlideCanvas rendering - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Container: ${containerWidth}x${containerHeight}`);
   
   const [showGuide, setShowGuide] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
   const [selectedObject, setSelectedObject] = useState<any>(null);
 
-  // Use consolidated high-resolution canvas hook
+  // Use unified high-resolution canvas hook
   const {
     canvasRef,
     fabricCanvasRef,
@@ -120,8 +120,8 @@ const OptimizedSlideCanvas = React.memo(({
     console.log('Image functionality coming soon');
   }, []);
   
-  // Ultra-high resolution element rendering - memoized to prevent unnecessary re-renders
-  const handleUltraRenderElements = useCallback(() => {
+  // High resolution element rendering - memoized to prevent unnecessary re-renders
+  const handleRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady || !canvasConfig) return;
     
@@ -138,25 +138,25 @@ const OptimizedSlideCanvas = React.memo(({
       );
       setIsEmpty(result.isEmpty);
       
-      console.log(`Rendered ${elements.length} elements at ${canvasConfig.width}x${canvasConfig.height} resolution`);
+      console.log(`Unified canvas rendered ${elements.length} elements at ${canvasConfig.width}x${canvasConfig.height} resolution`);
     } catch (err) {
-      console.error('Ultra rendering failed:', err);
+      console.error('Unified rendering failed:', err);
     }
   }, [elements, currentSlide, editable, isReady, canvasConfig, handleAddText, handleAddShape, handleAddImage, fabricCanvasRef.current]);
   
   useEffect(() => {
     if (isReady && canvasConfig) {
-      handleUltraRenderElements();
+      handleRenderElements();
     }
-  }, [handleUltraRenderElements, isReady, canvasConfig]);
+  }, [handleRenderElements, isReady, canvasConfig]);
 
   // Show guide for first-time users
   useEffect(() => {
     if (isReady && editable && isEmpty && enablePerformanceMode) {
-      const hasSeenGuide = localStorage.getItem('standard-slide-guide-seen');
+      const hasSeenGuide = localStorage.getItem('unified-slide-guide-seen');
       if (!hasSeenGuide) {
         setShowGuide(true);
-        localStorage.setItem('standard-slide-guide-seen', 'true');
+        localStorage.setItem('unified-slide-guide-seen', 'true');
       }
     }
   }, [isReady, editable, isEmpty, enablePerformanceMode]);
@@ -239,7 +239,7 @@ const OptimizedSlideCanvas = React.memo(({
           </div>
         )}
 
-        {/* Ultra-high resolution slide container with context menu */}
+        {/* High resolution slide container with context menu */}
         <CanvasContextMenu
           selectedObject={selectedObject}
           onCopy={copySelected}
@@ -256,12 +256,13 @@ const OptimizedSlideCanvas = React.memo(({
             style={{
               width: canvasConfig.displayWidth,
               height: canvasConfig.displayHeight,
+              // Apply zoom only once here - no duplicate scaling
               transform: `scale(${zoomLevel / 100})`,
               transformOrigin: 'center center',
               transition: 'transform 0.2s ease-out'
             }}
           >
-            {/* Ultra-High Resolution Fabric.js Canvas */}
+            {/* High Resolution Fabric.js Canvas */}
             <canvas 
               ref={canvasRef}
               className="block rounded-lg"
@@ -289,7 +290,7 @@ const OptimizedSlideCanvas = React.memo(({
             {!isReady && !error && (
               <CanvasLoadingState 
                 progress={performance.metrics?.fps || 0}
-                message="高解像度スライドを初期化中..."
+                message="統合キャンバスを初期化中..."
               />
             )}
             
@@ -305,7 +306,7 @@ const OptimizedSlideCanvas = React.memo(({
         </CanvasContextMenu>
       </div>
 
-      {/* Enhanced Information Bar - Bottom */}
+      {/* Information Bar - Bottom */}
       <div className="flex justify-between items-center p-2 bg-gray-100 border-t border-gray-200">
         {/* Left: Performance Information */}
         <div className="flex items-center gap-4">
@@ -315,7 +316,7 @@ const OptimizedSlideCanvas = React.memo(({
             </div>
           )}
           <div className="text-xs bg-green-600 text-white px-2 py-1 rounded">
-            解像度: {canvasConfig.width}×{canvasConfig.height} ({canvasConfig.pixelRatio}x)
+            統合解像度: {canvasConfig.width}×{canvasConfig.height} ({canvasConfig.pixelRatio}x)
           </div>
           {canvasConfig.displayCapabilities?.is8KCapable && (
             <div className="text-xs bg-purple-600 text-white px-2 py-1 rounded">
@@ -341,7 +342,7 @@ const OptimizedSlideCanvas = React.memo(({
           )}
           {canvasConfig.pixelRatio > 2 && (
             <div className="text-xs text-purple-700 bg-purple-100 px-2 py-1 rounded border">
-              Super High-DPI ({canvasConfig.pixelRatio}x)
+              統合High-DPI ({canvasConfig.pixelRatio}x)
             </div>
           )}
         </div>
@@ -350,6 +351,6 @@ const OptimizedSlideCanvas = React.memo(({
   );
 });
 
-OptimizedSlideCanvas.displayName = 'OptimizedSlideCanvas';
+UnifiedSlideCanvas.displayName = 'UnifiedSlideCanvas';
 
-export default OptimizedSlideCanvas;
+export default UnifiedSlideCanvas;
