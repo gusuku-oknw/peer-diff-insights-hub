@@ -1,11 +1,10 @@
-
 import React from "react";
 import SidebarLeft from "./SidebarLeft";
 import SidebarRight from "./SidebarRight";
 import PresentationContent from "../presentation/PresentationContent";
 import { FloatingToggleButton } from "./FloatingToggleButton";
 import OverallReviewPanel from "../panels/OverallReviewPanel/OverallReviewPanel.tsx";
-import MainToolbar from "../toolbar/MainToolbar";
+import OptimizedToolbar from "../toolbar/OptimizedToolbar";
 import type { ViewerMode } from "@/types/slide.types";
 import { useSlideStore } from "@/stores/slide-store";
 
@@ -90,8 +89,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
   return (
     <div className="flex flex-col h-full w-full main-layout-container overflow-hidden">
-      {/* 1: こだわりのツールバー */}
-      <MainToolbar
+      {/* 1: 最適化されたツールバー */}
+      <OptimizedToolbar
         currentSlide={currentSlideNumber}
         totalSlides={totalSlides}
         zoom={zoom}
@@ -180,4 +179,3 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 };
 
 export default MainLayout;
-

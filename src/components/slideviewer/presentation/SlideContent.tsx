@@ -1,10 +1,11 @@
+
 import React from "react";
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
-import SlideDisplay from "./SlideDisplay";
+import EnhancedSlideDisplay from "./EnhancedSlideDisplay";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import { useSlideStore } from "@/stores/slide-store";
 import type { ViewerMode } from "@/types/slide.types";
@@ -26,6 +27,7 @@ interface SlideContentProps {
     onSlideChange: (slide: number) => void;
     rightPanelCollapsed: boolean;
     onOpenOverallReview: () => void;
+    onZoomChange?: (zoom: number) => void;
 }
 
 const SlideContent: React.FC<SlideContentProps> = ({
@@ -45,6 +47,7 @@ const SlideContent: React.FC<SlideContentProps> = ({
     onSlideChange,
     rightPanelCollapsed,
     onOpenOverallReview,
+    onZoomChange,
 }) => {
     const { thumbnailsHeight, setThumbnailsHeight, getSlideThumbnailsWidth } = useSlideStore();
 
@@ -56,7 +59,7 @@ const SlideContent: React.FC<SlideContentProps> = ({
     const thumbnailSizePercentage = Math.min(40, Math.max(10, (thumbnailsHeight / windowHeight) * 100));
 
     const mainContent = (
-        <SlideDisplay
+        <EnhancedSlideDisplay
             currentSlide={currentSlide}
             totalSlides={totalSlides}
             zoom={zoom}
@@ -72,6 +75,7 @@ const SlideContent: React.FC<SlideContentProps> = ({
             userType={userType}
             rightPanelCollapsed={rightPanelCollapsed}
             onSlideChange={onSlideChange}
+            onZoomChange={onZoomChange}
         />
     );
 
