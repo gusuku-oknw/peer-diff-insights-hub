@@ -33,6 +33,7 @@ export interface LayoutSlice {
   getSlideThumbnailsWidth: () => number;
   isRightPanelVisible: () => boolean;
   getRightSidebarWidth: () => number;
+  toggleLeftSidebar: () => void;
 }
 
 const DEFAULT_LAYOUT = {
@@ -40,7 +41,7 @@ const DEFAULT_LAYOUT = {
   rightSidebarWidth: 280,
   editSidebarWidth: 280,
   thumbnailsHeight: 128,
-  leftSidebarOpen: false,
+  leftSidebarOpen: true, // Changed to true by default
   rightPanelHidden: false,
   isFullScreen: false,
 };
@@ -77,6 +78,11 @@ export const createLayoutSlice: StateCreator<
   setRightPanelHidden: (hidden: boolean) => set({ rightPanelHidden: hidden }),
   setIsFullScreen: (fullScreen: boolean) => set({ isFullScreen: fullScreen }),
   
+  toggleLeftSidebar: () => {
+    const state = get();
+    set({ leftSidebarOpen: !state.leftSidebarOpen });
+  },
+  
   resetLayoutToDefaults: () => set(DEFAULT_LAYOUT),
   
   // Optimized responsive width calculation
@@ -99,16 +105,17 @@ export const createLayoutSlice: StateCreator<
     }
   },
   
+  // Simplified right panel visibility logic
   isRightPanelVisible: () => {
     const state = get();
-    const shouldShowNotes = (state.viewerMode === "presentation" && state.showPresenterNotes) || 
-                           (state.viewerMode === "review" && state.showPresenterNotes);
-    const shouldShowReviewPanel = state.viewerMode === "review";
-    const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
-    const hideRightPanelCompletely = (state.viewerMode === "presentation" && state.isFullScreen) || 
-                                    !shouldDisplayRightPanel;
     
-    return !hideRightPanelCompletely && !state.rightPanelHidden;
+    // Don't show if explicitly hidden or in fullscreen presentation mode
+    if (state.rightPanelHidden || (state.viewerMode === "presentation" && state.isFullScreen)) {
+      return false;
+    }
+    
+    // Show by default for all other cases
+    return true;
   },
   
   // Unified content area calculation
@@ -130,14 +137,6 @@ export const createLayoutSlice: StateCreator<
       availableWidth,
       thumbnailsWidth: availableWidth,
     };
-    
-    // Debug logging
-    console.log('Layout store calculation:', {
-      windowWidth,
-      usedWidth,
-      minContentWidth,
-      ...result
-    });
     
     return result;
   },

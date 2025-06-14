@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, useCallback, useState } from "react";
+import React, { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import { useOptimizedSlideCanvas } from "@/hooks/slideviewer/useOptimizedSlideCanvas";
 import { useEnhancedResponsive } from "@/hooks/slideviewer/useEnhancedResponsive";
 import { useCanvasActions } from "@/hooks/slideviewer/canvas/useCanvasActions";
@@ -20,7 +20,7 @@ interface OptimizedSlideCanvasProps {
   enablePerformanceMode?: boolean;
 }
 
-const OptimizedSlideCanvas = ({ 
+const OptimizedSlideCanvas = React.memo(({ 
   currentSlide, 
   zoomLevel = 100, 
   editable = false,
@@ -35,14 +35,26 @@ const OptimizedSlideCanvas = ({
   const [showGuide, setShowGuide] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
 
+  // Memoize responsive calculations to prevent infinite rerenders
+  const responsiveConfig = useMemo(() => ({
+    containerWidth,
+    containerHeight
+  }), [containerWidth, containerHeight]);
+
   const {
     canvasSize,
     deviceInfo,
     isResponsive
-  } = useEnhancedResponsive({
-    containerWidth,
-    containerHeight
-  });
+  } = useEnhancedResponsive(responsiveConfig);
+
+  // Memoize canvas configuration
+  const canvasConfig = useMemo(() => ({
+    currentSlide,
+    editable,
+    containerWidth: canvasSize.width,
+    containerHeight: canvasSize.height,
+    enablePerformanceMode
+  }), [currentSlide, editable, canvasSize.width, canvasSize.height, enablePerformanceMode]);
 
   const {
     canvasRef,
@@ -52,13 +64,7 @@ const OptimizedSlideCanvas = ({
     elements,
     slides,
     performance
-  } = useOptimizedSlideCanvas({
-    currentSlide,
-    editable,
-    containerWidth: canvasSize.width,
-    containerHeight: canvasSize.height,
-    enablePerformanceMode
-  });
+  } = useOptimizedSlideCanvas(canvasConfig);
 
   const { addText, addShape, addImage } = useCanvasActions({
     currentSlide,
@@ -71,13 +77,14 @@ const OptimizedSlideCanvas = ({
   }, [addText]);
 
   const handleAddShape = useCallback(() => {
-    addShape(); // Call without arguments since addShape now defaults to rectangle
+    addShape();
   }, [addShape]);
 
   const handleAddImage = useCallback(() => {
     addImage();
   }, [addImage]);
   
+  // Memoize the render function to prevent unnecessary calls
   const handleOptimizedRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady) return;
@@ -98,7 +105,7 @@ const OptimizedSlideCanvas = ({
     } catch (err) {
       console.error('Optimized rendering failed:', err);
     }
-  }, [elements, currentSlide, editable, isReady, canvasSize, performance, handleAddText, handleAddShape, handleAddImage]);
+  }, [elements, currentSlide, editable, isReady, canvasSize, performance.metrics, handleAddText, handleAddShape, handleAddImage]);
   
   useEffect(() => {
     if (isReady) {
@@ -234,6 +241,8 @@ const OptimizedSlideCanvas = ({
       </div>
     </div>
   );
-};
+});
 
-export default React.memo(OptimizedSlideCanvas);
+OptimizedSlideCanvas.displayName = 'OptimizedSlideCanvas';
+
+export default OptimizedSlideCanvas;

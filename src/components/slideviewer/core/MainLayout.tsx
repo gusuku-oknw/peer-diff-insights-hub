@@ -51,11 +51,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     goToSlide,
     toggleLeftSidebar,
     setRightPanelHidden,
+    isRightPanelVisible,
     setZoom,
   } = useSlideStore();
 
   const canvasWidth = contentAreaDimensions.availableWidth - (isMobile ? 20 : 40);
   const canvasHeight = windowDimensions.height - (isMobile ? 180 : 200);
+
+  const handleToggleRightPanel = () => {
+    setRightPanelHidden(!isRightPanelVisible());
+  };
 
   return (
     <div className="h-full flex bg-gray-50">
@@ -97,13 +102,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
       {/* Right Sidebar */}
       <RightSidebar
-        isOpen={isRightPanelOpen}
+        isOpen={isRightPanelVisible()}
         width={rightPanelWidth}
         currentSlide={currentSlide}
         totalSlides={totalSlides}
         presenterNotes={presenterNotes}
         userType={userType}
-        onToggle={() => setRightPanelHidden(!isRightPanelOpen)}
+        onToggle={handleToggleRightPanel}
         isMobile={isMobile}
       />
 
@@ -111,9 +116,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       {isMobile && (
         <FloatingToggleButton
           onToggleLeft={toggleLeftSidebar}
-          onToggleRight={() => setRightPanelHidden(!isRightPanelOpen)}
+          onToggleRight={handleToggleRightPanel}
           leftOpen={leftSidebarOpen}
-          rightOpen={isRightPanelOpen}
+          rightOpen={isRightPanelVisible()}
         />
       )}
     </div>
