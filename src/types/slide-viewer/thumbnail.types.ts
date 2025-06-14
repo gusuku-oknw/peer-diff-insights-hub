@@ -3,7 +3,7 @@ export type ThumbnailViewMode = 'horizontal' | 'grid' | 'list' | 'compact';
 
 export interface ThumbnailDisplaySettings {
   viewMode: ThumbnailViewMode;
-  thumbnailSize: 'small' | 'medium' | 'large';
+  thumbnailSize: 'compact' | 'normal' | 'large'; // Updated to match ThumbnailSize from slide.types.ts
   showDetails: boolean;
   showProgress: boolean;
 }
