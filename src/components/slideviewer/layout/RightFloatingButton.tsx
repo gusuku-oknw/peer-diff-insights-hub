@@ -1,9 +1,8 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PanelRightOpen, MessageSquare, FileText } from "lucide-react";
+import { PanelRightOpen } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useSlideStore } from "@/stores/slide.store";
 
 interface RightFloatingButtonProps {
   onToggle: () => void;
@@ -11,25 +10,6 @@ interface RightFloatingButtonProps {
 
 const RightFloatingButton: React.FC<RightFloatingButtonProps> = ({ onToggle }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const { viewerMode, showPresenterNotes } = useSlideStore();
-
-  // パネルのタイプを判定
-  const getPanelInfo = () => {
-    const shouldShowNotes = (viewerMode === "presentation" && showPresenterNotes) || 
-                           (viewerMode === "review" && showPresenterNotes);
-    const shouldShowReviewPanel = viewerMode === "review";
-    
-    if (shouldShowNotes && shouldShowReviewPanel) {
-      return { icon: MessageSquare, label: "パネル" };
-    } else if (shouldShowNotes) {
-      return { icon: FileText, label: "ノート" };
-    } else if (shouldShowReviewPanel) {
-      return { icon: MessageSquare, label: "レビュー" };
-    }
-    return { icon: PanelRightOpen, label: "パネル" };
-  };
-
-  const { icon: PanelIcon, label } = getPanelInfo();
 
   return (
     <Tooltip>
@@ -52,10 +32,10 @@ const RightFloatingButton: React.FC<RightFloatingButtonProps> = ({ onToggle }) =
             `}
             title="右パネルを表示"
           >
-            <PanelIcon className="h-4 w-4 text-gray-600" />
+            <PanelRightOpen className="h-4 w-4 text-gray-600" />
             {isHovered && (
               <span className="text-xs text-gray-600 font-medium leading-tight">
-                {label}
+                パネル
               </span>
             )}
           </Button>
