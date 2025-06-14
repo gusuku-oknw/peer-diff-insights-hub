@@ -217,33 +217,6 @@ const OptimizedSlideCanvas = React.memo(({
       ref={canvasContainerRef}
       className="w-full h-full flex flex-col bg-gray-50 overflow-auto relative"
     >
-      {/* Information Bar - Outside Canvas */}
-      <div className="flex justify-between items-center p-2 bg-gray-100 border-b border-gray-200">
-        {/* Left: Performance Information */}
-        <div className="flex items-center gap-4">
-          {enablePerformanceMode && performance.metrics && (
-            <div className="text-xs bg-black text-white px-2 py-1 rounded">
-              FPS: {performance.metrics.fps} | Render: {performance.metrics.renderTime}ms
-              {!performance.isPerformanceGood && (
-                <span className="text-yellow-300 ml-2">⚡ 高速モード</span>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Right: Slide Size Information */}
-        <div className="flex items-center gap-2">
-          <div className="text-xs bg-blue-500 text-white px-2 py-1 rounded">
-            {slideSize.width}×{slideSize.height} (16:9)
-          </div>
-          {window.devicePixelRatio > 2 && (
-            <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
-              高解像度最適化済み
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Canvas Container */}
       <div className="flex-1 flex items-center justify-center p-4 relative">
         {/* Guide overlay */}
@@ -324,6 +297,33 @@ const OptimizedSlideCanvas = React.memo(({
             )}
           </div>
         </CanvasContextMenu>
+      </div>
+
+      {/* Information Bar - Bottom */}
+      <div className="flex justify-between items-center p-2 bg-gray-100 border-t border-gray-200">
+        {/* Left: Performance Information */}
+        <div className="flex items-center gap-4">
+          {enablePerformanceMode && performance.metrics && (
+            <div className="text-xs bg-black text-white px-2 py-1 rounded">
+              FPS: {performance.metrics.fps} | Render: {performance.metrics.renderTime}ms
+              {!performance.isPerformanceGood && (
+                <span className="text-yellow-300 ml-2">⚡ 高速モード</span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Right: Slide Size Information */}
+        <div className="flex items-center gap-2">
+          <div className="text-xs bg-blue-500 text-white px-2 py-1 rounded">
+            {slideSize.width}×{slideSize.height} (16:9)
+          </div>
+          {window.devicePixelRatio > 2 && (
+            <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
+              高解像度最適化済み
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
