@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, RotateCcw, Maximize2 } from "lucide-react";
+import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface EnhancedSlideDisplayProps {
@@ -213,6 +213,7 @@ const EnhancedSlideDisplay: React.FC<EnhancedSlideDisplayProps> = ({
   }, [currentSlide, totalSlides, onSlideChange]);
 
   const canShowQuickControls = !isFullScreen && zoom > 100;
+  const zoomScale = zoom / 100;
 
   return (
     <main className="flex-1 flex flex-col h-full overflow-hidden relative">
@@ -246,6 +247,13 @@ const EnhancedSlideDisplay: React.FC<EnhancedSlideDisplayProps> = ({
         </div>
       )}
 
+      {/* Zoom indicator */}
+      {zoom !== 100 && (
+        <div className="absolute top-4 left-4 z-10 bg-black/60 text-white text-sm px-3 py-1 rounded-full">
+          {zoom}%
+        </div>
+      )}
+
       {/* Loading state */}
       {containerSize.width === 0 && (
         <div className="flex-1 flex items-center justify-center">
@@ -275,15 +283,14 @@ const EnhancedSlideDisplay: React.FC<EnhancedSlideDisplayProps> = ({
         >
           <div 
             ref={canvasRef}
-            className="w-full h-full flex items-center justify-center transform transition-transform duration-300"
+            className="transform transition-transform duration-300 origin-center"
             style={{
-              transform: zoom > 100 ? `scale(${zoom / 100})` : 'scale(1)',
-              transformOrigin: 'center center'
+              transform: `scale(${zoomScale})`,
             }}
           >
             <SlideCanvas
               currentSlide={currentSlide}
-              zoomLevel={100} // Let CSS handle the zoom for smoother experience
+              zoomLevel={100}
               editable={viewerMode === "edit"}
               userType={userType}
               containerWidth={containerSize.width}

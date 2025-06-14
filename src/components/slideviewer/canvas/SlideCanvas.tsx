@@ -23,18 +23,16 @@ const SlideCanvas = ({
 }: SlideCanvasProps) => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   
-  console.log(`SlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}, Zoom: ${zoomLevel}%`);
+  console.log(`SlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}`);
   
-  // レスポンシブキャンバスサイズの計算
+  // レスポンシブキャンバスサイズの計算（ズーム処理は除外）
   const {
     canvasSize,
-    actualDisplaySize,
     getScaleFactors,
     isResponsive
   } = useResponsiveCanvas({
     containerWidth,
-    containerHeight,
-    zoom: zoomLevel
+    containerHeight
   });
   
   const {
@@ -51,7 +49,7 @@ const SlideCanvas = ({
     containerHeight: canvasSize.height
   });
   
-  // 要素をキャンバスにレンダリング（改善版）
+  // 要素をキャンバスにレンダリング
   const handleRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady) return;
@@ -68,14 +66,6 @@ const SlideCanvas = ({
       handleRenderElements();
     }
   }, [handleRenderElements, isReady]);
-  
-  // ズームとレスポンシブサイズを組み合わせたスタイル
-  const containerStyle = {
-    width: actualDisplaySize.width || 'auto',
-    height: actualDisplaySize.height || 'auto',
-    maxWidth: '100%',
-    maxHeight: '100%',
-  };
   
   if (!slides || slides.length === 0) {
     return (
@@ -98,28 +88,22 @@ const SlideCanvas = ({
       ref={canvasContainerRef}
       className="w-full h-full flex items-center justify-center bg-gray-50 overflow-hidden"
     >
-      <div 
-        className="relative transition-all duration-300 ease-in-out"
-        style={containerStyle}
-      >
-        <div className="bg-white rounded-lg shadow-lg border relative">
+      <div className="relative">
+        <div 
+          className="bg-white rounded-lg shadow-lg border relative"
+          style={{
+            width: canvasSize.width,
+            height: canvasSize.height
+          }}
+        >
           <canvas 
             ref={canvasRef}
-            className="block rounded-lg transition-all duration-300 ease-in-out"
+            className="block rounded-lg"
             style={{
               width: '100%',
               height: '100%',
-              maxWidth: '100%',
-              maxHeight: '100%',
             }}
           />
-          
-          {/* ズームレベル表示 */}
-          {zoomLevel !== 100 && (
-            <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-              {zoomLevel}%
-            </div>
-          )}
           
           {!isReady && (
             <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 rounded-lg">

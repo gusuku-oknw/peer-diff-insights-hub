@@ -4,16 +4,13 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 interface UseResponsiveCanvasProps {
   containerWidth: number;
   containerHeight: number;
-  zoom: number;
 }
 
 export const useResponsiveCanvas = ({ 
   containerWidth, 
-  containerHeight, 
-  zoom 
+  containerHeight 
 }: UseResponsiveCanvasProps) => {
   const [canvasSize, setCanvasSize] = useState({ width: 1600, height: 900 });
-  const [actualDisplaySize, setActualDisplaySize] = useState({ width: 0, height: 0 });
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
 
   const calculateOptimalSize = useCallback(() => {
@@ -36,28 +33,20 @@ export const useResponsiveCanvas = ({
         optimalWidth = optimalHeight * aspectRatio;
       }
       
-      // ズームを考慮した最終サイズ
-      const zoomFactor = zoom / 100;
-      const displayWidth = Math.round(optimalWidth * zoomFactor);
-      const displayHeight = Math.round(optimalHeight * zoomFactor);
-      
-      // 基準キャンバスサイズは固定、表示サイズのみ調整
+      // 基準キャンバスサイズ（ズーム処理は上位コンポーネントで行う）
       const baseCanvasSize = {
         width: Math.max(800, Math.min(1920, Math.round(optimalWidth))),
         height: Math.max(450, Math.min(1080, Math.round(optimalHeight)))
       };
       
       setCanvasSize(baseCanvasSize);
-      setActualDisplaySize({ width: displayWidth, height: displayHeight });
       
-      console.log('Canvas size recalculated:', {
+      console.log('Canvas size calculated:', {
         container: { containerWidth, containerHeight },
         base: baseCanvasSize,
-        display: { width: displayWidth, height: displayHeight },
-        zoom
       });
-    }, 100); // 100msのデバウンス
-  }, [containerWidth, containerHeight, zoom]);
+    }, 100);
+  }, [containerWidth, containerHeight]);
 
   useEffect(() => {
     calculateOptimalSize();
@@ -78,7 +67,6 @@ export const useResponsiveCanvas = ({
 
   return {
     canvasSize,
-    actualDisplaySize,
     getScaleFactors,
     isResponsive: containerWidth > 0 && containerHeight > 0,
   };

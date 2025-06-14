@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from "react";
 import SlideCanvas from "@/components/slideviewer/canvas/SlideCanvas";
 
@@ -46,7 +47,6 @@ const SlideDisplay: React.FC<SlideDisplayProps> = ({
     const updateSize = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        
         setContainerSize({
           width: rect.width,
           height: rect.height
@@ -57,7 +57,6 @@ const SlideDisplay: React.FC<SlideDisplayProps> = ({
     const resizeObserver = new ResizeObserver(updateSize);
     resizeObserver.observe(containerRef.current);
     
-    // Initial size setting
     updateSize();
 
     return () => {
@@ -65,25 +64,25 @@ const SlideDisplay: React.FC<SlideDisplayProps> = ({
     };
   }, []);
 
-  console.log('SlideDisplay: Container size and display settings', {
-    containerSize,
-    userType,
-    viewerMode,
-    rightPanelCollapsed
-  });
+  const zoomScale = zoom / 100;
 
   return (
     <main className="flex-1 flex flex-col h-full overflow-hidden">
       {/* Slide viewer - Main area */}
       <div
         ref={containerRef}
-        className="flex-1 relative bg-gray-50 w-full h-full min-h-0 min-h-[300px]"
+        className="flex-1 relative bg-gray-50 w-full h-full min-h-0 min-h-[300px] overflow-hidden"
       >
         <div className="absolute inset-0 flex items-center justify-center p-4">
-          <div className="w-full h-full flex items-center justify-center">
+          <div 
+            className="transform transition-transform duration-300 origin-center"
+            style={{
+              transform: `scale(${zoomScale})`,
+            }}
+          >
             <SlideCanvas
               currentSlide={currentSlide}
-              zoomLevel={zoom}
+              zoomLevel={100}
               editable={viewerMode === "edit"}
               userType={userType}
               containerWidth={containerSize.width}
