@@ -59,8 +59,13 @@ const UnifiedSlideThumbnails = ({
   }));
 
   // 折りたたみ時の高さ
-  const collapsedHeight = 80;
+  const collapsedHeight = 24; // Much smaller when collapsed
   const currentHeight = isCollapsed ? collapsedHeight : height;
+
+  // Enhanced toggle function with smooth animation
+  const handleToggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
 
   // 現在のスライドへの自動スクロール
   useEffect(() => {
@@ -69,23 +74,30 @@ const UnifiedSlideThumbnails = ({
     }
   }, [currentSlide, scrollToItem, isCollapsed]);
 
-  // キーボードナビゲーション
+  // Enhanced keyboard navigation with space bar toggle
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (containerRef.current?.contains(event.target as Node)) {
+        // Space bar to toggle collapse
+        if (event.code === 'Space' && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+          event.preventDefault();
+          handleToggleCollapse();
+          return;
+        }
+        
         handleKeyboardNavigation(event, currentSlide, slides.length, onSlideClick);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [currentSlide, slides.length, onSlideClick, handleKeyboardNavigation]);
+  }, [currentSlide, slides.length, onSlideClick, handleKeyboardNavigation, isCollapsed]);
 
   return (
     <UnifiedSlideThumbnailsContainer
       currentHeight={currentHeight}
       isCollapsed={isCollapsed}
-      onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
+      onToggleCollapse={handleToggleCollapse}
     >
       {!isCollapsed && (
         <>
