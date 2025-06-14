@@ -15,19 +15,12 @@ const SimplifiedSlideThumbnailsHeader = ({
   onClose 
 }: SimplifiedSlideThumbnailsHeaderProps) => {
   return (
-    <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
+    <div className="flex justify-between items-center px-6 py-2 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
       <div className="flex items-center gap-4">
-        <h3 className="font-bold text-xl text-gray-800">
-          スライド一覧
-        </h3>
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 text-sm rounded-full font-semibold">
-            {slidesCount} スライド
-          </span>
-          <span className="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-700 text-sm rounded-full font-medium">
-            現在: {currentSlide}
-          </span>
-        </div>
+        {/* Simplified header - only show current slide info */}
+        <span className="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-700 text-sm rounded-full font-medium">
+          現在: {currentSlide}
+        </span>
       </div>
       
       <div className="flex items-center gap-2">
