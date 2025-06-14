@@ -28,45 +28,44 @@ export const useOptimizedSlideCanvas = ({
   
   const { slides } = useSlideStore();
   
-  // Get current slide data - memoized to prevent unnecessary re-renders
   const currentSlideData = useMemo(() => 
     slides[currentSlide - 1], 
     [slides, currentSlide]
   );
   const elements = currentSlideData?.elements || [];
   
-  // Get high-resolution slide size with display capabilities
+  // Get high-resolution slide size with forced high quality
   const { slideSize, deviceType } = useStandardSlideSize({
     containerWidth,
     containerHeight,
     preferredAspectRatio: 16 / 9
   });
 
-  // Ultra-high resolution canvas configuration
+  // --- 改善：常に高DPIを適用するためのcanvasConfig ---
   const canvasConfig = useMemo(() => {
+    // 通常のdisplayCapabilitiesだと1xになるが、今回はforceに最低2xとする
     const displayCapabilities = detectDisplayCapabilities();
-    
-    // Super High-DPI scaling (up to 6x for 8K displays)
-    const maxRatio = displayCapabilities.is8KCapable ? 6 : 
-                    displayCapabilities.is4KCapable ? 4 : 
-                    displayCapabilities.isUltraHighDPI ? 3 : 2;
-    const pixelRatio = Math.min(displayCapabilities.pixelRatio || 1, maxRatio);
-    
-    // Ultra-high resolution dimensions
+    // 強制的に2xまたは3x（実DPIが2x超の場合のみその値を使う）
+    const ENFORCED_MIN_PIXELRATIO = 2;
+    const ENFORCED_IDEAL_PIXELRATIO = 3;
+    const pixelRatio =
+      displayCapabilities.pixelRatio < ENFORCED_MIN_PIXELRATIO
+        ? ENFORCED_MIN_PIXELRATIO
+        : displayCapabilities.pixelRatio < ENFORCED_IDEAL_PIXELRATIO
+          ? ENFORCED_IDEAL_PIXELRATIO
+          : displayCapabilities.pixelRatio;
+
     const ultraWidth = slideSize.width * pixelRatio;
     const ultraHeight = slideSize.height * pixelRatio;
-    
-    console.log('High-resolution canvas config:', {
+
+    // ログ明示
+    console.log('最終canvas解像度', {
       baseSize: `${slideSize.width}x${slideSize.height}`,
       ultraSize: `${ultraWidth}x${ultraHeight}`,
       pixelRatio,
-      displayCapabilities: {
-        is8K: displayCapabilities.is8KCapable,
-        is4K: displayCapabilities.is4KCapable,
-        ultraHighDPI: displayCapabilities.isUltraHighDPI
-      }
+      forcedHighQuality: true
     });
-    
+
     return {
       width: ultraWidth,
       height: ultraHeight,
@@ -78,25 +77,22 @@ export const useOptimizedSlideCanvas = ({
     };
   }, [slideSize]);
 
-  // Performance monitoring - simplified to prevent re-renders
   const performance = useMemo(() => ({
     metrics: { fps: 60, renderTime: 16 },
     isPerformanceGood: true
   }), []);
 
-  // Canvas initialization with high-resolution support
   const initializeCanvas = useCallback(() => {
     if (!canvasRef.current || initializationRef.current) return;
-    
+
     try {
-      // Clean up existing canvas
       if (fabricCanvasRef.current) {
         fabricCanvasRef.current.dispose();
         fabricCanvasRef.current = null;
       }
-      
-      console.log('Initializing ultra-high resolution canvas:', canvasConfig);
-      
+
+      console.log('Initializing canvas for high quality:', canvasConfig);
+
       const canvas = new Canvas(canvasRef.current, {
         width: canvasConfig.width,
         height: canvasConfig.height,
@@ -112,34 +108,38 @@ export const useOptimizedSlideCanvas = ({
         imageSmoothingEnabled: true,
         enableRetinaScaling: true
       });
-      
-      // Set up ultra-high resolution rendering
+
+      // Enhance: force HTML Canvas and context to high quality always
       const canvasElement = canvasRef.current;
       canvasElement.width = canvasConfig.width;
       canvasElement.height = canvasConfig.height;
       canvasElement.style.width = `${canvasConfig.displayWidth}px`;
       canvasElement.style.height = `${canvasConfig.displayHeight}px`;
-      
-      // Configure context for maximum quality
+
+      // 強制的にスムージングを最優先
       const ctx = canvasElement.getContext('2d');
-      if (ctx && canvasConfig.pixelRatio > 1) {
+      if (ctx) {
         ctx.scale(canvasConfig.pixelRatio, canvasConfig.pixelRatio);
         ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        try {
+          (ctx as any).imageSmoothingQuality = 'high';
+        } catch (e) {
+          // not all browsers support
+        }
       }
-      
-      // Set Fabric.js zoom to compensate for high-DPI scaling
+
       canvas.setZoom(canvasConfig.pixelRatio);
-      
+
       fabricCanvasRef.current = canvas;
       initializationRef.current = true;
       setIsReady(true);
       setError(null);
-      
-      console.log(`Ultra-high DPI canvas ready: ${canvasConfig.width}x${canvasConfig.height} (${canvasConfig.pixelRatio}x scale)`);
-      
+
+      console.log(
+        `HIGH-QUALITY canvas ready: ${canvasConfig.width}x${canvasConfig.height} (${canvasConfig.pixelRatio}x enforced)`
+      );
     } catch (err) {
-      console.error('High-resolution canvas initialization failed:', err);
+      console.error('Canvas initialization failed:', err);
       setError('キャンバスの初期化に失敗しました');
       setIsReady(false);
       initializationRef.current = false;

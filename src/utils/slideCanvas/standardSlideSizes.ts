@@ -1,4 +1,3 @@
-
 /**
  * 標準スライドサイズ定義
  * PowerPointや一般的なプレゼンテーションソフトウェアと互換性のあるサイズ
@@ -95,29 +94,23 @@ export const getBestFitSlideSize = (
   preferredAspectRatio: number = SLIDE_ASPECT_RATIOS.widescreen
 ): SlideSize => {
   const capabilities = detectDisplayCapabilities();
-  
+
+  // もともとのavailableSizesを大きい順に＆aspectでフィルタ
   const availableSizes = Object.values(STANDARD_SLIDE_SIZES)
     .filter(size => Math.abs(size.aspectRatio - preferredAspectRatio) < 0.1)
-    .sort((a, b) => b.width - a.width); // 大きいサイズから順に
+    .sort((a, b) => b.width - a.width);
 
-  // 高DPIディスプレイでは、より高解像度のサイズを優先
-  const sizeMultiplier = capabilities.isUltraHighDPI ? 2.0 : 
-                        capabilities.isHighDPI ? 1.5 : 1.0;
+  // 高画質改善: 最低でもlarge(1600x900)以上, 可能ならfullhd
+  const minWidth = 1600;
+  const enhancedAvailableSizes = availableSizes.filter(sz => sz.width >= minWidth);
 
-  // コンテナに収まる最大サイズを探す（高解像度優先）
-  for (const size of availableSizes) {
-    const scaledWidth = size.width / sizeMultiplier;
-    const scaledHeight = size.height / sizeMultiplier;
-    
-    if (scaledWidth <= containerWidth * 0.9 && scaledHeight <= containerHeight * 0.9) {
-      return size;
-    }
-  }
-
-  // どれも収まらない場合は適切なフォールバックサイズを返す
-  return preferredAspectRatio === SLIDE_ASPECT_RATIOS.widescreen 
-    ? STANDARD_SLIDE_SIZES.medium
-    : STANDARD_SLIDE_SIZES.standard_medium;
+  // 高DPI優遇 (ただしforce)
+  // サイズ制約を緩和(90%→70%)してより大きいサイズも採用しやすくする
+  const fittingSize = (enhancedAvailableSizes.length > 0 ? enhancedAvailableSizes : availableSizes).find(size => {
+    return size.width <= containerWidth * 0.7 && size.height <= containerHeight * 0.7;
+  });
+  // 最低でも large
+  return fittingSize || STANDARD_SLIDE_SIZES.large;
 };
 
 /**
