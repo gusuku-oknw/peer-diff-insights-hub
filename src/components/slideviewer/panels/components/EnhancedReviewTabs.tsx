@@ -133,7 +133,7 @@ const EnhancedReviewTabs: React.FC<EnhancedReviewTabsProps> = ({
         })}
       </TabsList>
 
-      <TabsContent value="dashboard" className="flex-grow mx-0 mt-0 overflow-hidden">
+      <TabsContent value="dashboard" className="flex-grow mx-4 mt-3 overflow-hidden">
         <ReviewDashboard
           currentSlide={currentSlide}
           totalSlides={10} // This should come from props
@@ -166,7 +166,7 @@ const EnhancedReviewTabs: React.FC<EnhancedReviewTabsProps> = ({
         />
       </TabsContent>
 
-      <TabsContent value="suggestions" className="flex-grow mx-0 mt-0 overflow-hidden">
+      <TabsContent value="suggestions" className="flex-grow mx-4 mt-3 overflow-hidden">
         <SmartSuggestions
           currentSlide={currentSlide}
           onApplySuggestion={mockApplySuggestion}

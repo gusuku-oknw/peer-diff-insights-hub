@@ -64,7 +64,7 @@ const ReviewDashboard: React.FC<ReviewDashboardProps> = ({
 
   if (isVeryNarrow) {
     return (
-      <div className="p-2 space-y-2">
+      <div className="space-y-2 overflow-y-auto h-full">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium">進捗</span>
           <Badge variant="outline" className="text-xs">{completionPercentage}%</Badge>
@@ -75,7 +75,7 @@ const ReviewDashboard: React.FC<ReviewDashboardProps> = ({
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-4 overflow-y-auto h-full">
       {/* Quick Overview */}
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3">
         <div className="flex items-center justify-between mb-2">
