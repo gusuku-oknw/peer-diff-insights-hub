@@ -7,23 +7,28 @@ interface UseCanvasClipboardProps {
 }
 
 export const useCanvasClipboard = ({ canvas }: UseCanvasClipboardProps) => {
-  const [clipboard, setClipboard] = useState<any>(null);
+  const [clipboard, setClipboard] = useState<FabricObject | null>(null);
 
-  const copySelected = useCallback(() => {
+  const copySelected = useCallback(async () => {
     if (!canvas) return;
     
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
 
-    activeObject.clone((cloned: any) => {
+    try {
+      // Use Fabric.js v6 clone method - it returns a Promise
+      const cloned = await activeObject.clone();
       setClipboard(cloned);
-    });
+    } catch (error) {
+      console.error('Error copying object:', error);
+    }
   }, [canvas]);
 
-  const paste = useCallback(() => {
+  const paste = useCallback(async () => {
     if (!canvas || !clipboard) return;
 
-    clipboard.clone((cloned: FabricObject) => {
+    try {
+      const cloned = await clipboard.clone();
       canvas.discardActiveObject();
       cloned.set({
         left: (cloned.left || 0) + 10,
@@ -44,16 +49,19 @@ export const useCanvasClipboard = ({ canvas }: UseCanvasClipboardProps) => {
 
       canvas.setActiveObject(cloned);
       canvas.requestRenderAll();
-    });
+    } catch (error) {
+      console.error('Error pasting object:', error);
+    }
   }, [canvas, clipboard]);
 
-  const duplicate = useCallback(() => {
+  const duplicate = useCallback(async () => {
     if (!canvas) return;
     
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
 
-    activeObject.clone((cloned: FabricObject) => {
+    try {
+      const cloned = await activeObject.clone();
       canvas.discardActiveObject();
       cloned.set({
         left: (cloned.left || 0) + 10,
@@ -64,7 +72,9 @@ export const useCanvasClipboard = ({ canvas }: UseCanvasClipboardProps) => {
       canvas.add(cloned);
       canvas.setActiveObject(cloned);
       canvas.requestRenderAll();
-    });
+    } catch (error) {
+      console.error('Error duplicating object:', error);
+    }
   }, [canvas]);
 
   return {

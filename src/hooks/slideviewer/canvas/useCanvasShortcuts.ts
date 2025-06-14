@@ -80,7 +80,8 @@ export const useCanvasShortcuts = ({
           // Duplicate selected object
           const activeObject = canvas.getActiveObject();
           if (activeObject) {
-            activeObject.clone((cloned: any) => {
+            // Use async clone for Fabric.js v6
+            activeObject.clone().then((cloned: any) => {
               cloned.set({
                 left: activeObject.left! + 10,
                 top: activeObject.top! + 10,
@@ -88,6 +89,8 @@ export const useCanvasShortcuts = ({
               canvas.add(cloned);
               canvas.setActiveObject(cloned);
               canvas.renderAll();
+            }).catch((error: any) => {
+              console.error('Error duplicating object:', error);
             });
           }
           break;

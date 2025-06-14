@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { Canvas, FabricObject } from 'fabric';
+import { Canvas, FabricObject, Point } from 'fabric';
 
 interface UseCanvasAnimationsProps {
   canvas: Canvas | null;
@@ -20,20 +20,20 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
 
     canvas.add(element);
 
-    // Animate to final state
+    // Animate to final state using Fabric.js v6 API
     element.animate('opacity', 1, {
       duration: 300,
-      easing: (t, b, c, d) => c * ((t = t / d - 1) * t * t + 1) + b, // easeOutCubic
+      easing: 'easeOutCubic',
     });
 
     element.animate('scaleX', 1, {
       duration: 300,
-      easing: (t, b, c, d) => c * ((t = t / d - 1) * t * t + 1) + b,
+      easing: 'easeOutCubic',
     });
 
     element.animate('scaleY', 1, {
       duration: 300,
-      easing: (t, b, c, d) => c * ((t = t / d - 1) * t * t + 1) + b,
+      easing: 'easeOutCubic',
       onChange: () => canvas.renderAll(),
       onComplete: () => {
         canvas.setActiveObject(element);
@@ -47,17 +47,17 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
 
     element.animate('opacity', 0, {
       duration: 200,
-      easing: (t, b, c, d) => c * t * t + b, // easeInQuad
+      easing: 'easeInQuad',
     });
 
     element.animate('scaleX', 0.1, {
       duration: 200,
-      easing: (t, b, c, d) => c * t * t + b,
+      easing: 'easeInQuad',
     });
 
     element.animate('scaleY', 0.1, {
       duration: 200,
-      easing: (t, b, c, d) => c * t * t + b,
+      easing: 'easeInQuad',
       onChange: () => canvas.renderAll(),
       onComplete: () => {
         canvas.remove(element);
@@ -73,12 +73,12 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
     
     element.animate('opacity', 0.5, {
       duration: 150,
-      easing: (t, b, c, d) => c * t * t + b,
+      easing: 'easeInQuad',
       onChange: () => canvas.renderAll(),
       onComplete: () => {
         element.animate('opacity', originalOpacity, {
           duration: 150,
-          easing: (t, b, c, d) => c * ((t = t / d - 1) * t * t + 1) + b,
+          easing: 'easeOutCubic',
           onChange: () => canvas.renderAll()
         });
       }
@@ -100,7 +100,9 @@ export const useCanvasAnimations = ({ canvas }: UseCanvasAnimationsProps) => {
       const newZoom = currentZoom + (stepSize * currentStep);
       
       if (centerPoint) {
-        canvas.zoomToPoint({ x: centerPoint.x, y: centerPoint.y }, newZoom);
+        // Use proper Point constructor for Fabric.js v6
+        const point = new Point(centerPoint.x, centerPoint.y);
+        canvas.zoomToPoint(point, newZoom);
       } else {
         canvas.setZoom(newZoom);
       }
