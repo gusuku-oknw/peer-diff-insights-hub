@@ -1,114 +1,124 @@
+
 import { useCallback } from 'react';
 import { Canvas, FabricText, Rect } from 'fabric';
 import { useSlideStore } from '@/stores/slide.store';
+import type { SlideElement } from '@/types/slide.types';
 
 interface UseCanvasActionsProps {
-  currentSlide: number;
   canvas: Canvas | null;
+  currentSlide: number;
 }
 
-export const useCanvasActions = ({
-  currentSlide,
-  canvas
-}: UseCanvasActionsProps) => {
-  const { addSlideElement } = useSlideStore();
+export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps) => {
+  const { addSlideElement, updateSlideElement, removeSlideElement } = useSlideStore();
 
-  const addText = useCallback(() => {
+  const addText = useCallback((x: number = 100, y: number = 100) => {
     if (!canvas) return;
 
-    const text = new FabricText('新しいテキスト', {
-      left: 100,
-      top: 100,
+    const text = new FabricText('テキストを入力', {
+      left: x,
+      top: y,
       fontFamily: 'Arial',
-      fontSize: 20,
-      fill: '#000000'
+      fontSize: 16,
+      fill: '#000000',
     });
 
     canvas.add(text);
     canvas.setActiveObject(text);
-    canvas.renderAll();
 
-    // Add to store
-    const element = {
+    // Create SlideElement conforming to the interface
+    const element: SlideElement = {
       id: `text-${Date.now()}`,
       type: 'text',
-      content: '新しいテキスト',
-      x: 100,
-      y: 100,
-      width: 200,
-      height: 50
+      position: { x, y },
+      size: { width: 120, height: 20 },
+      props: {
+        content: 'テキストを入力',
+        fontSize: 16,
+        fontFamily: 'Arial',
+        color: '#000000'
+      }
     };
 
     addSlideElement(currentSlide, element);
   }, [canvas, currentSlide, addSlideElement]);
 
-  const addShape = useCallback(() => {
+  const addShape = useCallback((shapeType: 'rectangle' | 'circle', x: number = 100, y: number = 100) => {
     if (!canvas) return;
 
-    const rect = new Rect({
-      left: 100,
-      top: 100,
-      width: 100,
-      height: 100,
-      fill: '#007bff',
-      stroke: '#0056b3',
-      strokeWidth: 2
-    });
+    let shape;
+    let element: SlideElement;
 
-    canvas.add(rect);
-    canvas.setActiveObject(rect);
-    canvas.renderAll();
+    if (shapeType === 'rectangle') {
+      shape = new Rect({
+        left: x,
+        top: y,
+        width: 100,
+        height: 100,
+        fill: '#3b82f6',
+        stroke: '#1e40af',
+        strokeWidth: 2,
+      });
 
-    // Add to store
-    const element = {
-      id: `shape-${Date.now()}`,
-      type: 'shape',
-      x: 100,
-      y: 100,
-      width: 100,
-      height: 100
-    };
-
-    addSlideElement(currentSlide, element);
-  }, [canvas, currentSlide, addSlideElement]);
-
-  const addImage = useCallback(() => {
-    if (!canvas) return;
-    
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-      
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imgUrl = event.target?.result as string;
-        
-        // Add to store
-        const element = {
-          id: `image-${Date.now()}`,
-          type: 'image',
-          src: imgUrl,
-          x: 100,
-          y: 100,
-          width: 200,
-          height: 150
-        };
-        
-        addSlideElement(currentSlide, element);
+      element = {
+        id: `rect-${Date.now()}`,
+        type: 'rectangle',
+        position: { x, y },
+        size: { width: 100, height: 100 },
+        props: {
+          fill: '#3b82f6',
+          stroke: '#1e40af',
+          strokeWidth: 2
+        }
       };
-      reader.readAsDataURL(file);
-    };
-    
-    input.click();
+    } else {
+      // Circle implementation would go here
+      return;
+    }
+
+    canvas.add(shape);
+    canvas.setActiveObject(shape);
+    addSlideElement(currentSlide, element);
   }, [canvas, currentSlide, addSlideElement]);
+
+  const addImage = useCallback((imageUrl: string, x: number = 100, y: number = 100) => {
+    if (!canvas) return;
+
+    // Image loading logic would be implemented here
+    const element: SlideElement = {
+      id: `image-${Date.now()}`,
+      type: 'image',
+      position: { x, y },
+      size: { width: 200, height: 150 },
+      props: {
+        src: imageUrl,
+        alt: 'Uploaded image'
+      }
+    };
+
+    addSlideElement(currentSlide, element);
+  }, [canvas, currentSlide, addSlideElement]);
+
+  const deleteSelected = useCallback(() => {
+    if (!canvas) return;
+
+    const activeObject = canvas.getActiveObject();
+    if (activeObject) {
+      canvas.remove(activeObject);
+      // Remove from store would be implemented here based on object ID
+    }
+  }, [canvas]);
+
+  const clearCanvas = useCallback(() => {
+    if (!canvas) return;
+    canvas.clear();
+  }, [canvas]);
 
   return {
     addText,
     addShape,
-    addImage
+    addImage,
+    deleteSelected,
+    clearCanvas
   };
 };
