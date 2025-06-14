@@ -3,7 +3,7 @@ import React from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, BookOpen } from "lucide-react";
-import PanelContent from "./PanelContent";
+import PanelContent from "../../ui/panels/components/panel-content";
 
 interface MobileSheetProps {
   shouldShowNotes: boolean;

@@ -1,6 +1,6 @@
 
 import React from "react";
-import PanelContent from "./PanelContent";
+import PanelContent from "../../ui/panels/components/panel-content";
 
 interface DesktopPanelProps {
   shouldShowNotes: boolean;
