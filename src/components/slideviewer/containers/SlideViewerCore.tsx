@@ -8,16 +8,19 @@ import MainLayout from "../layout/MainLayout";
 const SlideViewerCore: React.FC = () => {
   const slideViewerLogic = useSlideViewerLogic();
   const responsiveLayout = useResponsiveLayout();
-  
+
   // 型変換: number | null → Date | null
   let presentationStartTime: Date | null = null;
-  if (
-    typeof slideViewerLogic.presentationStartTime === "number" &&
-    slideViewerLogic.presentationStartTime !== null
+  const val = slideViewerLogic.presentationStartTime;
+  if (typeof val === "number" && val !== null) {
+    presentationStartTime = new Date(val);
+  } else if (
+    typeof val === "object" &&
+    val !== null &&
+    "getTime" in val &&
+    typeof (val as Date).getTime === "function"
   ) {
-    presentationStartTime = new Date(slideViewerLogic.presentationStartTime);
-  } else if (slideViewerLogic.presentationStartTime instanceof Date) {
-    presentationStartTime = slideViewerLogic.presentationStartTime;
+    presentationStartTime = val as Date;
   } else {
     presentationStartTime = null;
   }
@@ -32,3 +35,4 @@ const SlideViewerCore: React.FC = () => {
 };
 
 export default SlideViewerCore;
+
