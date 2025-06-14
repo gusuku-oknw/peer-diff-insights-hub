@@ -7,6 +7,8 @@ import RightSidebar from "../layout/RightSidebar";
 import OptimizedSlideCanvas from "@/features/slideviewer/components/canvas/OptimizedSlideCanvas";
 import SlideThumbnails from "../SlideThumbnails";
 import FloatingToggleButton from "../layout/FloatingToggleButton";
+import LeftFloatingButton from "../layout/LeftFloatingButton";
+import RightFloatingButton from "../layout/RightFloatingButton";
 import MainToolbar from "../toolbar/MainToolbar";
 import MobileOptimizedToolbar from "../toolbar/MobileOptimizedToolbar";
 
@@ -94,6 +96,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
   // Calculate presentation start time as number
   const presentationStartTimeNumber = presentationStartTime ? presentationStartTime.getTime() : null;
+
+  // Determine if we should show the right panel content
+  const shouldShowNotes = (viewerMode === "presentation" && showPresenterNotes) || 
+                         (viewerMode === "review" && showPresenterNotes);
+  const shouldShowReviewPanel = viewerMode === "review";
+  const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
+  
+  // Hide right panel completely in presentation fullscreen or when no content to show
+  const hideRightPanelCompletely = (viewerMode === "presentation" && isFullScreen) || 
+                                  !shouldDisplayRightPanel;
 
   return (
     <div className="h-full flex bg-gray-50">
@@ -196,6 +208,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           leftOpen={leftSidebarOpen}
           rightOpen={isRightPanelVisible()}
         />
+      )}
+
+      {/* Left Floating Button - Show when left sidebar is closed and not on mobile */}
+      {!isMobile && !leftSidebarOpen && (
+        <LeftFloatingButton onToggle={toggleLeftSidebar} />
+      )}
+
+      {/* Right Floating Button - Show when right panel is closed and not on mobile */}
+      {!isMobile && !hideRightPanelCompletely && !isRightPanelVisible() && (
+        <RightFloatingButton onToggle={handleToggleRightPanel} />
       )}
     </div>
   );
