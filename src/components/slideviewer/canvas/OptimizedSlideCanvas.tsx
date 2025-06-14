@@ -1,11 +1,9 @@
 
 import React, { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import { useOptimizedSlideCanvas } from "@/hooks/slideviewer/useOptimizedSlideCanvas";
-import { useStandardSlideSize } from "@/hooks/slideviewer/useStandardSlideSize";
 import { useEnhancedCanvasActions } from "@/hooks/slideviewer/canvas/useEnhancedCanvasActions";
 import { useCanvasShortcuts } from "@/hooks/slideviewer/canvas/useCanvasShortcuts";
 import { renderElementsWithEmptyState } from "@/utils/slideCanvas/enhancedElementRenderer";
-import { detectDisplayCapabilities } from "@/utils/slideCanvas/standardSlideSizes";
 import TouchOptimizedCanvas from "@/features/slideviewer/components/canvas/TouchOptimizedCanvas";
 import EmptyCanvasState from "@/features/slideviewer/components/canvas/states/EmptyCanvasState";
 import CanvasLoadingState from "@/features/slideviewer/components/canvas/states/CanvasLoadingState";
@@ -33,63 +31,13 @@ const OptimizedSlideCanvas = React.memo(({
   containerHeight = 0,
   enablePerformanceMode = true
 }: OptimizedSlideCanvasProps) => {
-  console.log(`OptimizedSlideCanvas rendering - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Performance Mode: ${enablePerformanceMode}`);
+  console.log(`OptimizedSlideCanvas rendering - Slide: ${currentSlide}, Zoom: ${zoomLevel}%`);
   
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
   const [showGuide, setShowGuide] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
   const [selectedObject, setSelectedObject] = useState<any>(null);
 
-  // 超高解像度ディスプレイ検出と最適化
-  const displayCapabilities = useMemo(() => detectDisplayCapabilities(), []);
-  
-  // Super High-DPI スケーリング（最大6倍まで対応）
-  const pixelRatio = useMemo(() => {
-    const maxRatio = displayCapabilities.is8KCapable ? 6 : 
-                    displayCapabilities.is4KCapable ? 4 : 
-                    displayCapabilities.isUltraHighDPI ? 3 : 2;
-    return Math.min(displayCapabilities.pixelRatio || 1, maxRatio);
-  }, [displayCapabilities]);
-
-  // Use standard slide sizes with ultra-high resolution support
-  const { slideSize, deviceType } = useStandardSlideSize({
-    containerWidth,
-    containerHeight,
-    preferredAspectRatio: 16 / 9
-  });
-
-  // Ultra-high resolution slide size with Super High-DPI scaling
-  const ultraSlideSize = useMemo(() => {
-    // 基本解像度をpixelRatioで拡大
-    const scaledWidth = slideSize.width * pixelRatio;
-    const scaledHeight = slideSize.height * pixelRatio;
-    
-    // 表示サイズは元のサイズを維持
-    const displayWidth = slideSize.width;
-    const displayHeight = slideSize.height;
-    
-    return {
-      width: scaledWidth,
-      height: scaledHeight,
-      displayWidth,
-      displayHeight,
-      scale: pixelRatio,
-      baseWidth: slideSize.width,
-      baseHeight: slideSize.height,
-      resolution: `${scaledWidth}x${scaledHeight}`,
-      displayResolution: `${displayWidth}x${displayHeight}`
-    };
-  }, [slideSize, pixelRatio]);
-
-  // Memoize canvas configuration
-  const canvasConfig = useMemo(() => ({
-    currentSlide,
-    editable,
-    containerWidth: ultraSlideSize.width,
-    containerHeight: ultraSlideSize.height,
-    enablePerformanceMode
-  }), [currentSlide, editable, ultraSlideSize.width, ultraSlideSize.height, enablePerformanceMode]);
-
+  // Use consolidated high-resolution canvas hook
   const {
     canvasRef,
     fabricCanvasRef,
@@ -97,8 +45,15 @@ const OptimizedSlideCanvas = React.memo(({
     error,
     elements,
     slides,
+    canvasConfig,
     performance
-  } = useOptimizedSlideCanvas(canvasConfig);
+  } = useOptimizedSlideCanvas({
+    currentSlide,
+    editable,
+    containerWidth,
+    containerHeight,
+    enablePerformanceMode
+  });
 
   // Enhanced canvas actions with animations
   const {
@@ -129,68 +84,6 @@ const OptimizedSlideCanvas = React.memo(({
     onCopySelected: copySelected,
     onPasteSelected: paste
   });
-
-  // Ultra-high resolution canvas setup with maximum quality
-  useEffect(() => {
-    const canvas = fabricCanvasRef.current;
-    const canvasElement = canvasRef.current;
-    
-    if (!canvas || !canvasElement || !isReady) return;
-
-    console.log('Setting up ultra-high resolution canvas:', {
-      resolution: ultraSlideSize.resolution,
-      displaySize: ultraSlideSize.displayResolution,
-      pixelRatio,
-      displayCapabilities
-    });
-
-    // Set ultra-high resolution canvas dimensions
-    canvasElement.width = ultraSlideSize.width;
-    canvasElement.height = ultraSlideSize.height;
-    
-    // Scale the CSS size back down for proper display
-    canvasElement.style.width = `${ultraSlideSize.displayWidth}px`;
-    canvasElement.style.height = `${ultraSlideSize.displayHeight}px`;
-    
-    // Update Fabric.js canvas dimensions
-    canvas.setDimensions({
-      width: ultraSlideSize.width,
-      height: ultraSlideSize.height
-    });
-    
-    // Get context and apply ultra-high quality settings
-    const ctx = canvasElement.getContext('2d');
-    if (ctx) {
-      // Scale context for ultra-high DPI
-      if (pixelRatio > 1) {
-        ctx.scale(pixelRatio, pixelRatio);
-      }
-      
-      // Maximum quality rendering settings
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      
-      // Enhanced text rendering
-      ctx.textBaseline = 'alphabetic';
-      ctx.textAlign = 'start';
-      
-      // Anti-aliasing and quality optimizations
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.miterLimit = 10;
-    }
-    
-    // Update Fabric.js zoom to compensate for ultra-high scaling
-    canvas.setZoom(pixelRatio);
-    
-    // Enable enhanced rendering options in Fabric.js
-    canvas.enableRetinaScaling = true;
-    canvas.imageSmoothingEnabled = true;
-    
-    canvas.renderAll();
-    
-    console.log(`Ultra-high DPI canvas ready: ${ultraSlideSize.resolution} (${pixelRatio}x scale)`);
-  }, [fabricCanvasRef.current, isReady, ultraSlideSize, pixelRatio, displayCapabilities]);
 
   // Track selected object for context menu
   useEffect(() => {
@@ -227,16 +120,16 @@ const OptimizedSlideCanvas = React.memo(({
     console.log('Image functionality coming soon');
   }, []);
   
-  // Ultra-high resolution element rendering
+  // Ultra-high resolution element rendering - memoized to prevent unnecessary re-renders
   const handleUltraRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
-    if (!canvas || !isReady) return;
+    if (!canvas || !isReady || !canvasConfig) return;
     
     try {
       const result = renderElementsWithEmptyState(
         canvas, 
         elements, 
-        ultraSlideSize,
+        canvasConfig,
         editable, 
         currentSlide,
         handleAddText,
@@ -244,16 +137,18 @@ const OptimizedSlideCanvas = React.memo(({
         handleAddImage
       );
       setIsEmpty(result.isEmpty);
+      
+      console.log(`Rendered ${elements.length} elements at ${canvasConfig.width}x${canvasConfig.height} resolution`);
     } catch (err) {
       console.error('Ultra rendering failed:', err);
     }
-  }, [elements, currentSlide, editable, isReady, ultraSlideSize, handleAddText, handleAddShape, handleAddImage]);
+  }, [elements, currentSlide, editable, isReady, canvasConfig, handleAddText, handleAddShape, handleAddImage, fabricCanvasRef.current]);
   
   useEffect(() => {
-    if (isReady) {
+    if (isReady && canvasConfig) {
       handleUltraRenderElements();
     }
-  }, [handleUltraRenderElements, isReady]);
+  }, [handleUltraRenderElements, isReady, canvasConfig]);
 
   // Show guide for first-time users
   useEffect(() => {
@@ -278,6 +173,13 @@ const OptimizedSlideCanvas = React.memo(({
     }
   }, []);
 
+  // Device type detection for mobile optimization
+  const deviceType = useMemo(() => {
+    if (containerWidth < 768) return 'mobile';
+    if (containerWidth < 1024) return 'tablet';
+    return 'desktop';
+  }, [containerWidth]);
+
   // Use TouchOptimizedCanvas for mobile devices
   if (deviceType === 'mobile') {
     return (
@@ -286,8 +188,8 @@ const OptimizedSlideCanvas = React.memo(({
         zoomLevel={zoomLevel}
         editable={editable}
         userType={userType}
-        containerWidth={ultraSlideSize.displayWidth}
-        containerHeight={ultraSlideSize.displayHeight}
+        containerWidth={canvasConfig?.displayWidth || containerWidth}
+        containerHeight={canvasConfig?.displayHeight || containerHeight}
       />
     );
   }
@@ -309,11 +211,17 @@ const OptimizedSlideCanvas = React.memo(({
     );
   }
   
+  if (!canvasConfig) {
+    return (
+      <CanvasLoadingState 
+        progress={0}
+        message="高解像度設定を初期化中..."
+      />
+    );
+  }
+  
   return (
-    <div 
-      ref={canvasContainerRef}
-      className="w-full h-full flex flex-col bg-gray-50 overflow-auto relative"
-    >
+    <div className="w-full h-full flex flex-col bg-gray-50 overflow-auto relative">
       {/* Canvas Container */}
       <div className="flex-1 flex items-center justify-center p-4 relative">
         {/* Guide overlay */}
@@ -346,8 +254,8 @@ const OptimizedSlideCanvas = React.memo(({
           <div 
             className="bg-white rounded-lg shadow-lg border relative"
             style={{
-              width: ultraSlideSize.displayWidth,
-              height: ultraSlideSize.displayHeight,
+              width: canvasConfig.displayWidth,
+              height: canvasConfig.displayHeight,
               transform: `scale(${zoomLevel / 100})`,
               transformOrigin: 'center center',
               transition: 'transform 0.2s ease-out'
@@ -404,20 +312,17 @@ const OptimizedSlideCanvas = React.memo(({
           {enablePerformanceMode && performance.metrics && (
             <div className="text-xs bg-black text-white px-2 py-1 rounded">
               FPS: {performance.metrics.fps} | Render: {performance.metrics.renderTime}ms
-              {!performance.isPerformanceGood && (
-                <span className="text-yellow-300 ml-2">⚡ 高速モード</span>
-              )}
             </div>
           )}
           <div className="text-xs bg-green-600 text-white px-2 py-1 rounded">
-            解像度: {ultraSlideSize.resolution} ({pixelRatio}x)
+            解像度: {canvasConfig.width}×{canvasConfig.height} ({canvasConfig.pixelRatio}x)
           </div>
-          {displayCapabilities.is8KCapable && (
+          {canvasConfig.displayCapabilities?.is8KCapable && (
             <div className="text-xs bg-purple-600 text-white px-2 py-1 rounded">
               8K対応
             </div>
           )}
-          {displayCapabilities.is4KCapable && (
+          {canvasConfig.displayCapabilities?.is4KCapable && (
             <div className="text-xs bg-blue-600 text-white px-2 py-1 rounded">
               4K対応
             </div>
@@ -427,14 +332,16 @@ const OptimizedSlideCanvas = React.memo(({
         {/* Right: Display & Resolution Information */}
         <div className="flex items-center gap-2">
           <div className="text-xs bg-blue-500 text-white px-2 py-1 rounded">
-            {ultraSlideSize.displayResolution} (16:9)
+            表示: {canvasConfig.displayWidth}×{canvasConfig.displayHeight}
           </div>
-          <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
-            物理: {displayCapabilities.physicalWidth}×{displayCapabilities.physicalHeight}
-          </div>
-          {pixelRatio > 2 && (
+          {canvasConfig.displayCapabilities && (
+            <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
+              物理: {canvasConfig.displayCapabilities.physicalWidth}×{canvasConfig.displayCapabilities.physicalHeight}
+            </div>
+          )}
+          {canvasConfig.pixelRatio > 2 && (
             <div className="text-xs text-purple-700 bg-purple-100 px-2 py-1 rounded border">
-              Super High-DPI ({pixelRatio}x)
+              Super High-DPI ({canvasConfig.pixelRatio}x)
             </div>
           )}
         </div>
