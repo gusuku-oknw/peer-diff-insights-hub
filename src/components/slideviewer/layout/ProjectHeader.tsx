@@ -8,13 +8,13 @@ const ProjectHeader: React.FC = () => {
   const { 
     leftSidebarOpen, 
     toggleLeftSidebar, 
-    rightPanelHidden, 
     setRightPanelHidden,
     isRightPanelVisible 
   } = useSlideStore();
 
   const handleToggleRightPanel = () => {
-    setRightPanelHidden(!isRightPanelVisible());
+    const currentVisible = isRightPanelVisible();
+    setRightPanelHidden(currentVisible);
   };
 
   return (

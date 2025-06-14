@@ -7,6 +7,8 @@ import RightSidebar from "../layout/RightSidebar";
 import OptimizedSlideCanvas from "@/features/slideviewer/components/canvas/OptimizedSlideCanvas";
 import SlideThumbnails from "../SlideThumbnails";
 import FloatingToggleButton from "../layout/FloatingToggleButton";
+import MainToolbar from "../toolbar/MainToolbar";
+import MobileOptimizedToolbar from "../toolbar/MobileOptimizedToolbar";
 
 interface MainLayoutProps {
   // Props from useSlideViewerLogic
@@ -27,6 +29,15 @@ interface MainLayoutProps {
   isMobile: boolean;
   isTablet: boolean;
   isDesktop: boolean;
+
+  // Handlers from useSlideViewerLogic
+  handlePreviousSlide: () => void;
+  handleNextSlide: () => void;
+  handleZoomChange: (zoom: number) => void;
+  handleModeChange: (mode: "presentation" | "edit" | "review") => void;
+  handleSaveChanges: () => void;
+  handleStartPresentation: () => void;
+  togglePresenterNotes: () => void;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({
@@ -40,6 +51,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   isRightPanelOpen,
   contentAreaDimensions,
   isMobile: isResponsiveMobile,
+  handlePreviousSlide,
+  handleNextSlide,
+  handleZoomChange,
+  handleModeChange,
+  handleSaveChanges,
+  handleStartPresentation,
+  togglePresenterNotes,
 }) => {
   const isMobileHook = useIsMobile();
   const isMobile = isMobileHook || isResponsiveMobile;
@@ -48,6 +66,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     leftSidebarOpen,
     viewerMode,
     zoom,
+    showPresenterNotes,
+    displayCount,
+    isFullScreen,
     goToSlide,
     toggleLeftSidebar,
     setRightPanelHidden,
@@ -56,11 +77,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   } = useSlideStore();
 
   const canvasWidth = contentAreaDimensions.availableWidth - (isMobile ? 20 : 40);
-  const canvasHeight = windowDimensions.height - (isMobile ? 180 : 200);
+  const canvasHeight = windowDimensions.height - (isMobile ? 260 : 280); // Adjusted for toolbar
 
   const handleToggleRightPanel = () => {
     setRightPanelHidden(!isRightPanelVisible());
   };
+
+  const handleFullScreenToggle = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      document.documentElement.requestFullscreen();
+    }
+  };
+
+  // Calculate presentation start time as number
+  const presentationStartTimeNumber = presentationStartTime ? presentationStartTime.getTime() : null;
 
   return (
     <div className="h-full flex bg-gray-50">
@@ -73,6 +105,49 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
+        {/* Toolbar */}
+        {isMobile ? (
+          <MobileOptimizedToolbar
+            currentSlide={currentSlide}
+            totalSlides={totalSlides}
+            zoom={zoom}
+            viewerMode={viewerMode}
+            isFullScreen={isFullScreen}
+            leftSidebarOpen={leftSidebarOpen}
+            onPreviousSlide={handlePreviousSlide}
+            onNextSlide={handleNextSlide}
+            onZoomIn={() => handleZoomChange(Math.min(200, zoom + 10))}
+            onZoomOut={() => handleZoomChange(Math.max(25, zoom - 10))}
+            onResetZoom={() => handleZoomChange(100)}
+            onLeftSidebarToggle={toggleLeftSidebar}
+            onFullScreenToggle={handleFullScreenToggle}
+            canZoomIn={zoom < 200}
+            canZoomOut={zoom > 25}
+          />
+        ) : (
+          <MainToolbar
+            currentSlide={currentSlide}
+            totalSlides={totalSlides}
+            zoom={zoom}
+            viewerMode={viewerMode}
+            isFullScreen={isFullScreen}
+            leftSidebarOpen={leftSidebarOpen}
+            showPresenterNotes={showPresenterNotes}
+            presentationStartTime={presentationStartTimeNumber}
+            displayCount={displayCount}
+            userType={userType}
+            onPreviousSlide={handlePreviousSlide}
+            onNextSlide={handleNextSlide}
+            onZoomChange={handleZoomChange}
+            onModeChange={handleModeChange}
+            onLeftSidebarToggle={toggleLeftSidebar}
+            onFullScreenToggle={handleFullScreenToggle}
+            onShowPresenterNotesToggle={togglePresenterNotes}
+            onStartPresentation={handleStartPresentation}
+            onSaveChanges={handleSaveChanges}
+          />
+        )}
+
         {/* Canvas Area */}
         <div className="flex-1 flex items-center justify-center p-4">
           <OptimizedSlideCanvas
