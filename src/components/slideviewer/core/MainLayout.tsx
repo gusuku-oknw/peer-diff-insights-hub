@@ -103,9 +103,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const shouldShowReviewPanel = viewerMode === "review";
   const shouldDisplayRightPanel = shouldShowNotes || shouldShowReviewPanel;
   
-  // Hide right panel completely in presentation fullscreen or when no content to show
-  const hideRightPanelCompletely = (viewerMode === "presentation" && isFullScreen) || 
-                                  !shouldDisplayRightPanel;
+  // Hide right panel completely in presentation fullscreen mode only
+  const hideRightPanelCompletely = (viewerMode === "presentation" && isFullScreen);
 
   return (
     <div className="h-full flex bg-gray-50 relative">
