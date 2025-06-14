@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useSlideStore } from "@/stores/slide-store";
 import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
+import UnifiedSlideThumbnails from "./thumbnails/UnifiedSlideThumbnails";
 import EnhancedSlideThumbnails from "./thumbnails/EnhancedSlideThumbnails";
 import ImprovedSlideThumbnails from "./thumbnails/ImprovedSlideThumbnails";
 import SimplifiedSlideThumbnails from "./thumbnails/SimplifiedSlideThumbnails";
@@ -76,86 +76,16 @@ const SlideThumbnails = ({
     );
   }
 
-  // 改善版UI/UXを使用する場合
-  if (useImprovedUI) {
-    return (
-      <ImprovedSlideThumbnails
-        currentSlide={currentSlide}
-        onSlideClick={onSlideClick}
-        onOpenOverallReview={onOpenOverallReview}
-        height={Math.max(height, optimalHeight)}
-        containerWidth={containerWidth}
-        userType={userType}
-        showAsPopup={showAsPopup}
-      />
-    );
-  }
-
-  // 拡張版を使用する場合（従来版）
-  if (enhanced) {
-    return (
-      <EnhancedSlideThumbnails
-        currentSlide={currentSlide}
-        onSlideClick={onSlideClick}
-        onOpenOverallReview={onOpenOverallReview}
-        height={Math.max(height, optimalHeight)}
-        containerWidth={containerWidth}
-        userType={userType}
-      />
-    );
-  }
-
-  // 固定表示モード（従来版）
-  const {
-    containerRef,
-    scrollContainerRef,
-    scrollByDirection,
-    thumbnailWidth,
-    gap,
-    slideData
-  } = useThumbnailContainer({
-    currentSlide,
-    onSlideClick,
-    containerWidth,
-    isPopupMode: false
-  });
-
-  const showAddSlide = userType === "enterprise";
-  const adjustedHeight = Math.max(height, optimalHeight);
-
+  // デフォルトで新しいUnifiedSlideThumbnailsを使用
   return (
-    <div 
-      ref={containerRef}
-      className="flex flex-col h-full bg-white border-t border-gray-200"
-      style={{ height: `${adjustedHeight}px` }}
-      tabIndex={0}
-      role="region"
-      aria-label="スライド一覧"
-    >
-      <SimplifiedThumbnailHeader 
-        slideCount={slides.length}
-        userType={userType}
-      />
-      
-      <div className="flex-1 relative overflow-hidden">
-        <ThumbnailNavigationButtons
-          onScrollLeft={() => scrollByDirection('left')}
-          onScrollRight={() => scrollByDirection('right')}
-        />
-        
-        <ThumbnailScrollArea
-          scrollContainerRef={scrollContainerRef}
-          slideData={slideData}
-          currentSlide={currentSlide}
-          thumbnailWidth={thumbnailWidth}
-          gap={gap}
-          onSlideClick={onSlideClick}
-          userType={userType}
-          showAddSlide={showAddSlide}
-          onOpenOverallReview={onOpenOverallReview}
-        />
-      </div>
-    </div>
+    <UnifiedSlideThumbnails
+      currentSlide={currentSlide}
+      onSlideClick={onSlideClick}
+      onOpenOverallReview={onOpenOverallReview}
+      height={Math.max(height, optimalHeight)}
+      containerWidth={containerWidth}
+      userType={userType}
+    />
   );
 };
 

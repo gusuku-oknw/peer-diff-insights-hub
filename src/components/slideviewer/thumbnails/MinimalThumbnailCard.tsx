@@ -30,10 +30,10 @@ const MinimalThumbnailCard = ({
   const slideTitle = slide.title || `スライド ${slideIndex}`;
   const showStudentFeatures = userType === "student";
   
-  // 改善されたサイズ分類（大幅に拡大されたサイズに対応）
-  const isSmall = thumbnailWidth < 180;      // 従来の120未満
-  const isMedium = thumbnailWidth >= 180 && thumbnailWidth < 240; // 従来の120-160
-  const isLarge = thumbnailWidth >= 240;     // 新しいカテゴリ
+  // Improved size classification
+  const isSmall = thumbnailWidth < 160;
+  const isMedium = thumbnailWidth >= 160 && thumbnailWidth < 200;
+  const isLarge = thumbnailWidth >= 200;
 
   return (
     <Tooltip>
@@ -41,14 +41,14 @@ const MinimalThumbnailCard = ({
         <div 
           className={`thumbnail-card cursor-pointer transition-all duration-200 transform hover:scale-105 ${
             isActive 
-              ? 'ring-2 ring-blue-400 ring-offset-2 bg-blue-50 shadow-lg scale-105' 
-              : 'hover:shadow-md hover:ring-1 hover:ring-blue-200 hover:ring-offset-1'
-          } relative flex-shrink-0 group`} 
+              ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50 shadow-lg scale-105' 
+              : 'hover:shadow-lg hover:ring-1 hover:ring-blue-300 hover:ring-offset-1'
+          } relative flex-shrink-0 group bg-white rounded-lg`} 
           style={{ width: `${thumbnailWidth}px` }}
           onClick={() => onClick(slideIndex)}
         >
-          {/* サムネイル画像（大きめサイズ対応） */}
-          <div className="w-full aspect-video bg-white rounded-lg border-2 border-gray-200 overflow-hidden shadow-sm mb-3">
+          {/* Thumbnail image with better aspect ratio */}
+          <div className="w-full aspect-video bg-white rounded-t-lg border border-gray-200 overflow-hidden shadow-sm">
             {slide.thumbnail ? (
               <img 
                 src={slide.thumbnail} 
@@ -60,9 +60,9 @@ const MinimalThumbnailCard = ({
                 <div className="text-center">
                   <svg 
                     className={`${
-                      isSmall ? 'w-6 h-6' : 
-                      isMedium ? 'w-8 h-8' : 
-                      'w-10 h-10'
+                      isSmall ? 'w-8 h-8' : 
+                      isMedium ? 'w-10 h-10' : 
+                      'w-12 h-12'
                     } text-gray-300 mx-auto`} 
                     fill="none" 
                     stroke="currentColor" 
@@ -80,64 +80,64 @@ const MinimalThumbnailCard = ({
             )}
           </div>
           
-          {/* スライド情報（拡大版対応） */}
-          <div className="text-center">
-            {/* スライド番号バッジ（大きめ） */}
+          {/* Slide information section */}
+          <div className="p-3 text-center">
+            {/* Slide number badge */}
             <div className={`inline-flex items-center justify-center rounded-full font-bold mb-2 transition-colors duration-200 ${
               isSmall ? 'w-6 h-6 text-xs' : 
-              isMedium ? 'w-8 h-8 text-sm' : 
-              'w-10 h-10 text-base'
+              isMedium ? 'w-7 h-7 text-sm' : 
+              'w-8 h-8 text-sm'
             } ${
               isActive 
                 ? 'bg-blue-500 text-white shadow-md' 
-                : 'bg-gray-400 text-white group-hover:bg-blue-400'
+                : 'bg-gray-500 text-white group-hover:bg-blue-400'
             }`}>
               {slideIndex}
             </div>
             
-            {/* タイトル（大きめサイズで常に表示） */}
+            {/* Title */}
             <p className={`font-medium truncate transition-colors duration-200 ${
               isSmall ? 'text-xs' :
               isMedium ? 'text-sm' :
-              'text-base'
+              'text-sm'
             } ${
-              isActive ? 'text-blue-700' : 'text-gray-600 group-hover:text-gray-800'
+              isActive ? 'text-blue-700' : 'text-gray-700 group-hover:text-gray-900'
             }`} title={slideTitle}>
               {slideTitle}
             </p>
             
-            {/* 詳細情報（大きめサイズの場合に表示） */}
-            {isLarge && (showStudentFeatures || slide.hasComments) && (
-              <div className="mt-2 flex items-center justify-center gap-2 text-xs text-gray-500">
+            {/* Status indicators for larger sizes */}
+            {(isMedium || isLarge) && (showStudentFeatures || slide.hasComments) && (
+              <div className="mt-2 flex items-center justify-center gap-1 text-xs">
                 {showStudentFeatures && slide.isReviewed && (
-                  <span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-600 rounded-full">
+                  <span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    レビュー済
+                    済
                   </span>
                 )}
                 {slide.hasComments && (
-                  <span className="flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-600 rounded-full">
+                  <span className="flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-full">
                     <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    コメント
+                    ※
                   </span>
                 )}
               </div>
             )}
           </div>
           
-          {/* ステータスインジケーター（小さめサイズ用） */}
-          {!isLarge && (
+          {/* Compact status indicators for small sizes */}
+          {isSmall && (
             <div className="absolute top-2 right-2 flex gap-1">
               {showStudentFeatures && slide.isReviewed && (
-                <div className="w-3 h-3 bg-green-500 rounded-full opacity-80"></div>
+                <div className="w-3 h-3 bg-green-500 rounded-full opacity-90 shadow-sm"></div>
               )}
               {slide.hasComments && (
-                <div className="w-3 h-3 bg-purple-500 rounded-full opacity-80"></div>
+                <div className="w-3 h-3 bg-purple-500 rounded-full opacity-90 shadow-sm"></div>
               )}
             </div>
           )}
           
-          {/* アクティブインジケーター */}
+          {/* Active indicator */}
           {isActive && (
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-t-lg"></div>
           )}
