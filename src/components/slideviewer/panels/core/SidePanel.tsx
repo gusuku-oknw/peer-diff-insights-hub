@@ -55,7 +55,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
 
   return (
     <div 
-      className="h-full bg-white border-l border-gray-200 flex flex-col transition-all duration-300 ease-in-out shadow-lg"
+      className="h-full bg-white border-l border-gray-200 flex flex-col transition-all duration-300 ease-in-out shadow-lg overflow-hidden"
       style={{ 
         width: `${layout.panelWidth}px`,
         borderLeftColor: panelTokens.colors.border.light,
@@ -69,14 +69,16 @@ const SidePanel: React.FC<SidePanelProps> = ({
         totalSlides={totalSlides}
         userType={userType}
         sizeClass={layout.sizeClass}
-        completionPercentage={75} // これは実際のデータから取得する必要があります
+        completionPercentage={75}
         onClose={onToggleHide}
         showProgress={showProgress}
       />
 
       {/* タブシステム（複数タブがある場合のみ） */}
       {showTabSystem && (
-        <div className={`flex-shrink-0 ${layout.sizeClass === 'xs' ? 'px-2' : 'px-4'} pt-2`}>
+        <div className={`flex-shrink-0 ${
+          layout.sizeClass === 'xs' ? 'px-1 pt-1' : 'px-3 pt-2'
+        } relative z-10`}>
           <UnifiedTabSystem
             activeTab={activeTab}
             onTabChange={setActiveTab}

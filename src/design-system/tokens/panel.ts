@@ -103,8 +103,8 @@ export const getOptimalPanelWidth = (screenWidth: number): number => {
 };
 
 export const getPanelSizeClass = (width: number): 'xs' | 'sm' | 'md' | 'lg' => {
-  if (width < 300) return 'xs';
-  if (width < 400) return 'sm';
-  if (width < 500) return 'md';
-  return 'lg';
+  if (width < 280) return 'xs';  // 極小：アイコンのみ
+  if (width < 350) return 'sm';  // 小：アクティブタブのみテキスト
+  if (width < 450) return 'md';  // 中：短縮ラベル
+  return 'lg';                   // 大：フルラベル
 };
