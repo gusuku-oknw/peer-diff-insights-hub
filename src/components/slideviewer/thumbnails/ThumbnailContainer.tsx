@@ -40,8 +40,8 @@ export const useThumbnailContainer = ({
     title: slide.title || `スライド ${index + 1}`,
     thumbnail: slide.thumbnail,
     elements: slide.elements || [],
-    hasComments: slide.comments?.length > 0 || false,
-    isReviewed: slide.isReviewed || false
+    hasComments: (slide as any).comments?.length > 0 || false,
+    isReviewed: (slide as any).isReviewed || false
   }));
 
   useEffect(() => {

@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -69,8 +68,8 @@ const SimplifiedSlideThumbnails = ({
     title: slide.title || `スライド ${index + 1}`,
     thumbnail: slide.thumbnail,
     elements: slide.elements || [],
-    hasComments: slide.comments?.length > 0 || false,
-    isReviewed: slide.isReviewed || false
+    hasComments: (slide as any).comments?.length > 0 || false,
+    isReviewed: (slide as any).isReviewed || false
   }));
 
   const handleSlideClick = (slideIndex: number) => {
