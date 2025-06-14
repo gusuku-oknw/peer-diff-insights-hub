@@ -33,7 +33,7 @@ const EnhancedSlideThumbnails = ({
   // 表示設定とフィルター状態
   const [displaySettings, setDisplaySettings] = useState<ThumbnailDisplaySettings>({
     viewMode: 'horizontal',
-    thumbnailSize: 'normal', // Changed from 'medium' to 'normal' to match ThumbnailSize type
+    thumbnailSize: 'normal',
     showDetails: true,
     showProgress: userType === "student"
   });
@@ -50,8 +50,8 @@ const EnhancedSlideThumbnails = ({
     if (mode === 'list' || mode === 'compact') return width - 40;
     
     const sizeMultipliers = {
-      compact: 0.12, // Changed from 'small' to 'compact'
-      normal: 0.15,  // Changed from 'medium' to 'normal'
+      compact: 0.12,
+      normal: 0.15,
       large: 0.18
     };
     
@@ -230,18 +230,20 @@ const EnhancedSlideThumbnails = ({
         >
           {filteredAndSortedSlides.map((slide, index) => {
             const slideIndex = enhancedSlideData.findIndex(s => s.id === slide.id) + 1;
+            const isActive = currentSlide === slideIndex;
+            
             return (
               <div 
                 key={slide.id} 
                 data-slide={slideIndex}
                 className={displaySettings.viewMode === 'horizontal' ? "flex-shrink-0 transition-all duration-300 ease-in-out" : ""}
                 role="tab"
-                aria-selected={currentSlide === slideIndex}
+                aria-selected={isActive}
               >
                 <EnhancedThumbnailCard
                   slide={slide}
                   slideIndex={slideIndex}
-                  isActive={currentSlide === slideIndex}
+                  isActive={isActive}
                   viewMode={displaySettings.viewMode}
                   thumbnailSize={displaySettings.thumbnailSize}
                   showDetails={displaySettings.showDetails}
