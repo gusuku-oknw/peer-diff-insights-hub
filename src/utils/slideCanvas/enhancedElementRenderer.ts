@@ -1,7 +1,18 @@
 
 import { IText, Rect, Circle, Image } from 'fabric';
-import EmptyCanvasState from '@/components/slideviewer/canvas/EmptyCanvasState';
 
+/**
+ * 拡張要素レンダリング関数（空状態対応版）
+ * @param canvas Fabricキャンバスインスタンス
+ * @param elements レンダリングする要素配列
+ * @param canvasSize キャンバスサイズ
+ * @param editable 編集可能かどうか
+ * @param currentSlide 現在のスライド番号
+ * @param onAddText テキスト追加コールバック
+ * @param onAddShape 図形追加コールバック
+ * @param onAddImage 画像追加コールバック
+ * @returns レンダリング結果（空かどうかの情報含む）
+ */
 export const renderElementsWithEmptyState = (
   canvas: any, 
   elements: any[], 
@@ -16,18 +27,19 @@ export const renderElementsWithEmptyState = (
     canvas.clear();
     canvas.backgroundColor = '#ffffff';
     
+    // 空のキャンバスの場合、コンポーネントレベルで処理
     if (elements.length === 0) {
-      // For empty canvas, we'll handle this in the component level
-      // This function focuses on rendering actual elements
       canvas.renderAll();
       return { isEmpty: true };
     }
     
+    // Z-indexでソートしてレイヤー順序を保持
     const sortedElements = [...elements].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
     
     sortedElements.forEach(element => {
       const { type, position, size, props, id, angle } = element;
       
+      // スケール計算（1600x900を基準）
       const scaleX = canvasSize.width / 1600;
       const scaleY = canvasSize.height / 900;
       

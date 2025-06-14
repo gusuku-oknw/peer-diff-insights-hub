@@ -13,6 +13,12 @@ interface PanelHeaderProps {
   onSheetClose?: () => void;
 }
 
+/**
+ * パネルヘッダーコンポーネント
+ * - ノートとレビューパネルのタブ切り替え
+ * - レスポンシブ対応（モバイル・デスクトップ）
+ * - パネル開閉制御
+ */
 const PanelHeader: React.FC<PanelHeaderProps> = ({
   shouldShowNotes,
   shouldShowReviewPanel,

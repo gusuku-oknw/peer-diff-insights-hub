@@ -1,11 +1,26 @@
 
 import { IText, Rect, Circle, Image } from 'fabric';
 
-export const renderElements = (canvas: any, elements: any[], canvasSize: { width: number; height: number }, editable: boolean, currentSlide: number) => {
+/**
+ * スライド要素レンダリング関数
+ * @param canvas Fabricキャンバスインスタンス
+ * @param elements レンダリングする要素配列
+ * @param canvasSize キャンバスサイズ
+ * @param editable 編集可能かどうか
+ * @param currentSlide 現在のスライド番号
+ */
+export const renderElements = (
+  canvas: any, 
+  elements: any[], 
+  canvasSize: { width: number; height: number }, 
+  editable: boolean, 
+  currentSlide: number
+) => {
   try {
     canvas.clear();
     canvas.backgroundColor = '#ffffff';
     
+    // 要素が空の場合はプレースホルダーを表示
     if (elements.length === 0) {
       const placeholder = new IText(`スライド ${currentSlide}`, {
         left: canvasSize.width / 2,
@@ -23,11 +38,13 @@ export const renderElements = (canvas: any, elements: any[], canvasSize: { width
       return;
     }
     
+    // Z-indexでソートしてレイヤー順序を保持
     const sortedElements = [...elements].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
     
     sortedElements.forEach(element => {
       const { type, position, size, props, id, angle } = element;
       
+      // スケール計算（1600x900を基準）
       const scaleX = canvasSize.width / 1600;
       const scaleY = canvasSize.height / 900;
       

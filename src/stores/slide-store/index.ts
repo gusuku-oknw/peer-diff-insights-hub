@@ -11,7 +11,12 @@ import { createPPTXImportSlice } from './createPPTXImport';
 import { createSampleSlides } from './createSampleSlides';
 import type { ViewerMode } from '@/types/slide.types';
 
-// スライドストアの作成
+/**
+ * スライドストアの作成
+ * - 全てのスライス機能を統合
+ * - 永続化対応
+ * - 学生アカウント用フィルタリング
+ */
 const createSlideStore: StateCreator<SlideStore> = (set, get, api) => {
   // サンプルスライドを作成
   const sampleSlides = createSampleSlides();
@@ -51,7 +56,10 @@ const createSlideStore: StateCreator<SlideStore> = (set, get, api) => {
   };
 };
 
-// 学生アカウント用のフィルタリング関数
+/**
+ * 学生アカウント用のビューアーモードフィルタリング
+ * 編集モードを無効化し、プレゼンテーションモードに変更
+ */
 const filterViewerModeForStudent = (mode: ViewerMode): ViewerMode => {
   if (mode === "edit") {
     console.log('Filtering edit mode to presentation for student account');
@@ -60,7 +68,11 @@ const filterViewerModeForStudent = (mode: ViewerMode): ViewerMode => {
   return mode;
 };
 
-// 永続化付きのスライドストア
+/**
+ * 永続化付きスライドストア
+ * - レイアウト状態も含めて永続化
+ * - 学生アカウント向けフィルタリング適用
+ */
 export const useSlideStore = create<SlideStore>()(
   persist(
     createSlideStore,

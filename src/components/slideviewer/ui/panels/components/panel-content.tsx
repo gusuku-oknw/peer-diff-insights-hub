@@ -20,6 +20,12 @@ interface PanelContentProps {
   isMobile?: boolean;
 }
 
+/**
+ * 統合パネルコンテンツコンポーネント
+ * - ノートパネルとレビューパネルの表示制御
+ * - タブ切り替え機能
+ * - レスポンシブ対応
+ */
 const PanelContent: React.FC<PanelContentProps> = ({
   shouldShowNotes,
   shouldShowReviewPanel,
@@ -35,6 +41,7 @@ const PanelContent: React.FC<PanelContentProps> = ({
   onClose,
   isMobile = false,
 }) => {
+  // 両方のパネルが表示される場合はタブで切り替え
   if (shouldShowNotes && shouldShowReviewPanel) {
     return (
       <Tabs value={activeTab} onValueChange={onTabChange} className="h-full flex flex-col">
@@ -69,6 +76,7 @@ const PanelContent: React.FC<PanelContentProps> = ({
     );
   }
 
+  // レビューパネルのみの場合
   if (shouldShowReviewPanel) {
     return (
       <EnhancedReviewPanel
@@ -87,6 +95,7 @@ const PanelContent: React.FC<PanelContentProps> = ({
     );
   }
 
+  // ノートパネルのみの場合
   if (shouldShowNotes) {
     return (
       <NotesPanel 

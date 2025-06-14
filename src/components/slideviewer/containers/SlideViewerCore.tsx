@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useSlideViewerLogic } from "@/hooks/slideviewer/useSlideViewerLogic";
 import { useResponsiveLayout } from "@/hooks/slideviewer/useResponsiveLayout";
@@ -12,7 +13,11 @@ function isValidDate(val: unknown): val is Date {
   );
 }
 
-// SlideViewer全体のロジック+レイアウト統合
+/**
+ * SlideViewer全体のロジック+レイアウト統合コンポーネント
+ * - ビジネスロジックとレスポンシブレイアウトを統合
+ * - プレゼンテーション開始時刻の型安全な処理
+ */
 const SlideViewerCore: React.FC = () => {
   console.log("SlideViewerCore rendering");
   
