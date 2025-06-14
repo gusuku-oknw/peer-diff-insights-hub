@@ -1,15 +1,13 @@
 
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useSlideStore } from "@/stores/slide-store";
 import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
 import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ChevronDown, ChevronUp, LayoutGrid, List, Layers, Filter, ChevronLeft, ChevronRight } from "lucide-react";
-import MinimalThumbnailCard from './MinimalThumbnailCard';
-import ThumbnailSizeControls from './ThumbnailSizeControls';
-import VirtualizedThumbnailList from './VirtualizedThumbnailList';
+import { ChevronDown, ChevronUp } from "lucide-react";
+import ThumbnailControlsBar from './ThumbnailControlsBar';
+import ThumbnailMainContent from './ThumbnailMainContent';
 
 type ViewMode = 'horizontal' | 'grid' | 'list';
 type FilterMode = 'all' | 'reviewed' | 'unreviewed' | 'commented';
@@ -135,165 +133,10 @@ const UnifiedSlideThumbnails = ({
   const useVirtualization = slides.length > 20;
 
   // Layout calculations with optimized heights
-  const controlsHeight = 28; // Significantly reduced from 40px
+  const controlsHeight = 28;
   const collapseButtonHeight = 48;
   const currentHeight = isCollapsed ? collapseButtonHeight : height;
   const contentHeight = currentHeight - controlsHeight;
-
-  // View mode icons with better mapping
-  const viewModeIcons = {
-    horizontal: Layers,
-    grid: LayoutGrid,
-    list: List
-  };
-
-  // Enhanced render functions
-  const renderCompactControls = () => (
-    <div className="flex items-center justify-between px-3 py-1 bg-white border-b border-gray-200 h-7">
-      {/* Compact view mode toggle */}
-      <div className="flex items-center gap-0.5 bg-gray-100 rounded-md p-0.5">
-        {Object.entries(viewModeIcons).map(([mode, Icon]) => (
-          <Tooltip key={mode}>
-            <TooltipTrigger asChild>
-              <Button
-                variant={viewMode === mode ? "default" : "ghost"}
-                size="sm"
-                className={`h-6 w-6 p-0 transition-all duration-200 ${
-                  viewMode === mode 
-                    ? "bg-white shadow-sm text-blue-600 ring-1 ring-blue-200" 
-                    : "hover:bg-white/70 text-gray-600"
-                }`}
-                onClick={() => setViewMode(mode as ViewMode)}
-                aria-label={`${mode}モードに切り替え`}
-              >
-                <Icon className="h-3 w-3" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              {mode === 'horizontal' && '水平スクロール'}
-              {mode === 'grid' && 'グリッド'}
-              {mode === 'list' && 'リスト'}
-            </TooltipContent>
-          </Tooltip>
-        ))}
-      </div>
-
-      {/* Center controls */}
-      <div className="flex items-center gap-2">
-        <ThumbnailSizeControls
-          currentSize={thumbnailWidth}
-          onSizeChange={setThumbnailWidth}
-          minSize={minSize}
-          maxSize={maxSize}
-          step={20}
-        />
-
-        <Select value={filterMode} onValueChange={(value) => setFilterMode(value as FilterMode)}>
-          <SelectTrigger className="w-20 h-6 text-xs border-gray-300">
-            <Filter className="h-2.5 w-2.5 mr-1" />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全て</SelectItem>
-            <SelectItem value="reviewed">済</SelectItem>
-            <SelectItem value="unreviewed">未</SelectItem>
-            <SelectItem value="commented">※</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Right side info */}
-      <div className="flex items-center gap-2 text-xs text-gray-500">
-        <span>{currentSlide}/{slides.length}</span>
-        <span className="text-gray-300">|</span>
-        <span>{filteredSlides.length}表示</span>
-      </div>
-    </div>
-  );
-
-  const renderNavigationButtons = () => {
-    if (viewMode !== 'horizontal') return null;
-    
-    return (
-      <>
-        <Button
-          variant="outline"
-          size="sm"
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 h-8 w-8 p-0 bg-white/95 hover:bg-white shadow-lg border-gray-300 transition-all duration-200 hover:scale-105"
-          onClick={() => scrollByDirection('left')}
-          aria-label="左にスクロール"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 h-8 w-8 p-0 bg-white/95 hover:bg-white shadow-lg border-gray-300 transition-all duration-200 hover:scale-105"
-          onClick={() => scrollByDirection('right')}
-          aria-label="右にスクロール"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </>
-    );
-  };
-
-  const renderThumbnails = () => {
-    // Use virtualization for large datasets
-    if (useVirtualization && viewMode === 'horizontal') {
-      return (
-        <VirtualizedThumbnailList
-          slides={filteredSlides}
-          currentSlide={currentSlide}
-          thumbnailWidth={thumbnailWidth}
-          containerHeight={contentHeight}
-          onSlideClick={onSlideClick}
-          userType={userType}
-          orientation="horizontal"
-        />
-      );
-    }
-
-    const containerClasses = {
-      horizontal: `flex items-center h-full px-4 py-3 pb-12 overflow-x-auto scroll-smooth gap-${gap/4} scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100`,
-      grid: `grid gap-4 p-4 pb-12 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100`,
-      list: `space-y-2 p-4 pb-12 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100`
-    };
-
-    // Calculate grid columns dynamically
-    const gridStyle = viewMode === 'grid' ? {
-      gridTemplateColumns: `repeat(auto-fill, minmax(${thumbnailWidth}px, 1fr))`
-    } : {};
-
-    return (
-      <div
-        ref={viewMode === 'horizontal' ? scrollContainerRef : null}
-        className={containerClasses[viewMode]}
-        style={viewMode === 'horizontal' ? { gap: `${gap}px` } : gridStyle}
-        role="tablist"
-        aria-label="スライドサムネイル一覧"
-      >
-        {filteredSlides.map((slide) => (
-          <div
-            key={slide.id}
-            className={viewMode === 'horizontal' ? "flex-shrink-0" : ""}
-            role="tab"
-            aria-selected={currentSlide === slide.slideIndex}
-          >
-            <MinimalThumbnailCard
-              slide={slide}
-              slideIndex={slide.slideIndex}
-              isActive={currentSlide === slide.slideIndex}
-              thumbnailWidth={thumbnailWidth}
-              onClick={onSlideClick}
-              userType={userType}
-              showHoverActions={true}
-            />
-          </div>
-        ))}
-      </div>
-    );
-  };
 
   const renderEnhancedCollapseButton = () => (
     <div className="absolute bottom-3 right-3 z-30">
@@ -336,13 +179,38 @@ const UnifiedSlideThumbnails = ({
     >
       {!isCollapsed && (
         <>
-          {renderCompactControls()}
-          <div className="flex-1 relative overflow-hidden" style={{ height: `${contentHeight}px` }}>
-            {renderNavigationButtons()}
-            {renderThumbnails()}
-          </div>
+          <ThumbnailControlsBar
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            thumbnailWidth={thumbnailWidth}
+            onThumbnailSizeChange={setThumbnailWidth}
+            minSize={minSize}
+            maxSize={maxSize}
+            filterMode={filterMode}
+            onFilterChange={setFilterMode}
+            currentSlide={currentSlide}
+            totalSlides={slides.length}
+            filteredCount={filteredSlides.length}
+          />
+          
+          <ThumbnailMainContent
+            slides={filteredSlides}
+            currentSlide={currentSlide}
+            thumbnailWidth={thumbnailWidth}
+            contentHeight={contentHeight}
+            containerWidth={containerWidth}
+            viewMode={viewMode}
+            gap={gap}
+            onSlideClick={onSlideClick}
+            onScrollLeft={() => scrollByDirection('left')}
+            onScrollRight={() => scrollByDirection('right')}
+            userType={userType}
+            useVirtualization={useVirtualization}
+            scrollContainerRef={scrollContainerRef}
+          />
         </>
       )}
+      
       {renderEnhancedCollapseButton()}
       
       {/* Loading indicator for better UX */}
