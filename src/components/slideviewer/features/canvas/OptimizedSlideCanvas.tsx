@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import { useOptimizedSlideCanvas } from "@/hooks/slideviewer/useOptimizedSlideCanvas";
 import { useEnhancedResponsive } from "@/hooks/slideviewer/useEnhancedResponsive";
@@ -70,7 +71,7 @@ const OptimizedSlideCanvas = ({
   }, [addText]);
 
   const handleAddShape = useCallback(() => {
-    addShape('rect'); // Default to rectangle
+    addShape(); // Call without arguments since addShape now defaults to rectangle
   }, [addShape]);
 
   const handleAddImage = useCallback(() => {
