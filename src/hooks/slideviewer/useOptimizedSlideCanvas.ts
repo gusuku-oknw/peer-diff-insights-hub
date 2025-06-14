@@ -50,9 +50,10 @@ export const useOptimizedSlideCanvas = ({
         fabricCanvasRef.current = null;
       }
 
-      console.log('Initializing canvas with simplified config:', {
+      console.log('Initializing canvas with dynamic config:', {
         canvasSize: `${canvasConfig.width}x${canvasConfig.height}`,
-        displaySize: `${canvasConfig.displayWidth}x${canvasConfig.displayHeight}`
+        displaySize: `${canvasConfig.displayWidth}x${canvasConfig.displayHeight}`,
+        useActualSizing: canvasConfig.useActualSizing
       });
 
       const canvas = new Canvas(canvasRef.current, {
@@ -62,19 +63,16 @@ export const useOptimizedSlideCanvas = ({
         selection: editable,
         preserveObjectStacking: true,
         selectionBorderColor: '#2563eb',
-        selectionLineWidth: 1, // Fixed small line width
+        selectionLineWidth: 1,
         controlsAboveOverlay: true,
         allowTouchScrolling: false,
         renderOnAddRemove: false,
         skipTargetFind: false,
         imageSmoothingEnabled: true,
-        enableRetinaScaling: false // Disable to prevent scaling conflicts
+        enableRetinaScaling: false
       });
 
       // Set fixed control sizes that won't scale with zoom
-      canvas.controlsAboveOverlay = true;
-      
-      // Override default control rendering to maintain fixed sizes
       if (editable) {
         canvas.selectionLineWidth = 1;
         canvas.selectionBorderColor = '#2563eb';
@@ -84,7 +82,7 @@ export const useOptimizedSlideCanvas = ({
         (canvas as any).borderOpacityWhenMoving = 0.4;
       }
 
-      // Set canvas element attributes for 1:1 rendering
+      // Set canvas element attributes for dynamic sizing
       const canvasElement = canvasRef.current;
       canvasElement.width = canvasConfig.width;
       canvasElement.height = canvasConfig.height;
@@ -96,7 +94,7 @@ export const useOptimizedSlideCanvas = ({
       setIsReady(true);
       setError(null);
 
-      console.log(`Canvas successfully initialized - 1:1 rendering: ${canvasConfig.width}x${canvasConfig.height}`);
+      console.log(`Canvas initialized - Size: ${canvasConfig.width}x${canvasConfig.height}, Display: ${canvasConfig.displayWidth}x${canvasConfig.displayHeight}`);
     } catch (err) {
       console.error('Canvas initialization failed:', err);
       setError('キャンバスの初期化に失敗しました');
@@ -105,9 +103,11 @@ export const useOptimizedSlideCanvas = ({
     }
   }, [canvasConfig, editable]);
   
-  // Initialize canvas when config is available
+  // Reinitialize canvas when config changes significantly
   useEffect(() => {
     if (canvasConfig) {
+      // Force reinitialization for size changes
+      initializationRef.current = false;
       initializeCanvas();
     }
   }, [canvasConfig, initializeCanvas]);

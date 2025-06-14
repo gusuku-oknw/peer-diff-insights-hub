@@ -6,32 +6,42 @@ interface UseCustomZoomProps {
   canvas: Canvas | null;
   isReady: boolean;
   canvasConfig: any;
+  zoomLevel: number;
 }
 
-export const useCustomZoom = ({ canvas, isReady, canvasConfig }: UseCustomZoomProps) => {
+export const useCustomZoom = ({ canvas, isReady, canvasConfig, zoomLevel }: UseCustomZoomProps) => {
   const zoomTransformRef = useRef<string>('scale(1)');
   
-  const applyZoomTransform = useCallback((zoomLevel: number) => {
+  const applyZoomTransform = useCallback((currentZoomLevel: number) => {
     if (!canvas || !isReady || !canvasConfig) return;
     
     try {
-      const zoomValue = zoomLevel / 100;
-      const transform = `scale(${zoomValue})`;
-      zoomTransformRef.current = transform;
-      
-      // Apply CSS transform to canvas wrapper instead of using Fabric.js setZoom
       const canvasElement = canvas.getElement();
       const canvasContainer = canvasElement.parentElement;
       
-      if (canvasContainer) {
+      if (!canvasContainer) return;
+      
+      if (canvasConfig.useActualSizing) {
+        // For zoom ≤ 100%: no CSS transform needed, canvas size handles it
+        canvasContainer.style.transform = 'scale(1)';
+        canvasContainer.style.transformOrigin = 'center center';
+        canvasContainer.style.transition = 'transform 0.2s ease-out';
+        zoomTransformRef.current = 'scale(1)';
+        
+        console.log(`Actual sizing mode: ${currentZoomLevel}% (no CSS transform)`);
+      } else {
+        // For zoom > 100%: use CSS transform
+        const zoomValue = currentZoomLevel / 100;
+        const transform = `scale(${zoomValue})`;
         canvasContainer.style.transform = transform;
         canvasContainer.style.transformOrigin = 'center center';
         canvasContainer.style.transition = 'transform 0.2s ease-out';
+        zoomTransformRef.current = transform;
+        
+        console.log(`CSS transform mode: ${currentZoomLevel}% (transform: ${transform})`);
       }
-      
-      console.log(`CSS zoom applied: ${zoomLevel}% (transform: ${transform})`);
     } catch (err) {
-      console.error('CSS zoom error:', err);
+      console.error('Zoom application error:', err);
     }
   }, [canvas, isReady, canvasConfig]);
   

@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import UnifiedSlideCanvas from "@/components/slideviewer/canvas/UnifiedSlideCanvas";
 import { Button } from "@/components/ui/button";
@@ -87,7 +86,7 @@ const EnhancedSlideDisplay: React.FC<EnhancedSlideDisplayProps> = ({
         </Button>
       </div>
 
-      {/* Unified Canvas Container - Single rendering path */}
+      {/* Unified Canvas Container with zoom level */}
       <div className="flex-1 flex items-center justify-center p-4">
         <UnifiedSlideCanvas
           currentSlide={currentSlide}
@@ -97,6 +96,7 @@ const EnhancedSlideDisplay: React.FC<EnhancedSlideDisplayProps> = ({
           containerWidth={containerWidth}
           containerHeight={containerHeight}
           enablePerformanceMode={true}
+          onZoomChange={onZoomChange}
         />
       </div>
     </div>
