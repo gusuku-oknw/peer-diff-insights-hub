@@ -1,9 +1,9 @@
 import React from "react";
-import LeftSidebar from "./left-sidebar";
-import RightSidebar from "./right-sidebar";
-import PresentationContent from "../../core/presentation/PresentationContent";
-import { FloatingToggleButton } from "./floating-toggle-button";
-import OverallReviewPanel from "../panels/overall-review/OverallReviewPanel.tsx";
+import LeftSidebar from "../ui/layout/left-sidebar";
+import RightSidebar from "../ui/layout/right-sidebar";
+import PresentationContent from "../presentation/PresentationContent";
+import { FloatingToggleButton } from "../ui/layout/floating-toggle-button";
+import OverallReviewPanel from "../panels/OverallReviewPanel/OverallReviewPanel";
 import OptimizedToolbar from "../toolbar/OptimizedToolbar";
 import type { ViewerMode } from "@/types/slide.types";
 import { useSlideStore } from "@/stores/slide-store";
