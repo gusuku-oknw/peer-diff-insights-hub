@@ -108,7 +108,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
                                   !shouldDisplayRightPanel;
 
   return (
-    <div className="h-full flex bg-gray-50">
+    <div className="h-full flex bg-gray-50 relative">
       {/* Left Sidebar */}
       <LeftSidebar 
         isOpen={leftSidebarOpen}
@@ -210,12 +210,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         />
       )}
 
-      {/* Left Floating Button - Show when left sidebar is closed and not on mobile */}
+      {/* Left Edge Tab - Show when left sidebar is closed and not on mobile */}
       {!isMobile && !leftSidebarOpen && (
         <LeftFloatingButton onToggle={toggleLeftSidebar} />
       )}
 
-      {/* Right Floating Button - Show when right panel is closed and not on mobile */}
+      {/* Right Edge Tab - Show when right panel is closed and not on mobile */}
       {!isMobile && !hideRightPanelCompletely && !isRightPanelVisible() && (
         <RightFloatingButton onToggle={handleToggleRightPanel} />
       )}
