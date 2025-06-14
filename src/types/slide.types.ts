@@ -1,6 +1,5 @@
-
 // Unified slide types - consolidating from multiple locations
-export type SlideElementType = 'text' | 'image' | 'shape' | 'chart';
+export type SlideElementType = 'text' | 'image' | 'shape' | 'rectangle' | 'circle' | 'chart';
 
 export interface SlideElement {
   id: string;

@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { Canvas, FabricText, Rect } from 'fabric';
+import { Canvas, FabricText, Rect, Circle } from 'fabric';
 import { useSlideStore } from '@/stores/slide.store';
 import type { SlideElement } from '@/types/slide.types';
 
@@ -12,12 +12,12 @@ interface UseCanvasActionsProps {
 export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps) => {
   const { addSlideElement, updateSlideElement, removeSlideElement } = useSlideStore();
 
-  const addText = useCallback((x: number = 100, y: number = 100) => {
+  const addText = useCallback(() => {
     if (!canvas) return;
 
     const text = new FabricText('テキストを入力', {
-      left: x,
-      top: y,
+      left: 100,
+      top: 100,
       fontFamily: 'Arial',
       fontSize: 16,
       fill: '#000000',
@@ -26,11 +26,10 @@ export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps
     canvas.add(text);
     canvas.setActiveObject(text);
 
-    // Create SlideElement conforming to the interface
     const element: SlideElement = {
       id: `text-${Date.now()}`,
       type: 'text',
-      position: { x, y },
+      position: { x: 100, y: 100 },
       size: { width: 120, height: 20 },
       props: {
         content: 'テキストを入力',
@@ -43,61 +42,75 @@ export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps
     addSlideElement(currentSlide, element);
   }, [canvas, currentSlide, addSlideElement]);
 
-  const addShape = useCallback((shapeType: 'rectangle' | 'circle', x: number = 100, y: number = 100) => {
+  const addRectangle = useCallback(() => {
     if (!canvas) return;
 
-    let shape;
-    let element: SlideElement;
+    const shape = new Rect({
+      left: 100,
+      top: 100,
+      width: 100,
+      height: 100,
+      fill: '#3b82f6',
+      stroke: '#1e40af',
+      strokeWidth: 2,
+    });
 
-    if (shapeType === 'rectangle') {
-      shape = new Rect({
-        left: x,
-        top: y,
-        width: 100,
-        height: 100,
+    const element: SlideElement = {
+      id: `rect-${Date.now()}`,
+      type: 'rectangle',
+      position: { x: 100, y: 100 },
+      size: { width: 100, height: 100 },
+      props: {
         fill: '#3b82f6',
         stroke: '#1e40af',
-        strokeWidth: 2,
-      });
-
-      element = {
-        id: `rect-${Date.now()}`,
-        type: 'rectangle',
-        position: { x, y },
-        size: { width: 100, height: 100 },
-        props: {
-          fill: '#3b82f6',
-          stroke: '#1e40af',
-          strokeWidth: 2
-        }
-      };
-    } else {
-      // Circle implementation would go here
-      return;
-    }
+        strokeWidth: 2
+      }
+    };
 
     canvas.add(shape);
     canvas.setActiveObject(shape);
     addSlideElement(currentSlide, element);
   }, [canvas, currentSlide, addSlideElement]);
 
-  const addImage = useCallback((imageUrl: string, x: number = 100, y: number = 100) => {
+  const addCircle = useCallback(() => {
     if (!canvas) return;
 
-    // Image loading logic would be implemented here
+    const shape = new Circle({
+      left: 100,
+      top: 100,
+      radius: 50,
+      fill: '#3b82f6',
+      stroke: '#1e40af',
+      strokeWidth: 2,
+    });
+
     const element: SlideElement = {
-      id: `image-${Date.now()}`,
-      type: 'image',
-      position: { x, y },
-      size: { width: 200, height: 150 },
+      id: `circle-${Date.now()}`,
+      type: 'circle',
+      position: { x: 100, y: 100 },
+      size: { width: 100, height: 100 },
       props: {
-        src: imageUrl,
-        alt: 'Uploaded image'
+        radius: 50,
+        fill: '#3b82f6',
+        stroke: '#1e40af',
+        strokeWidth: 2
       }
     };
 
+    canvas.add(shape);
+    canvas.setActiveObject(shape);
     addSlideElement(currentSlide, element);
   }, [canvas, currentSlide, addSlideElement]);
+
+  // Add shape method for compatibility
+  const addShape = useCallback(() => {
+    addRectangle(); // Default to rectangle
+  }, [addRectangle]);
+
+  // Add image method for compatibility
+  const addImage = useCallback(() => {
+    console.log('Add image functionality not implemented yet');
+  }, []);
 
   const deleteSelected = useCallback(() => {
     if (!canvas) return;
@@ -105,7 +118,6 @@ export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps
     const activeObject = canvas.getActiveObject();
     if (activeObject) {
       canvas.remove(activeObject);
-      // Remove from store would be implemented here based on object ID
     }
   }, [canvas]);
 
@@ -116,6 +128,8 @@ export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps
 
   return {
     addText,
+    addRectangle,
+    addCircle,
     addShape,
     addImage,
     deleteSelected,

@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { useSlideStore } from "@/stores/slide.store";
+import { useSlideStore } from '@/stores/slide.store';
 import { IText, Rect, Circle } from 'fabric';
 import { Canvas } from 'fabric';
 import type { SlideElement } from '@/types/slide.types';
@@ -105,9 +105,22 @@ export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps
     addSlideElement(currentSlide, element);
   }, [canvas, currentSlide, addSlideElement]);
 
+  // Add shape method for compatibility
+  const addShape = useCallback(() => {
+    addRectangle(); // Default to rectangle
+  }, [addRectangle]);
+
+  // Add image method for compatibility
+  const addImage = useCallback(() => {
+    // Simple placeholder implementation
+    console.log('Add image functionality not implemented yet');
+  }, []);
+
   return {
     addText,
     addRectangle,
-    addCircle
+    addCircle,
+    addShape,
+    addImage
   };
 };

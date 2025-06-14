@@ -59,21 +59,12 @@ const SlideContent: React.FC<SlideContentProps> = ({
     const mainContent = (
         <EnhancedSlideDisplay
             currentSlide={currentSlide}
-            totalSlides={totalSlides}
-            zoom={zoom}
-            viewerMode={viewerMode}
-            showPresenterNotes={showPresenterNotes}
-            isFullScreen={isFullScreen}
-            presentationStartTime={presentationStartTime}
-            presenterNotes={presenterNotes}
-            elapsedTime={elapsedTime}
-            displayCount={displayCount}
-            commentedSlides={commentedSlides}
-            mockComments={mockComments}
+            zoomLevel={zoom}
+            editable={viewerMode === "edit"}
             userType={userType}
-            rightPanelCollapsed={rightPanelCollapsed}
-            onSlideChange={onSlideChange}
-            onZoomChange={onZoomChange}
+            containerWidth={containerWidth}
+            containerHeight={600}
+            onZoomChange={onZoomChange || (() => {})}
         />
     );
 
