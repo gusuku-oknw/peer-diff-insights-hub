@@ -1,4 +1,3 @@
-
 /**
  * スライドサムネイル共通型定義
  */
@@ -16,7 +15,7 @@ export interface BaseSlideData {
 // ユーザータイプ
 export type UserType = "student" | "enterprise";
 
-// サムネイル表示の基本プロパティ
+// サムネイル表示の基本プロパティのみ
 export interface BaseThumbnailProps {
   currentSlide: number;
   onSlideClick: (slideIndex: number) => void;
@@ -25,7 +24,7 @@ export interface BaseThumbnailProps {
   userType?: UserType;
 }
 
-// レスポンシブ対応のための画面サイズ情報
+// レスポンシブ情報
 export interface ResponsiveInfo {
   isMobile: boolean;
   isTablet: boolean;
