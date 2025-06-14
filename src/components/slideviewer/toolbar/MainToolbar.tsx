@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
@@ -60,7 +61,7 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
   };
 
   const handleZoomIn = () => {
-    const newZoom = Math.min(200, zoom + 10); // Restored max to 200
+    const newZoom = Math.min(100, zoom + 10); // Limited to 100%
     onZoomChange(newZoom);
   };
 
@@ -128,7 +129,7 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
 
       {/* Right section - Zoom and actions */}
       <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-        {/* Enhanced zoom controls - Restored to 200% max */}
+        {/* Enhanced zoom controls - Limited to 100% */}
         <div className="zoom-controls flex items-center gap-1 lg:gap-3 bg-gray-50 rounded-lg px-2 lg:px-4 py-1 lg:py-2 border border-gray-200">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -151,7 +152,7 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
             <Slider
               value={[zoom]}
               onValueChange={handleZoomSliderChange}
-              max={200} // Restored max to 200
+              max={100} // Limited to 100%
               min={25}
               step={5}
               className="w-20 zoom-slider"
@@ -171,7 +172,7 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={handleZoomIn}
-                disabled={zoom >= 200} // Restored max to 200
+                disabled={zoom >= 100} // Limited to 100%
                 className="modern-button h-6 w-6 lg:h-7 lg:w-7 p-0 disabled:opacity-50"
               >
                 <ZoomIn className="h-3 w-3" />

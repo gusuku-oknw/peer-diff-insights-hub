@@ -40,50 +40,33 @@ export const useCanvasConfig = ({
     const baseDisplayWidth = Math.max(320, Math.min(1200, Math.round(displayWidth)));
     const baseDisplayHeight = Math.max(180, Math.min(675, Math.round(displayHeight)));
     
-    // Hybrid zoom approach: 25%-100% actual sizing, 100%-200% CSS transform
-    const useActualSizing = zoomLevel <= 100;
-    const effectiveZoomLevel = Math.max(0.25, Math.min(2.0, zoomLevel / 100));
-    
-    let actualWidth, actualHeight, finalDisplayWidth, finalDisplayHeight;
-    
-    if (useActualSizing) {
-      // For zoom <= 100%, adjust actual canvas size
-      const zoomFactor = Math.max(0.25, Math.min(1.0, zoomLevel / 100));
-      actualWidth = Math.round(baseDisplayWidth * zoomFactor);
-      actualHeight = Math.round(baseDisplayHeight * zoomFactor);
-      finalDisplayWidth = actualWidth;
-      finalDisplayHeight = actualHeight;
-    } else {
-      // For zoom > 100%, use base size (CSS transform will handle the scaling)
-      actualWidth = baseDisplayWidth;
-      actualHeight = baseDisplayHeight;
-      finalDisplayWidth = baseDisplayWidth;
-      finalDisplayHeight = baseDisplayHeight;
-    }
+    // Simplified zoom approach: 25%-100% actual sizing only
+    const zoomFactor = Math.max(0.25, Math.min(1.0, zoomLevel / 100));
+    const actualWidth = Math.round(baseDisplayWidth * zoomFactor);
+    const actualHeight = Math.round(baseDisplayHeight * zoomFactor);
     
     // Simple 1:1 rendering - no pixel ratio scaling
     const pixelRatio = 1;
     
-    console.log('Canvas config (hybrid zoom 25%-200%):', {
+    console.log('Canvas config (simplified 25%-100%):', {
       container: `${containerWidth}x${containerHeight}`,
       zoomLevel: `${zoomLevel}%`,
-      useActualSizing,
-      mode: useActualSizing ? 'actual sizing' : 'CSS transform',
+      mode: 'actual sizing only',
       base: `${baseDisplayWidth}x${baseDisplayHeight}`,
       actual: `${actualWidth}x${actualHeight}`,
-      display: `${finalDisplayWidth}x${finalDisplayHeight}`,
+      zoomFactor,
       pixelRatio
     });
     
     return {
       width: actualWidth,
       height: actualHeight,
-      displayWidth: finalDisplayWidth,
-      displayHeight: finalDisplayHeight,
+      displayWidth: actualWidth,
+      displayHeight: actualHeight,
       pixelRatio,
       actualWidth,
       actualHeight,
-      useActualSizing
+      useActualSizing: true
     };
   }, [containerWidth, containerHeight, zoomLevel]);
 

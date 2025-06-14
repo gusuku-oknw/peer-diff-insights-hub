@@ -20,7 +20,7 @@ const ZoomControlsEnhanced: React.FC<ZoomControlsEnhancedProps> = ({
   };
 
   const handleZoomIn = () => {
-    const newZoom = Math.min(200, zoom + 10); // Keep 200% max as in original
+    const newZoom = Math.min(100, zoom + 10); // Limited to 100%
     onZoomChange(newZoom);
   };
 
@@ -46,7 +46,7 @@ const ZoomControlsEnhanced: React.FC<ZoomControlsEnhancedProps> = ({
           variant="ghost"
           size="sm"
           onClick={handleZoomIn}
-          disabled={zoom >= 200} // Keep 200% max as in original
+          disabled={zoom >= 100} // Limited to 100%
           className="h-6 w-6 p-0"
         >
           <ZoomIn className="h-3 w-3" />
@@ -71,7 +71,7 @@ const ZoomControlsEnhanced: React.FC<ZoomControlsEnhancedProps> = ({
         <Slider
           value={[zoom]}
           onValueChange={handleZoomSliderChange}
-          max={200} // Keep 200% max as in original
+          max={100} // Limited to 100%
           min={25}
           step={5}
           className="w-20"
@@ -85,7 +85,7 @@ const ZoomControlsEnhanced: React.FC<ZoomControlsEnhancedProps> = ({
         variant="ghost"
         size="sm"
         onClick={handleZoomIn}
-        disabled={zoom >= 200} // Keep 200% max as in original
+        disabled={zoom >= 100} // Limited to 100%
         className="h-7 w-7 p-0 disabled:opacity-50"
       >
         <ZoomIn className="h-3 w-3" />

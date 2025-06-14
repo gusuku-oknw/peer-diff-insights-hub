@@ -66,11 +66,11 @@ const MainContentArea: React.FC<MainContentAreaProps> = ({
           isFullScreen={isFullScreen}
           onPreviousSlide={onPreviousSlide}
           onNextSlide={onNextSlide}
-          onZoomIn={() => onZoomChange(Math.min(200, zoom + 10))}
+          onZoomIn={() => onZoomChange(Math.min(100, zoom + 10))} // Limited to 100%
           onZoomOut={() => onZoomChange(Math.max(25, zoom - 10))}
           onResetZoom={() => onZoomChange(100)}
           onFullScreenToggle={onFullScreenToggle}
-          canZoomIn={zoom < 200}
+          canZoomIn={zoom < 100} // Limited to 100%
           canZoomOut={zoom > 25}
         />
       ) : (
