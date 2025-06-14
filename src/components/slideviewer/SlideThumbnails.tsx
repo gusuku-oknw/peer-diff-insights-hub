@@ -1,13 +1,14 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useSlideStore } from "@/stores/slide-store";
+import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
 import EnhancedSlideThumbnails from "./thumbnails/EnhancedSlideThumbnails";
 import SimplifiedSlideThumbnails from "./thumbnails/SimplifiedSlideThumbnails";
 import SimplifiedThumbnailHeader from "./thumbnails/SimplifiedThumbnailHeader";
 import ThumbnailNavigationButtons from "./thumbnails/ThumbnailNavigationButtons";
 import ThumbnailScrollArea from "./thumbnails/ThumbnailScrollArea";
 import { useThumbnailContainer } from "./thumbnails/ThumbnailContainer";
-import { useSlideStore } from "@/stores/slide-store";
 
 interface SlideThumbnailsProps {
   currentSlide: number;
@@ -33,8 +34,17 @@ const SlideThumbnails = ({
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { slides } = useSlideStore();
 
+  // レスポンシブ判定
+  const { shouldUsePopup, optimalHeight } = useResponsiveThumbnails({
+    containerWidth,
+    isPopupMode: false
+  });
+
+  // 強制ポップアップまたは自動判定でポップアップを使用
+  const usePopupMode = showAsPopup || shouldUsePopup;
+
   // ポップアップモードの場合
-  if (showAsPopup) {
+  if (usePopupMode) {
     return (
       <>
         {/* ポップアップ開くトリガーボタン */}
@@ -69,16 +79,17 @@ const SlideThumbnails = ({
         currentSlide={currentSlide}
         onSlideClick={onSlideClick}
         onOpenOverallReview={onOpenOverallReview}
-        height={height}
+        height={Math.max(height, optimalHeight)}
         containerWidth={containerWidth}
         userType={userType}
       />
     );
   }
 
-  // 従来のUI実装（簡素化版・サイズ改善）
+  // 固定表示モード（デスクトップ・大画面タブレット）
   const {
     containerRef,
+    scrollContainerRef,
     scrollByDirection,
     thumbnailWidth,
     gap,
@@ -86,15 +97,18 @@ const SlideThumbnails = ({
   } = useThumbnailContainer({
     currentSlide,
     onSlideClick,
-    containerWidth
+    containerWidth,
+    isPopupMode: false
   });
 
   const showAddSlide = userType === "enterprise";
+  const adjustedHeight = Math.max(height, optimalHeight);
 
   return (
     <div 
       ref={containerRef}
       className="flex flex-col h-full bg-white border-t border-gray-200"
+      style={{ height: `${adjustedHeight}px` }}
       tabIndex={0}
       role="region"
       aria-label="スライド一覧"
@@ -111,7 +125,7 @@ const SlideThumbnails = ({
         />
         
         <ThumbnailScrollArea
-          scrollContainerRef={useThumbnailContainer({ currentSlide, onSlideClick, containerWidth }).scrollContainerRef}
+          scrollContainerRef={scrollContainerRef}
           slideData={slideData}
           currentSlide={currentSlide}
           thumbnailWidth={thumbnailWidth}

@@ -1,10 +1,10 @@
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSlideStore } from "@/stores/slide-store";
 import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
 import MinimalThumbnailCard from "./MinimalThumbnailCard";
 import AddSlideCard from "./AddSlideCard";
 import EvaluationCard from "./EvaluationCard";
@@ -41,22 +41,18 @@ const SimplifiedSlideThumbnails = ({
   onClose
 }: SimplifiedSlideThumbnailsProps) => {
   const { slides } = useSlideStore();
-  const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // 改善されたサムネイルサイズ（ポップアップ用・大きめ設定）
-  const calculateThumbnailSize = (width: number, mobile: boolean) => {
-    if (mobile) {
-      // モバイル：160-200px（従来より大きく）
-      return Math.max(160, Math.min(200, width * 0.35));
-    } else {
-      // デスクトップ：220-280px（大幅に拡大）
-      return Math.max(220, Math.min(280, width * 0.2));
-    }
-  };
+  // レスポンシブサムネイル設定
+  const { 
+    thumbnailWidth, 
+    gap, 
+    isMobile 
+  } = useResponsiveThumbnails({
+    containerWidth,
+    isPopupMode: true
+  });
 
-  const thumbnailWidth = calculateThumbnailSize(containerWidth, isMobile);
-  const gap = isMobile ? 12 : 20; // ギャップも拡大
   const showAddSlide = userType === "enterprise";
   
   // スムーズスクロールフック
@@ -67,14 +63,14 @@ const SimplifiedSlideThumbnails = ({
     handleKeyboardNavigation,
   } = useSmoothScroll({ itemWidth: thumbnailWidth, gap });
   
-  // 簡素化されたスライドデータ
+  // 改善されたスライドデータ（実際のデータを優先）
   const slideData = slides.map((slide, index) => ({
     id: slide.id,
     title: slide.title || `スライド ${index + 1}`,
     thumbnail: slide.thumbnail,
     elements: slide.elements || [],
-    hasComments: Math.random() > 0.8,
-    isReviewed: Math.random() > 0.6
+    hasComments: slide.comments?.length > 0 || false,
+    isReviewed: slide.isReviewed || false
   }));
 
   const handleSlideClick = (slideIndex: number) => {
@@ -103,7 +99,7 @@ const SimplifiedSlideThumbnails = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [currentSlide, slides.length, handleSlideClick, handleKeyboardNavigation, isOpen, onClose]);
 
-  // サムネイル一覧のコンテンツ（拡大対応）
+  // サムネイル一覧のコンテンツ
   const thumbnailsContent = (
     <div 
       ref={containerRef}
@@ -112,7 +108,7 @@ const SimplifiedSlideThumbnails = ({
       role="region"
       aria-label="スライド一覧"
     >
-      {/* 改善されたヘッダー */}
+      {/* ヘッダー */}
       <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-white">
         <div className="flex items-center gap-3">
           <h3 className="font-semibold text-lg text-gray-800">
@@ -134,7 +130,7 @@ const SimplifiedSlideThumbnails = ({
         </Button>
       </div>
       
-      {/* サムネイル一覧（拡大版） */}
+      {/* サムネイル一覧 */}
       <div className="flex-1 relative overflow-hidden">
         <Button
           variant="ghost"
@@ -199,7 +195,7 @@ const SimplifiedSlideThumbnails = ({
     </div>
   );
 
-  // モバイル・タブレット：Drawer表示（高さ拡大）
+  // モバイル・タブレット：Drawer表示
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={onClose}>
@@ -213,7 +209,7 @@ const SimplifiedSlideThumbnails = ({
     );
   }
 
-  // デスクトップ：Dialog表示（サイズ拡大）
+  // デスクトップ：Dialog表示
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[75vh] max-h-[75vh] p-0">

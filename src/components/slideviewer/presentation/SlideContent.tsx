@@ -3,7 +3,7 @@ import React from "react";
 import EnhancedSlideDisplay from "./EnhancedSlideDisplay";
 import SlideThumbnails from "@/components/slideviewer/SlideThumbnails";
 import { useSlideStore } from "@/stores/slide-store";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
 import type { ViewerMode } from "@/types/slide.types";
 
 interface SlideContentProps {
@@ -46,13 +46,15 @@ const SlideContent: React.FC<SlideContentProps> = ({
     onZoomChange,
 }) => {
     const { getSlideThumbnailsWidth } = useSlideStore();
-    const isMobile = useIsMobile();
-
-    const showThumbnails = !(viewerMode === "presentation" && isFullScreen);
     const containerWidth = getSlideThumbnailsWidth();
 
-    // 画面サイズに応じてポップアップモードを決定（基準を緩和）
-    const shouldUsePopup = isMobile || containerWidth < 1000;
+    // レスポンシブ判定
+    const { shouldUsePopup, optimalHeight } = useResponsiveThumbnails({
+        containerWidth,
+        isPopupMode: false
+    });
+
+    const showThumbnails = !(viewerMode === "presentation" && isFullScreen);
 
     const mainContent = (
         <EnhancedSlideDisplay
@@ -104,8 +106,8 @@ const SlideContent: React.FC<SlideContentProps> = ({
         );
     }
 
-    // デスクトップ：固定サイズのサムネイル一覧（高さ拡大）
-    const thumbnailsHeight = 220; // 180pxから220pxに拡大（大きなサムネイルに対応）
+    // デスクトップ：固定サイズのサムネイル一覧
+    const thumbnailsHeight = optimalHeight;
 
     return (
         <div className="flex-1 flex flex-col overflow-hidden min-w-0 h-full">
