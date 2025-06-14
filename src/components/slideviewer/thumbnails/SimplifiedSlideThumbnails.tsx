@@ -4,17 +4,17 @@ import { useSimplifiedThumbnails } from "@/hooks/slideviewer/useSimplifiedThumbn
 import SimplifiedSlideThumbnailsHeader from "./SimplifiedSlideThumbnailsHeader";
 import SimplifiedSlideThumbnailsContent from "./SimplifiedSlideThumbnailsContent";
 import SimplifiedSlideThumbnailsDialog from "./SimplifiedSlideThumbnailsDialog";
+import type { BaseThumbnailProps } from "@/types/slideviewer/thumbnail-common.types";
 
-interface SimplifiedSlideThumbnailsProps {
-  currentSlide: number;
-  onSlideClick: (slideIndex: number) => void;
-  onOpenOverallReview: () => void;
-  containerWidth: number;
-  userType?: "student" | "enterprise";
+interface SimplifiedSlideThumbnailsProps extends BaseThumbnailProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+/**
+ * ポップアップモード用のスライドサムネイル表示コンポーネント
+ * モバイルやタブレットなど、画面幅が制限される環境で使用
+ */
 const SimplifiedSlideThumbnails = ({
   currentSlide,
   onSlideClick,
@@ -45,6 +45,7 @@ const SimplifiedSlideThumbnails = ({
     onClose
   });
 
+  // サムネイル表示コンテンツ
   const thumbnailsContent = (
     <div 
       ref={containerRef}
@@ -53,12 +54,14 @@ const SimplifiedSlideThumbnails = ({
       role="region"
       aria-label="スライド一覧"
     >
+      {/* ヘッダー部分 */}
       <SimplifiedSlideThumbnailsHeader
         slidesCount={slides.length}
         currentSlide={currentSlide}
         onClose={onClose}
       />
       
+      {/* メインコンテンツ部分 */}
       <SimplifiedSlideThumbnailsContent
         slideData={slideData}
         currentSlide={currentSlide}

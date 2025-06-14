@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useSlideStore } from "@/stores/slide-store";
-import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
 import { useResponsiveLayout } from "@/hooks/slideviewer/useResponsiveLayout";
+import { useThumbnailMode } from "@/hooks/slideviewer/useThumbnailMode";
 import UnifiedSlideThumbnails from "./thumbnails/UnifiedSlideThumbnails";
 import SimplifiedSlideThumbnails from "./thumbnails/SimplifiedSlideThumbnails";
 
@@ -19,6 +19,10 @@ interface SlideThumbnailsProps {
   useImprovedUI?: boolean;
 }
 
+/**
+ * メインのスライドサムネイル表示コンポーネント
+ * レスポンシブ対応で、画面サイズに応じてポップアップモードまたは固定モードを選択
+ */
 const SlideThumbnails = ({
   currentSlide,
   onSlideClick,
@@ -26,40 +30,34 @@ const SlideThumbnails = ({
   height,
   containerWidth,
   userType = "enterprise",
-  enhanced = false,
-  showAsPopup = false,
-  useImprovedUI = true
+  showAsPopup = false
 }: SlideThumbnailsProps) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { slides } = useSlideStore();
-  const { contentAreaDimensions, mobile } = useResponsiveLayout();
+  const { contentAreaDimensions } = useResponsiveLayout();
 
-  // Use the optimized width calculation
+  // 効果的なコンテナ幅の計算
   const effectiveContainerWidth = containerWidth || contentAreaDimensions.thumbnailsWidth;
   
-  // Enhanced responsive logic with better thresholds
-  const { shouldUsePopup, optimalHeight } = useResponsiveThumbnails({
+  // サムネイル表示モードの判定
+  const { usePopupMode, enhancedHeight } = useThumbnailMode({
     containerWidth: effectiveContainerWidth,
-    isPopupMode: false
+    showAsPopup
   });
 
-  // More intelligent popup mode detection with relaxed constraints
-  const usePopupMode = showAsPopup || shouldUsePopup || (mobile && effectiveContainerWidth < 480);
-
-  console.log('SlideThumbnails decision:', {
+  console.log('SlideThumbnails rendering:', {
     containerWidth,
     effectiveContainerWidth,
-    shouldUsePopup,
     usePopupMode,
-    mobile,
     height,
-    optimalHeight
+    enhancedHeight
   });
 
-  // Popup mode implementation with improved button
+  // ポップアップモードのレンダリング
   if (usePopupMode) {
     return (
       <>
+        {/* ポップアップ開閉ボタン */}
         <div className="flex items-center justify-center p-4 border-t border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <Button
             onClick={() => setIsPopupOpen(true)}
@@ -75,6 +73,7 @@ const SlideThumbnails = ({
           </Button>
         </div>
         
+        {/* ポップアップダイアログ */}
         <SimplifiedSlideThumbnails
           currentSlide={currentSlide}
           onSlideClick={onSlideClick}
@@ -88,9 +87,7 @@ const SlideThumbnails = ({
     );
   }
 
-  // Fixed mode implementation with enhanced height calculation
-  const enhancedHeight = Math.max(height, optimalHeight, mobile ? 160 : 200);
-
+  // 固定モードのレンダリング
   return (
     <UnifiedSlideThumbnails
       currentSlide={currentSlide}
