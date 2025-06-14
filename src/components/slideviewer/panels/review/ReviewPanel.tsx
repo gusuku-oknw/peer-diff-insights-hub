@@ -2,6 +2,7 @@
 import React from "react";
 import { useReviewPanel } from "@/hooks/useReviewPanel";
 import ReviewTabs from "./ReviewTabs";
+import { checklistCategories } from "../components/ChecklistCategories"; // <-- Import the categories
 
 interface ReviewPanelProps {
   currentSlide: number;
@@ -43,7 +44,7 @@ const ReviewPanel: React.FC<ReviewPanelProps> = ({
         onTabChange={handleTabChange}
         canInteract={canInteract}
         comments={comments}
-        checklistCategories={null}
+        checklistCategories={checklistCategories} {/* <-- Use real categories */}
         newComment={newComment}
         currentSlide={currentSlide}
         isVeryNarrow={isVeryNarrow}

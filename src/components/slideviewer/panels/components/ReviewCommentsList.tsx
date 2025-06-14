@@ -31,6 +31,9 @@ const ReviewCommentsList: React.FC<ReviewCommentsListProps> = ({
   comments,
   checklistCategories
 }) => {
+  // Defensive: fallback to {}
+  const safeChecklistCategories = checklistCategories ?? {};
+
   const formatTimestamp = (timestamp: string | Date) => {
     if (typeof timestamp === 'string') {
       return timestamp;
@@ -44,7 +47,7 @@ const ReviewCommentsList: React.FC<ReviewCommentsListProps> = ({
   };
 
   const getCategoryInfo = (categoryKey: string) => {
-    return checklistCategories[categoryKey] || { 
+    return safeChecklistCategories[categoryKey] || { 
       label: categoryKey, 
       color: 'gray', 
       icon: AlertTriangle 
