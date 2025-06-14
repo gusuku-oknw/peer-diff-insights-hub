@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import PanelHeader from "./PanelHeader";
+import TabsContainer from "../components/TabsContainer";
 import PanelContent from "./PanelContent";
 
 interface SidePanelProps {
@@ -37,29 +36,42 @@ const SidePanel: React.FC<SidePanelProps> = ({
   const isNarrow = panelWidth < 350;
   const isVeryNarrow = panelWidth < 280;
 
-  return (
-    <div className="h-full flex flex-col relative z-10 bg-white">
-      <PanelHeader
-        shouldShowNotes={shouldShowNotes}
-        shouldShowReviewPanel={shouldShowReviewPanel}
-        isVeryNarrow={isVeryNarrow}
-        isMobile={false}
-        onToggleHide={onToggleHide}
-      />
-      <PanelContent
+  if (shouldShowNotes && shouldShowReviewPanel) {
+    // Use TabsContainer to render proper Tabs context and triggers
+    return (
+      <TabsContainer
         shouldShowNotes={shouldShowNotes}
         shouldShowReviewPanel={shouldShowReviewPanel}
         currentSlide={currentSlide}
         totalSlides={totalSlides}
         presenterNotes={presenterNotes}
         userType={userType}
-        panelWidth={panelWidth}
+        panelDimensions={{ width: panelWidth, height: 600 }}
         isNarrow={isNarrow}
         isVeryNarrow={isVeryNarrow}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        isMobile={false}
+        onToggleHide={onToggleHide}
       />
-    </div>
+    );
+  }
+
+  // If only one panel is showing render just PanelContent (no header/triggers needed)
+  return (
+    <PanelContent
+      shouldShowNotes={shouldShowNotes}
+      shouldShowReviewPanel={shouldShowReviewPanel}
+      currentSlide={currentSlide}
+      totalSlides={totalSlides}
+      presenterNotes={presenterNotes}
+      userType={userType}
+      panelWidth={panelWidth}
+      isNarrow={isNarrow}
+      isVeryNarrow={isVeryNarrow}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+    />
   );
 };
 
