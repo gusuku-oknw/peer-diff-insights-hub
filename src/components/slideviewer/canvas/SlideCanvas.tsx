@@ -1,9 +1,14 @@
 
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import { useOptimizedSlideCanvas } from "@/hooks/slideviewer/useOptimizedSlideCanvas";
 import { useEnhancedResponsive } from "@/hooks/slideviewer/useEnhancedResponsive";
-import { renderElements } from "@/utils/slideCanvas/elementRenderer";
+import { useCanvasActions } from "@/hooks/slideviewer/canvas/useCanvasActions";
+import { renderElementsWithEmptyState } from "@/utils/slideCanvas/enhancedElementRenderer";
 import TouchOptimizedCanvas from "./TouchOptimizedCanvas";
+import EmptyCanvasState from "./EmptyCanvasState";
+import CanvasLoadingState from "./CanvasLoadingState";
+import CanvasErrorState from "./CanvasErrorState";
+import CanvasGuideOverlay from "./CanvasGuideOverlay";
 
 interface SlideCanvasProps {
   currentSlide: number;
@@ -25,6 +30,8 @@ const SlideCanvas = ({
   console.log(`SlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}`);
   
   const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const [showGuide, setShowGuide] = useState(false);
+  const [isEmpty, setIsEmpty] = useState(false);
 
   // Always call all hooks at the top level - never conditionally
   const {
@@ -52,23 +59,61 @@ const SlideCanvas = ({
     enablePerformanceMode: true
   });
 
-  // Enhanced element rendering with performance optimization
+  const { addText, addShape, addImage } = useCanvasActions({
+    currentSlide,
+    canvas: fabricCanvasRef.current
+  });
+
+  // Enhanced element rendering with empty state detection
   const handleRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady) return;
     
     try {
-      renderElements(canvas, elements, canvasSize, editable, currentSlide);
+      const result = renderElementsWithEmptyState(
+        canvas, 
+        elements, 
+        canvasSize, 
+        editable, 
+        currentSlide,
+        addText,
+        addShape,
+        addImage
+      );
+      setIsEmpty(result.isEmpty);
     } catch (err) {
       console.error('Enhanced rendering failed:', err);
     }
-  }, [elements, currentSlide, editable, isReady, canvasSize]);
+  }, [elements, currentSlide, editable, isReady, canvasSize, addText, addShape, addImage]);
   
   useEffect(() => {
     if (isReady) {
       handleRenderElements();
     }
   }, [handleRenderElements, isReady]);
+
+  // Show guide on first load for new users
+  useEffect(() => {
+    if (isReady && editable && isEmpty) {
+      const hasSeenGuide = localStorage.getItem('canvas-guide-seen');
+      if (!hasSeenGuide) {
+        setShowGuide(true);
+        localStorage.setItem('canvas-guide-seen', 'true');
+      }
+    }
+  }, [isReady, editable, isEmpty]);
+
+  const handleRetry = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  const handleReset = useCallback(() => {
+    if (fabricCanvasRef.current) {
+      fabricCanvasRef.current.clear();
+      fabricCanvasRef.current.backgroundColor = '#ffffff';
+      fabricCanvasRef.current.renderAll();
+    }
+  }, []);
 
   // Now we can conditionally render based on device type AFTER all hooks are called
   if (deviceInfo.isMobile) {
@@ -103,8 +148,16 @@ const SlideCanvas = ({
   return (
     <div 
       ref={canvasContainerRef}
-      className="w-full h-full flex items-center justify-center bg-gray-50 overflow-hidden"
+      className="w-full h-full flex items-center justify-center bg-gray-50 overflow-hidden relative"
     >
+      {/* Guide overlay */}
+      {showGuide && (
+        <CanvasGuideOverlay
+          deviceType={deviceInfo.isMobile ? 'mobile' : deviceInfo.isTablet ? 'tablet' : 'desktop'}
+          onClose={() => setShowGuide(false)}
+        />
+      )}
+
       <div className="relative">
         <div 
           className="bg-white rounded-lg shadow-lg border relative"
@@ -116,6 +169,7 @@ const SlideCanvas = ({
             transition: 'transform 0.2s ease-out'
           }}
         >
+          {/* Canvas element */}
           <canvas 
             ref={canvasRef}
             className="block rounded-lg"
@@ -124,28 +178,35 @@ const SlideCanvas = ({
               height: '100%',
             }}
           />
-          
-          {!isReady && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90 rounded-lg">
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 border-2 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
-                <p className="mt-2 text-blue-600 text-sm">読み込み中...</p>
-              </div>
+
+          {/* Empty state overlay */}
+          {isEmpty && isReady && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-lg">
+              <EmptyCanvasState
+                onAddText={addText}
+                onAddShape={addShape}
+                onAddImage={addImage}
+                slideNumber={currentSlide}
+                editable={editable}
+              />
             </div>
           )}
           
+          {/* Loading state */}
+          {!isReady && !error && (
+            <CanvasLoadingState 
+              progress={performance.metrics?.fps || 0}
+              message="キャンバスを初期化中..."
+            />
+          )}
+          
+          {/* Error state */}
           {error && (
-            <div className="absolute inset-0 flex items-center justify-center bg-red-50 bg-opacity-95 rounded-lg">
-              <div className="flex flex-col items-center p-4 bg-white rounded-lg shadow border-red-200">
-                <p className="text-red-600 text-sm mb-2 text-center">{error}</p>
-                <button 
-                  className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition-colors"
-                  onClick={() => window.location.reload()}
-                >
-                  再読み込み
-                </button>
-              </div>
-            </div>
+            <CanvasErrorState
+              error={error}
+              onRetry={handleRetry}
+              onReset={handleReset}
+            />
           )}
         </div>
 
