@@ -35,16 +35,16 @@ export const useCanvasConfig = ({ containerWidth, containerHeight }: UseCanvasCo
       displayWidth = displayHeight * aspectRatio;
     }
     
-    // Adaptive DPI handling - respect device capabilities
+    // Respect device DPI without forcing high resolution
     const devicePixelRatio = window.devicePixelRatio || 1;
-    const maxSafeRatio = Math.min(devicePixelRatio, 2); // Cap at 2x for performance
+    const pixelRatio = Math.min(devicePixelRatio, 2); // Cap at 2x for performance
     
     const finalDisplayWidth = Math.max(320, Math.min(1200, Math.round(displayWidth)));
     const finalDisplayHeight = Math.max(180, Math.min(675, Math.round(displayHeight)));
     
     // Canvas rendering size (for high DPI)
-    const canvasWidth = Math.round(finalDisplayWidth * maxSafeRatio);
-    const canvasHeight = Math.round(finalDisplayHeight * maxSafeRatio);
+    const canvasWidth = Math.round(finalDisplayWidth * pixelRatio);
+    const canvasHeight = Math.round(finalDisplayHeight * pixelRatio);
     
     const displayCapabilities = {
       physicalWidth: Math.round(window.screen.width * devicePixelRatio),
@@ -53,12 +53,19 @@ export const useCanvasConfig = ({ containerWidth, containerHeight }: UseCanvasCo
       is8KCapable: window.screen.width >= 7680 || window.screen.height >= 4320,
     };
     
+    console.log('Canvas config calculated:', {
+      display: `${finalDisplayWidth}x${finalDisplayHeight}`,
+      canvas: `${canvasWidth}x${canvasHeight}`,
+      pixelRatio,
+      devicePixelRatio
+    });
+    
     return {
       width: canvasWidth,
       height: canvasHeight,
       displayWidth: finalDisplayWidth,
       displayHeight: finalDisplayHeight,
-      pixelRatio: maxSafeRatio,
+      pixelRatio,
       displayCapabilities
     };
   }, [containerWidth, containerHeight]);

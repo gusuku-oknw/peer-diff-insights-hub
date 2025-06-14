@@ -73,10 +73,10 @@ const CanvasContainer: React.FC<CanvasContainerProps> = ({
         style={{
           width: canvasConfig.displayWidth,
           height: canvasConfig.displayHeight,
-          // Remove CSS transform scaling - let Fabric.js handle zoom
+          // Removed CSS transform scaling - let Fabric.js handle all scaling
         }}
       >
-        {/* High Resolution Fabric.js Canvas */}
+        {/* Canvas element with proper sizing */}
         <canvas 
           ref={canvasRef}
           className="block rounded-lg"
@@ -104,7 +104,7 @@ const CanvasContainer: React.FC<CanvasContainerProps> = ({
         {!isReady && !error && (
           <CanvasLoadingState 
             progress={performance.metrics?.fps || 0}
-            message="統合キャンバスを初期化中..."
+            message="キャンバスを初期化中..."
           />
         )}
         

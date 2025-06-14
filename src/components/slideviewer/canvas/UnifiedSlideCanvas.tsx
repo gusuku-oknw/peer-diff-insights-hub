@@ -40,7 +40,7 @@ const UnifiedSlideCanvas = React.memo(({
     containerHeight
   });
 
-  // Use unified high-resolution canvas hook
+  // Use unified canvas hook with proper config
   const {
     canvasRef,
     fabricCanvasRef,
@@ -52,8 +52,7 @@ const UnifiedSlideCanvas = React.memo(({
   } = useOptimizedSlideCanvas({
     currentSlide,
     editable,
-    containerWidth: canvasConfig.displayWidth,
-    containerHeight: canvasConfig.displayHeight,
+    canvasConfig,
     enablePerformanceMode
   });
 
@@ -104,20 +103,20 @@ const UnifiedSlideCanvas = React.memo(({
     onPasteSelected: paste
   });
 
-  // Handle zoom changes with Fabric.js setZoom
+  // Handle zoom changes properly - only apply zoom level, not pixel ratio
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
-    if (!canvas || !isReady) return;
+    if (!canvas || !isReady || !canvasConfig) return;
     
     try {
       const zoomValue = zoomLevel / 100;
       canvas.setZoom(zoomValue);
       canvas.renderAll();
-      console.log(`Canvas zoom updated to: ${zoomLevel}%`);
+      console.log(`Canvas zoom updated to: ${zoomLevel}% (zoom value: ${zoomValue})`);
     } catch (err) {
       console.error('Canvas zoom error:', err);
     }
-  }, [zoomLevel, isReady, fabricCanvasRef.current]);
+  }, [zoomLevel, isReady, fabricCanvasRef.current, canvasConfig]);
 
   // Track selected object for context menu
   useEffect(() => {
@@ -168,7 +167,7 @@ const UnifiedSlideCanvas = React.memo(({
     }
   }, [onZoomChange]);
 
-  // High resolution element rendering - memoized to prevent unnecessary re-renders
+  // Simplified element rendering
   const handleRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady || !canvasConfig) return;
@@ -185,9 +184,9 @@ const UnifiedSlideCanvas = React.memo(({
         handleAddImage
       );
       
-      console.log(`Unified canvas rendered ${elements.length} elements at ${canvasConfig.width}x${canvasConfig.height} resolution`);
+      console.log(`Canvas rendered ${elements.length} elements`);
     } catch (err) {
-      console.error('Unified rendering failed:', err);
+      console.error('Canvas rendering failed:', err);
     }
   }, [elements, currentSlide, editable, isReady, canvasConfig, handleAddText, handleAddShape, handleAddImage, fabricCanvasRef.current]);
   
@@ -233,7 +232,7 @@ const UnifiedSlideCanvas = React.memo(({
       <div className="flex items-center justify-center w-full h-full bg-gray-50">
         <div className="text-center p-8 animate-fade-in">
           <div className="w-12 h-12 border-3 border-blue-200 border-t-blue-500 rounded-full animate-spin mb-4 mx-auto"></div>
-          <p className="text-gray-600">高解像度設定を初期化中...</p>
+          <p className="text-gray-600">Canvas設定を初期化中...</p>
         </div>
       </div>
     );

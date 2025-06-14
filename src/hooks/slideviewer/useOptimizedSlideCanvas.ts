@@ -2,22 +2,24 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Canvas } from 'fabric';
 import { useSlideStore } from '@/stores/slide.store';
-import { useStandardSlideSize } from './useStandardSlideSize';
-import { detectDisplayCapabilities } from '@/utils/slideCanvas/standardSlideSizes';
 
 interface UseOptimizedSlideCanvasProps {
   currentSlide: number;
   editable: boolean;
-  containerWidth: number;
-  containerHeight: number;
+  canvasConfig: {
+    width: number;
+    height: number;
+    displayWidth: number;
+    displayHeight: number;
+    pixelRatio: number;
+  };
   enablePerformanceMode?: boolean;
 }
 
 export const useOptimizedSlideCanvas = ({
   currentSlide,
   editable,
-  containerWidth,
-  containerHeight,
+  canvasConfig,
   enablePerformanceMode = true
 }: UseOptimizedSlideCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -33,49 +35,6 @@ export const useOptimizedSlideCanvas = ({
     [slides, currentSlide]
   );
   const elements = currentSlideData?.elements || [];
-  
-  // Get high-resolution slide size with forced high quality
-  const { slideSize, deviceType } = useStandardSlideSize({
-    containerWidth,
-    containerHeight,
-    preferredAspectRatio: 16 / 9
-  });
-
-  // --- 改善：常に高DPIを適用するためのcanvasConfig ---
-  const canvasConfig = useMemo(() => {
-    // 通常のdisplayCapabilitiesだと1xになるが、今回はforceに最低2xとする
-    const displayCapabilities = detectDisplayCapabilities();
-    // 強制的に2xまたは3x（実DPIが2x超の場合のみその値を使う）
-    const ENFORCED_MIN_PIXELRATIO = 2;
-    const ENFORCED_IDEAL_PIXELRATIO = 3;
-    const pixelRatio =
-      displayCapabilities.pixelRatio < ENFORCED_MIN_PIXELRATIO
-        ? ENFORCED_MIN_PIXELRATIO
-        : displayCapabilities.pixelRatio < ENFORCED_IDEAL_PIXELRATIO
-          ? ENFORCED_IDEAL_PIXELRATIO
-          : displayCapabilities.pixelRatio;
-
-    const ultraWidth = slideSize.width * pixelRatio;
-    const ultraHeight = slideSize.height * pixelRatio;
-
-    // ログ明示
-    console.log('最終canvas解像度', {
-      baseSize: `${slideSize.width}x${slideSize.height}`,
-      ultraSize: `${ultraWidth}x${ultraHeight}`,
-      pixelRatio,
-      forcedHighQuality: true
-    });
-
-    return {
-      width: ultraWidth,
-      height: ultraHeight,
-      displayWidth: slideSize.width,
-      displayHeight: slideSize.height,
-      pixelRatio,
-      scale: pixelRatio,
-      displayCapabilities
-    };
-  }, [slideSize]);
 
   const performance = useMemo(() => ({
     metrics: { fps: 60, renderTime: 16 },
@@ -83,7 +42,7 @@ export const useOptimizedSlideCanvas = ({
   }), []);
 
   const initializeCanvas = useCallback(() => {
-    if (!canvasRef.current || initializationRef.current) return;
+    if (!canvasRef.current || initializationRef.current || !canvasConfig) return;
 
     try {
       if (fabricCanvasRef.current) {
@@ -91,7 +50,7 @@ export const useOptimizedSlideCanvas = ({
         fabricCanvasRef.current = null;
       }
 
-      console.log('Initializing canvas for high quality:', canvasConfig);
+      console.log('Initializing canvas with config:', canvasConfig);
 
       const canvas = new Canvas(canvasRef.current, {
         width: canvasConfig.width,
@@ -109,35 +68,32 @@ export const useOptimizedSlideCanvas = ({
         enableRetinaScaling: true
       });
 
-      // Enhance: force HTML Canvas and context to high quality always
+      // Set canvas element size properly
       const canvasElement = canvasRef.current;
       canvasElement.width = canvasConfig.width;
       canvasElement.height = canvasConfig.height;
       canvasElement.style.width = `${canvasConfig.displayWidth}px`;
       canvasElement.style.height = `${canvasConfig.displayHeight}px`;
 
-      // 強制的にスムージングを最優先
-      const ctx = canvasElement.getContext('2d');
-      if (ctx) {
-        ctx.scale(canvasConfig.pixelRatio, canvasConfig.pixelRatio);
-        ctx.imageSmoothingEnabled = true;
-        try {
-          (ctx as any).imageSmoothingQuality = 'high';
-        } catch (e) {
-          // not all browsers support
+      // Apply proper scaling only if needed
+      if (canvasConfig.pixelRatio > 1) {
+        const ctx = canvasElement.getContext('2d');
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          try {
+            (ctx as any).imageSmoothingQuality = 'high';
+          } catch (e) {
+            // Fallback for browsers that don't support imageSmoothingQuality
+          }
         }
       }
-
-      canvas.setZoom(canvasConfig.pixelRatio);
 
       fabricCanvasRef.current = canvas;
       initializationRef.current = true;
       setIsReady(true);
       setError(null);
 
-      console.log(
-        `HIGH-QUALITY canvas ready: ${canvasConfig.width}x${canvasConfig.height} (${canvasConfig.pixelRatio}x enforced)`
-      );
+      console.log(`Canvas initialized: ${canvasConfig.width}x${canvasConfig.height} (display: ${canvasConfig.displayWidth}x${canvasConfig.displayHeight})`);
     } catch (err) {
       console.error('Canvas initialization failed:', err);
       setError('キャンバスの初期化に失敗しました');
@@ -146,12 +102,12 @@ export const useOptimizedSlideCanvas = ({
     }
   }, [canvasConfig, editable]);
   
-  // Initialize canvas when container dimensions are available
+  // Initialize canvas when config is available
   useEffect(() => {
-    if (containerWidth > 0 && containerHeight > 0) {
+    if (canvasConfig) {
       initializeCanvas();
     }
-  }, [containerWidth, containerHeight, initializeCanvas]);
+  }, [canvasConfig, initializeCanvas]);
   
   // Cleanup
   useEffect(() => {
@@ -171,7 +127,6 @@ export const useOptimizedSlideCanvas = ({
     error,
     elements,
     slides,
-    canvasConfig,
     performance
   };
 };
