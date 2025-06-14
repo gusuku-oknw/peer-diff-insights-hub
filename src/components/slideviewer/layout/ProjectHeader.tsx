@@ -21,7 +21,12 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   collaborators = 3,
   totalSlides = 10
 }) => {
+  console.log("ProjectHeader rendering");
+  
+  // Always call hooks at the top level, never conditionally
   const isMobile = useIsMobile();
+
+  console.log("ProjectHeader: isMobile =", isMobile);
 
   return (
     <div className="bg-white border-b border-gray-200 px-4 py-3 shadow-sm">

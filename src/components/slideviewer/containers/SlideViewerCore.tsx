@@ -15,8 +15,13 @@ function isValidDate(val: unknown): val is Date {
 
 // SlideViewer全体のロジック+レイアウト統合
 const SlideViewerCore: React.FC = () => {
+  console.log("SlideViewerCore rendering");
+  
+  // Always call hooks at the top level
   const slideViewerLogic = useSlideViewerLogic();
   const responsiveLayout = useResponsiveLayout();
+
+  console.log("SlideViewerCore: hooks called successfully");
 
   // presentationStartTime may be number | Date | null
   const { presentationStartTime: initialTimeValue } = slideViewerLogic;
@@ -31,6 +36,8 @@ const SlideViewerCore: React.FC = () => {
     finalPresentationStartTime = null;
   }
 
+  console.log("SlideViewerCore: about to render MainLayout");
+
   return (
     <MainLayout
       {...slideViewerLogic}
@@ -41,4 +48,3 @@ const SlideViewerCore: React.FC = () => {
 };
 
 export default SlideViewerCore;
-
