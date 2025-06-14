@@ -69,13 +69,11 @@ const CanvasContainer: React.FC<CanvasContainerProps> = ({
       hasClipboard={hasClipboard}
     >
       <div 
-        className="bg-white rounded-lg shadow-lg border relative"
+        className="bg-white rounded-lg shadow-lg border relative transition-all duration-200 ease-out"
         style={{
           width: canvasConfig.displayWidth,
           height: canvasConfig.displayHeight,
-          transform: `scale(${zoomLevel / 100})`,
-          transformOrigin: 'center center',
-          transition: 'transform 0.2s ease-out'
+          // Remove CSS transform scaling - let Fabric.js handle zoom
         }}
       >
         {/* High Resolution Fabric.js Canvas */}

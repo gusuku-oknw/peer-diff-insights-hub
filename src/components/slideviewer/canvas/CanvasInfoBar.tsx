@@ -5,50 +5,45 @@ interface CanvasInfoBarProps {
   enablePerformanceMode: boolean;
   performance: any;
   canvasConfig: any;
+  zoomLevel: number;
 }
 
 const CanvasInfoBar: React.FC<CanvasInfoBarProps> = ({
   enablePerformanceMode,
   performance,
-  canvasConfig
+  canvasConfig,
+  zoomLevel
 }) => {
   return (
-    <div className="flex justify-between items-center p-2 bg-gray-100 border-t border-gray-200">
-      {/* Left: Performance Information */}
-      <div className="flex items-center gap-4">
+    <div className="flex justify-between items-center p-2 bg-gray-50 border-t border-gray-200 text-xs">
+      {/* Left: Performance and Canvas Information */}
+      <div className="flex items-center gap-3">
         {enablePerformanceMode && performance.metrics && (
-          <div className="text-xs bg-black text-white px-2 py-1 rounded">
-            FPS: {performance.metrics.fps} | Render: {performance.metrics.renderTime}ms
+          <div className="bg-gray-800 text-white px-2 py-1 rounded">
+            FPS: {performance.metrics.fps} | 描画: {performance.metrics.renderTime}ms
           </div>
         )}
-        <div className="text-xs bg-green-600 text-white px-2 py-1 rounded">
-          統合解像度: {canvasConfig.width}×{canvasConfig.height} ({canvasConfig.pixelRatio}x)
+        <div className="bg-blue-600 text-white px-2 py-1 rounded">
+          解像度: {canvasConfig.width}×{canvasConfig.height}
         </div>
-        {canvasConfig.displayCapabilities?.is8KCapable && (
-          <div className="text-xs bg-purple-600 text-white px-2 py-1 rounded">
-            8K対応
-          </div>
-        )}
-        {canvasConfig.displayCapabilities?.is4KCapable && (
-          <div className="text-xs bg-blue-600 text-white px-2 py-1 rounded">
-            4K対応
+        <div className="bg-green-600 text-white px-2 py-1 rounded">
+          ズーム: {zoomLevel}%
+        </div>
+        {canvasConfig.pixelRatio > 1 && (
+          <div className="bg-purple-600 text-white px-2 py-1 rounded">
+            DPI: {canvasConfig.pixelRatio}x
           </div>
         )}
       </div>
 
-      {/* Right: Display & Resolution Information */}
+      {/* Right: Display Information */}
       <div className="flex items-center gap-2">
-        <div className="text-xs bg-blue-500 text-white px-2 py-1 rounded">
+        <div className="bg-gray-600 text-white px-2 py-1 rounded">
           表示: {canvasConfig.displayWidth}×{canvasConfig.displayHeight}
         </div>
         {canvasConfig.displayCapabilities && (
-          <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
+          <div className="text-gray-600 bg-white px-2 py-1 rounded border">
             物理: {canvasConfig.displayCapabilities.physicalWidth}×{canvasConfig.displayCapabilities.physicalHeight}
-          </div>
-        )}
-        {canvasConfig.pixelRatio > 2 && (
-          <div className="text-xs text-purple-700 bg-purple-100 px-2 py-1 rounded border">
-            統合High-DPI ({canvasConfig.pixelRatio}x)
           </div>
         )}
       </div>

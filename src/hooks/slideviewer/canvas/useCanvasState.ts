@@ -1,6 +1,8 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
+export type DeviceType = 'mobile' | 'tablet' | 'desktop';
+
 interface UseCanvasStateProps {
   currentSlide: number;
   containerWidth: number;
@@ -21,8 +23,8 @@ export const useCanvasState = ({
   const [showGuide, setShowGuide] = useState(false);
   const [selectedObject, setSelectedObject] = useState<any>(null);
 
-  // Device type detection for mobile optimization
-  const deviceType = useMemo(() => {
+  // Device type detection for mobile optimization with proper typing
+  const deviceType: DeviceType = useMemo(() => {
     if (containerWidth < 768) return 'mobile';
     if (containerWidth < 1024) return 'tablet';
     return 'desktop';

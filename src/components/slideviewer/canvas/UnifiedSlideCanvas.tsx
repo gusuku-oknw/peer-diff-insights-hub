@@ -4,6 +4,7 @@ import { useOptimizedSlideCanvas } from "@/hooks/slideviewer/useOptimizedSlideCa
 import { useEnhancedCanvasActions } from "@/hooks/slideviewer/canvas/useEnhancedCanvasActions";
 import { useCanvasShortcuts } from "@/hooks/slideviewer/canvas/useCanvasShortcuts";
 import { useCanvasState } from "@/hooks/slideviewer/canvas/useCanvasState";
+import { useCanvasConfig } from "@/hooks/slideviewer/canvas/useCanvasConfig";
 import { renderElementsWithEmptyState } from "@/utils/slideCanvas/enhancedElementRenderer";
 import TouchOptimizedCanvas from "@/features/slideviewer/components/canvas/TouchOptimizedCanvas";
 import CanvasContainer from "./CanvasContainer";
@@ -18,6 +19,7 @@ interface UnifiedSlideCanvasProps {
   containerWidth?: number;
   containerHeight?: number;
   enablePerformanceMode?: boolean;
+  onZoomChange?: (zoom: number) => void;
 }
 
 const UnifiedSlideCanvas = React.memo(({ 
@@ -27,10 +29,17 @@ const UnifiedSlideCanvas = React.memo(({
   userType = "enterprise",
   containerWidth = 0,
   containerHeight = 0,
-  enablePerformanceMode = true
+  enablePerformanceMode = true,
+  onZoomChange
 }: UnifiedSlideCanvasProps) => {
   console.log(`UnifiedSlideCanvas rendering - Slide: ${currentSlide}, Zoom: ${zoomLevel}%, Container: ${containerWidth}x${containerHeight}`);
   
+  // Use improved canvas configuration
+  const { canvasConfig } = useCanvasConfig({
+    containerWidth,
+    containerHeight
+  });
+
   // Use unified high-resolution canvas hook
   const {
     canvasRef,
@@ -39,13 +48,12 @@ const UnifiedSlideCanvas = React.memo(({
     error,
     elements,
     slides,
-    canvasConfig,
     performance
   } = useOptimizedSlideCanvas({
     currentSlide,
     editable,
-    containerWidth,
-    containerHeight,
+    containerWidth: canvasConfig.displayWidth,
+    containerHeight: canvasConfig.displayHeight,
     enablePerformanceMode
   });
 
@@ -96,6 +104,21 @@ const UnifiedSlideCanvas = React.memo(({
     onPasteSelected: paste
   });
 
+  // Handle zoom changes with Fabric.js setZoom
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas || !isReady) return;
+    
+    try {
+      const zoomValue = zoomLevel / 100;
+      canvas.setZoom(zoomValue);
+      canvas.renderAll();
+      console.log(`Canvas zoom updated to: ${zoomLevel}%`);
+    } catch (err) {
+      console.error('Canvas zoom error:', err);
+    }
+  }, [zoomLevel, isReady, fabricCanvasRef.current]);
+
   // Track selected object for context menu
   useEffect(() => {
     const canvas = fabricCanvasRef.current;
@@ -138,6 +161,12 @@ const UnifiedSlideCanvas = React.memo(({
       fabricCanvasRef.current.renderAll();
     }
   }, []);
+
+  const handleZoomChange = useCallback((newZoom: number) => {
+    if (onZoomChange) {
+      onZoomChange(newZoom);
+    }
+  }, [onZoomChange]);
 
   // High resolution element rendering - memoized to prevent unnecessary re-renders
   const handleRenderElements = useCallback(() => {
@@ -186,7 +215,7 @@ const UnifiedSlideCanvas = React.memo(({
   if (!slides || slides.length === 0) {
     return (
       <div className="flex items-center justify-center w-full h-full bg-gray-50">
-        <div className="text-center p-8 bg-white rounded-lg shadow border">
+        <div className="text-center p-8 bg-white rounded-lg shadow border animate-fade-in">
           <p className="text-gray-600 text-lg mb-4">スライドが読み込まれていません</p>
           <button 
             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
@@ -202,7 +231,7 @@ const UnifiedSlideCanvas = React.memo(({
   if (!canvasConfig) {
     return (
       <div className="flex items-center justify-center w-full h-full bg-gray-50">
-        <div className="text-center p-8">
+        <div className="text-center p-8 animate-fade-in">
           <div className="w-12 h-12 border-3 border-blue-200 border-t-blue-500 rounded-full animate-spin mb-4 mx-auto"></div>
           <p className="text-gray-600">高解像度設定を初期化中...</p>
         </div>
@@ -211,14 +240,16 @@ const UnifiedSlideCanvas = React.memo(({
   }
   
   return (
-    <div className="w-full h-full flex flex-col bg-gray-50 overflow-auto relative">
+    <div className="w-full h-full flex flex-col bg-gray-50 overflow-hidden relative">
       {/* Canvas Container */}
       <div className="flex-1 flex items-center justify-center p-4 relative">
         <CanvasHeader
           showGuide={showGuide}
           editable={editable}
           deviceType={deviceType}
+          zoomLevel={zoomLevel}
           onCloseGuide={handleCloseGuide}
+          onZoomChange={handleZoomChange}
         />
 
         <CanvasContainer
@@ -238,7 +269,7 @@ const UnifiedSlideCanvas = React.memo(({
           onBringToFront={bringToFront}
           onSendToBack={sendToBack}
           onDuplicate={duplicate}
-          onRotate={() => rotateObject(90)}
+          onRotate={() => rotateObject()}
           onAddText={handleAddText}
           onAddShape={handleAddShape}
           onAddImage={handleAddImage}
@@ -248,11 +279,12 @@ const UnifiedSlideCanvas = React.memo(({
         />
       </div>
 
-      {/* Information Bar - Bottom */}
+      {/* Enhanced Information Bar - Bottom */}
       <CanvasInfoBar
         enablePerformanceMode={enablePerformanceMode}
         performance={performance}
         canvasConfig={canvasConfig}
+        zoomLevel={zoomLevel}
       />
     </div>
   );
