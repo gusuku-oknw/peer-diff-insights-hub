@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
 import { useEnhancedSlideData } from "@/hooks/slideviewer/useEnhancedSlideData";
@@ -6,6 +7,7 @@ import ThumbnailControls from "./ThumbnailControls";
 import ThumbnailLayoutContainer from "./ThumbnailLayoutContainer";
 import HorizontalNavigationButtons from "./HorizontalNavigationButtons";
 import ThumbnailList from "./ThumbnailList";
+import CollapseThumbnailsButton from "./CollapseThumbnailsButton";
 import type { ThumbnailDisplaySettings, SlideSearchFilters } from "@/types/slide-viewer/thumbnail.types";
 
 interface EnhancedSlideThumbnailsProps {
@@ -26,6 +28,9 @@ const EnhancedSlideThumbnails = ({
   userType = "enterprise"
 }: EnhancedSlideThumbnailsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // 折りたたみ状態の管理
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // 表示設定とフィルター状態
   const [displaySettings, setDisplaySettings] = useState<ThumbnailDisplaySettings>({
@@ -60,10 +65,10 @@ const EnhancedSlideThumbnails = ({
 
   // 現在のスライドに自動スクロール
   useEffect(() => {
-    if (displaySettings.viewMode === 'horizontal') {
+    if (displaySettings.viewMode === 'horizontal' && !isCollapsed) {
       scrollToItem(currentSlide);
     }
-  }, [currentSlide, scrollToItem, displaySettings.viewMode]);
+  }, [currentSlide, scrollToItem, displaySettings.viewMode, isCollapsed]);
 
   // キーボードナビゲーション
   useEffect(() => {
@@ -77,48 +82,65 @@ const EnhancedSlideThumbnails = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [currentSlide, enhancedSlideData.length, onSlideClick, handleKeyboardNavigation]);
 
+  // 折りたたみ時の高さ計算
+  const collapsedHeight = 48; // ボタンのみ表示する高さ
+  const currentHeight = isCollapsed ? collapsedHeight : height;
+
   return (
     <div 
       ref={containerRef}
-      className="flex flex-col h-full bg-white border-t border-gray-200"
+      className={`flex flex-col bg-white border-t border-gray-200 transition-all duration-300 ease-in-out ${
+        isCollapsed ? 'overflow-hidden' : ''
+      }`}
+      style={{ height: `${currentHeight}px` }}
       tabIndex={0}
       role="region"
       aria-label="拡張スライド一覧"
     >
-      <ThumbnailControls
-        displaySettings={displaySettings}
-        searchFilters={searchFilters}
-        onDisplaySettingsChange={setDisplaySettings}
-        onSearchFiltersChange={setSearchFilters}
-        slideCount={filteredAndSortedSlides.length}
-        userType={userType}
-      />
-      
-      <div className="flex-1 relative overflow-hidden">
-        <HorizontalNavigationButtons
-          viewMode={displaySettings.viewMode}
-          onScrollLeft={() => scrollByDirection('left')}
-          onScrollRight={() => scrollByDirection('right')}
-        />
-        
-        <ThumbnailLayoutContainer
-          viewMode={displaySettings.viewMode}
-          gap={gap}
-          scrollContainerRef={scrollContainerRef}
-        >
-          <ThumbnailList
-            filteredSlides={filteredAndSortedSlides}
-            enhancedSlideData={enhancedSlideData}
-            currentSlide={currentSlide}
+      {!isCollapsed && (
+        <>
+          <ThumbnailControls
             displaySettings={displaySettings}
-            thumbnailWidth={thumbnailWidth}
-            onSlideClick={onSlideClick}
-            onOpenOverallReview={onOpenOverallReview}
+            searchFilters={searchFilters}
+            onDisplaySettingsChange={setDisplaySettings}
+            onSearchFiltersChange={setSearchFilters}
+            slideCount={filteredAndSortedSlides.length}
             userType={userType}
-            showAddSlide={showAddSlide}
           />
-        </ThumbnailLayoutContainer>
-      </div>
+          
+          <div className="flex-1 relative overflow-hidden">
+            <HorizontalNavigationButtons
+              viewMode={displaySettings.viewMode}
+              onScrollLeft={() => scrollByDirection('left')}
+              onScrollRight={() => scrollByDirection('right')}
+            />
+            
+            <ThumbnailLayoutContainer
+              viewMode={displaySettings.viewMode}
+              gap={gap}
+              scrollContainerRef={scrollContainerRef}
+              showCollapseButton={true}
+            >
+              <ThumbnailList
+                filteredSlides={filteredAndSortedSlides}
+                enhancedSlideData={enhancedSlideData}
+                currentSlide={currentSlide}
+                displaySettings={displaySettings}
+                thumbnailWidth={thumbnailWidth}
+                onSlideClick={onSlideClick}
+                onOpenOverallReview={onOpenOverallReview}
+                userType={userType}
+                showAddSlide={showAddSlide}
+              />
+            </ThumbnailLayoutContainer>
+          </div>
+        </>
+      )}
+      
+      <CollapseThumbnailsButton
+        isCollapsed={isCollapsed}
+        onToggle={() => setIsCollapsed(!isCollapsed)}
+      />
     </div>
   );
 };
