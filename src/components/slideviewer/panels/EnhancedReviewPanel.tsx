@@ -1,12 +1,11 @@
+
 import React from "react";
 import EnhancedReviewPanelHeader from "./components/EnhancedReviewPanelHeader";
 import ReviewPermissionNotice from "./components/ReviewPermissionNotice";
-import ReviewSimplifiedView from "./components/ReviewSimplifiedView";
-import EnhancedReviewTabs from "./components/EnhancedReviewTabs";
-import QuickActionBar from "./components/QuickActionBar";
+import EnhancedReviewPanelContent from "./components/EnhancedReviewPanelContent";
 import { useReviewPanel } from "@/hooks/useReviewPanel";
 import { checklistCategories } from "./components/ChecklistCategories";
-import { useToast } from "@/hooks/use-toast";
+import { useEnhancedReviewPanelActions } from "./components/EnhancedReviewPanelActions";
 
 interface EnhancedReviewPanelProps {
   currentSlide: number;
@@ -51,8 +50,6 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
     onTabChange: externalOnTabChange
   });
 
-  const { toast } = useToast();
-
   console.log('EnhancedReviewPanel render:', { 
     activeTab, 
     externalActiveTab, 
@@ -67,126 +64,27 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
     handleTabChange(newTab);
   }, [activeTab, handleTabChange]);
 
+  const {
+    handleClose,
+    handleAddComment,
+    handleSendReview,
+    handleBookmark,
+    handleUndo,
+    handleShare,
+    handleSuggest,
+    handleMarkComplete,
+    handleStartDiscussion
+  } = useEnhancedReviewPanelActions({
+    canInteract,
+    activeTab,
+    onTabChange: handleExplicitTabChange,
+    onClose
+  });
+
   // Mock data for enhanced header
   const reviewedCount = Math.floor(totalSlides * 0.6);
   const totalComments = comments.length + Math.floor(Math.random() * 5);
   const urgentItems = Math.floor(Math.random() * 3);
-
-  // 閉じる操作のハンドラー（アニメーション付き）
-  const handleClose = () => {
-    if (onClose) {
-      toast({
-        title: "レビューパネルを閉じました",
-        description: "ツールバーから再度開くことができます",
-        duration: 2000
-      });
-      onClose();
-    }
-  };
-
-  // Quick action handlers
-  const handleAddComment = () => {
-    if (canInteract) {
-      handleExplicitTabChange("review");
-      toast({
-        title: "コメント追加モード",
-        description: "レビュータブでコメントを追加できます",
-        duration: 2000
-      });
-    } else {
-      toast({
-        title: "権限がありません",
-        description: "企業ユーザーはコメントの追加はできません",
-        variant: "destructive",
-        duration: 2000
-      });
-    }
-  };
-
-  const handleSendReview = () => {
-    if (canInteract) {
-      toast({
-        title: "レビューを送信しました",
-        description: "チームメンバーに通知されました",
-        duration: 3000
-      });
-    } else {
-      toast({
-        title: "権限がありません",
-        description: "企業ユーザーはレビューの送信はできません",
-        variant: "destructive",
-        duration: 2000
-      });
-    }
-  };
-
-  const handleBookmark = () => {
-    toast({
-      title: "ブックマークしました",
-      description: "このスライドがブックマークに追加されました",
-      duration: 2000
-    });
-  };
-
-  const handleUndo = () => {
-    toast({
-      title: "操作を元に戻しました",
-      description: "前の状態に復元されました",
-      duration: 2000
-    });
-  };
-
-  const handleShare = () => {
-    toast({
-      title: "共有リンクをコピーしました",
-      description: "クリップボードにリンクがコピーされました",
-      duration: 2000
-    });
-  };
-
-  const handleSuggest = () => {
-    handleExplicitTabChange("suggestions");
-    toast({
-      title: "AI提案を表示",
-      description: "このスライドの改善提案を確認できます",
-      duration: 2000
-    });
-  };
-
-  const handleMarkComplete = () => {
-    if (canInteract) {
-      toast({
-        title: "完了マークを追加",
-        description: "このスライドのレビューが完了しました",
-        duration: 2000
-      });
-    } else {
-      toast({
-        title: "権限がありません",
-        description: "企業ユーザーは完了マークの追加はできません",
-        variant: "destructive",
-        duration: 2000
-      });
-    }
-  };
-
-  const handleStartDiscussion = () => {
-    if (canInteract) {
-      handleExplicitTabChange("review");
-      toast({
-        title: "ディスカッション開始",
-        description: "チームディスカッションを開始しました",
-        duration: 2000
-      });
-    } else {
-      toast({
-        title: "権限がありません",
-        description: "企業ユーザーはディスカッションの開始はできません",
-        variant: "destructive",
-        duration: 2000
-      });
-    }
-  };
 
   return (
     <div className="h-full bg-white flex flex-col transition-all duration-300 ease-in-out">
@@ -208,45 +106,30 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
       )}
 
       <div className="flex-grow flex flex-col min-h-0">
-        {canView && !isVeryNarrow ? (
-          <>
-            <EnhancedReviewTabs
-              activeTab={activeTab}
-              onTabChange={handleExplicitTabChange}
-              canInteract={canInteract}
-              comments={comments}
-              checklistCategories={checklistCategories}
-              newComment={newComment}
-              currentSlide={currentSlide}
-              isVeryNarrow={isVeryNarrow}
-              checklistState={checklistState}
-              completionPercentage={completionPercentage}
-              onCommentChange={setNewComment}
-              onSubmitComment={handleSubmitComment}
-              onCheckboxChange={handleCheckboxChange}
-            />
-            
-            {canInteract && (
-              <QuickActionBar
-                canInteract={canInteract}
-                onAddComment={handleAddComment}
-                onSendReview={handleSendReview}
-                onBookmark={handleBookmark}
-                onUndo={handleUndo}
-                onShare={handleShare}
-                onSuggest={handleSuggest}
-                onMarkComplete={handleMarkComplete}
-                onStartDiscussion={handleStartDiscussion}
-                isVeryNarrow={isVeryNarrow}
-              />
-            )}
-          </>
-        ) : (
-          <ReviewSimplifiedView
-            comments={comments}
-            checklistCategories={checklistCategories}
-          />
-        )}
+        <EnhancedReviewPanelContent
+          canView={canView}
+          canInteract={canInteract}
+          isVeryNarrow={isVeryNarrow}
+          activeTab={activeTab}
+          onTabChange={handleExplicitTabChange}
+          comments={comments}
+          checklistCategories={checklistCategories}
+          newComment={newComment}
+          currentSlide={currentSlide}
+          checklistState={checklistState}
+          completionPercentage={completionPercentage}
+          onCommentChange={setNewComment}
+          onSubmitComment={handleSubmitComment}
+          onCheckboxChange={handleCheckboxChange}
+          onAddComment={handleAddComment}
+          onSendReview={handleSendReview}
+          onBookmark={handleBookmark}
+          onUndo={handleUndo}
+          onShare={handleShare}
+          onSuggest={handleSuggest}
+          onMarkComplete={handleMarkComplete}
+          onStartDiscussion={handleStartDiscussion}
+        />
       </div>
     </div>
   );
