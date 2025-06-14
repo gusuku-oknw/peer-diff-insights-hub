@@ -1,8 +1,9 @@
 
 import React, { useRef, useEffect, useState } from "react";
-import { useSlideStore } from "@/stores/slide-store";
+import { useSlideStore } from "@/stores/slide.store";
 import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
 import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
+import { useEnhancedThumbnailUI } from "@/hooks/slideviewer/useEnhancedThumbnailUI";
 import UnifiedSlideThumbnailsContainer from "./UnifiedSlideThumbnailsContainer";
 import SimplifiedSlideThumbnailsContent from "./SimplifiedSlideThumbnailsContent";
 import SimplifiedThumbnailHeader from "./SimplifiedThumbnailHeader";
@@ -26,8 +27,19 @@ const UnifiedSlideThumbnails = ({
   userType = "enterprise"
 }: UnifiedSlideThumbnailsProps) => {
   const { slides } = useSlideStore();
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Enhanced UI state management
+  const {
+    isCollapsed,
+    toggleCollapse,
+    handleMouseEnter,
+    handleMouseLeave,
+    updateLastInteraction
+  } = useEnhancedThumbnailUI({
+    initialCollapsed: false,
+    autoCollapseDelay: 3000
+  });
   
   // レスポンシブなサムネイルサイズの計算
   const { 
@@ -59,13 +71,8 @@ const UnifiedSlideThumbnails = ({
   }));
 
   // 折りたたみ時の高さ
-  const collapsedHeight = 24; // Much smaller when collapsed
+  const collapsedHeight = 24;
   const currentHeight = isCollapsed ? collapsedHeight : height;
-
-  // Enhanced toggle function with smooth animation
-  const handleToggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
 
   // 現在のスライドへの自動スクロール
   useEffect(() => {
@@ -81,7 +88,8 @@ const UnifiedSlideThumbnails = ({
         // Space bar to toggle collapse
         if (event.code === 'Space' && !event.ctrlKey && !event.shiftKey && !event.altKey) {
           event.preventDefault();
-          handleToggleCollapse();
+          toggleCollapse();
+          updateLastInteraction();
           return;
         }
         
@@ -91,39 +99,45 @@ const UnifiedSlideThumbnails = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [currentSlide, slides.length, onSlideClick, handleKeyboardNavigation, isCollapsed]);
+  }, [currentSlide, slides.length, onSlideClick, handleKeyboardNavigation, toggleCollapse, updateLastInteraction]);
 
   return (
-    <UnifiedSlideThumbnailsContainer
-      currentHeight={currentHeight}
-      isCollapsed={isCollapsed}
-      onToggleCollapse={handleToggleCollapse}
+    <div
+      ref={containerRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      {!isCollapsed && (
-        <>
-          {/* ヘッダー部分 */}
-          <SimplifiedThumbnailHeader
-            slideCount={slides.length}
-            userType={userType}
-          />
-          
-          {/* メインコンテンツ部分 */}
-          <SimplifiedSlideThumbnailsContent
-            slideData={slideData}
-            currentSlide={currentSlide}
-            thumbnailWidth={thumbnailWidth}
-            gap={gap}
-            showAddSlide={showAddSlide}
-            userType={userType}
-            onSlideClick={onSlideClick}
-            onOpenOverallReview={onOpenOverallReview}
-            onScrollLeft={() => scrollByDirection('left')}
-            onScrollRight={() => scrollByDirection('right')}
-            scrollContainerRef={scrollContainerRef}
-          />
-        </>
-      )}
-    </UnifiedSlideThumbnailsContainer>
+      <UnifiedSlideThumbnailsContainer
+        currentHeight={currentHeight}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={toggleCollapse}
+      >
+        {!isCollapsed && (
+          <>
+            {/* ヘッダー部分 */}
+            <SimplifiedThumbnailHeader
+              slideCount={slides.length}
+              userType={userType}
+            />
+            
+            {/* メインコンテンツ部分 */}
+            <SimplifiedSlideThumbnailsContent
+              slideData={slideData}
+              currentSlide={currentSlide}
+              thumbnailWidth={thumbnailWidth}
+              gap={gap}
+              showAddSlide={showAddSlide}
+              userType={userType}
+              onSlideClick={onSlideClick}
+              onOpenOverallReview={onOpenOverallReview}
+              onScrollLeft={() => scrollByDirection('left')}
+              onScrollRight={() => scrollByDirection('right')}
+              scrollContainerRef={scrollContainerRef}
+            />
+          </>
+        )}
+      </UnifiedSlideThumbnailsContainer>
+    </div>
   );
 };
 

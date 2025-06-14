@@ -4,7 +4,7 @@ import { useSlideStore } from "@/stores/slide-store";
 import { useIsMobile } from "@/hooks/use-mobile";
 import LeftSidebar from "../layout/LeftSidebar";
 import RightSidebar from "../layout/RightSidebar";
-import OptimizedSlideCanvas from "../features/canvas/OptimizedSlideCanvas";
+import OptimizedSlideCanvas from "@/features/slideviewer/components/canvas/OptimizedSlideCanvas";
 import SlideThumbnails from "../SlideThumbnails";
 import FloatingToggleButton from "../layout/FloatingToggleButton";
 

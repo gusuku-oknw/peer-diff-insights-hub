@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useSlideStore } from "@/stores/slide-store";
+import { useSlideStore } from "@/stores/slide.store";
 import { useResponsiveLayout } from "@/hooks/slideviewer/useResponsiveLayout";
 import { useThumbnailMode } from "@/hooks/slideviewer/useThumbnailMode";
 import UnifiedSlideThumbnails from "./thumbnails/UnifiedSlideThumbnails";

@@ -1,39 +1,40 @@
 
 import React, { useRef, useEffect, useCallback, useState } from "react";
-import { useOptimizedSlideCanvas } from "@/hooks/slideviewer/useOptimizedSlideCanvas";
-import { useEnhancedResponsive } from "@/hooks/slideviewer/useEnhancedResponsive";
-import { useCanvasActions } from "@/hooks/slideviewer/canvas/useCanvasActions";
-import { renderElementsWithEmptyState } from "@/utils/slideCanvas/enhancedElementRenderer";
+import { useOptimizedSlideCanvas } from "../../hooks/useOptimizedSlideCanvas";
+import { useEnhancedResponsive } from "../../hooks/useEnhancedResponsive";
+import { useCanvasActions } from "../../hooks/canvas/useCanvasActions";
+import { renderElementsWithEmptyState } from "../../utils/enhancedElementRenderer";
 import TouchOptimizedCanvas from "./TouchOptimizedCanvas";
-import EmptyCanvasState from "./EmptyCanvasState";
-import CanvasLoadingState from "./CanvasLoadingState";
-import CanvasErrorState from "./CanvasErrorState";
-import CanvasGuideOverlay from "./CanvasGuideOverlay";
+import EmptyCanvasState from "./states/EmptyCanvasState";
+import CanvasLoadingState from "./states/CanvasLoadingState";
+import CanvasErrorState from "./states/CanvasErrorState";
+import CanvasGuideOverlay from "./states/CanvasGuideOverlay";
 
-interface SlideCanvasProps {
+interface OptimizedSlideCanvasProps {
   currentSlide: number;
   zoomLevel?: number;
   editable?: boolean;
   userType?: "student" | "enterprise";
   containerWidth?: number;
   containerHeight?: number;
+  enablePerformanceMode?: boolean;
 }
 
-const SlideCanvas = ({ 
+const OptimizedSlideCanvas = ({ 
   currentSlide, 
   zoomLevel = 100, 
   editable = false,
   userType = "enterprise",
   containerWidth = 0,
-  containerHeight = 0
-}: SlideCanvasProps) => {
-  console.log(`SlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}`);
+  containerHeight = 0,
+  enablePerformanceMode = true
+}: OptimizedSlideCanvasProps) => {
+  console.log(`OptimizedSlideCanvas rendering - Slide: ${currentSlide}, Container: ${containerWidth}x${containerHeight}`);
   
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const [showGuide, setShowGuide] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
 
-  // Always call all hooks at the top level - never conditionally
   const {
     canvasSize,
     deviceInfo,
@@ -56,7 +57,7 @@ const SlideCanvas = ({
     editable,
     containerWidth: canvasSize.width,
     containerHeight: canvasSize.height,
-    enablePerformanceMode: true
+    enablePerformanceMode
   });
 
   const { addText, addShape, addImage } = useCanvasActions({
@@ -115,7 +116,7 @@ const SlideCanvas = ({
     }
   }, []);
 
-  // Now we can conditionally render based on device type AFTER all hooks are called
+  // Use TouchOptimizedCanvas for mobile devices
   if (deviceInfo.isMobile) {
     return (
       <TouchOptimizedCanvas
@@ -228,4 +229,4 @@ const SlideCanvas = ({
   );
 };
 
-export default React.memo(SlideCanvas);
+export default React.memo(OptimizedSlideCanvas);

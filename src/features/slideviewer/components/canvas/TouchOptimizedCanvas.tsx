@@ -1,9 +1,9 @@
 
 import React, { useRef, useEffect, useCallback } from "react";
-import { useEnhancedZoom } from "@/hooks/slideviewer/useEnhancedZoom";
-import { useSlideCanvas } from "@/hooks/slideviewer/useSlideCanvas";
-import { useEnhancedResponsive } from "@/hooks/slideviewer/useEnhancedResponsive";
-import { renderElements } from "@/utils/slideCanvas/elementRenderer";
+import { useEnhancedZoom } from "../../hooks/useEnhancedZoom";
+import { useSlideCanvas } from "../../hooks/useSlideCanvas";
+import { useEnhancedResponsive } from "../../hooks/useEnhancedResponsive";
+import { renderElements } from "../../utils/elementRenderer";
 
 interface TouchOptimizedCanvasProps {
   currentSlide: number;

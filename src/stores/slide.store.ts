@@ -2,25 +2,25 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { StateCreator } from 'zustand';
-import { SlideStore } from './types';
-import { createNavigationSlice } from './navigation.slice';
-import { createElementsSlice } from './elements.slice';
-import { createPresentationSlice } from './presentation.slice';
-import { createLayoutSlice } from './layout.slice';
-import { createPPTXImportSlice } from './createPPTXImport';
-import { createSampleSlides } from './createSampleSlides';
+import { SlideStore } from './slide-store/types';
+import { createNavigationSlice } from './slide-store/navigation.slice';
+import { createElementsSlice } from './slide-store/elements.slice';
+import { createPresentationSlice } from './slide-store/presentation.slice';
+import { createLayoutSlice } from './slide-store/layout.slice';
+import { createPPTXImportSlice } from './slide-store/createPPTXImport';
+import { createSampleSlides } from './slide-store/createSampleSlides';
 import type { ViewerMode } from '@/types/slide.types';
 
 /**
- * スライドストアの作成
- * - 全てのスライス機能を統合
- * - 永続化対応
- * - 学生アカウント用フィルタリング
+ * Unified slide store with all functionality
+ * - Consolidates all slide-related state management
+ * - Includes navigation, elements, presentation, layout functionality
+ * - Supports persistence and filtering for different user types
  */
 const createSlideStore: StateCreator<SlideStore> = (set, get, api) => {
   // サンプルスライドを作成
   const sampleSlides = createSampleSlides();
-  console.log('Creating slide store with sample slides:', sampleSlides.length);
+  console.log('Creating unified slide store with sample slides:', sampleSlides.length);
   
   // 各スライスを結合
   return {
@@ -69,15 +69,16 @@ const filterViewerModeForStudent = (mode: ViewerMode): ViewerMode => {
 };
 
 /**
- * 永続化付きスライドストア
- * - レイアウト状態も含めて永続化
- * - 学生アカウント向けフィルタリング適用
+ * Main slide store with persistence
+ * - Consolidates all slide functionality
+ * - Includes layout state persistence
+ * - Applies student account filtering
  */
 export const useSlideStore = create<SlideStore>()(
   persist(
     createSlideStore,
     {
-      name: 'slide-storage',
+      name: 'unified-slide-storage',
       // 永続化する部分状態を指定（レイアウト状態を追加）
       partialize: (state) => ({ 
         slides: state.slides, 
@@ -98,12 +99,12 @@ export const useSlideStore = create<SlideStore>()(
       // 復元時に学生アカウント用のフィルタリングを適用
       onRehydrateStorage: () => (state, error) => {
         if (error) {
-          console.error('Failed to rehydrate slide store:', error);
+          console.error('Failed to rehydrate unified slide store:', error);
           return;
         }
         
         if (state) {
-          console.log('Slide store rehydrated:', {
+          console.log('Unified slide store rehydrated:', {
             slides: state.slides?.length || 0,
             viewerMode: state.viewerMode,
             currentSlide: state.currentSlide,
