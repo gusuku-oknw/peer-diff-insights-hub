@@ -43,8 +43,8 @@ const SlideThumbnails = ({
     isPopupMode: false
   });
 
-  // More intelligent popup mode detection
-  const usePopupMode = showAsPopup || shouldUsePopup || (mobile && effectiveContainerWidth < 400);
+  // More intelligent popup mode detection with relaxed constraints
+  const usePopupMode = showAsPopup || shouldUsePopup || (mobile && effectiveContainerWidth < 480);
 
   console.log('SlideThumbnails decision:', {
     containerWidth,
@@ -56,17 +56,22 @@ const SlideThumbnails = ({
     optimalHeight
   });
 
-  // Popup mode implementation
+  // Popup mode implementation with improved button
   if (usePopupMode) {
     return (
       <>
-        <div className="flex items-center justify-center p-3 border-t border-gray-200 bg-white">
+        <div className="flex items-center justify-center p-4 border-t border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <Button
             onClick={() => setIsPopupOpen(true)}
             variant="outline"
-            className="w-full max-w-sm text-sm"
+            className="w-full max-w-md h-12 text-base font-semibold bg-white hover:bg-blue-50 border-blue-200 hover:border-blue-300 shadow-md hover:shadow-lg transition-all duration-200"
           >
-            スライド一覧を表示 ({currentSlide}/{slides.length})
+            <span className="flex items-center gap-2">
+              📊 スライド一覧を表示
+              <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-sm rounded-full font-bold">
+                {currentSlide}/{slides.length}
+              </span>
+            </span>
           </Button>
         </div>
         
@@ -84,7 +89,7 @@ const SlideThumbnails = ({
   }
 
   // Fixed mode implementation with enhanced height calculation
-  const enhancedHeight = Math.max(height, optimalHeight, mobile ? 120 : 160);
+  const enhancedHeight = Math.max(height, optimalHeight, mobile ? 160 : 200);
 
   return (
     <UnifiedSlideThumbnails

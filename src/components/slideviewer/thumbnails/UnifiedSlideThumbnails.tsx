@@ -132,33 +132,34 @@ const UnifiedSlideThumbnails = ({
   // Virtualization threshold
   const useVirtualization = slides.length > 20;
 
-  // Layout calculations with optimized heights
+  // Enhanced layout calculations with better height utilization
   const controlsHeight = 28;
-  const collapseButtonHeight = 48;
-  const currentHeight = isCollapsed ? collapseButtonHeight : height;
+  const collapseButtonHeight = 56; // Increased for better UX
+  const enhancedHeight = Math.max(height, isMobile ? 160 : isTablet ? 200 : 240);
+  const currentHeight = isCollapsed ? collapseButtonHeight : enhancedHeight;
   const contentHeight = currentHeight - controlsHeight;
 
   const renderEnhancedCollapseButton = () => (
-    <div className="absolute bottom-3 right-3 z-30">
+    <div className="absolute bottom-4 right-4 z-30">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
             variant="outline"
-            size="sm"
+            size="lg"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`h-10 w-10 p-0 bg-white shadow-xl hover:shadow-2xl transition-all duration-300 border-gray-300 rounded-full ${
-              isCollapsed ? 'hover:scale-110' : 'hover:scale-105'
+            className={`h-12 w-12 p-0 bg-white shadow-xl hover:shadow-2xl transition-all duration-300 border-gray-300 rounded-full ${
+              isCollapsed ? 'hover:scale-110 ring-2 ring-blue-200' : 'hover:scale-105'
             }`}
             aria-label={isCollapsed ? "スライド一覧を表示" : "スライド一覧を隠す"}
           >
             {isCollapsed ? (
-              <ChevronUp className="h-5 w-5 transition-transform duration-300" />
+              <ChevronUp className="h-6 w-6 transition-transform duration-300 text-blue-600" />
             ) : (
-              <ChevronDown className="h-5 w-5 transition-transform duration-300" />
+              <ChevronDown className="h-6 w-6 transition-transform duration-300 text-gray-600" />
             )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="top" className="bg-gray-900 text-white">
+        <TooltipContent side="top" className="bg-gray-900 text-white text-sm">
           {isCollapsed ? "スライド一覧を表示" : "スライド一覧を隠す"}
         </TooltipContent>
       </Tooltip>
@@ -168,7 +169,7 @@ const UnifiedSlideThumbnails = ({
   return (
     <div 
       ref={containerRef}
-      className={`flex flex-col bg-white border-t border-gray-200 transition-all duration-300 ease-in-out shadow-sm ${
+      className={`flex flex-col bg-white border-t border-gray-200 transition-all duration-300 ease-in-out shadow-lg ${
         isCollapsed ? 'overflow-hidden' : ''
       }`}
       style={{ height: `${currentHeight}px` }}
@@ -213,12 +214,13 @@ const UnifiedSlideThumbnails = ({
       
       {renderEnhancedCollapseButton()}
       
-      {/* Loading indicator for better UX */}
+      {/* Enhanced loading indicator */}
       {slides.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+        <div className="absolute inset-0 flex items-center justify-center bg-white/90 backdrop-blur-sm">
           <div className="text-center">
-            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-            <p className="text-sm text-gray-500">スライドを読み込み中...</p>
+            <div className="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+            <p className="text-base font-medium text-gray-700">スライドを読み込み中...</p>
+            <p className="text-sm text-gray-500 mt-1">しばらくお待ちください</p>
           </div>
         </div>
       )}

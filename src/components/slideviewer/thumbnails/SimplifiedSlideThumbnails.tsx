@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,8 @@ const SimplifiedSlideThumbnails = ({
   const { 
     thumbnailWidth, 
     gap, 
-    isMobile 
+    isMobile,
+    isTablet 
   } = useResponsiveThumbnails({
     containerWidth,
     isPopupMode: true
@@ -98,6 +100,13 @@ const SimplifiedSlideThumbnails = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [currentSlide, slides.length, handleSlideClick, handleKeyboardNavigation, isOpen, onClose]);
 
+  // レスポンシブ高さ計算
+  const getOptimalHeight = () => {
+    if (isMobile) return 'h-[95vh]';
+    if (isTablet) return 'h-[90vh]';
+    return 'h-[85vh]';
+  };
+
   // サムネイル一覧のコンテンツ
   const thumbnailsContent = (
     <div 
@@ -107,53 +116,65 @@ const SimplifiedSlideThumbnails = ({
       role="region"
       aria-label="スライド一覧"
     >
-      {/* ヘッダー */}
-      <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-white">
-        <div className="flex items-center gap-3">
-          <h3 className="font-semibold text-lg text-gray-800">
+      {/* 改善されたヘッダー */}
+      <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 flex-shrink-0">
+        <div className="flex items-center gap-4">
+          <h3 className="font-bold text-xl text-gray-800">
             スライド一覧
           </h3>
-          <span className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-600 text-sm rounded-full font-medium">
-            {slides.length} スライド
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 text-sm rounded-full font-semibold">
+              {slides.length} スライド
+            </span>
+            <span className="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-700 text-sm rounded-full font-medium">
+              現在: {currentSlide}
+            </span>
+          </div>
         </div>
         
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-10 w-10 p-0 hover:bg-gray-100"
-          onClick={onClose}
-          aria-label="スライド一覧を閉じる"
-        >
-          <X className="h-5 w-5" />
-        </Button>
+        {/* 大幅改善された閉じるボタン */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500 hidden sm:block">
+            ESCキーでも閉じます
+          </span>
+          <Button
+            variant="outline"
+            size="lg"
+            className="h-12 w-12 p-0 hover:bg-red-50 hover:border-red-200 transition-all duration-200 shadow-md hover:shadow-lg"
+            onClick={onClose}
+            aria-label="スライド一覧を閉じる"
+          >
+            <X className="h-6 w-6 text-gray-600 hover:text-red-600 transition-colors" />
+          </Button>
+        </div>
       </div>
       
-      {/* サムネイル一覧 */}
+      {/* 最大化されたサムネイル一覧 */}
       <div className="flex-1 relative overflow-hidden">
+        {/* 改善されたナビゲーションボタン */}
         <Button
-          variant="ghost"
-          size="icon"
-          className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10 h-10 w-10 bg-white shadow-lg hover:bg-gray-50 transition-all duration-200"
+          variant="outline"
+          size="lg"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 h-12 w-12 p-0 bg-white/95 shadow-xl hover:bg-white hover:shadow-2xl transition-all duration-200 border-gray-300 rounded-full"
           onClick={() => scrollByDirection('left')}
           aria-label="前のスライドへスクロール"
         >
-          <ChevronLeft className="h-5 w-5" />
+          <ChevronLeft className="h-6 w-6" />
         </Button>
         
         <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10 h-10 w-10 bg-white shadow-lg hover:bg-gray-50 transition-all duration-200"
+          variant="outline"
+          size="lg"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 h-12 w-12 p-0 bg-white/95 shadow-xl hover:bg-white hover:shadow-2xl transition-all duration-200 border-gray-300 rounded-full"
           onClick={() => scrollByDirection('right')}
           aria-label="次のスライドへスクロール"
         >
-          <ChevronRight className="h-5 w-5" />
+          <ChevronRight className="h-6 w-6" />
         </Button>
         
         <div
           ref={scrollContainerRef}
-          className="flex items-center h-full px-6 py-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 transition-all duration-300 ease-in-out scroll-smooth"
+          className="flex items-center h-full px-8 py-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 transition-all duration-300 ease-in-out scroll-smooth"
           style={{ gap: `${gap}px` }}
           role="tablist"
           aria-label="スライドサムネイル"
@@ -194,11 +215,11 @@ const SimplifiedSlideThumbnails = ({
     </div>
   );
 
-  // モバイル・タブレット：Drawer表示
+  // モバイル・タブレット：Drawer表示（最大化）
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={onClose}>
-        <DrawerContent className="h-[75vh] max-h-[75vh]">
+        <DrawerContent className={`${getOptimalHeight()} max-h-[95vh]`}>
           <DrawerHeader className="sr-only">
             <DrawerTitle>スライド一覧</DrawerTitle>
           </DrawerHeader>
@@ -208,10 +229,10 @@ const SimplifiedSlideThumbnails = ({
     );
   }
 
-  // デスクトップ：Dialog表示
+  // デスクトップ：Dialog表示（最大化）
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[75vh] max-h-[75vh] p-0">
+      <DialogContent className={`max-w-7xl ${getOptimalHeight()} max-h-[85vh] p-0`}>
         <DialogHeader className="sr-only">
           <DialogTitle>スライド一覧</DialogTitle>
         </DialogHeader>
