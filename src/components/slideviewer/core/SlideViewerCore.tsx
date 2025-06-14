@@ -8,6 +8,11 @@ const SlideViewerCore: React.FC = () => {
   const slideViewerLogic = useSlideViewerLogic();
   const responsiveLayout = useResponsiveLayout();
 
+  // Convert number timestamp to Date object
+  const presentationStartTimeDate = slideViewerLogic.presentationStartTime 
+    ? new Date(slideViewerLogic.presentationStartTime) 
+    : null;
+
   return (
     <MainLayout
       // Slide viewer logic props
@@ -15,7 +20,7 @@ const SlideViewerCore: React.FC = () => {
       totalSlides={slideViewerLogic.slides.length}
       presenterNotes={slideViewerLogic.presenterNotes}
       userType={slideViewerLogic.userType}
-      presentationStartTime={slideViewerLogic.presentationStartTime}
+      presentationStartTime={presentationStartTimeDate}
       
       // Responsive layout props
       windowDimensions={responsiveLayout.windowDimensions}
