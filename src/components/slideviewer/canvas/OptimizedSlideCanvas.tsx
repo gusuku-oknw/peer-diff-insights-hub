@@ -215,24 +215,52 @@ const OptimizedSlideCanvas = React.memo(({
   return (
     <div 
       ref={canvasContainerRef}
-      className="w-full h-full flex items-center justify-center bg-gray-50 overflow-auto relative"
+      className="w-full h-full flex flex-col bg-gray-50 overflow-auto relative"
     >
-      {/* Guide overlay */}
-      {showGuide && (
-        <CanvasGuideOverlay
-          deviceType={deviceType}
-          onClose={() => setShowGuide(false)}
-        />
-      )}
-
-      {/* Shortcuts guide in top-right corner */}
-      {editable && (
-        <div className="absolute top-4 right-4 z-10">
-          <CanvasShortcutsGuide />
+      {/* Information Bar - Outside Canvas */}
+      <div className="flex justify-between items-center p-2 bg-gray-100 border-b border-gray-200">
+        {/* Left: Performance Information */}
+        <div className="flex items-center gap-4">
+          {enablePerformanceMode && performance.metrics && (
+            <div className="text-xs bg-black text-white px-2 py-1 rounded">
+              FPS: {performance.metrics.fps} | Render: {performance.metrics.renderTime}ms
+              {!performance.isPerformanceGood && (
+                <span className="text-yellow-300 ml-2">⚡ 高速モード</span>
+              )}
+            </div>
+          )}
         </div>
-      )}
 
-      <div className="relative">
+        {/* Right: Slide Size Information */}
+        <div className="flex items-center gap-2">
+          <div className="text-xs bg-blue-500 text-white px-2 py-1 rounded">
+            {slideSize.width}×{slideSize.height} (16:9)
+          </div>
+          {window.devicePixelRatio > 2 && (
+            <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">
+              高解像度最適化済み
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Canvas Container */}
+      <div className="flex-1 flex items-center justify-center p-4 relative">
+        {/* Guide overlay */}
+        {showGuide && (
+          <CanvasGuideOverlay
+            deviceType={deviceType}
+            onClose={() => setShowGuide(false)}
+          />
+        )}
+
+        {/* Shortcuts guide in top-right corner */}
+        {editable && (
+          <div className="absolute top-4 right-4 z-10">
+            <CanvasShortcutsGuide />
+          </div>
+        )}
+
         {/* Fixed size slide container with context menu */}
         <CanvasContextMenu
           selectedObject={selectedObject}
@@ -296,28 +324,6 @@ const OptimizedSlideCanvas = React.memo(({
             )}
           </div>
         </CanvasContextMenu>
-
-        {/* Performance information */}
-        {enablePerformanceMode && performance.metrics && (
-          <div className="absolute bottom-2 left-2 text-xs bg-black bg-opacity-70 text-white px-2 py-1 rounded">
-            FPS: {performance.metrics.fps} | Render: {performance.metrics.renderTime}ms
-            {!performance.isPerformanceGood && (
-              <span className="text-yellow-300 ml-2">⚡ 高速モード</span>
-            )}
-          </div>
-        )}
-
-        {/* High resolution display info */}
-        {window.devicePixelRatio > 2 && (
-          <div className="absolute bottom-2 right-2 text-xs text-gray-500 bg-white bg-opacity-75 px-2 py-1 rounded">
-            高解像度最適化済み
-          </div>
-        )}
-
-        {/* Slide size info */}
-        <div className="absolute top-2 right-2 text-xs bg-blue-500 text-white px-2 py-1 rounded opacity-75">
-          {slideSize.width}×{slideSize.height} (16:9)
-        </div>
       </div>
     </div>
   );
