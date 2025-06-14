@@ -4,8 +4,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSlideStore } from "@/stores/slide-store";
 import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
-import ThumbnailHeader from "./thumbnails/ThumbnailHeader";
-import ThumbnailCard from "./thumbnails/ThumbnailCard";
+import SimplifiedThumbnailHeader from "./thumbnails/SimplifiedThumbnailHeader";
+import MinimalThumbnailCard from "./thumbnails/MinimalThumbnailCard";
 import AddSlideCard from "./thumbnails/AddSlideCard";
 import EvaluationCard from "./thumbnails/EvaluationCard";
 
@@ -56,20 +56,17 @@ const SlideThumbnails = ({
     handleKeyboardNavigation,
   } = useSmoothScroll({ itemWidth: thumbnailWidth, gap });
   
+  // Simplified mock data - focus only on navigation-relevant info
   const mockSlideData = slides.map((slide, index) => ({
     id: slide.id,
     title: slide.title || `スライド ${index + 1}`,
     thumbnail: slide.thumbnail,
     elements: slide.elements || [],
-    hasComments: Math.random() > 0.7,
-    commentCount: Math.floor(Math.random() * 5),
-    isReviewed: Math.random() > 0.5
+    hasComments: Math.random() > 0.8, // Reduced frequency for cleaner look
+    isReviewed: Math.random() > 0.6
   }));
-  
-  const reviewedCount = mockSlideData.filter(slide => slide.isReviewed).length;
-  const totalComments = mockSlideData.reduce((sum, slide) => sum + slide.commentCount, 0);
 
-  // 現在のスライドに自動スクロール（改善版）
+  // 現在のスライドに自動スクロール
   useEffect(() => {
     scrollToItem(currentSlide);
   }, [currentSlide, scrollToItem]);
@@ -94,11 +91,9 @@ const SlideThumbnails = ({
       role="region"
       aria-label="スライド一覧"
     >
-      <ThumbnailHeader 
+      <SimplifiedThumbnailHeader 
         slideCount={slides.length}
         userType={userType}
-        reviewedCount={reviewedCount}
-        totalComments={totalComments}
       />
       
       <div className="flex-1 relative overflow-hidden">
@@ -140,7 +135,7 @@ const SlideThumbnails = ({
               role="tab"
               aria-selected={currentSlide === index + 1}
             >
-              <ThumbnailCard
+              <MinimalThumbnailCard
                 slide={slide}
                 slideIndex={index + 1}
                 isActive={currentSlide === index + 1}

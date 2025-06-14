@@ -1,5 +1,6 @@
+
 import React from "react";
-import ReviewPanelHeader from "./components/ReviewPanelHeader";
+import EnhancedReviewPanelHeader from "./components/EnhancedReviewPanelHeader";
 import ReviewPermissionNotice from "./components/ReviewPermissionNotice";
 import ReviewSimplifiedView from "./components/ReviewSimplifiedView";
 import EnhancedReviewTabs from "./components/EnhancedReviewTabs";
@@ -64,6 +65,11 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
     console.log('EnhancedReviewPanel: Explicit tab change requested', { from: activeTab, to: newTab });
     handleTabChange(newTab);
   }, [activeTab, handleTabChange]);
+
+  // Mock data for enhanced header
+  const reviewedCount = Math.floor(totalSlides * 0.6);
+  const totalComments = comments.length + Math.floor(Math.random() * 5);
+  const urgentItems = Math.floor(Math.random() * 3);
 
   // 閉じる操作のハンドラー（アニメーション付き）
   const handleClose = () => {
@@ -155,7 +161,7 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
 
   return (
     <div className="h-full bg-white flex flex-col transition-all duration-300 ease-in-out">
-      <ReviewPanelHeader
+      <EnhancedReviewPanelHeader
         currentSlide={currentSlide}
         totalSlides={totalSlides}
         canInteract={canInteract}
@@ -163,6 +169,9 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
         completionPercentage={completionPercentage}
         onClose={handleClose}
         isMobile={isMobile}
+        reviewedCount={reviewedCount}
+        totalComments={totalComments}
+        urgentItems={urgentItems}
       />
 
       {!canInteract && (
