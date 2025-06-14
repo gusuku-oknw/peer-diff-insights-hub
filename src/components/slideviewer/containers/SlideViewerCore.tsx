@@ -4,6 +4,15 @@ import { useSlideViewerLogic } from "@/hooks/slideviewer/useSlideViewerLogic";
 import { useResponsiveLayout } from "@/hooks/slideviewer/useResponsiveLayout";
 import MainLayout from "../layout/MainLayout";
 
+// Helper to check if a value is a Date instance
+function isValidDate(val: unknown): val is Date {
+  return (
+    typeof val === "object" &&
+    val !== null &&
+    Object.prototype.toString.call(val) === "[object Date]"
+  );
+}
+
 // SlideViewer全体のロジック+レイアウト統合
 const SlideViewerCore: React.FC = () => {
   const slideViewerLogic = useSlideViewerLogic();
@@ -16,11 +25,7 @@ const SlideViewerCore: React.FC = () => {
 
   if (typeof initialTimeValue === "number") {
     finalPresentationStartTime = new Date(initialTimeValue);
-  } else if (
-    typeof initialTimeValue === "object" &&
-    initialTimeValue !== null &&
-    initialTimeValue instanceof Date
-  ) {
+  } else if (isValidDate(initialTimeValue)) {
     finalPresentationStartTime = initialTimeValue;
   } else {
     finalPresentationStartTime = null;
@@ -36,3 +41,4 @@ const SlideViewerCore: React.FC = () => {
 };
 
 export default SlideViewerCore;
+
