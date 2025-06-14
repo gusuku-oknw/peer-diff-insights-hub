@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { LayoutGrid, List, Layers, Search, Filter, SortAsc, Settings } from "lucide-react";
+import { LayoutGrid, List, Layers, Filter, SortAsc } from "lucide-react";
 import type { ThumbnailControlsProps, ThumbnailViewMode } from "@/types/slide-viewer/thumbnail.types";
 
 const ThumbnailControls: React.FC<ThumbnailControlsProps> = ({
@@ -19,15 +18,11 @@ const ThumbnailControls: React.FC<ThumbnailControlsProps> = ({
     horizontal: Layers,
     grid: LayoutGrid,
     list: List,
-    compact: Settings
+    compact: LayoutGrid
   };
 
   const handleViewModeChange = (mode: ThumbnailViewMode) => {
     onDisplaySettingsChange({ ...displaySettings, viewMode: mode });
-  };
-
-  const handleSearchChange = (value: string) => {
-    onSearchFiltersChange({ ...searchFilters, searchText: value });
   };
 
   const handleFilterChange = (field: string, value: string) => {
@@ -35,68 +30,44 @@ const ThumbnailControls: React.FC<ThumbnailControlsProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-3 p-4 bg-white border-b border-gray-200">
-      {/* Header with view mode toggles */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-            <Layers className="w-4 h-4 text-blue-500" />
-            スライド一覧
-            <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full font-medium">
-              {slideCount}
-            </span>
-          </h3>
-        </div>
-
-        {/* View Mode Toggle */}
-        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-          {Object.entries(viewModeIcons).map(([mode, Icon]) => (
-            <Tooltip key={mode}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={displaySettings.viewMode === mode ? "default" : "ghost"}
-                  size="sm"
-                  className={`h-8 w-8 p-0 ${
-                    displaySettings.viewMode === mode
-                      ? "bg-white shadow-sm text-blue-600"
-                      : "hover:bg-white/50"
-                  }`}
-                  onClick={() => handleViewModeChange(mode as ThumbnailViewMode)}
-                >
-                  <Icon className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {mode === 'horizontal' && '水平スクロール'}
-                {mode === 'grid' && 'グリッドビュー'}
-                {mode === 'list' && 'リストビュー'}
-                {mode === 'compact' && 'コンパクト'}
-              </TooltipContent>
-            </Tooltip>
-          ))}
-        </div>
+    <div className="flex items-center justify-between p-2 bg-white border-b border-gray-200">
+      {/* View Mode Toggle */}
+      <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+        {Object.entries(viewModeIcons).map(([mode, Icon]) => (
+          <Tooltip key={mode}>
+            <TooltipTrigger asChild>
+              <Button
+                variant={displaySettings.viewMode === mode ? "default" : "ghost"}
+                size="sm"
+                className={`h-8 w-8 p-0 ${
+                  displaySettings.viewMode === mode
+                    ? "bg-white shadow-sm text-blue-600"
+                    : "hover:bg-white/50"
+                }`}
+                onClick={() => handleViewModeChange(mode as ThumbnailViewMode)}
+              >
+                <Icon className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {mode === 'horizontal' && '水平スクロール'}
+              {mode === 'grid' && 'グリッドビュー'}
+              {mode === 'list' && 'リストビュー'}
+              {mode === 'compact' && 'コンパクト'}
+            </TooltipContent>
+          </Tooltip>
+        ))}
       </div>
 
-      {/* Search and Filter Controls */}
-      <div className="flex items-center gap-3">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="スライドを検索..."
-            value={searchFilters.searchText}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-10 h-9"
-          />
-        </div>
-
+      {/* Filter and Sort Controls */}
+      <div className="flex items-center gap-2">
         {/* Status Filter */}
         <Select
           value={searchFilters.status}
           onValueChange={(value) => handleFilterChange('status', value)}
         >
-          <SelectTrigger className="w-40 h-9">
-            <Filter className="h-4 w-4 mr-2" />
+          <SelectTrigger className="w-32 h-8">
+            <Filter className="h-3 w-3 mr-1" />
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -119,8 +90,8 @@ const ThumbnailControls: React.FC<ThumbnailControlsProps> = ({
             });
           }}
         >
-          <SelectTrigger className="w-40 h-9">
-            <SortAsc className="h-4 w-4 mr-2" />
+          <SelectTrigger className="w-32 h-8">
+            <SortAsc className="h-3 w-3 mr-1" />
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

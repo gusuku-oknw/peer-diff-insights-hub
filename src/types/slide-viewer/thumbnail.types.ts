@@ -9,7 +9,7 @@ export interface ThumbnailDisplaySettings {
 }
 
 export interface SlideSearchFilters {
-  searchText: string;
+  // searchText フィールドを削除
   status: 'all' | 'reviewed' | 'unreviewed' | 'commented';
   sortBy: 'created' | 'updated' | 'title' | 'progress';
   sortOrder: 'asc' | 'desc';

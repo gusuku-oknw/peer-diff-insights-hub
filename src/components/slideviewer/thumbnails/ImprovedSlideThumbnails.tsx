@@ -39,14 +39,14 @@ const ImprovedSlideThumbnails = ({
     isPopupMode: false
   });
 
-  // 表示オプションの状態管理
+  // 表示オプションの状態管理（検索機能を削除）
   const [displayOptions, setDisplayOptions] = useState<ThumbnailDisplayOptions>({
     size: 'normal',
     filter: 'all',
     sort: 'created',
     sortOrder: 'asc',
-    showSearch: true,
-    searchQuery: ''
+    showSearch: false, // 検索機能を無効化
+    searchQuery: '' // 空の検索クエリ
   });
 
   // スライドデータの拡張（実際のプロジェクトではAPIから取得）
@@ -66,17 +66,9 @@ const ImprovedSlideThumbnails = ({
     }));
   }, [slides]);
 
-  // フィルタリングとソート
+  // フィルタリングとソート（検索機能を削除）
   const filteredAndSortedSlides = useMemo(() => {
     let filtered = [...enhancedSlides];
-
-    // 検索フィルター
-    if (displayOptions.searchQuery) {
-      const query = displayOptions.searchQuery.toLowerCase();
-      filtered = filtered.filter(slide =>
-        slide.title.toLowerCase().includes(query)
-      );
-    }
 
     // ステータスフィルター
     switch (displayOptions.filter) {
@@ -162,8 +154,8 @@ const ImprovedSlideThumbnails = ({
     );
   }
 
-  // コントロールの高さを差し引いた実際のグリッド高さ
-  const controlsHeight = displayOptions.showSearch ? 140 : 100;
+  // コントロールの高さを大幅に削減
+  const controlsHeight = 48; // 検索機能削除により大幅削減
   const gridHeight = Math.max(300, height - controlsHeight);
 
   return (
@@ -172,7 +164,7 @@ const ImprovedSlideThumbnails = ({
       className="flex flex-col h-full bg-white border-t border-gray-200"
       style={{ height: `${height}px` }}
     >
-      {/* 表示コントロール */}
+      {/* 簡素化された表示コントロール */}
       <ThumbnailDisplayControls
         options={displayOptions}
         onOptionsChange={setDisplayOptions}

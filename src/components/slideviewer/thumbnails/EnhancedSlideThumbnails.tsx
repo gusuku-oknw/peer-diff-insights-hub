@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
 import { useEnhancedSlideData } from "@/hooks/slideviewer/useEnhancedSlideData";
@@ -37,7 +36,6 @@ const EnhancedSlideThumbnails = ({
   });
 
   const [searchFilters, setSearchFilters] = useState<SlideSearchFilters>({
-    searchText: '',
     status: 'all',
     sortBy: 'created',
     sortOrder: 'asc'

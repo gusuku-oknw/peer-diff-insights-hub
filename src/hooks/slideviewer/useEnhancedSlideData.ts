@@ -28,12 +28,7 @@ export const useEnhancedSlideData = () => {
   ): EnhancedSlideData[] => {
     let filtered = enhancedSlideData;
 
-    // 検索フィルター
-    if (searchFilters.searchText) {
-      filtered = filtered.filter(slide =>
-        slide.title.toLowerCase().includes(searchFilters.searchText.toLowerCase())
-      );
-    }
+    // 検索機能を削除（searchTextフィルターを削除）
 
     // ステータスフィルター
     if (searchFilters.status !== 'all') {
