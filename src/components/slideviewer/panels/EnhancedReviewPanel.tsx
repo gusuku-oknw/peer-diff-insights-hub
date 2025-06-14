@@ -1,4 +1,3 @@
-
 import React from "react";
 import ReviewPanelHeader from "./components/ReviewPanelHeader";
 import ReviewPermissionNotice from "./components/ReviewPermissionNotice";
@@ -19,6 +18,8 @@ interface EnhancedReviewPanelProps {
   isVeryNarrow?: boolean;
   activeTab?: string;
   onTabChange?: (tab: string) => void;
+  onClose?: () => void;
+  isMobile?: boolean;
 }
 
 const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
@@ -28,7 +29,9 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
   isNarrow = false,
   isVeryNarrow = false,
   activeTab: externalActiveTab,
-  onTabChange: externalOnTabChange
+  onTabChange: externalOnTabChange,
+  onClose,
+  isMobile = false
 }) => {
   const {
     activeTab,
@@ -61,6 +64,18 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
     console.log('EnhancedReviewPanel: Explicit tab change requested', { from: activeTab, to: newTab });
     handleTabChange(newTab);
   }, [activeTab, handleTabChange]);
+
+  // 閉じる操作のハンドラー（アニメーション付き）
+  const handleClose = () => {
+    if (onClose) {
+      toast({
+        title: "レビューパネルを閉じました",
+        description: "ツールバーから再度開くことができます",
+        duration: 2000
+      });
+      onClose();
+    }
+  };
 
   // Quick action handlers
   const handleAddComment = () => {
@@ -139,13 +154,15 @@ const EnhancedReviewPanel: React.FC<EnhancedReviewPanelProps> = ({
   };
 
   return (
-    <div className="h-full bg-white flex flex-col">
+    <div className="h-full bg-white flex flex-col transition-all duration-300 ease-in-out">
       <ReviewPanelHeader
         currentSlide={currentSlide}
         totalSlides={totalSlides}
         canInteract={canInteract}
         isVeryNarrow={isVeryNarrow}
         completionPercentage={completionPercentage}
+        onClose={handleClose}
+        isMobile={isMobile}
       />
 
       {!canInteract && (

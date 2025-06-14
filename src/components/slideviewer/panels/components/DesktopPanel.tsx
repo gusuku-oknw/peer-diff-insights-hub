@@ -1,5 +1,6 @@
+
 import React from "react";
-import TabsContainer from "./TabsContainer";
+import PanelContent from "./PanelContent";
 
 interface DesktopPanelProps {
   shouldShowNotes: boolean;
@@ -15,59 +16,51 @@ interface DesktopPanelProps {
   onTabChange: (tab: string) => void;
   onToggleHide?: () => void;
   panelRef: React.RefObject<HTMLDivElement>;
-  /** パネルの幅(px) */
   width: number;
-  /** リサイズハンドルコンポーネント */
-  ResizeHandle: ({
-                   className,
-                   position,
-                 }: {
-    className?: string;
-    position?: "left" | "right" | "top" | "bottom";
-  }) => JSX.Element;
+  ResizeHandle: React.ComponentType<any> | null;
 }
 
 const DesktopPanel: React.FC<DesktopPanelProps> = ({
-                                                     shouldShowNotes,
-                                                     shouldShowReviewPanel,
-                                                     currentSlide,
-                                                     totalSlides,
-                                                     presenterNotes,
-                                                     userType,
-                                                     panelDimensions,
-                                                     isNarrow,
-                                                     isVeryNarrow,
-                                                     activeTab,
-                                                     onTabChange,
-                                                     onToggleHide,
-                                                     panelRef,
-                                                     width,
-                                                     ResizeHandle,
-                                                   }) => {
+  shouldShowNotes,
+  shouldShowReviewPanel,
+  currentSlide,
+  totalSlides,
+  presenterNotes,
+  userType,
+  panelDimensions,
+  isNarrow,
+  isVeryNarrow,
+  activeTab,
+  onTabChange,
+  onToggleHide,
+  panelRef,
+  width,
+  ResizeHandle,
+}) => {
   return (
-      <div
-          ref={panelRef}
-          className="flex-shrink-0 h-full bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-hidden flex flex-col transition-all duration-300 ease-in-out shadow-sm relative z-10"
-          style={{ width: `${width}px` }}
-      >
-
-        {/* タブコンテンツ */}
-        <TabsContainer
-            shouldShowNotes={shouldShowNotes}
-            shouldShowReviewPanel={shouldShowReviewPanel}
-            currentSlide={currentSlide}
-            totalSlides={totalSlides}
-            presenterNotes={presenterNotes}
-            userType={userType}
-            panelDimensions={panelDimensions}
-            isNarrow={isNarrow}
-            isVeryNarrow={isVeryNarrow}
-            activeTab={activeTab}
-            onTabChange={onTabChange}
-            isMobile={false}
-            onToggleHide={onToggleHide}
-        />
-      </div>
+    <div
+      ref={panelRef}
+      className="h-full bg-white border-l border-gray-200 flex flex-col transition-all duration-300 ease-in-out"
+      style={{ width: `${width}px` }}
+    >
+      <PanelContent
+        shouldShowNotes={shouldShowNotes}
+        shouldShowReviewPanel={shouldShowReviewPanel}
+        currentSlide={currentSlide}
+        totalSlides={totalSlides}
+        presenterNotes={presenterNotes}
+        userType={userType}
+        panelDimensions={panelDimensions}
+        isNarrow={isNarrow}
+        isVeryNarrow={isVeryNarrow}
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+        onClose={onToggleHide}
+        isMobile={false}
+      />
+      
+      {ResizeHandle && <ResizeHandle />}
+    </div>
   );
 };
 

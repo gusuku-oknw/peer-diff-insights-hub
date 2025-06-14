@@ -16,6 +16,8 @@ interface PanelContentProps {
   isVeryNarrow: boolean;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onClose?: () => void;
+  isMobile?: boolean;
 }
 
 const PanelContent: React.FC<PanelContentProps> = ({
@@ -30,6 +32,8 @@ const PanelContent: React.FC<PanelContentProps> = ({
   isVeryNarrow,
   activeTab,
   onTabChange,
+  onClose,
+  isMobile = false,
 }) => {
   if (shouldShowNotes && shouldShowReviewPanel) {
     return (
@@ -57,6 +61,8 @@ const PanelContent: React.FC<PanelContentProps> = ({
             isVeryNarrow={isVeryNarrow}
             activeTab={activeTab}
             onTabChange={onTabChange}
+            onClose={onClose}
+            isMobile={isMobile}
           />
         </TabsContent>
       </Tabs>
@@ -75,6 +81,8 @@ const PanelContent: React.FC<PanelContentProps> = ({
         isVeryNarrow={isVeryNarrow}
         activeTab={activeTab}
         onTabChange={onTabChange}
+        onClose={onClose}
+        isMobile={isMobile}
       />
     );
   }

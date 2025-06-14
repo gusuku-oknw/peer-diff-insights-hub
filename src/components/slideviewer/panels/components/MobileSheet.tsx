@@ -1,14 +1,11 @@
 
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
-import { MessageSquare } from "lucide-react";
-import TabsContainer from "./TabsContainer";
+import { Button } from "@/components/ui/button";
+import { MessageSquare, BookOpen } from "lucide-react";
+import PanelContent from "./PanelContent";
 
 interface MobileSheetProps {
-  isSheetOpen: boolean;
-  setIsSheetOpen: (open: boolean) => void;
   shouldShowNotes: boolean;
   shouldShowReviewPanel: boolean;
   currentSlide: number;
@@ -20,12 +17,12 @@ interface MobileSheetProps {
   isVeryNarrow: boolean;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  isSheetOpen: boolean;
+  setIsSheetOpen: (open: boolean) => void;
   panelRef: React.RefObject<HTMLDivElement>;
 }
 
 const MobileSheet: React.FC<MobileSheetProps> = ({
-  isSheetOpen,
-  setIsSheetOpen,
   shouldShowNotes,
   shouldShowReviewPanel,
   currentSlide,
@@ -37,28 +34,42 @@ const MobileSheet: React.FC<MobileSheetProps> = ({
   isVeryNarrow,
   activeTab,
   onTabChange,
+  isSheetOpen,
+  setIsSheetOpen,
   panelRef,
 }) => {
+  const handleCloseSheet = () => {
+    setIsSheetOpen(false);
+  };
+
   return (
     <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
       <SheetTrigger asChild>
         <Button
           variant="outline"
           size="sm"
-          className="fixed bottom-4 right-4 z-50 shadow-lg bg-white hover:bg-gray-50 border-2 transition-all duration-200 hover:scale-105"
+          className="fixed bottom-4 right-4 z-50 bg-white shadow-lg border-gray-300 hover:bg-gray-50 transition-all duration-200 hover:scale-105"
+          aria-label="レビューパネルを開く"
         >
-          <MessageSquare className="h-4 w-4 mr-1 text-purple-600" />
-          <span className="font-medium">レビュー</span>
-          {(presenterNotes[currentSlide] || shouldShowReviewPanel) && (
-            <Badge variant="destructive" className="ml-1 h-4 w-4 p-0 text-xs rounded-full animate-pulse">
-              !
-            </Badge>
-          )}
+          {shouldShowReviewPanel && <MessageSquare className="h-4 w-4 mr-1 text-purple-600" />}
+          {shouldShowNotes && <BookOpen className="h-4 w-4 mr-1 text-blue-600" />}
+          <span className="text-sm font-medium">
+            {shouldShowReviewPanel ? "レビュー" : "メモ"}
+          </span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full max-w-md p-0 z-50">
-        <div className="h-full bg-gradient-to-b from-gray-50 to-white" ref={panelRef}>
-          <TabsContainer
+      
+      <SheetContent 
+        side="right" 
+        className="w-full sm:w-96 p-0 bg-white"
+        aria-describedby="mobile-panel-description"
+      >
+        <div id="mobile-panel-description" className="sr-only">
+          {shouldShowReviewPanel ? "レビュー管理パネル" : "プレゼンターノートパネル"}
+        </div>
+        
+        <div ref={panelRef} className="h-full">
+          <PanelContent
             shouldShowNotes={shouldShowNotes}
             shouldShowReviewPanel={shouldShowReviewPanel}
             currentSlide={currentSlide}
@@ -70,8 +81,8 @@ const MobileSheet: React.FC<MobileSheetProps> = ({
             isVeryNarrow={isVeryNarrow}
             activeTab={activeTab}
             onTabChange={onTabChange}
+            onClose={handleCloseSheet}
             isMobile={true}
-            onSheetClose={() => setIsSheetOpen(false)}
           />
         </div>
       </SheetContent>
