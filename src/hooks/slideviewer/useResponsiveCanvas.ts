@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useResponsiveLayout } from './useResponsiveLayout';
 
 interface UseResponsiveCanvasProps {
   containerWidth: number;
@@ -12,50 +13,47 @@ export const useResponsiveCanvas = ({
 }: UseResponsiveCanvasProps) => {
   const [canvasSize, setCanvasSize] = useState({ width: 1600, height: 900 });
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
+  const { mobile, tablet, desktop, large } = useResponsiveLayout();
 
   const calculateOptimalSize = useCallback(() => {
-    // 改善されたデバウンス処理
     if (resizeTimeoutRef.current) {
       clearTimeout(resizeTimeoutRef.current);
     }
 
     resizeTimeoutRef.current = setTimeout(() => {
-      // より精密な計算
-      const padding = 40;
+      // Enhanced padding calculation based on device type
+      const padding = mobile ? 20 : tablet ? 30 : 40;
       const availableWidth = Math.max(320, containerWidth - padding);
       const availableHeight = Math.max(240, containerHeight - padding);
       
       const aspectRatio = 16 / 9;
       
-      // 幅ベースの計算
-      let optimalWidth = availableWidth * 0.92;
+      // Width-based calculation
+      let optimalWidth = availableWidth * (mobile ? 0.95 : 0.92);
       let optimalHeight = optimalWidth / aspectRatio;
       
-      // 高さ制限チェック
-      if (optimalHeight > availableHeight * 0.92) {
-        optimalHeight = availableHeight * 0.92;
+      // Height constraint check
+      if (optimalHeight > availableHeight * (mobile ? 0.95 : 0.92)) {
+        optimalHeight = availableHeight * (mobile ? 0.95 : 0.92);
         optimalWidth = optimalHeight * aspectRatio;
       }
       
-      // デバイス種別に応じた最適化
-      const isTablet = containerWidth >= 768 && containerWidth < 1024;
-      const isMobile = containerWidth < 768;
-      const isDesktop = containerWidth >= 1024;
-      
+      // Device-specific optimization with better ranges
       let finalWidth, finalHeight;
       
-      if (isMobile) {
-        // モバイル: より小さめに調整
-        finalWidth = Math.max(320, Math.min(800, Math.round(optimalWidth * 0.9)));
-        finalHeight = Math.max(180, Math.min(450, Math.round(optimalHeight * 0.9)));
-      } else if (isTablet) {
-        // タブレット: 中間サイズ
-        finalWidth = Math.max(600, Math.min(1200, Math.round(optimalWidth)));
-        finalHeight = Math.max(338, Math.min(675, Math.round(optimalHeight)));
+      if (mobile) {
+        finalWidth = Math.max(280, Math.min(600, Math.round(optimalWidth)));
+        finalHeight = Math.max(158, Math.min(338, Math.round(optimalHeight)));
+      } else if (tablet) {
+        finalWidth = Math.max(480, Math.min(900, Math.round(optimalWidth)));
+        finalHeight = Math.max(270, Math.min(506, Math.round(optimalHeight)));
+      } else if (desktop) {
+        finalWidth = Math.max(640, Math.min(1280, Math.round(optimalWidth)));
+        finalHeight = Math.max(360, Math.min(720, Math.round(optimalHeight)));
       } else {
-        // デスクトップ: フルサイズ
-        finalWidth = Math.max(800, Math.min(1920, Math.round(optimalWidth)));
-        finalHeight = Math.max(450, Math.min(1080, Math.round(optimalHeight)));
+        // Large screens
+        finalWidth = Math.max(800, Math.min(1600, Math.round(optimalWidth)));
+        finalHeight = Math.max(450, Math.min(900, Math.round(optimalHeight)));
       }
       
       const newCanvasSize = {
@@ -67,13 +65,13 @@ export const useResponsiveCanvas = ({
       
       console.log('Enhanced canvas size calculated:', {
         container: { containerWidth, containerHeight },
-        device: { isMobile, isTablet, isDesktop },
+        device: { mobile, tablet, desktop, large },
         calculated: { optimalWidth, optimalHeight },
         final: newCanvasSize,
         aspectRatio: finalWidth / finalHeight
       });
-    }, 150); // 少し長めのデバウンス
-  }, [containerWidth, containerHeight]);
+    }, 100); // Reduced debounce for more responsive updates
+  }, [containerWidth, containerHeight, mobile, tablet, desktop, large]);
 
   useEffect(() => {
     calculateOptimalSize();
@@ -89,12 +87,10 @@ export const useResponsiveCanvas = ({
     return {
       scaleX: canvasSize.width / 1600,
       scaleY: canvasSize.height / 900,
-      // 統一スケールファクター（アスペクト比維持）
       scale: Math.min(canvasSize.width / 1600, canvasSize.height / 900)
     };
   }, [canvasSize]);
 
-  // パフォーマンス情報
   const getPerformanceInfo = useCallback(() => {
     const pixelCount = canvasSize.width * canvasSize.height;
     const scaleFactor = getScaleFactors().scale;
@@ -102,7 +98,7 @@ export const useResponsiveCanvas = ({
     return {
       pixelCount,
       scaleFactor,
-      isHighDensity: pixelCount > 1000000, // 1MP以上
+      isHighDensity: pixelCount > 1000000,
       renderingComplexity: scaleFactor < 0.5 ? 'low' : scaleFactor < 0.8 ? 'medium' : 'high'
     };
   }, [canvasSize, getScaleFactors]);
@@ -112,7 +108,7 @@ export const useResponsiveCanvas = ({
     getScaleFactors,
     getPerformanceInfo,
     isResponsive: containerWidth > 0 && containerHeight > 0,
-    // デバッグ用
-    containerDimensions: { containerWidth, containerHeight }
+    containerDimensions: { containerWidth, containerHeight },
+    deviceInfo: { mobile, tablet, desktop, large }
   };
 };

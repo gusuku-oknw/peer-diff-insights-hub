@@ -11,61 +11,83 @@ export const useResponsiveThumbnails = ({
   containerWidth, 
   isPopupMode = false 
 }: UseResponsiveThumbnailsProps) => {
-  const { isMobile, isTablet, isDesktop } = useResponsiveLayout();
+  const { mobile, tablet, desktop, large, contentAreaDimensions } = useResponsiveLayout();
 
-  // 統一されたサムネイルサイズ計算
+  // Enhanced thumbnail size calculation with better constraints
   const calculateThumbnailSize = useMemo(() => {
+    // Use actual available width from layout calculation
+    const effectiveWidth = containerWidth || contentAreaDimensions.availableWidth;
+    
     if (isPopupMode) {
-      if (isMobile) {
-        // モバイルポップアップ：画面幅の35%、160-200px範囲
-        return Math.max(160, Math.min(200, containerWidth * 0.35));
-      } else if (isTablet) {
-        // タブレットポップアップ：画面幅の25%、200-250px範囲
-        return Math.max(200, Math.min(250, containerWidth * 0.25));
+      if (mobile) {
+        return Math.max(140, Math.min(180, effectiveWidth * 0.8));
+      } else if (tablet) {
+        return Math.max(160, Math.min(220, effectiveWidth * 0.6));
       } else {
-        // デスクトップポップアップ：画面幅の20%、220-280px範囲
-        return Math.max(220, Math.min(280, containerWidth * 0.2));
+        return Math.max(180, Math.min(280, effectiveWidth * 0.4));
       }
     } else {
-      if (isMobile) {
-        // モバイル固定：140-180px
-        return Math.max(140, Math.min(180, containerWidth * 0.4));
-      } else if (isTablet) {
-        // タブレット固定：180-220px
-        return Math.max(180, Math.min(220, containerWidth * 0.22));
+      if (mobile) {
+        // Mobile: Smaller thumbnails for better fit
+        return Math.max(120, Math.min(160, effectiveWidth * 0.35));
+      } else if (tablet) {
+        // Tablet: Medium-sized thumbnails
+        return Math.max(140, Math.min(200, effectiveWidth * 0.25));
+      } else if (desktop) {
+        // Desktop: Standard size
+        return Math.max(160, Math.min(240, effectiveWidth * 0.2));
       } else {
-        // デスクトップ固定：200-300px
-        return Math.max(200, Math.min(300, containerWidth * 0.22));
+        // Large screens: Can use bigger thumbnails
+        return Math.max(180, Math.min(280, effectiveWidth * 0.18));
       }
     }
-  }, [containerWidth, isPopupMode, isMobile, isTablet, isDesktop]);
+  }, [containerWidth, contentAreaDimensions.availableWidth, isPopupMode, mobile, tablet, desktop, large]);
 
-  // 統一されたギャップ計算
+  // Dynamic gap calculation
   const gap = useMemo(() => {
-    if (isMobile) return 12;
-    if (isTablet) return 16;
-    return 20;
-  }, [isMobile, isTablet]);
+    if (mobile) return 8;
+    if (tablet) return 12;
+    return 16;
+  }, [mobile, tablet]);
 
-  // レスポンシブモード判定
+  // Improved popup mode detection
   const shouldUsePopup = useMemo(() => {
-    return isMobile || (isTablet && containerWidth < 900);
-  }, [isMobile, isTablet, containerWidth]);
+    const minWidthForFixedView = mobile ? 320 : tablet ? 600 : 800;
+    return mobile || (containerWidth > 0 && containerWidth < minWidthForFixedView);
+  }, [mobile, tablet, containerWidth]);
 
-  // 適切な高さ計算
+  // Optimal height based on screen size
   const optimalHeight = useMemo(() => {
-    if (isMobile) return 140;
-    if (isTablet) return 180;
-    return 220;
-  }, [isMobile, isTablet]);
+    if (mobile) return 120;
+    if (tablet) return 160;
+    if (desktop) return 200;
+    return 220; // large screens
+  }, [mobile, tablet, desktop]);
 
-  return {
+  const result = {
     thumbnailWidth: calculateThumbnailSize,
     gap,
     shouldUsePopup,
     optimalHeight,
-    isMobile,
-    isTablet,
-    isDesktop
+    // Device flags for backward compatibility
+    isMobile: mobile,
+    isTablet: tablet,
+    isDesktop: desktop || large,
+    // Enhanced breakpoint info
+    deviceType: mobile ? 'mobile' : tablet ? 'tablet' : desktop ? 'desktop' : 'large',
+    effectiveWidth: containerWidth || contentAreaDimensions.availableWidth
   };
+
+  // Debug logging
+  console.log('Responsive thumbnails calculation:', {
+    containerWidth,
+    isPopupMode,
+    deviceType: result.deviceType,
+    shouldUsePopup,
+    thumbnailWidth: result.thumbnailWidth,
+    gap,
+    optimalHeight
+  });
+
+  return result;
 };

@@ -79,34 +79,24 @@ export const createLayoutSlice: StateCreator<
   
   resetLayoutToDefaults: () => set(DEFAULT_LAYOUT),
   
+  // Optimized responsive width calculation
   getRightSidebarWidth: () => {
     const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
     
-    // Calculate responsive width based on screen size
-    let targetWidth: number;
-    
-    if (windowWidth >= 1920) {
-      // Large screens: use 1/4 of screen width
-      targetWidth = windowWidth / 4;
-    } else if (windowWidth >= 1440) {
-      // Medium-large screens: use 1/3 of screen width
-      targetWidth = windowWidth / 3;
-    } else if (windowWidth >= 1024) {
-      // Medium screens: use 1/3 of screen width
-      targetWidth = windowWidth / 3;
-    } else if (windowWidth >= 768) {
-      // Small-medium screens: use 2/5 of screen width
-      targetWidth = (windowWidth * 2) / 5;
+    // Enhanced responsive calculations with better constraints
+    if (windowWidth < 640) {
+      // Mobile: Use most of screen but ensure content space
+      return Math.min(windowWidth * 0.85, 320);
+    } else if (windowWidth < 1024) {
+      // Tablet: Conservative approach
+      return Math.min(windowWidth * 0.5, 400);
+    } else if (windowWidth < 1440) {
+      // Desktop: Balanced
+      return Math.min(windowWidth * 0.3, 450);
     } else {
-      // Small screens: use 1/2 of screen width
-      targetWidth = windowWidth / 2;
+      // Large screens: Can use more space
+      return Math.min(windowWidth * 0.25, 500);
     }
-    
-    // Apply min/max constraints
-    const minWidth = 280;
-    const maxWidth = Math.min(500, windowWidth * 0.6); // Never exceed 60% of screen
-    
-    return Math.max(minWidth, Math.min(maxWidth, targetWidth));
   },
   
   isRightPanelVisible: () => {
@@ -121,6 +111,7 @@ export const createLayoutSlice: StateCreator<
     return !hideRightPanelCompletely && !state.rightPanelHidden;
   },
   
+  // Unified content area calculation
   getContentAreaDimensions: () => {
     const state = get();
     const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
@@ -130,39 +121,30 @@ export const createLayoutSlice: StateCreator<
     if (state.isRightPanelVisible()) usedWidth += state.getRightSidebarWidth();
     if (state.viewerMode === 'edit') usedWidth += state.editSidebarWidth;
     
-    const availableWidth = windowWidth - usedWidth;
+    // Ensure minimum content width based on screen size
+    const minContentWidth = windowWidth < 640 ? 280 : 400;
+    const availableWidth = Math.max(minContentWidth, windowWidth - usedWidth - 20);
     
-    return {
+    const result = {
       width: windowWidth,
       availableWidth,
-      thumbnailsWidth: Math.max(400, availableWidth - 20),
+      thumbnailsWidth: availableWidth,
     };
+    
+    // Debug logging
+    console.log('Layout store calculation:', {
+      windowWidth,
+      usedWidth,
+      minContentWidth,
+      ...result
+    });
+    
+    return result;
   },
   
+  // Simplified method that uses the unified calculation
   getSlideThumbnailsWidth: () => {
     const state = get();
-    const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
-    
-    let usedWidth = 0;
-    
-    // Calculate width used by visible panels
-    if (state.leftSidebarOpen) {
-      usedWidth += state.leftSidebarWidth;
-    }
-    
-    // Use the centralized right panel visibility logic with responsive width
-    if (state.isRightPanelVisible()) {
-      usedWidth += state.getRightSidebarWidth();
-    }
-    
-    if (state.viewerMode === 'edit') {
-      usedWidth += state.editSidebarWidth;
-    }
-    
-    // Reserve minimal padding for better space utilization
-    const padding = 20;
-    const availableWidth = Math.max(400, windowWidth - usedWidth - padding);
-    
-    return availableWidth;
+    return state.getContentAreaDimensions().thumbnailsWidth;
   },
 });
