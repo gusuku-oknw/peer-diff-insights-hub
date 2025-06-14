@@ -35,7 +35,7 @@ const TabsContainer: React.FC<TabsContainerProps> = ({
   onTabChange,
   isMobile,
   onToggleHide,
-  onSheetClose,
+  onSheetClose, // we keep it in the props, but NOT passing to PanelHeader
 }) => {
   return (
     <div className="h-full flex flex-col relative z-10">
@@ -47,7 +47,6 @@ const TabsContainer: React.FC<TabsContainerProps> = ({
             isVeryNarrow={isVeryNarrow}
             isMobile={isMobile}
             onToggleHide={onToggleHide}
-            onSheetClose={onSheetClose}
           />
           <PanelContent
             shouldShowNotes={shouldShowNotes}
@@ -99,3 +98,4 @@ const TabsContainer: React.FC<TabsContainerProps> = ({
 };
 
 export default TabsContainer;
+
