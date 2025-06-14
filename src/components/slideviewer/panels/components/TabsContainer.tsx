@@ -1,8 +1,8 @@
 
 import React from "react";
 import { Tabs } from "@/components/ui/tabs";
-import PanelHeader from "../../core/PanelHeader";
-import PanelContent from "../../core/PanelContent";
+import PanelHeader from "../core/PanelHeader";
+import PanelContent from "../core/PanelContent";
 
 interface TabsContainerProps {
   shouldShowNotes: boolean;
