@@ -1,13 +1,17 @@
 
 import React, { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import { useOptimizedSlideCanvas } from "@/hooks/slideviewer/useOptimizedSlideCanvas";
-import { useCanvasActions } from "@/hooks/slideviewer/canvas/useCanvasActions";
+import { useStandardSlideSize } from "@/hooks/slideviewer/useStandardSlideSize";
+import { useEnhancedCanvasActions } from "@/hooks/slideviewer/canvas/useEnhancedCanvasActions";
+import { useCanvasShortcuts } from "@/hooks/slideviewer/canvas/useCanvasShortcuts";
 import { renderElementsWithEmptyState } from "@/utils/slideCanvas/enhancedElementRenderer";
 import TouchOptimizedCanvas from "@/features/slideviewer/components/canvas/TouchOptimizedCanvas";
 import EmptyCanvasState from "@/features/slideviewer/components/canvas/states/EmptyCanvasState";
 import CanvasLoadingState from "@/features/slideviewer/components/canvas/states/CanvasLoadingState";
 import CanvasErrorState from "@/features/slideviewer/components/canvas/states/CanvasErrorState";
 import CanvasGuideOverlay from "@/features/slideviewer/components/canvas/states/CanvasGuideOverlay";
+import CanvasContextMenu from "./CanvasContextMenu";
+import CanvasShortcutsGuide from "./CanvasShortcutsGuide";
 
 interface OptimizedSlideCanvasProps {
   currentSlide: number;
@@ -18,13 +22,6 @@ interface OptimizedSlideCanvasProps {
   containerHeight?: number;
   enablePerformanceMode?: boolean;
 }
-
-// 標準スライドサイズ定義（16:9アスペクト比）
-const STANDARD_SLIDE_SIZES = {
-  large: { width: 1600, height: 900 },    // フルHD基準
-  medium: { width: 1280, height: 720 },   // HD基準
-  small: { width: 960, height: 540 }      // モバイル対応
-} as const;
 
 const OptimizedSlideCanvas = React.memo(({ 
   currentSlide, 
@@ -40,35 +37,16 @@ const OptimizedSlideCanvas = React.memo(({
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const [showGuide, setShowGuide] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
+  const [selectedObject, setSelectedObject] = useState<any>(null);
 
-  // デバイス判定とスライドサイズ決定（固定サイズ）
-  const { slideSize, deviceInfo } = useMemo(() => {
-    const isMobile = window.innerWidth < 768;
-    const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-    
-    // 固定サイズの選択（コンテナサイズに依存しない）
-    let selectedSize;
-    if (isMobile) {
-      selectedSize = STANDARD_SLIDE_SIZES.small;
-    } else if (isTablet) {
-      selectedSize = STANDARD_SLIDE_SIZES.medium;
-    } else {
-      selectedSize = STANDARD_SLIDE_SIZES.large;
-    }
+  // Use standard slide sizes instead of responsive sizing
+  const { slideSize, deviceType } = useStandardSlideSize({
+    containerWidth,
+    containerHeight,
+    preferredAspectRatio: 16 / 9
+  });
 
-    return {
-      slideSize: selectedSize,
-      deviceInfo: {
-        isMobile,
-        isTablet,
-        isDesktop: !isMobile && !isTablet,
-        devicePixelRatio: window.devicePixelRatio || 1,
-        touchSupported: 'ontouchstart' in window
-      }
-    };
-  }, []); // 依存配列を空にして固定サイズを保証
-
-  // 固定サイズでキャンバス設定
+  // Memoize canvas configuration
   const canvasConfig = useMemo(() => ({
     currentSlide,
     editable,
@@ -87,12 +65,72 @@ const OptimizedSlideCanvas = React.memo(({
     performance
   } = useOptimizedSlideCanvas(canvasConfig);
 
-  const { addText, addShape, addImage } = useCanvasActions({
-    currentSlide,
-    canvas: fabricCanvasRef.current
+  // Enhanced canvas actions with animations
+  const {
+    addText,
+    addRectangle,
+    addCircle,
+    deleteSelected,
+    copySelected,
+    paste,
+    duplicate,
+    bringToFront,
+    sendToBack,
+    rotateObject,
+    hasClipboard
+  } = useEnhancedCanvasActions({
+    canvas: fabricCanvasRef.current,
+    currentSlide
   });
 
-  // 要素レンダリング関数
+  // Keyboard shortcuts
+  useCanvasShortcuts({
+    canvas: fabricCanvasRef.current,
+    editable,
+    onAddText: addText,
+    onAddRectangle: addRectangle,
+    onAddCircle: addCircle,
+    onDeleteSelected: deleteSelected,
+    onCopySelected: copySelected,
+    onPasteSelected: paste
+  });
+
+  // Track selected object for context menu
+  useEffect(() => {
+    const canvas = fabricCanvasRef.current;
+    if (!canvas) return;
+
+    const handleSelectionCreated = (e: any) => {
+      setSelectedObject(e.selected?.[0] || null);
+    };
+
+    const handleSelectionCleared = () => {
+      setSelectedObject(null);
+    };
+
+    const handleSelectionUpdated = (e: any) => {
+      setSelectedObject(e.selected?.[0] || null);
+    };
+
+    canvas.on('selection:created', handleSelectionCreated);
+    canvas.on('selection:cleared', handleSelectionCleared);
+    canvas.on('selection:updated', handleSelectionUpdated);
+
+    return () => {
+      canvas.off('selection:created', handleSelectionCreated);
+      canvas.off('selection:cleared', handleSelectionCleared);
+      canvas.off('selection:updated', handleSelectionUpdated);
+    };
+  }, [fabricCanvasRef.current]);
+
+  // Create wrapper functions for EmptyCanvasState compatibility
+  const handleAddText = useCallback(() => addText(), [addText]);
+  const handleAddShape = useCallback(() => addRectangle(), [addRectangle]);
+  const handleAddImage = useCallback(() => {
+    console.log('Image functionality coming soon');
+  }, []);
+  
+  // Enhanced element rendering
   const handleOptimizedRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady) return;
@@ -101,18 +139,18 @@ const OptimizedSlideCanvas = React.memo(({
       const result = renderElementsWithEmptyState(
         canvas, 
         elements, 
-        slideSize, // 固定サイズを使用
+        slideSize,
         editable, 
         currentSlide,
-        addText,
-        addShape,
-        addImage
+        handleAddText,
+        handleAddShape,
+        handleAddImage
       );
       setIsEmpty(result.isEmpty);
     } catch (err) {
       console.error('Optimized rendering failed:', err);
     }
-  }, [elements, currentSlide, editable, isReady, slideSize, addText, addShape, addImage]);
+  }, [elements, currentSlide, editable, isReady, slideSize, handleAddText, handleAddShape, handleAddImage]);
   
   useEffect(() => {
     if (isReady) {
@@ -120,7 +158,7 @@ const OptimizedSlideCanvas = React.memo(({
     }
   }, [handleOptimizedRenderElements, isReady]);
 
-  // ガイド表示
+  // Show guide for first-time users
   useEffect(() => {
     if (isReady && editable && isEmpty && enablePerformanceMode) {
       const hasSeenGuide = localStorage.getItem('standard-slide-guide-seen');
@@ -143,8 +181,8 @@ const OptimizedSlideCanvas = React.memo(({
     }
   }, []);
 
-  // モバイルデバイスは専用コンポーネント
-  if (deviceInfo.isMobile) {
+  // Use TouchOptimizedCanvas for mobile devices
+  if (deviceType === 'mobile') {
     return (
       <TouchOptimizedCanvas
         currentSlide={currentSlide}
@@ -157,7 +195,7 @@ const OptimizedSlideCanvas = React.memo(({
     );
   }
   
-  // スライドデータチェック
+  // Check if slides are loaded
   if (!slides || slides.length === 0) {
     return (
       <div className="flex items-center justify-center w-full h-full bg-gray-50">
@@ -179,68 +217,87 @@ const OptimizedSlideCanvas = React.memo(({
       ref={canvasContainerRef}
       className="w-full h-full flex items-center justify-center bg-gray-50 overflow-auto relative"
     >
-      {/* ガイドオーバーレイ */}
+      {/* Guide overlay */}
       {showGuide && (
         <CanvasGuideOverlay
-          deviceType={deviceInfo.isMobile ? 'mobile' : deviceInfo.isTablet ? 'tablet' : 'desktop'}
+          deviceType={deviceType}
           onClose={() => setShowGuide(false)}
         />
       )}
 
-      <div className="relative">
-        {/* 固定サイズのスライドコンテナ */}
-        <div 
-          className="bg-white rounded-lg shadow-lg border relative"
-          style={{
-            width: slideSize.width,
-            height: slideSize.height,
-            transform: `scale(${zoomLevel / 100})`,
-            transformOrigin: 'center center',
-            transition: 'transform 0.2s ease-out'
-          }}
-        >
-          {/* Fabric.js キャンバス */}
-          <canvas 
-            ref={canvasRef}
-            className="block rounded-lg"
-            style={{
-              width: '100%',
-              height: '100%',
-            }}
-          />
-
-          {/* 空のスライド状態 */}
-          {isEmpty && isReady && (
-            <div className="absolute inset-0 flex items-center justify-center rounded-lg">
-              <EmptyCanvasState
-                onAddText={addText}
-                onAddShape={addShape}
-                onAddImage={addImage}
-                slideNumber={currentSlide}
-                editable={editable}
-              />
-            </div>
-          )}
-          
-          {/* ローディング状態 */}
-          {!isReady && !error && (
-            <CanvasLoadingState 
-              progress={performance.metrics?.fps || 0}
-              message="標準スライドを初期化中..."
-            />
-          )}
-          
-          {/* エラー状態 */}
-          {error && (
-            <CanvasErrorState
-              error={error}
-              onRetry={handleRetry}
-              onReset={handleReset}
-            />
-          )}
+      {/* Shortcuts guide in top-right corner */}
+      {editable && (
+        <div className="absolute top-4 right-4 z-10">
+          <CanvasShortcutsGuide />
         </div>
+      )}
 
-        {/* パフォーマンス情報 */}
+      <div className="relative">
+        {/* Fixed size slide container with context menu */}
+        <CanvasContextMenu
+          selectedObject={selectedObject}
+          onCopy={copySelected}
+          onPaste={paste}
+          onDelete={deleteSelected}
+          onBringToFront={bringToFront}
+          onSendToBack={sendToBack}
+          onDuplicate={duplicate}
+          onRotate={rotateObject}
+          hasClipboard={hasClipboard}
+        >
+          <div 
+            className="bg-white rounded-lg shadow-lg border relative"
+            style={{
+              width: slideSize.width,
+              height: slideSize.height,
+              transform: `scale(${zoomLevel / 100})`,
+              transformOrigin: 'center center',
+              transition: 'transform 0.2s ease-out'
+            }}
+          >
+            {/* Fabric.js Canvas */}
+            <canvas 
+              ref={canvasRef}
+              className="block rounded-lg"
+              style={{
+                width: '100%',
+                height: '100%',
+              }}
+            />
+
+            {/* Empty state overlay */}
+            {isEmpty && isReady && (
+              <div className="absolute inset-0 flex items-center justify-center rounded-lg">
+                <EmptyCanvasState
+                  onAddText={handleAddText}
+                  onAddShape={handleAddShape}
+                  onAddImage={handleAddImage}
+                  slideNumber={currentSlide}
+                  editable={editable}
+                />
+              </div>
+            )}
+            
+            {/* Loading state */}
+            {!isReady && !error && (
+              <CanvasLoadingState 
+                progress={performance.metrics?.fps || 0}
+                message="標準スライドを初期化中..."
+              />
+            )}
+            
+            {/* Error state */}
+            {error && (
+              <CanvasErrorState
+                error={error}
+                onRetry={handleRetry}
+                onReset={handleReset}
+              />
+            )}
+          </div>
+        </CanvasContextMenu>
+
+        {/* Performance information */}
         {enablePerformanceMode && performance.metrics && (
           <div className="absolute bottom-2 left-2 text-xs bg-black bg-opacity-70 text-white px-2 py-1 rounded">
             FPS: {performance.metrics.fps} | Render: {performance.metrics.renderTime}ms
@@ -250,14 +307,14 @@ const OptimizedSlideCanvas = React.memo(({
           </div>
         )}
 
-        {/* 高解像度表示情報 */}
-        {deviceInfo.devicePixelRatio > 2 && (
+        {/* High resolution display info */}
+        {window.devicePixelRatio > 2 && (
           <div className="absolute bottom-2 right-2 text-xs text-gray-500 bg-white bg-opacity-75 px-2 py-1 rounded">
             高解像度最適化済み
           </div>
         )}
 
-        {/* スライドサイズ情報 */}
+        {/* Slide size info */}
         <div className="absolute top-2 right-2 text-xs bg-blue-500 text-white px-2 py-1 rounded opacity-75">
           {slideSize.width}×{slideSize.height} (16:9)
         </div>
