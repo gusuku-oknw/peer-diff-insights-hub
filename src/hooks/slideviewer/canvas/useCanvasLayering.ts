@@ -14,8 +14,8 @@ export const useCanvasLayering = ({ canvas }: UseCanvasLayeringProps) => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
 
-    // Use Fabric.js v6 method
-    activeObject.bringToFront();
+    // Use Canvas methods for layering in Fabric.js v6
+    canvas.bringObjectToFront(activeObject);
     canvas.renderAll();
   }, [canvas]);
 
@@ -25,8 +25,8 @@ export const useCanvasLayering = ({ canvas }: UseCanvasLayeringProps) => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
 
-    // Use Fabric.js v6 method
-    activeObject.sendToBack();
+    // Use Canvas methods for layering in Fabric.js v6
+    canvas.sendObjectToBack(activeObject);
     canvas.renderAll();
   }, [canvas]);
 
@@ -36,8 +36,8 @@ export const useCanvasLayering = ({ canvas }: UseCanvasLayeringProps) => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
 
-    // Use Fabric.js v6 method
-    activeObject.bringForward();
+    // Use Canvas methods for layering in Fabric.js v6
+    canvas.bringObjectForward(activeObject);
     canvas.renderAll();
   }, [canvas]);
 
@@ -47,8 +47,8 @@ export const useCanvasLayering = ({ canvas }: UseCanvasLayeringProps) => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
 
-    // Use Fabric.js v6 method
-    activeObject.sendBackwards();
+    // Use Canvas methods for layering in Fabric.js v6
+    canvas.sendObjectBackwards(activeObject);
     canvas.renderAll();
   }, [canvas]);
 
