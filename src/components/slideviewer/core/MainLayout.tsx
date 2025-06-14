@@ -6,7 +6,6 @@ import LeftSidebar from "../layout/LeftSidebar";
 import RightSidebar from "../layout/RightSidebar";
 import OptimizedSlideCanvas from "@/features/slideviewer/components/canvas/OptimizedSlideCanvas";
 import SlideThumbnails from "../SlideThumbnails";
-import FloatingToggleButton from "../layout/FloatingToggleButton";
 import LeftFloatingButton from "../layout/LeftFloatingButton";
 import RightFloatingButton from "../layout/RightFloatingButton";
 import MainToolbar from "../toolbar/MainToolbar";
@@ -125,13 +124,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             zoom={zoom}
             viewerMode={viewerMode}
             isFullScreen={isFullScreen}
-            leftSidebarOpen={leftSidebarOpen}
             onPreviousSlide={handlePreviousSlide}
             onNextSlide={handleNextSlide}
             onZoomIn={() => handleZoomChange(Math.min(200, zoom + 10))}
             onZoomOut={() => handleZoomChange(Math.max(25, zoom - 10))}
             onResetZoom={() => handleZoomChange(100)}
-            onLeftSidebarToggle={toggleLeftSidebar}
             onFullScreenToggle={handleFullScreenToggle}
             canZoomIn={zoom < 200}
             canZoomOut={zoom > 25}
@@ -143,7 +140,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             zoom={zoom}
             viewerMode={viewerMode}
             isFullScreen={isFullScreen}
-            leftSidebarOpen={leftSidebarOpen}
             showPresenterNotes={showPresenterNotes}
             presentationStartTime={presentationStartTimeNumber}
             displayCount={displayCount}
@@ -152,7 +148,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             onNextSlide={handleNextSlide}
             onZoomChange={handleZoomChange}
             onModeChange={handleModeChange}
-            onLeftSidebarToggle={toggleLeftSidebar}
             onFullScreenToggle={handleFullScreenToggle}
             onShowPresenterNotesToggle={togglePresenterNotes}
             onStartPresentation={handleStartPresentation}
@@ -198,16 +193,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         onToggle={handleToggleRightPanel}
         isMobile={isMobile}
       />
-
-      {/* Floating Toggle Button for Mobile */}
-      {isMobile && (
-        <FloatingToggleButton
-          onToggleLeft={toggleLeftSidebar}
-          onToggleRight={handleToggleRightPanel}
-          leftOpen={leftSidebarOpen}
-          rightOpen={isRightPanelVisible()}
-        />
-      )}
 
       {/* Left Edge Tab - Show when left sidebar is closed and not on mobile */}
       {!isMobile && !leftSidebarOpen && (

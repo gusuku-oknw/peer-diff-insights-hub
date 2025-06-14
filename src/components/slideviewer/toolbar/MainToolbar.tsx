@@ -8,7 +8,6 @@ import {
   ChevronRight, 
   ZoomIn, 
   ZoomOut, 
-  PanelLeft, 
   Maximize
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip.tsx";
@@ -22,7 +21,6 @@ interface MainToolbarProps {
   zoom: number;
   viewerMode: "presentation" | "edit" | "review";
   isFullScreen: boolean;
-  leftSidebarOpen: boolean;
   showPresenterNotes: boolean;
   presentationStartTime: number | null;
   displayCount: number;
@@ -31,7 +29,6 @@ interface MainToolbarProps {
   onNextSlide: () => void;
   onZoomChange: (zoom: number) => void;
   onModeChange: (mode: "presentation" | "edit" | "review") => void;
-  onLeftSidebarToggle: () => void;
   onFullScreenToggle: () => void;
   onShowPresenterNotesToggle: () => void;
   onStartPresentation: () => void;
@@ -44,7 +41,6 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
   zoom,
   viewerMode,
   isFullScreen,
-  leftSidebarOpen,
   showPresenterNotes,
   presentationStartTime,
   displayCount,
@@ -53,7 +49,6 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
   onNextSlide,
   onZoomChange,
   onModeChange,
-  onLeftSidebarToggle,
   onFullScreenToggle,
   onShowPresenterNotesToggle,
   onStartPresentation,
@@ -77,27 +72,8 @@ const MainToolbar: React.FC<MainToolbarProps> = ({
 
   return (
     <div className="modern-toolbar flex items-center justify-between p-2 lg:p-3 bg-white border-b border-gray-200 h-14 lg:h-16 shadow-sm overflow-x-hidden">
-      {/* Left section - Sidebar toggle and navigation */}
+      {/* Left section - Navigation */}
       <div className="flex items-center gap-1 lg:gap-3 flex-shrink-0">
-        {/* Sidebar toggle */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onLeftSidebarToggle}
-              className={`modern-button ${leftSidebarOpen ? "bg-blue-50 text-blue-700 border-blue-200" : "hover:bg-gray-50"} transition-all duration-200 h-8 w-8 p-0 lg:h-auto lg:w-auto lg:p-2`}
-            >
-              <PanelLeft className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>サイドバー表示/非表示</p>
-          </TooltipContent>
-        </Tooltip>
-        
-        <Separator orientation="vertical" className="h-6 lg:h-8 bg-gray-300" />
-        
         {/* Navigation controls */}
         <div className="flex items-center gap-1 lg:gap-2 bg-gray-50 rounded-lg p-1">
           <Tooltip>

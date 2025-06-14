@@ -7,8 +7,7 @@ import {
   ZoomIn, 
   ZoomOut,
   MoreHorizontal,
-  Maximize,
-  PanelLeft
+  Maximize
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,13 +23,11 @@ interface MobileOptimizedToolbarProps {
   zoom: number;
   viewerMode: "presentation" | "edit" | "review";
   isFullScreen: boolean;
-  leftSidebarOpen: boolean;
   onPreviousSlide: () => void;
   onNextSlide: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onResetZoom: () => void;
-  onLeftSidebarToggle: () => void;
   onFullScreenToggle: () => void;
   canZoomIn: boolean;
   canZoomOut: boolean;
@@ -42,13 +39,11 @@ const MobileOptimizedToolbar: React.FC<MobileOptimizedToolbarProps> = ({
   zoom,
   viewerMode,
   isFullScreen,
-  leftSidebarOpen,
   onPreviousSlide,
   onNextSlide,
   onZoomIn,
   onZoomOut,
   onResetZoom,
-  onLeftSidebarToggle,
   onFullScreenToggle,
   canZoomIn,
   canZoomOut
@@ -148,13 +143,6 @@ const MobileOptimizedToolbar: React.FC<MobileOptimizedToolbarProps> = ({
               リセット
             </DropdownMenuItem>
             <Separator />
-            <DropdownMenuItem 
-              onClick={onLeftSidebarToggle}
-              className="flex items-center gap-2"
-            >
-              <PanelLeft className="h-4 w-4" />
-              サイドバー
-            </DropdownMenuItem>
             <DropdownMenuItem 
               onClick={onFullScreenToggle}
               className="flex items-center gap-2"
