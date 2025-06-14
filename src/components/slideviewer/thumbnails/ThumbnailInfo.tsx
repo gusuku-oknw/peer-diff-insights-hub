@@ -26,12 +26,12 @@ const ThumbnailInfo = ({
   const slideTitle = slide.title || `スライド ${slideIndex}`;
 
   return (
-    <div className="p-1.5 text-center bg-white">
-      {/* Smaller slide number badge */}
-      <div className={`inline-flex items-center justify-center rounded-full font-bold mb-1 transition-all duration-300 shadow-sm ${
-        isSmall ? 'w-4 h-4 text-xs' : 
-        isMedium ? 'w-5 h-5 text-xs' : 
-        'w-5 h-5 text-xs'
+    <div className="px-1 py-0.5 text-center bg-white">
+      {/* Much smaller slide number badge */}
+      <div className={`inline-flex items-center justify-center rounded-full font-bold mb-0.5 transition-all duration-300 shadow-sm ${
+        isSmall ? 'w-3 h-3 text-[10px]' : 
+        isMedium ? 'w-4 h-4 text-[10px]' : 
+        'w-4 h-4 text-[10px]'
       } ${
         isActive 
           ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md ring-2 ring-blue-200' 
@@ -40,8 +40,10 @@ const ThumbnailInfo = ({
         {slideIndex}
       </div>
       
-      {/* Smaller title with compact typography */}
-      <p className={`font-medium truncate transition-colors duration-300 text-xs ${
+      {/* Much smaller title with compact typography */}
+      <p className={`font-medium truncate transition-colors duration-300 ${
+        isSmall ? 'text-[10px]' : 'text-[11px]'
+      } ${
         isActive ? 'text-blue-700' : 'text-gray-700 group-hover:text-gray-900'
       }`} title={slideTitle}>
         {slideTitle}
