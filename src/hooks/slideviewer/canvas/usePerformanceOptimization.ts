@@ -1,28 +1,56 @@
-
-import { useEffect } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { Canvas } from 'fabric';
-import { canvasOptimizer } from '@/utils/slideCanvas/canvasOptimizer';
+// Temporary fix - use the correct path
+import { optimizeCanvasPerformance } from '@/utils/slideviewer/canvas/canvasOptimizer';
+
+export interface PerformanceMetrics {
+  renderTime: number;
+  objectCount: number;
+  memoryUsage: number;
+  frameRate: number;
+  lastUpdate: number;
+}
 
 interface UsePerformanceOptimizationProps {
   canvas: Canvas | null;
-  enablePerformanceMode: boolean;
-  isPerformanceGood: boolean;
+  enabled: boolean;
 }
 
-export const usePerformanceOptimization = ({
-  canvas,
-  enablePerformanceMode,
-  isPerformanceGood
-}: UsePerformanceOptimizationProps) => {
+export const usePerformanceOptimization = ({ canvas, enabled }: UsePerformanceOptimizationProps) => {
+  const performanceDataRef = useRef<PerformanceMetrics>({
+    renderTime: 0,
+    objectCount: 0,
+    memoryUsage: 0,
+    frameRate: 0,
+    lastUpdate: 0,
+  });
   
-  useEffect(() => {
-    if (!canvas || !enablePerformanceMode) return;
+  const isEnabledRef = useRef(enabled);
+  isEnabledRef.current = enabled;
+
+  const optimize = useCallback(() => {
+    if (!canvas || !isEnabledRef.current) return;
     
-    if (!isPerformanceGood) {
-      canvasOptimizer.enableHighPerformanceMode();
-      console.log('High performance mode enabled due to low performance');
-    } else {
-      canvasOptimizer.disableHighPerformanceMode();
-    }
-  }, [canvas, isPerformanceGood, enablePerformanceMode]);
+    const start = performance.now();
+    optimizeCanvasPerformance(canvas);
+    const end = performance.now();
+
+    const renderTime = end - start;
+    const objectCount = canvas.getObjects().length;
+    // Basic memory usage approximation (very rough)
+    const memoryUsage = objectCount * 100; // Assumes each object takes ~100 bytes
+    const frameRate = renderTime > 0 ? 1000 / renderTime : 60;
+
+    performanceDataRef.current = {
+      renderTime,
+      objectCount,
+      memoryUsage,
+      frameRate,
+      lastUpdate: Date.now(),
+    };
+  }, [canvas]);
+
+  const performance = useMemo(() => performanceDataRef.current, [performanceDataRef.current.lastUpdate]);
+
+  return { optimize, performance };
 };

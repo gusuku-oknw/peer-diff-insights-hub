@@ -1,3 +1,4 @@
+
 // Unified slide types - consolidating from multiple locations
 export type SlideElementType = 'text' | 'image' | 'shape' | 'rectangle' | 'circle' | 'chart';
 
@@ -31,6 +32,7 @@ export interface Slide {
   id: number;
   title?: string;
   content?: string;
+  html?: string; // Add HTML property for rich content
   notes: string;
   elements: SlideElement[];
   thumbnail?: string;

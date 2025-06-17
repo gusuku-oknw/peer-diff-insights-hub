@@ -18,7 +18,7 @@ export interface BaseSlideStore {
   thumbnails: Record<number, string>;
   
   // Methods
-  generateThumbnails: () => Promise<void>;
+  generateThumbnails: () => Promise<void>; // Make this async
   updateThumbnail: (slideId: number, thumbnail: string) => void;
   setSlides: (slides: Slide[]) => void;
   addSlide: (slide: Slide) => void;

@@ -1,82 +1,58 @@
+import { useMemo } from 'react';
+// Fix the import path
+import { STANDARD_SLIDE_SIZES, type StandardSlideSize } from '@/utils/slideviewer/canvas/standardSlideSizes';
 
-import { useState, useEffect, useMemo } from 'react';
-import { getOptimalSlideSize, getBestFitSlideSize, calculateZoomToFit, SlideSize, SLIDE_ASPECT_RATIOS } from '@/utils/slideCanvas/standardSlideSizes';
-
-interface UseStandardSlideSizeProps {
-  containerWidth?: number;
-  containerHeight?: number;
-  preferredAspectRatio?: number;
-  forceSize?: SlideSize;
-}
-
-export const useStandardSlideSize = ({
-  containerWidth = 0,
-  containerHeight = 0,
-  preferredAspectRatio = SLIDE_ASPECT_RATIOS.widescreen,
-  forceSize
-}: UseStandardSlideSizeProps = {}) => {
-  const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
-
-  // デバイスタイプの判定
-  useEffect(() => {
-    const updateDeviceType = () => {
-      const width = window.innerWidth;
-      if (width < 768) {
-        setDeviceType('mobile');
-      } else if (width < 1024) {
-        setDeviceType('tablet');
-      } else {
-        setDeviceType('desktop');
-      }
-    };
-
-    updateDeviceType();
-    window.addEventListener('resize', updateDeviceType);
-    return () => window.removeEventListener('resize', updateDeviceType);
-  }, []);
-
-  // 標準スライドサイズの決定
-  const slideSize = useMemo((): SlideSize => {
-    // 強制指定がある場合はそれを使用
-    if (forceSize) {
-      return forceSize;
+/**
+ * Calculate the optimal slide size based on container dimensions
+ * @param containerWidth Width of the container
+ * @param containerHeight Height of the container
+ * @param padding Optional padding to apply
+ * @returns Calculated slide dimensions and scale
+ */
+export const useStandardSlideSize = (
+  containerWidth: number,
+  containerHeight: number,
+  padding: number = 20
+) => {
+  return useMemo(() => {
+    // Default to 16:9 aspect ratio if container dimensions are invalid
+    if (!containerWidth || !containerHeight) {
+      return {
+        width: 1600,
+        height: 900,
+        scale: 1,
+        aspectRatio: '16:9',
+        displayWidth: 1600,
+        displayHeight: 900
+      };
     }
 
-    // コンテナサイズが指定されている場合は最適サイズを計算
-    if (containerWidth > 0 && containerHeight > 0) {
-      return getBestFitSlideSize(containerWidth, containerHeight, preferredAspectRatio);
-    }
+    // Find the best standard size that fits the container
+    const availableWidth = containerWidth - padding * 2;
+    const availableHeight = containerHeight - padding * 2;
+    const containerRatio = availableWidth / availableHeight;
 
-    // デフォルトはデバイスタイプベース
-    return getOptimalSlideSize(deviceType);
-  }, [containerWidth, containerHeight, preferredAspectRatio, deviceType, forceSize]);
+    // Find the closest standard size by aspect ratio
+    let bestMatch: StandardSlideSize = STANDARD_SLIDE_SIZES.find(
+      size => Math.abs(size.ratio - containerRatio) < 0.1
+    ) || STANDARD_SLIDE_SIZES[0]; // Default to first size if no match
 
-  // フィット用の推奨ズーム率
-  const recommendedZoom = useMemo(() => {
-    if (containerWidth > 0 && containerHeight > 0) {
-      return calculateZoomToFit(slideSize, containerWidth, containerHeight);
-    }
-    return 100;
-  }, [slideSize, containerWidth, containerHeight]);
+    // Calculate scale to fit the container
+    const scaleX = availableWidth / bestMatch.width;
+    const scaleY = availableHeight / bestMatch.height;
+    const scale = Math.min(scaleX, scaleY);
 
-  // スケール情報
-  const scaleInfo = useMemo(() => {
-    const baseWidth = 1600; // 基準サイズ
-    const baseHeight = 900;
-    
+    // Calculate display dimensions
+    const displayWidth = bestMatch.width * scale;
+    const displayHeight = bestMatch.height * scale;
+
     return {
-      scaleX: slideSize.width / baseWidth,
-      scaleY: slideSize.height / baseHeight,
-      scale: Math.min(slideSize.width / baseWidth, slideSize.height / baseHeight)
+      width: bestMatch.width,
+      height: bestMatch.height,
+      scale,
+      aspectRatio: bestMatch.name,
+      displayWidth,
+      displayHeight
     };
-  }, [slideSize]);
-
-  return {
-    slideSize,
-    deviceType,
-    recommendedZoom,
-    scaleInfo,
-    isFixedSize: true, // 常に固定サイズであることを示す
-    aspectRatio: slideSize.aspectRatio
-  };
+  }, [containerWidth, containerHeight, padding]);
 };

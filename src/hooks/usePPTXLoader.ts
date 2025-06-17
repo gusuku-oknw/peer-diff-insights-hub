@@ -1,81 +1,60 @@
-
 import { useState, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { parsePPTX, convertPPTXToSlides } from '@/utils/pptxParser';
-import { convertPPTXWithPreview, PPTXSlideData } from '@/utils/pptxPreviewConverter';
-import { useSlideStore } from '@/stores/slideStore';
+import JSZip from 'jszip';
+import { parseXMLToSlides } from '@/utils/pptxParser';
+import { convertPPTXToHTML } from '@/utils/pptxToHtml';
+import { useSlideStore } from '@/stores/slide.store'; // Fix import path
+import type { Slide } from '@/types/slide.types';
 
-// Convert pptx-preview slides to application format
-function convertPPTXPreviewToSlides(pptxSlides: PPTXSlideData[]) {
-  return pptxSlides.map((slide, index) => ({
-    id: `slide-${slide.id}`,
-    number: slide.id,
-    title: `スライド ${slide.id}`,
-    content: slide.html,
-    notes: slide.notes || '',
-    thumbnail: '', // Will be generated later
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }));
+interface PPTXLoaderResult {
+  loading: boolean;
+  error: Error | null;
+  loadPPTX: (file: File) => Promise<void>;
 }
 
-export function usePPTXLoader() {
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-  const { importSlidesFromPPTX, setPPTXImported } = useSlideStore();
-  
-  const loadPPTXFile = useCallback(async (file: File) => {
+/**
+ * Custom hook for loading and parsing PPTX files.
+ * @returns {PPTXLoaderResult} An object containing the loading state, error, and a function to load a PPTX file.
+ */
+export const usePPTXLoader = (): PPTXLoaderResult => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const setSlides = useSlideStore(state => state.setSlides);
+  const setPPTXImported = useSlideStore(state => state.setPPTXImported);
+  const importSlidesFromPPTX = useSlideStore(state => state.importSlidesFromPPTX);
+
+  /**
+   * Loads and parses a PPTX file, then updates the slide store.
+   * @param {File} file The PPTX file to load.
+   */
+  const loadPPTX = useCallback(async (file: File) => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setIsLoading(true);
+      const zip = new JSZip();
+      const pptx = await zip.loadAsync(file);
+      const slidesData = await parseXMLToSlides(pptx);
       
-      // Read file as ArrayBuffer
-      const fileBuffer = await file.arrayBuffer();
+      // Convert PPTX content to HTML
+      const htmlSlides = await convertPPTXToHTML(pptx);
       
-      // Try to parse PPTX file with pptx-preview first
-      let slides;
-      try {
-        const pptxResult = await convertPPTXWithPreview(fileBuffer);
-        slides = convertPPTXPreviewToSlides(pptxResult.slides);
-        
-        toast({
-          title: "高品質変換完了",
-          description: `pptx-preview.jsで${slides.length}枚のスライドを読み込みました`,
-        });
-      } catch (previewError) {
-        console.warn('pptx-preview failed, falling back to original parser:', previewError);
-        
-        // Fallback to original parser
-        const pptxSlides = await parsePPTX(fileBuffer);
-        slides = convertPPTXToSlides(pptxSlides);
-        
-        toast({
-          title: "フォールバック変換完了",
-          description: `従来の方式で${slides.length}枚のスライドを読み込みました`,
-        });
-      }
-      
-      // Set the PPTX as imported with the filename
+      // Merge HTML content into slidesData
+      const slidesWithHtml = slidesData.map((slide, index) => ({
+        ...slide,
+        html: htmlSlides[index] || '', // Assign corresponding HTML or empty string
+      }));
+
+      // Update the slide store with the parsed slides and HTML content
+      importSlidesFromPPTX(slidesWithHtml);
       setPPTXImported(true, file.name);
-      
-      // Update store with slides
-      importSlidesFromPPTX(slides);
-      
-      return slides;
-    } catch (error) {
-      console.error('Error loading PPTX file:', error);
-      toast({
-        title: "エラー",
-        description: "PPTXファイルの読み込みに失敗しました",
-        variant: "destructive",
-      });
-      return null;
+    } catch (err: any) {
+      console.error("Error loading or parsing PPTX file:", err);
+      setError(err instanceof Error ? err : new Error(err.message || "Failed to load PPTX file"));
+      setPPTXImported(false);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [toast, importSlidesFromPPTX, setPPTXImported]);
-  
-  return {
-    loadPPTXFile,
-    isLoading
-  };
-}
+  }, [setSlides, setPPTXImported, importSlidesFromPPTX]);
+
+  return { loading, error, loadPPTX };
+};

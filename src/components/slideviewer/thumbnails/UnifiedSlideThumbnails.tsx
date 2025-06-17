@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from "react";
 import { useSlideStore } from "@/stores/slide.store";
 import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
@@ -69,7 +68,7 @@ const UnifiedSlideThumbnails = ({
     id: slide.id,
     title: slide.title || `スライド ${index + 1}`,
     thumbnail: thumbnails[slide.id] || slide.thumbnail,
-    html: slide.html,
+    html: slide.html, // Now properly typed
     elements: slide.elements || [],
     hasComments: (slide as any).comments?.length > 0 || false,
     isReviewed: (slide as any).isReviewed || false
@@ -121,7 +120,7 @@ const UnifiedSlideThumbnails = ({
           <>
             {/* ヘッダー部分 */}
             <SimplifiedSlideThumbnailsHeader
-              slideCount={slides.length}
+              slidesCount={slides.length} // Fix prop name
               userType={userType}
             />
             
