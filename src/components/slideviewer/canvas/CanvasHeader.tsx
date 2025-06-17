@@ -1,6 +1,6 @@
 
 import React from "react";
-import CanvasGuideOverlay from "./CanvasGuideOverlay";
+import CanvasGuideOverlay from "@/features/slideviewer/components/canvas/states/CanvasGuideOverlay";
 import CanvasShortcutsGuide from "./CanvasShortcutsGuide";
 import ZoomControlsEnhanced from "../toolbar/ZoomControlsEnhanced";
 import type { DeviceType } from "@/hooks/slideviewer/canvas/useCanvasState";

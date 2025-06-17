@@ -40,33 +40,38 @@ export const useCanvasConfig = ({
     const baseDisplayWidth = Math.max(320, Math.min(1200, Math.round(displayWidth)));
     const baseDisplayHeight = Math.max(180, Math.min(675, Math.round(displayHeight)));
     
-    // Simplified zoom approach: 25%-100% actual sizing only
-    const zoomFactor = Math.max(0.25, Math.min(1.0, zoomLevel / 100));
+    // Simplified: Always use actual sizing since max zoom is now 100%
+    const useActualSizing = true;
+    const zoomFactor = Math.max(0.25, Math.min(1.0, zoomLevel / 100)); // Ensure zoom is between 25% and 100%
+    
+    // Adjust actual canvas size based on zoom
     const actualWidth = Math.round(baseDisplayWidth * zoomFactor);
     const actualHeight = Math.round(baseDisplayHeight * zoomFactor);
+    const finalDisplayWidth = actualWidth;
+    const finalDisplayHeight = actualHeight;
     
     // Simple 1:1 rendering - no pixel ratio scaling
     const pixelRatio = 1;
     
-    console.log('Canvas config (simplified 25%-100%):', {
+    console.log('Canvas config (max 100% zoom):', {
       container: `${containerWidth}x${containerHeight}`,
       zoomLevel: `${zoomLevel}%`,
-      mode: 'actual sizing only',
+      useActualSizing,
       base: `${baseDisplayWidth}x${baseDisplayHeight}`,
       actual: `${actualWidth}x${actualHeight}`,
-      zoomFactor,
+      display: `${finalDisplayWidth}x${finalDisplayHeight}`,
       pixelRatio
     });
     
     return {
       width: actualWidth,
       height: actualHeight,
-      displayWidth: actualWidth,
-      displayHeight: actualHeight,
+      displayWidth: finalDisplayWidth,
+      displayHeight: finalDisplayHeight,
       pixelRatio,
       actualWidth,
       actualHeight,
-      useActualSizing: true
+      useActualSizing
     };
   }, [containerWidth, containerHeight, zoomLevel]);
 

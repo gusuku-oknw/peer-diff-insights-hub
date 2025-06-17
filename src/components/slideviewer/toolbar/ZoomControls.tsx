@@ -18,12 +18,12 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
       console.warn(`Invalid zoom value: ${zoom}, using default 100%`);
       return 100;
     }
-    return Math.max(25, Math.min(100, Math.round(zoom))); // Limited to 100%
+    return Math.max(25, Math.min(100, Math.round(zoom))); // Changed max from 200 to 100
   }, [zoom]);
   
   console.log(`ZoomControls rendering - input zoom: ${zoom}, computed currentZoom: ${currentZoom}`);
   
-  // Updated zoom presets to remove values above 100%
+  // Updated zoom presets to max 100%
   const zoomPresets = useMemo(() => [
     { label: "25%", value: 25 },
     { label: "50%", value: 50 },
@@ -38,7 +38,7 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
       return;
     }
     
-    const boundedZoom = Math.max(25, Math.min(100, Math.round(newZoom))); // Limited to 100%
+    const boundedZoom = Math.max(25, Math.min(100, Math.round(newZoom))); // Changed max from 200 to 100
     
     // 同じ値の場合はスキップ
     if (boundedZoom === currentZoom) {
@@ -51,7 +51,7 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
   }, [currentZoom, onZoomChange]);
 
   const incrementZoom = useCallback(() => {
-    const newZoom = Math.min(100, currentZoom + 25); // Limited to 100%
+    const newZoom = Math.min(100, currentZoom + 25); // Changed max from 200 to 100
     handleZoomChange(newZoom);
   }, [currentZoom, handleZoomChange]);
 
@@ -84,7 +84,7 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">
-          <DropdownMenuLabel>ズーム設定 (25%-100%)</DropdownMenuLabel>
+          <DropdownMenuLabel>ズーム設定 (最大100%)</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {zoomPresets.map(preset => (
             <DropdownMenuItem 
@@ -104,14 +104,14 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
             <Slider
               value={[currentZoom]}
               onValueChange={handleSliderChange}
-              max={100} // Limited to 100%
+              max={100} // Changed max from 200 to 100
               min={25}
               step={5}
               className="w-full"
             />
             <div className="flex justify-between text-xs text-gray-400 mt-1">
               <span>25%</span>
-              <span>100%</span>
+              <span>100%</span> {/* Changed from 200% to 100% */}
             </div>
           </div>
           <DropdownMenuSeparator />
@@ -135,7 +135,7 @@ const ZoomControls = ({ zoom, onZoomChange }: ZoomControlsProps) => {
         onClick={incrementZoom} 
         variant="ghost" 
         size="icon" 
-        disabled={currentZoom >= 100} // Limited to 100%
+        disabled={currentZoom >= 100} // Changed max from 200 to 100
         className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600 disabled:opacity-50"
       >
         <ZoomIn className="h-4 w-4" />

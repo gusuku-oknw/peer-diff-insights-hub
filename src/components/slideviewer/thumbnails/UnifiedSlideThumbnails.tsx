@@ -3,12 +3,11 @@ import React, { useRef, useEffect, useState } from "react";
 import { useSlideStore } from "@/stores/slide.store";
 import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
 import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
-import { useEnhancedThumbnailUI } from "@/hooks/slideviewer/useEnhancedThumbnailUI";
-import { useThumbnailInit } from "@/hooks/slideviewer/useThumbnailInit";
+import { useEnhancedThumbnailUI } from "@/features/slideviewer/hooks/useEnhancedThumbnailUI";
 import UnifiedSlideThumbnailsContainer from "./UnifiedSlideThumbnailsContainer";
 import SimplifiedSlideThumbnailsContent from "./SimplifiedSlideThumbnailsContent";
-import SimplifiedSlideThumbnailsHeader from "./SimplifiedSlideThumbnailsHeader";
-import type { BaseThumbnailProps } from "@/types/slideviewer/thumbnail.types";
+import SimplifiedThumbnailHeader from "./SimplifiedThumbnailHeader";
+import type { BaseThumbnailProps } from "@/types/slideviewer/thumbnail-common.types";
 
 interface UnifiedSlideThumbnailsProps extends BaseThumbnailProps {
   height: number;
@@ -27,11 +26,8 @@ const UnifiedSlideThumbnails = ({
   containerWidth,
   userType = "enterprise"
 }: UnifiedSlideThumbnailsProps) => {
-  const { slides, thumbnails } = useSlideStore();
+  const { slides } = useSlideStore();
   const containerRef = useRef<HTMLDivElement>(null);
-  
-  // サムネイル初期化
-  const { isGenerating } = useThumbnailInit();
   
   // Enhanced UI state management
   const {
@@ -64,12 +60,11 @@ const UnifiedSlideThumbnails = ({
     handleKeyboardNavigation,
   } = useSmoothScroll({ itemWidth: thumbnailWidth, gap });
   
-  // スライドデータの変換（生成されたサムネイルを含む）
+  // スライドデータの変換
   const slideData = slides.map((slide, index) => ({
     id: slide.id,
     title: slide.title || `スライド ${index + 1}`,
-    thumbnail: thumbnails[slide.id] || slide.thumbnail,
-    html: slide.html,
+    thumbnail: slide.thumbnail,
     elements: slide.elements || [],
     hasComments: (slide as any).comments?.length > 0 || false,
     isReviewed: (slide as any).isReviewed || false
@@ -120,7 +115,7 @@ const UnifiedSlideThumbnails = ({
         {!isCollapsed && (
           <>
             {/* ヘッダー部分 */}
-            <SimplifiedSlideThumbnailsHeader
+            <SimplifiedThumbnailHeader
               slideCount={slides.length}
               userType={userType}
             />

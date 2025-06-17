@@ -20,9 +20,9 @@ const ThumbnailCard = ({
   
   // Improved size classification with better thresholds
   const sizeInfo: ThumbnailSizeInfo = {
-    isSmall: thumbnailWidth < 160,
-    isMedium: thumbnailWidth >= 160 && thumbnailWidth < 220,
-    isLarge: thumbnailWidth >= 220
+    isSmall: thumbnailWidth < 140,
+    isMedium: thumbnailWidth >= 140 && thumbnailWidth < 180,
+    isLarge: thumbnailWidth >= 180
   };
 
   const handlePreview = (slideIndex: number) => {
@@ -44,12 +44,12 @@ const ThumbnailCard = ({
     <Tooltip>
       <TooltipTrigger asChild>
         <div 
-          className={`thumbnail-card cursor-pointer transition-all duration-300 transform hover:scale-102 hover:z-10 ${
+          className={`thumbnail-card cursor-pointer transition-all duration-300 transform hover:scale-105 hover:z-10 ${
             isActive 
-              ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50 shadow-xl scale-102 z-10' 
-              : 'hover:shadow-lg hover:ring-2 hover:ring-blue-200 hover:ring-offset-1'
-          } relative flex-shrink-0 group bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm`} 
-          style={{ width: `${thumbnailWidth}px`, minHeight: `${Math.round(thumbnailWidth * 0.75)}px` }}
+              ? 'ring-2 ring-blue-500 ring-offset-2 bg-blue-50 shadow-xl scale-105 z-10' 
+              : 'hover:shadow-xl hover:ring-2 hover:ring-blue-300 hover:ring-offset-2'
+          } relative flex-shrink-0 group bg-white rounded-xl overflow-hidden`} 
+          style={{ width: `${thumbnailWidth}px` }}
           onClick={() => onClick(slideIndex)}
           role="button"
           tabIndex={0}

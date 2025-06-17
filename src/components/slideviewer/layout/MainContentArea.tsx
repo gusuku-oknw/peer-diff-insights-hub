@@ -1,9 +1,9 @@
 
 import React from "react";
-import UnifiedSlideCanvas from "../canvas/UnifiedSlideCanvas";
-import SlideThumbnails from "../thumbnails/SlideThumbnails";
+import EnhancedSlideDisplay from "../presentation/EnhancedSlideDisplay";
+import SlideThumbnails from "../SlideThumbnails";
 import MainToolbar from "../toolbar/MainToolbar";
-import ResponsiveToolbar from "../toolbar/ResponsiveToolbar";
+import MobileOptimizedToolbar from "../toolbar/MobileOptimizedToolbar";
 
 interface MainContentAreaProps {
   currentSlide: number;
@@ -55,68 +55,61 @@ const MainContentArea: React.FC<MainContentAreaProps> = ({
   onSlideClick,
 }) => {
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col min-w-0">
       {/* Toolbar */}
-      <div className="flex-shrink-0">
-        {isMobile ? (
-          <ResponsiveToolbar
-            currentSlide={currentSlide}
-            totalSlides={totalSlides}
-            zoom={zoom}
-            viewerMode={viewerMode}
-            isFullScreen={isFullScreen}
-            showPresenterNotes={showPresenterNotes}
-            presentationStartTime={presentationStartTimeNumber}
-            displayCount={displayCount}
-            userType={userType}
-            onPreviousSlide={onPreviousSlide}
-            onNextSlide={onNextSlide}
-            onZoomChange={onZoomChange}
-            onModeChange={onModeChange}
-            onFullScreenToggle={onFullScreenToggle}
-            onShowPresenterNotesToggle={onShowPresenterNotesToggle}
-            onStartPresentation={onStartPresentation}
-            onSaveChanges={onSaveChanges}
-          />
-        ) : (
-          <MainToolbar
-            currentSlide={currentSlide}
-            totalSlides={totalSlides}
-            zoom={zoom}
-            viewerMode={viewerMode}
-            isFullScreen={isFullScreen}
-            showPresenterNotes={showPresenterNotes}
-            presentationStartTime={presentationStartTimeNumber}
-            displayCount={displayCount}
-            userType={userType}
-            onPreviousSlide={onPreviousSlide}
-            onNextSlide={onNextSlide}
-            onZoomChange={onZoomChange}
-            onModeChange={onModeChange}
-            onFullScreenToggle={onFullScreenToggle}
-            onShowPresenterNotesToggle={onShowPresenterNotesToggle}
-            onStartPresentation={onStartPresentation}
-            onSaveChanges={onSaveChanges}
-          />
-        )}
-      </div>
+      {isMobile ? (
+        <MobileOptimizedToolbar
+          currentSlide={currentSlide}
+          totalSlides={totalSlides}
+          zoom={zoom}
+          viewerMode={viewerMode}
+          isFullScreen={isFullScreen}
+          onPreviousSlide={onPreviousSlide}
+          onNextSlide={onNextSlide}
+          onZoomIn={() => onZoomChange(Math.min(200, zoom + 10))}
+          onZoomOut={() => onZoomChange(Math.max(25, zoom - 10))}
+          onResetZoom={() => onZoomChange(100)}
+          onFullScreenToggle={onFullScreenToggle}
+          canZoomIn={zoom < 200}
+          canZoomOut={zoom > 25}
+        />
+      ) : (
+        <MainToolbar
+          currentSlide={currentSlide}
+          totalSlides={totalSlides}
+          zoom={zoom}
+          viewerMode={viewerMode}
+          isFullScreen={isFullScreen}
+          showPresenterNotes={showPresenterNotes}
+          presentationStartTime={presentationStartTimeNumber}
+          displayCount={displayCount}
+          userType={userType}
+          onPreviousSlide={onPreviousSlide}
+          onNextSlide={onNextSlide}
+          onZoomChange={onZoomChange}
+          onModeChange={onModeChange}
+          onFullScreenToggle={onFullScreenToggle}
+          onShowPresenterNotesToggle={onShowPresenterNotesToggle}
+          onStartPresentation={onStartPresentation}
+          onSaveChanges={onSaveChanges}
+        />
+      )}
 
-      {/* Slide Canvas */}
-      <div className="flex-1 overflow-hidden p-4">
-        <UnifiedSlideCanvas
+      {/* Enhanced Slide Display */}
+      <div className="flex-1 flex items-center justify-center p-4">
+        <EnhancedSlideDisplay
           currentSlide={currentSlide}
           zoomLevel={zoom}
           editable={viewerMode === "edit"}
           userType={userType}
           containerWidth={canvasWidth}
           containerHeight={canvasHeight}
-          enablePerformanceMode={true}
           onZoomChange={onZoomChange}
         />
       </div>
 
       {/* Thumbnails */}
-      <div className="border-t border-gray-200 bg-white flex-shrink-0 h-[120px] overflow-hidden">
+      <div className="border-t border-gray-200 bg-white">
         <SlideThumbnails
           currentSlide={currentSlide}
           onSlideClick={onSlideClick}

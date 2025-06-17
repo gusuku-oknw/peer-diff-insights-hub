@@ -1,6 +1,6 @@
 import React from "react";
 import CanvasContextMenu from "./CanvasContextMenu";
-import EmptyCanvasState from "./EmptyCanvasState";
+import EmptyCanvasState from "@/features/slideviewer/components/canvas/states/EmptyCanvasState";
 import CanvasLoadingState from "@/components/slideviewer/canvas/CanvasLoadingState";
 import CanvasErrorState from "@/components/slideviewer/canvas/CanvasErrorState";
 

@@ -22,7 +22,9 @@ const UnifiedSlideThumbnailsContainer = ({
   return (
     <div 
       ref={containerRef}
-      className={`relative flex flex-col bg-white border-t border-gray-200 transition-all duration-300 ease-in-out shadow-lg overflow-hidden`}
+      className={`relative flex flex-col bg-white border-t border-gray-200 transition-all duration-300 ease-in-out shadow-lg ${
+        isCollapsed ? 'overflow-hidden' : ''
+      }`}
       style={{ height: `${currentHeight}px` }}
       tabIndex={0}
       role="region"

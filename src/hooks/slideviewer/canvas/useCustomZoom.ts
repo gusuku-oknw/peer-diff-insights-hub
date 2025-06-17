@@ -44,11 +44,13 @@ export const useCustomZoom = ({ canvas, isReady, canvasConfig, zoomLevel }: UseC
         return;
       }
       
-      // Simplified zoom approach: 25%-100% actual sizing only
+      // Simplified: Always use actual sizing (no CSS transforms)
+      // Since max zoom is now 100%, we only need actual canvas size adjustments
       canvasContainer.style.transform = 'scale(1)';
       canvasContainer.style.transformOrigin = 'center center';
       canvasContainer.style.transition = 'transform 0.2s ease-out';
       zoomTransformRef.current = 'scale(1)';
+      
       console.log(`✓ Zoom applied: ${currentZoomLevel}% (actual sizing mode)`);
 
       // Force a re-render to ensure the transform is applied
@@ -80,7 +82,7 @@ export const useCustomZoom = ({ canvas, isReady, canvasConfig, zoomLevel }: UseC
   // Apply zoom when dependencies change
   useEffect(() => {
     if (isReady && canvasConfig && canvas) {
-      console.log(`🔄 Applying actual sizing zoom: ${zoomLevel}% (25%-100% range)`);
+      console.log(`🔄 Applying zoom: ${zoomLevel}% (simplified actual sizing)`);
       applyZoomTransform(zoomLevel);
     }
   }, [zoomLevel, isReady, canvasConfig, canvas, applyZoomTransform]);

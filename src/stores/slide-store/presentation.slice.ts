@@ -47,7 +47,7 @@ export const createPresentationSlice: StateCreator<
   
   setZoom: (zoom: number) => {
     const numericZoom = typeof zoom === 'number' ? zoom : parseFloat(String(zoom));
-    const validZoom = Math.max(25, Math.min(100, isNaN(numericZoom) ? 100 : numericZoom)); // Limited to 100%
+    const validZoom = Math.max(25, Math.min(200, isNaN(numericZoom) ? 100 : numericZoom));
     
     const currentZoom = get().zoom;
     if (currentZoom === validZoom) return;

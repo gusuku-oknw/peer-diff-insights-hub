@@ -9,7 +9,6 @@ import { createPresentationSlice } from './slide-store/presentation.slice';
 import { createLayoutSlice } from './slide-store/layout.slice';
 import { createPPTXImportSlice } from './slide-store/createPPTXImport';
 import { createSampleSlides } from './slide-store/createSampleSlides';
-import { updateSlideThumbnails } from '@/utils/slideviewer/thumbnailGenerator';
 import type { ViewerMode } from '@/types/slide.types';
 
 /**
@@ -39,27 +38,6 @@ const createSlideStore: StateCreator<SlideStore> = (set, get, api) => {
         slide.id === slideId ? { ...slide, ...updates } : slide
       )
     })),
-    
-    // Thumbnail management
-    updateThumbnail: (slideId, thumbnail) => set((state) => ({
-      thumbnails: { ...state.thumbnails, [slideId]: thumbnail }
-    })),
-    generateThumbnails: async () => {
-      const state = get();
-      try {
-        await updateSlideThumbnails(
-          state.slides,
-          (slideId, thumbnail) => {
-            set((currentState) => ({
-              thumbnails: { ...currentState.thumbnails, [slideId]: thumbnail }
-            }));
-          },
-          { width: 320, height: 180, quality: 0.8 }
-        );
-      } catch (error) {
-        console.error('Failed to generate thumbnails:', error);
-      }
-    },
     
     // Navigation slice
     ...createNavigationSlice(set, get, api),

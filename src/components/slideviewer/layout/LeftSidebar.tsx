@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { History, X } from "lucide-react";
 import { useSlideStore } from "@/stores/slide.store";
-import HistorySidebar from "../history/HistorySidebar";
+import HistorySidebar from "../HistorySidebar";
 
 interface LeftSidebarProps {
   isOpen: boolean;
@@ -41,10 +41,7 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
   return (
     <div 
       className={`${isMobile ? 'fixed inset-y-0 left-0 z-50' : 'relative'} bg-white border-r border-gray-200 flex-shrink-0 transition-all duration-300`}
-      style={{ 
-        width: isMobile ? 'min(320px, 85vw)' : `${leftSidebarWidth}px`,
-        maxWidth: isMobile ? '85vw' : 'none'
-      }}
+      style={{ width: isMobile ? '280px' : `${leftSidebarWidth}px` }}
     >
       <HistorySidebar
         currentBranch="main"

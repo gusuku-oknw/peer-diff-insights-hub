@@ -1,9 +1,9 @@
 
-import Navigation from "@/components/common/Navigation";
-import HeroSection from "@/components/common/HeroSection";
-import FeaturesSection from "@/components/common/FeaturesSection";
-import PricingSection from "@/components/common/PricingSection";
-import Footer from "@/components/common/Footer";
+import Navigation from "@/components/Navigation";
+import HeroSection from "@/components/HeroSection";
+import FeaturesSection from "@/components/FeaturesSection";
+import PricingSection from "@/components/PricingSection";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
