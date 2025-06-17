@@ -1,6 +1,7 @@
+
 import React from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PanelHeader from "../core/PanelHeader";
+import PanelHeader from "../core/EnhancedPanelHeader";
 import PanelContent from "../core/PanelContent";
 
 interface TabsContainerProps {

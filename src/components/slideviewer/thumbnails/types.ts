@@ -1,4 +1,10 @@
 
+export interface ThumbnailSizeInfo {
+  isSmall: boolean;
+  isMedium: boolean;
+  isLarge: boolean;
+}
+
 export interface ThumbnailCardProps {
   slide: {
     id: number;
@@ -16,6 +22,7 @@ export interface ThumbnailCardProps {
   thumbnailWidth: number;
   onClick: (slideIndex: number) => void;
   userType: "student" | "enterprise";
+  showHoverActions?: boolean;
 }
 
 export interface ThumbnailImageProps {
@@ -23,12 +30,19 @@ export interface ThumbnailImageProps {
   slideIndex: number;
   title?: string;
   isActive: boolean;
+  sizeInfo?: ThumbnailSizeInfo;
 }
 
 export interface ThumbnailInfoProps {
+  slide: {
+    title?: string;
+    hasComments?: boolean;
+    isReviewed?: boolean;
+  };
   slideIndex: number;
-  title?: string;
   isActive: boolean;
+  sizeInfo: ThumbnailSizeInfo;
+  userType: "student" | "enterprise";
 }
 
 export interface ThumbnailStatusProps {

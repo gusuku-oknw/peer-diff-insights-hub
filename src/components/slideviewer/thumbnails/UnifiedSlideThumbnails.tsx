@@ -36,11 +36,11 @@ const UnifiedSlideThumbnails = ({
   const [showScrollButtons, setShowScrollButtons] = useState(false);
   
   const { slides } = useSlideStore();
-  const { contentAreaDimensions } = useResponsiveLayout();
+  const { mobile, tablet, desktop } = useResponsiveLayout();
   
   // スムーススクロール機能
-  const { scrollToSlide, scrollByDirection } = useSmoothScroll({
-    containerRef: scrollContainerRef,
+  const { scrollToItem, scrollByDirection } = useSmoothScroll({
+    scrollContainerRef,
     slideCount: slides.length,
     currentSlide
   });
@@ -48,8 +48,8 @@ const UnifiedSlideThumbnails = ({
   // レスポンシブなサムネイルサイズの計算
   const { thumbnailWidth, gap, columnsCount } = useMemo(() => {
     const availableWidth = containerWidth - 32; // パディングを考慮
-    const baseWidth = contentAreaDimensions.isMobile ? 120 : 160;
-    const gapSize = contentAreaDimensions.isMobile ? 8 : 12;
+    const baseWidth = mobile ? 120 : 160;
+    const gapSize = mobile ? 8 : 12;
     
     // 利用可能な幅に基づいてカラム数を計算
     const maxColumns = Math.floor((availableWidth + gapSize) / (baseWidth + gapSize));
@@ -63,7 +63,7 @@ const UnifiedSlideThumbnails = ({
       gap: gapSize,
       columnsCount: actualColumns
     };
-  }, [containerWidth, contentAreaDimensions.isMobile, slides.length]);
+  }, [containerWidth, mobile, slides.length]);
 
   // スライドデータの準備
   const slideData = useMemo(() => {
@@ -97,9 +97,9 @@ const UnifiedSlideThumbnails = ({
   // 現在のスライドにスクロール
   useEffect(() => {
     if (currentSlide && scrollContainerRef.current) {
-      scrollToSlide(currentSlide);
+      scrollToItem(currentSlide - 1);
     }
-  }, [currentSlide, scrollToSlide]);
+  }, [currentSlide, scrollToItem]);
 
   const handleSlideClick = useCallback((slideIndex: number) => {
     onSlideClick(slideIndex);
@@ -114,7 +114,7 @@ const UnifiedSlideThumbnails = ({
       style={{ height: `${height}px` }}
     >
       {/* ヘッダー部分（モバイル時のみ表示） */}
-      {contentAreaDimensions.isMobile && (
+      {mobile && (
         <SimplifiedSlideThumbnailsHeader
           slidesCount={slides.length}
           currentSlide={currentSlide}

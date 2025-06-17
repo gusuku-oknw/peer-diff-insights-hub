@@ -1,6 +1,5 @@
-
 import React from "react";
-import LeftSidebarCore from "./left-sidebar-core";
+import LeftSidebarCore from "./LeftSidebarCore";
 
 interface LeftSidebarWrapperProps {
   currentBranch: string;

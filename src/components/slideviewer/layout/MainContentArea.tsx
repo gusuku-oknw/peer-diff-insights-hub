@@ -19,6 +19,7 @@ interface MainContentAreaProps {
   canvasHeight: number;
   contentAreaDimensions: any;
   isMobile: boolean;
+  leftSidebarOpen?: boolean;
   onPreviousSlide: () => void;
   onNextSlide: () => void;
   onZoomChange: (zoom: number) => void;
@@ -28,6 +29,7 @@ interface MainContentAreaProps {
   onStartPresentation: () => void;
   onSaveChanges: () => void;
   onSlideClick: (slideIndex: number) => void;
+  onLeftSidebarToggle?: () => void;
 }
 
 const MainContentArea: React.FC<MainContentAreaProps> = ({
@@ -44,6 +46,7 @@ const MainContentArea: React.FC<MainContentAreaProps> = ({
   canvasHeight,
   contentAreaDimensions,
   isMobile,
+  leftSidebarOpen = false,
   onPreviousSlide,
   onNextSlide,
   onZoomChange,
@@ -53,6 +56,7 @@ const MainContentArea: React.FC<MainContentAreaProps> = ({
   onStartPresentation,
   onSaveChanges,
   onSlideClick,
+  onLeftSidebarToggle = () => {},
 }) => {
   return (
     <div className="flex-1 flex flex-col">
@@ -65,6 +69,7 @@ const MainContentArea: React.FC<MainContentAreaProps> = ({
             zoom={zoom}
             viewerMode={viewerMode}
             isFullScreen={isFullScreen}
+            leftSidebarOpen={leftSidebarOpen}
             showPresenterNotes={showPresenterNotes}
             presentationStartTime={presentationStartTimeNumber}
             displayCount={displayCount}
@@ -73,6 +78,7 @@ const MainContentArea: React.FC<MainContentAreaProps> = ({
             onNextSlide={onNextSlide}
             onZoomChange={onZoomChange}
             onModeChange={onModeChange}
+            onLeftSidebarToggle={onLeftSidebarToggle}
             onFullScreenToggle={onFullScreenToggle}
             onShowPresenterNotesToggle={onShowPresenterNotesToggle}
             onStartPresentation={onStartPresentation}

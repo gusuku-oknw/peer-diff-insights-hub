@@ -14,16 +14,11 @@ import type { ViewerMode } from '@/types/slide.types';
 
 /**
  * Unified slide store with all functionality
- * - Consolidates all slide-related state management
- * - Includes navigation, elements, presentation, layout functionality
- * - Supports persistence and filtering for different user types
  */
 const createSlideStore: StateCreator<SlideStore> = (set, get, api) => {
-  // サンプルスライドを作成
   const sampleSlides = createSampleSlides();
   console.log('Creating unified slide store with sample slides:', sampleSlides.length);
   
-  // 各スライスを結合
   return {
     slides: sampleSlides,
     thumbnails: {},
@@ -64,7 +59,7 @@ const createSlideStore: StateCreator<SlideStore> = (set, get, api) => {
     // Navigation slice
     ...createNavigationSlice(set, get, api),
     
-    // Elements slice
+    // Elements slice  
     ...createElementsSlice(set, get, api),
     
     // Presentation slice
@@ -80,7 +75,6 @@ const createSlideStore: StateCreator<SlideStore> = (set, get, api) => {
 
 /**
  * 学生アカウント用のビューアーモードフィルタリング
- * 編集モードを無効化し、プレゼンテーションモードに変更
  */
 const filterViewerModeForStudent = (mode: ViewerMode): ViewerMode => {
   if (mode === "edit") {
@@ -92,16 +86,12 @@ const filterViewerModeForStudent = (mode: ViewerMode): ViewerMode => {
 
 /**
  * Main slide store with persistence
- * - Consolidates all slide functionality
- * - Includes layout state persistence
- * - Applies student account filtering
  */
 export const useSlideStore = create<SlideStore>()(
   persist(
     createSlideStore,
     {
       name: 'unified-slide-storage',
-      // 永続化する部分状態を指定（レイアウト状態を追加）
       partialize: (state) => ({ 
         slides: state.slides, 
         currentSlide: state.currentSlide,
@@ -110,7 +100,6 @@ export const useSlideStore = create<SlideStore>()(
         showPresenterNotes: state.showPresenterNotes,
         isPPTXImported: state.isPPTXImported,
         pptxFilename: state.pptxFilename,
-        // Layout state
         leftSidebarWidth: state.leftSidebarWidth,
         rightSidebarWidth: state.rightSidebarWidth,
         editSidebarWidth: state.editSidebarWidth,
@@ -118,7 +107,6 @@ export const useSlideStore = create<SlideStore>()(
         leftSidebarOpen: state.leftSidebarOpen,
         rightPanelHidden: state.rightPanelHidden,
       }),
-      // 復元時に学生アカウント用のフィルタリングを適用
       onRehydrateStorage: () => (state, error) => {
         if (error) {
           console.error('Failed to rehydrate unified slide store:', error);
@@ -130,14 +118,8 @@ export const useSlideStore = create<SlideStore>()(
             slides: state.slides?.length || 0,
             viewerMode: state.viewerMode,
             currentSlide: state.currentSlide,
-            layoutState: {
-              leftSidebarWidth: state.leftSidebarWidth,
-              rightSidebarWidth: state.rightSidebarWidth,
-              editSidebarWidth: state.editSidebarWidth,
-            }
           });
           
-          // 学生アカウント用のフィルタリング（将来的にはAuthContextから判定）
           if (state.viewerMode) {
             const filteredMode = filterViewerModeForStudent(state.viewerMode);
             if (filteredMode !== state.viewerMode) {
