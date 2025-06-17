@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { useSlideStore } from '@/stores/slide.store';
 import { useResponsiveLayout } from '@/hooks/slideviewer/useResponsiveLayout';
@@ -40,7 +39,6 @@ const UnifiedSlideThumbnails = ({
   
   // スムーススクロール機能
   const { scrollToItem, scrollByDirection } = useSmoothScroll({
-    scrollContainerRef,
     slideCount: slides.length,
     currentSlide
   });

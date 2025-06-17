@@ -1,6 +1,6 @@
 
 import React from "react";
-import SidePanel from "../../panels/core/SidePanel";
+import SidePanel from "../panels/core/SidePanel";
 import { useSlideStore } from "@/stores/slide.store";
 import { useEnhancedPanelLayout } from "@/hooks/slideviewer/useEnhancedPanelLayout";
 import type { ViewerMode } from "@/types/slide.types";

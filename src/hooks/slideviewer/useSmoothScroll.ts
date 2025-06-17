@@ -1,82 +1,62 @@
+import { useCallback, RefObject } from 'react';
 
-import { useRef, useCallback } from 'react';
-
-interface UseSmoothScrollProps {
-  itemWidth: number;
-  gap: number;
+export interface UseSmoothScrollProps {
+  scrollContainerRef: RefObject<HTMLDivElement>;
+  slideCount: number;
+  currentSlide: number;
 }
 
-export const useSmoothScroll = ({ itemWidth, gap }: UseSmoothScrollProps) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+interface UseSmoothScrollReturn {
+  scrollToItem: (itemIndex: number) => void;
+  scrollByDirection: (direction: 'left' | 'right') => void;
+}
 
-  const scrollToItem = useCallback((index: number) => {
+export const useSmoothScroll = ({ 
+  scrollContainerRef,
+  slideCount, 
+  currentSlide 
+}: UseSmoothScrollProps): UseSmoothScrollReturn => {
+
+  const scrollToItem = useCallback((itemIndex: number) => {
     if (!scrollContainerRef.current) return;
     
     const container = scrollContainerRef.current;
-    const itemElement = container.querySelector(`[data-slide="${index}"]`) as HTMLElement;
+    const items = Array.from(container.children);
     
-    if (itemElement) {
-      const containerRect = container.getBoundingClientRect();
-      const elementRect = itemElement.getBoundingClientRect();
-      
-      const isVisible = 
-        elementRect.left >= containerRect.left && 
-        elementRect.right <= containerRect.right;
-      
-      if (!isVisible) {
-        const scrollLeft = itemElement.offsetLeft - container.offsetWidth / 2 + itemElement.offsetWidth / 2;
-        container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
-      }
-    }
-  }, []);
+    if (itemIndex < 0 || itemIndex >= items.length) return;
+    
+    const targetItem = items[itemIndex] as HTMLElement;
+    const containerWidth = container.clientWidth;
+    const itemLeft = targetItem.offsetLeft;
+    const itemWidth = targetItem.offsetWidth;
+    
+    // Calculate the center position for the item
+    const scrollPosition = itemLeft - (containerWidth / 2) + (itemWidth / 2);
+    
+    container.scrollTo({
+      left: scrollPosition,
+      behavior: 'smooth'
+    });
+  }, [scrollContainerRef]);
 
   const scrollByDirection = useCallback((direction: 'left' | 'right') => {
     if (!scrollContainerRef.current) return;
     
-    const scrollAmount = (itemWidth + gap) * 3;
-    const newScrollLeft = scrollContainerRef.current.scrollLeft + 
-      (direction === 'right' ? scrollAmount : -scrollAmount);
+    const container = scrollContainerRef.current;
+    const scrollAmount = container.clientWidth * 0.8;
     
-    scrollContainerRef.current.scrollTo({
-      left: newScrollLeft,
+    const newScrollPosition = direction === 'left' 
+      ? container.scrollLeft - scrollAmount 
+      : container.scrollLeft + scrollAmount;
+    
+    container.scrollTo({
+      left: newScrollPosition,
       behavior: 'smooth'
     });
-  }, [itemWidth, gap]);
-
-  const handleKeyboardNavigation = useCallback((event: KeyboardEvent, currentSlide: number, totalSlides: number, onSlideClick: (slide: number) => void) => {
-    let newSlide = currentSlide;
-    
-    switch (event.key) {
-      case 'ArrowLeft':
-        event.preventDefault();
-        newSlide = Math.max(1, currentSlide - 1);
-        break;
-      case 'ArrowRight':
-        event.preventDefault();
-        newSlide = Math.min(totalSlides, currentSlide + 1);
-        break;
-      case 'Home':
-        event.preventDefault();
-        newSlide = 1;
-        break;
-      case 'End':
-        event.preventDefault();
-        newSlide = totalSlides;
-        break;
-      default:
-        return;
-    }
-    
-    if (newSlide !== currentSlide) {
-      onSlideClick(newSlide);
-      scrollToItem(newSlide);
-    }
-  }, [scrollToItem]);
+  }, [scrollContainerRef]);
 
   return {
-    scrollContainerRef,
     scrollToItem,
-    scrollByDirection,
-    handleKeyboardNavigation,
+    scrollByDirection
   };
 };

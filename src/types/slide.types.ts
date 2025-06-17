@@ -28,6 +28,11 @@ export interface SlideComment {
 
 export type SlideStatus = 'draft' | 'review' | 'approved' | 'archived';
 
+export interface SlideBackground {
+  type: 'color' | 'gradient' | 'image';
+  value: string;
+}
+
 export interface Slide {
   id: number;
   title?: string;
@@ -36,6 +41,7 @@ export interface Slide {
   notes: string;
   elements: SlideElement[];
   thumbnail?: string;
+  background?: SlideBackground;
   createdAt?: string;
   updatedAt?: string;
   // New properties for enhanced UI/UX
