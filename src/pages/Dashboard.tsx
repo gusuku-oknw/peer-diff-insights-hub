@@ -1,7 +1,7 @@
 
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import Navigation from "@/components/common/Navigation";
+import Footer from "@/components/common/Footer";
 import StudentDashboard from "@/components/dashboard/StudentDashboard";
 import BusinessDashboard from "@/components/dashboard/BusinessDashboard";
 import { Link } from "react-router-dom";

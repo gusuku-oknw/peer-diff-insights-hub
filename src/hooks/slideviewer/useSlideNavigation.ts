@@ -1,6 +1,6 @@
 
 import { useCallback } from "react";
-import { useSlideStore } from "@/stores/slideStore";
+import { useSlideStore } from "@/stores/slide.store";
 import { useToast } from "@/hooks/use-toast";
 
 interface UseSlideNavigationProps {

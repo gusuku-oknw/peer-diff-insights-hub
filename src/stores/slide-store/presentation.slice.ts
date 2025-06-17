@@ -18,7 +18,10 @@ export interface PresentationSlice {
   setIsFullScreen: (isFullScreen: boolean) => void;
   togglePresenterNotes: () => void;
   toggleLeftSidebar: () => void;
+  toggleFullScreen: () => void;
+  setLeftSidebarOpen: (open: boolean) => void;
   setPresentationStartTime: (time: number | null) => void;
+  startPresentation: () => void;
   setDisplayCount: (count: number) => void;
   generateThumbnails: () => void;
 }
@@ -29,7 +32,7 @@ export const createPresentationSlice: StateCreator<
   [],
   PresentationSlice
 > = (set, get) => ({
-  viewerMode: "presentation",
+  viewerMode: "presentation", // 学生アカウントのデフォルト
   zoom: 100,
   isFullScreen: false,
   showPresenterNotes: false,
@@ -38,13 +41,19 @@ export const createPresentationSlice: StateCreator<
   displayCount: 1,
   
   setViewerMode: (mode: ViewerMode) => {
+    console.log('PresentationSlice: Setting viewer mode to', mode);
     set({ viewerMode: mode });
   },
   
   setZoom: (zoom: number) => {
-    if (zoom >= 25 && zoom <= 200) {
-      set({ zoom });
-    }
+    const numericZoom = typeof zoom === 'number' ? zoom : parseFloat(String(zoom));
+    const validZoom = Math.max(25, Math.min(100, isNaN(numericZoom) ? 100 : numericZoom)); // Limited to 100%
+    
+    const currentZoom = get().zoom;
+    if (currentZoom === validZoom) return;
+    
+    console.log(`Setting zoom to ${validZoom}% (input: ${zoom}, current: ${currentZoom})`);
+    set({ zoom: validZoom });
   },
   
   setIsFullScreen: (isFullScreen: boolean) => {
@@ -59,8 +68,20 @@ export const createPresentationSlice: StateCreator<
     set((state) => ({ leftSidebarOpen: !state.leftSidebarOpen }));
   },
   
+  toggleFullScreen: () => {
+    set((state) => ({ isFullScreen: !state.isFullScreen }));
+  },
+  
+  setLeftSidebarOpen: (open: boolean) => {
+    set({ leftSidebarOpen: open });
+  },
+  
   setPresentationStartTime: (time: number | null) => {
     set({ presentationStartTime: time });
+  },
+  
+  startPresentation: () => {
+    set({ presentationStartTime: Date.now() });
   },
   
   setDisplayCount: (count: number) => {

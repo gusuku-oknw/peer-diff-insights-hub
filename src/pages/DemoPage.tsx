@@ -1,27 +1,24 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, Building, GraduationCap, Play, FileText, ArrowRight, Monitor, Edit3, MessageSquare } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { Check, Building, GraduationCap, Play, FileText, ArrowRight, Monitor, Edit3, MessageSquare, Upload } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
-
+import { PPTXUploader } from "@/components/pptx/PPTXUploader";
 const DemoPage = () => {
   const [activeTab, setActiveTab] = useState<"business" | "student">("business");
-
   const handleStartTrial = () => {
     toast({
       title: "無料トライアル登録",
       description: `${activeTab === "business" ? "企業" : "学生"}アカウントの登録を開始します。`,
-      duration: 3000,
+      duration: 3000
     });
   };
-
-  return (
-    <div className="pt-20 pb-16 min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+  return <div className="pt-20 pb-16 min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">
-            <span className="gradient-primary bg-clip-text text-transparent inline-block">
+            <span className="gradient-primary bg-clip-text inline-block my-0 text-slate-950">
               PeerDiffX
             </span>
             を体験する
@@ -39,10 +36,26 @@ const DemoPage = () => {
           </Link>
         </div>
 
+        {/* PPTX変換セクション */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-center mb-8">PPTX → HTML 変換ツール</h2>
+          <PPTXUploader />
+        </div>
+
         {/* 機能デモセクション */}
         <div className="mb-12">
           <h2 className="text-2xl font-bold text-center mb-8">主要機能のデモ</h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-4 gap-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+              <div className="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                <Upload className="h-6 w-6 text-orange-600" />
+              </div>
+              <h3 className="font-bold mb-2">PPTX変換</h3>
+              <p className="text-gray-600 text-sm mb-4">PowerPointファイルをHTMLに変換してプレビュー</p>
+              <Button variant="outline" size="sm" className="w-full" onClick={() => document.querySelector('.pptx-uploader')?.scrollIntoView({ behavior: 'smooth' })}>
+                試してみる
+              </Button>
+            </div>
             <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
               <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                 <Monitor className="h-6 w-6 text-blue-600" />
@@ -84,11 +97,7 @@ const DemoPage = () => {
           </div>
         </div>
 
-        <Tabs 
-          defaultValue="business" 
-          className="max-w-4xl mx-auto mb-12"
-          onValueChange={(value) => setActiveTab(value as "business" | "student")}
-        >
+        <Tabs defaultValue="business" className="max-w-4xl mx-auto mb-12" onValueChange={value => setActiveTab(value as "business" | "student")}>
           <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto">
             <TabsTrigger value="business" className="flex items-center gap-2">
               <Building className="h-4 w-4" />
@@ -136,11 +145,7 @@ const DemoPage = () => {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
-                  <Button 
-                    variant="outline"
-                    className="w-full" 
-                    onClick={handleStartTrial}
-                  >
+                  <Button variant="outline" className="w-full" onClick={handleStartTrial}>
                     企業として無料トライアルを開始
                   </Button>
                 </div>
@@ -211,11 +216,7 @@ const DemoPage = () => {
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
-                  <Button 
-                    variant="outline"
-                    className="w-full" 
-                    onClick={handleStartTrial}
-                  >
+                  <Button variant="outline" className="w-full" onClick={handleStartTrial}>
                     学生として無料トライアルを開始
                   </Button>
                 </div>
@@ -275,8 +276,6 @@ const DemoPage = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default DemoPage;

@@ -1,8 +1,9 @@
 
-import type { Slide } from '@/types/slide-viewer/slide.types';
+import type { Slide } from '@/types/slide.types';
 import type { NavigationSlice } from './navigation.slice';
 import type { PresentationSlice } from './presentation.slice';
 import type { ElementsSlice } from './elements.slice';
+import type { LayoutSlice } from './layout.slice';
 
 export interface PPTXImportSlice {
   isPPTXImported: boolean;
@@ -17,7 +18,8 @@ export interface BaseSlideStore {
   thumbnails: Record<number, string>;
   
   // Methods
-  generateThumbnails: () => void;
+  generateThumbnails: () => Promise<void>;
+  updateThumbnail: (slideId: number, thumbnail: string) => void;
   setSlides: (slides: Slide[]) => void;
   addSlide: (slide: Slide) => void;
   removeSlide: (slideId: number) => void;
@@ -28,4 +30,5 @@ export type SlideStore = BaseSlideStore &
   NavigationSlice & 
   PresentationSlice & 
   ElementsSlice &
-  PPTXImportSlice;
+  PPTXImportSlice &
+  LayoutSlice;

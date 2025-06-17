@@ -1,55 +1,59 @@
 
 import React from "react";
-import BranchSelector from "@/components/slideviewer/history/BranchSelector";
-import CommitHistory from "@/components/slideviewer/history/CommitHistory";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
+import { History, X } from "lucide-react";
+import { useSlideStore } from "@/stores/slide.store";
+import HistorySidebar from "../history/HistorySidebar";
 
 interface LeftSidebarProps {
-  leftSidebarOpen: boolean;
-  currentBranch: string;
-  branches: string[];
-  commitHistory: any[];
-  onBranchChange: (branch: string) => void;
+  isOpen: boolean;
+  onToggle: () => void;
+  isMobile: boolean;
 }
 
 const LeftSidebar: React.FC<LeftSidebarProps> = ({
-  leftSidebarOpen,
-  currentBranch,
-  branches,
-  commitHistory,
-  onBranchChange
+  isOpen,
+  onToggle,
+  isMobile
 }) => {
-  const isMobile = useIsMobile();
+  const { leftSidebarWidth } = useSlideStore();
+
+  if (!isOpen) return null;
+
+  const mockBranches = ["main", "feature/new-slides", "hotfix/typos"];
+  const mockCommitHistory = [
+    {
+      id: "a1b2c3d",
+      message: "スライド5-7の内容を更新",
+      author: "田中太郎",
+      date: "2025年1月14日 15:30",
+      reviewStatus: "approved" as const
+    },
+    {
+      id: "e4f5g6h",
+      message: "デザインテンプレートを追加",
+      author: "佐藤花子",
+      date: "2025年1月14日 10:15",
+      reviewStatus: "reviewing" as const
+    }
+  ];
 
   return (
-    <aside 
-      className={`
-        w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 
-        transition-transform duration-300 ease-in-out
-        ${leftSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        ${isMobile ? 'fixed top-0 left-0 h-full z-40' : 'absolute top-0 left-0 h-full z-10'}
-      `}
+    <div 
+      className={`${isMobile ? 'fixed inset-y-0 left-0 z-50' : 'relative'} bg-white border-r border-gray-200 flex-shrink-0 transition-all duration-300`}
+      style={{ 
+        width: isMobile ? 'min(320px, 85vw)' : `${leftSidebarWidth}px`,
+        maxWidth: isMobile ? '85vw' : 'none'
+      }}
     >
-      <div className="h-full flex flex-col">
-        <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-800">スライド管理</h2>
-        </div>
-
-        {/* Branch Selector */}
-        <div className="px-4 mb-4">
-          <BranchSelector
-            currentBranch={currentBranch}
-            branches={branches}
-            onBranchChange={onBranchChange}
-          />
-        </div>
-
-        {/* Commit History */}
-        <div className="flex-grow p-4">
-          <CommitHistory commitHistory={commitHistory} />
-        </div>
-      </div>
-    </aside>
+      <HistorySidebar
+        currentBranch="main"
+        branches={mockBranches}
+        commitHistory={mockCommitHistory}
+        onBranchChange={(branch) => console.log('Branch changed:', branch)}
+        onClose={onToggle}
+      />
+    </div>
   );
 };
 
