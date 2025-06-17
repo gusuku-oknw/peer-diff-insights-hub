@@ -1,104 +1,67 @@
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Canvas } from 'fabric';
 
 interface PerformanceMetrics {
-  renderTime: number;
-  memoryUsage: number;
   fps: number;
-  canvasOperations: number;
+  renderTime: number;
+  memoryUsage?: number;
 }
 
 interface UsePerformanceMonitorProps {
-  enabled?: boolean;
-  sampleInterval?: number;
+  canvas: Canvas | null;
+  enabled: boolean;
 }
 
 export const usePerformanceMonitor = ({
-  enabled = true,
-  sampleInterval = 1000
-}: UsePerformanceMonitorProps = {}) => {
-  const [metrics, setMetrics] = useState<PerformanceMetrics>({
-    renderTime: 0,
-    memoryUsage: 0,
-    fps: 0,
-    canvasOperations: 0
-  });
-  
-  const frameCount = useRef(0);
-  const lastTime = useRef(performance.now());
-  const renderStartTime = useRef<number>(0);
-  const canvasOpsCount = useRef(0);
-  
-  // FPS計測
-  const measureFPS = useCallback(() => {
-    const now = performance.now();
-    frameCount.current++;
-    
-    if (now - lastTime.current >= sampleInterval) {
-      const fps = (frameCount.current * 1000) / (now - lastTime.current);
-      setMetrics(prev => ({ ...prev, fps: Math.round(fps) }));
-      frameCount.current = 0;
-      lastTime.current = now;
-    }
-    
-    if (enabled) {
-      requestAnimationFrame(measureFPS);
-    }
-  }, [enabled, sampleInterval]);
-  
-  // レンダリング時間計測
-  const startRenderMeasure = useCallback(() => {
-    renderStartTime.current = performance.now();
-  }, []);
-  
-  const endRenderMeasure = useCallback(() => {
-    if (renderStartTime.current > 0) {
-      const renderTime = performance.now() - renderStartTime.current;
-      setMetrics(prev => ({ ...prev, renderTime: Math.round(renderTime) }));
-      renderStartTime.current = 0;
-    }
-  }, []);
-  
-  // キャンバス操作カウント
-  const incrementCanvasOps = useCallback(() => {
-    canvasOpsCount.current++;
-    setMetrics(prev => ({ ...prev, canvasOperations: canvasOpsCount.current }));
-  }, []);
-  
-  // メモリ使用量計測
-  const measureMemory = useCallback(() => {
-    if ('memory' in performance) {
-      const memory = (performance as any).memory;
-      const usedMB = Math.round(memory.usedJSHeapSize / 1024 / 1024);
-      setMetrics(prev => ({ ...prev, memoryUsage: usedMB }));
-    }
-  }, []);
-  
+  canvas,
+  enabled
+}: UsePerformanceMonitorProps) => {
+  const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
+  const [isPerformanceGood, setIsPerformanceGood] = useState(true);
+  const frameCountRef = useRef(0);
+  const lastTimeRef = useRef(performance.now());
+
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !canvas) return;
+
+    let animationId: number;
     
-    measureFPS();
-    
-    const memoryInterval = setInterval(measureMemory, sampleInterval);
-    
-    return () => {
-      clearInterval(memoryInterval);
+    const measurePerformance = () => {
+      const now = performance.now();
+      frameCountRef.current++;
+      
+      if (now - lastTimeRef.current >= 1000) {
+        const fps = Math.round((frameCountRef.current * 1000) / (now - lastTimeRef.current));
+        const renderTime = canvas.getContext().canvas ? 16.67 : 0; // Approximate
+        
+        const newMetrics: PerformanceMetrics = {
+          fps,
+          renderTime,
+          memoryUsage: (performance as any).memory?.usedJSHeapSize
+        };
+        
+        setMetrics(newMetrics);
+        setIsPerformanceGood(fps >= 30); // Consider 30fps as good performance
+        
+        frameCountRef.current = 0;
+        lastTimeRef.current = now;
+      }
+      
+      animationId = requestAnimationFrame(measurePerformance);
     };
-  }, [enabled, measureFPS, measureMemory, sampleInterval]);
-  
-  const resetMetrics = useCallback(() => {
-    frameCount.current = 0;
-    canvasOpsCount.current = 0;
-    lastTime.current = performance.now();
-    setMetrics({ renderTime: 0, memoryUsage: 0, fps: 0, canvasOperations: 0 });
-  }, []);
-  
+
+    measurePerformance();
+
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  }, [canvas, enabled]);
+
   return {
-    metrics,
-    startRenderMeasure,
-    endRenderMeasure,
-    incrementCanvasOps,
-    resetMetrics,
-    isPerformanceGood: metrics.fps >= 30 && metrics.renderTime < 16
+    performance: { metrics },
+    isPerformanceGood
   };
 };

@@ -1,111 +1,54 @@
 
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { Canvas } from 'fabric';
-import { canvasOptimizer } from '@/utils/slideCanvas/canvasOptimizer';
 
 interface UseCanvasInitializationProps {
-  canvasSize: { width: number; height: number; scale: number };
+  canvasRef: React.RefObject<HTMLCanvasElement>;
+  fabricCanvasRef: React.MutableRefObject<Canvas | null>;
   editable: boolean;
-  enablePerformanceMode: boolean;
-  isPerformanceGood: boolean;
-  setupCanvasEvents: (canvas: Canvas) => (() => void) | undefined;
-  startRenderMeasure: () => void;
-  endRenderMeasure: () => void;
+  onReady: () => void;
+  onError: (error: string) => void;
 }
 
 export const useCanvasInitialization = ({
-  canvasSize,
+  canvasRef,
+  fabricCanvasRef,
   editable,
-  enablePerformanceMode,
-  isPerformanceGood,
-  setupCanvasEvents,
-  startRenderMeasure,
-  endRenderMeasure
+  onReady,
+  onError
 }: UseCanvasInitializationProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricCanvasRef = useRef<Canvas | null>(null);
-  const [isReady, setIsReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const initializationRef = useRef<boolean>(false);
-
-  // キャンバス初期化
-  useEffect(() => {
-    if (!canvasRef.current || initializationRef.current) return;
+  
+  const initializeCanvas = useCallback(() => {
+    if (!canvasRef.current) {
+      onError('Canvas element not found');
+      return;
+    }
     
     try {
-      startRenderMeasure();
-      
-      if (fabricCanvasRef.current) {
-        fabricCanvasRef.current.dispose();
-        fabricCanvasRef.current = null;
-      }
-      
       const canvas = new Canvas(canvasRef.current, {
-        width: canvasSize.width,
-        height: canvasSize.height,
+        width: 800,
+        height: 600,
         backgroundColor: '#ffffff',
         selection: editable,
-        preserveObjectStacking: true,
-        selectionBorderColor: '#2563eb',
-        selectionLineWidth: 2,
-        controlsAboveOverlay: true,
         allowTouchScrolling: false,
-        renderOnAddRemove: false,
-        skipTargetFind: false,
-        imageSmoothingEnabled: true,
+        enableRetinaScaling: true,
+        renderOnAddRemove: true,
+        skipTargetFind: !editable,
+        interactive: editable,
+        moveCursor: editable ? 'move' : 'default',
+        hoverCursor: editable ? 'move' : 'default',
+        defaultCursor: editable ? 'default' : 'default'
       });
-      
-      canvasOptimizer.setCanvas(canvas);
-      
-      if (enablePerformanceMode && !isPerformanceGood) {
-        canvasOptimizer.enableHighPerformanceMode();
-      }
       
       fabricCanvasRef.current = canvas;
-      initializationRef.current = true;
-      setIsReady(true);
-      setError(null);
+      onReady();
       
-      endRenderMeasure();
-      
-      console.log('Canvas initialized:', {
-        size: canvasSize,
-        scale: canvasSize.scale,
-        editable,
-        performanceMode: enablePerformanceMode
-      });
-      
-      const cleanup = setupCanvasEvents(canvas);
-      return cleanup;
-      
+      console.log('Canvas initialized successfully');
     } catch (err) {
       console.error('Canvas initialization failed:', err);
-      setError('キャンバスの初期化に失敗しました');
-      setIsReady(false);
-      initializationRef.current = false;
-      endRenderMeasure();
+      onError('キャンバスの初期化に失敗しました');
     }
-  }, [canvasSize, editable, setupCanvasEvents, startRenderMeasure, endRenderMeasure, enablePerformanceMode, isPerformanceGood]);
-
-  // クリーンアップ
-  useEffect(() => {
-    return () => {
-      if (fabricCanvasRef.current) {
-        try {
-          fabricCanvasRef.current.dispose();
-        } catch (err) {
-          console.error('Canvas disposal error:', err);
-        }
-        fabricCanvasRef.current = null;
-        initializationRef.current = false;
-      }
-    };
-  }, []);
-
-  return {
-    canvasRef,
-    fabricCanvasRef,
-    isReady,
-    error
-  };
+  }, [canvasRef, fabricCanvasRef, editable, onReady, onError]);
+  
+  return { initializeCanvas };
 };

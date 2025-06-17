@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/common/use-mobile";
 import ModeSelector from "@/components/slideviewer/toolbar/ModeSelector";
 import ModeSpecificActions from "@/components/slideviewer/toolbar/ModeSpecificActions";
 import ZoomControlsEnhanced from "@/components/slideviewer/toolbar/ZoomControlsEnhanced";

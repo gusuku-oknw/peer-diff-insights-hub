@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { GitBranch, Clock, User, CheckCircle, AlertCircle } from "lucide-react";
+import { GitBranch, Clock, User, CheckCircle, AlertCircle, X } from "lucide-react";
 
 interface CommitHistoryItem {
   id: string;
@@ -43,16 +43,21 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({
     <div className="h-full flex flex-col">
       <div className="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-800">履歴</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-800 flex items-center">
+            <GitBranch className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-blue-600" />
+            履歴
+          </h2>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={onClose}
-            className="h-8 w-8 p-0"
+            className="h-10 w-10 sm:h-9 sm:w-9 p-0 hover:bg-red-50 hover:border-red-200 transition-all duration-200 shadow-sm hover:shadow-md bg-white touch-manipulation"
+            title="履歴パネルを閉じる (ESC)"
           >
-            ×
+            <X className="h-5 w-5 sm:h-4 sm:w-4 text-gray-600 hover:text-red-600 transition-colors" />
           </Button>
         </div>
+        <p className="text-xs sm:text-sm text-gray-600 mt-1">プロジェクトのバージョン管理</p>
       </div>
       
       <div className="flex-1 overflow-y-auto p-4">

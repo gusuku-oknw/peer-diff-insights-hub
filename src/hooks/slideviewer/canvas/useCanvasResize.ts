@@ -1,50 +1,38 @@
 
 import { useEffect } from 'react';
 import { Canvas } from 'fabric';
-import { canvasOptimizer } from '@/utils/slideCanvas/canvasOptimizer';
 
 interface UseCanvasResizeProps {
   canvas: Canvas | null;
-  isReady: boolean;
-  canvasSize: { width: number; height: number; scale: number };
-  startRenderMeasure: () => void;
-  endRenderMeasure: () => void;
+  containerWidth: number;
+  containerHeight: number;
 }
 
 export const useCanvasResize = ({
   canvas,
-  isReady,
-  canvasSize,
-  startRenderMeasure,
-  endRenderMeasure
+  containerWidth,
+  containerHeight
 }: UseCanvasResizeProps) => {
   
   useEffect(() => {
-    if (!canvas || !isReady) return;
+    if (!canvas || containerWidth <= 0 || containerHeight <= 0) return;
     
-    const timeoutId = setTimeout(() => {
-      try {
-        startRenderMeasure();
-        
-        if (canvas.upperCanvasEl && canvas.lowerCanvasEl) {
-          canvasOptimizer.queueRender(() => {
-            canvas.setDimensions({
-              width: canvasSize.width,
-              height: canvasSize.height
-            });
-          });
-        } else {
-          console.warn('Canvas elements not properly initialized, skipping resize');
-        }
-        
-        endRenderMeasure();
-        console.log('Canvas resized:', canvasSize);
-      } catch (err) {
-        console.error('Canvas resize error:', err);
-        endRenderMeasure();
-      }
-    }, 100);
+    const aspectRatio = 16 / 9;
+    let canvasWidth = containerWidth;
+    let canvasHeight = containerWidth / aspectRatio;
     
-    return () => clearTimeout(timeoutId);
-  }, [canvas, canvasSize, isReady, startRenderMeasure, endRenderMeasure]);
+    if (canvasHeight > containerHeight) {
+      canvasHeight = containerHeight;
+      canvasWidth = containerHeight * aspectRatio;
+    }
+    
+    canvas.setDimensions({
+      width: canvasWidth,
+      height: canvasHeight
+    });
+    
+    canvas.renderAll();
+    
+    console.log(`Canvas resized to: ${canvasWidth}x${canvasHeight}`);
+  }, [canvas, containerWidth, containerHeight]);
 };

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 interface UseEnhancedZoomProps {
   initialZoom?: number;
@@ -11,147 +11,94 @@ interface UseEnhancedZoomProps {
 export const useEnhancedZoom = ({
   initialZoom = 100,
   minZoom = 25,
-  maxZoom = 200,
+  maxZoom = 300,
   onZoomChange
 }: UseEnhancedZoomProps = {}) => {
-  const [zoom, setZoom] = useState(initialZoom);
+  const [zoom, setZoomInternal] = useState(initialZoom);
   const [isPinching, setIsPinching] = useState(false);
-  const lastPinchDistance = useRef<number>(0);
+  const lastTouchDistance = useRef<number>(0);
   const zoomCenter = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  const handleZoomChange = useCallback((newZoom: number, center?: { x: number; y: number }) => {
-    const boundedZoom = Math.max(minZoom, Math.min(maxZoom, Math.round(newZoom)));
-    
-    if (boundedZoom !== zoom) {
-      setZoom(boundedZoom);
-      if (center) {
-        zoomCenter.current = center;
-      }
-      onZoomChange?.(boundedZoom);
-      
-      console.log('Zoom changed:', {
-        from: zoom,
-        to: boundedZoom,
-        center: center || zoomCenter.current
-      });
-    }
-  }, [zoom, minZoom, maxZoom, onZoomChange]);
+  const setZoom = useCallback((newZoom: number) => {
+    const clampedZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+    setZoomInternal(clampedZoom);
+    onZoomChange?.(clampedZoom);
+  }, [minZoom, maxZoom, onZoomChange]);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        switch (e.key) {
-          case '=':
-          case '+':
-            e.preventDefault();
-            handleZoomChange(zoom + 25);
-            break;
-          case '-':
-            e.preventDefault();
-            handleZoomChange(zoom - 25);
-            break;
-          case '0':
-            e.preventDefault();
-            handleZoomChange(100);
-            break;
-        }
-      }
-    };
+  const zoomIn = useCallback(() => {
+    setZoom(zoom * 1.2);
+  }, [zoom, setZoom]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [zoom, handleZoomChange]);
+  const zoomOut = useCallback(() => {
+    setZoom(zoom / 1.2);
+  }, [zoom, setZoom]);
 
-  // Mouse wheel zoom
+  const resetZoom = useCallback(() => {
+    setZoom(100);
+  }, [setZoom]);
+
   const handleWheelZoom = useCallback((e: WheelEvent) => {
-    if (e.ctrlKey || e.metaKey) {
-      e.preventDefault();
-      const delta = e.deltaY > 0 ? -10 : 10;
-      const rect = (e.target as Element)?.getBoundingClientRect();
-      const center = rect ? {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      } : undefined;
-      
-      handleZoomChange(zoom + delta, center);
-    }
-  }, [zoom, handleZoomChange]);
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    setZoom(zoom * delta);
+  }, [zoom, setZoom]);
 
-  // Pinch zoom for touch devices
+  const getTouchDistance = (touches: TouchList) => {
+    if (touches.length < 2) return 0;
+    const touch1 = touches[0];
+    const touch2 = touches[1];
+    return Math.sqrt(
+      Math.pow(touch2.clientX - touch1.clientX, 2) +
+      Math.pow(touch2.clientY - touch1.clientY, 2)
+    );
+  };
+
   const handleTouchStart = useCallback((e: TouchEvent) => {
     if (e.touches.length === 2) {
       setIsPinching(true);
+      lastTouchDistance.current = getTouchDistance(e.touches);
+      
+      // Calculate center point for zoom
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
-      const distance = Math.sqrt(
-        Math.pow(touch2.clientX - touch1.clientX, 2) +
-        Math.pow(touch2.clientY - touch1.clientY, 2)
-      );
-      lastPinchDistance.current = distance;
-      
-      // Calculate pinch center
-      const centerX = (touch1.clientX + touch2.clientX) / 2;
-      const centerY = (touch1.clientY + touch2.clientY) / 2;
-      const rect = (e.target as Element)?.getBoundingClientRect();
-      
-      if (rect) {
-        zoomCenter.current = {
-          x: centerX - rect.left,
-          y: centerY - rect.top
-        };
-      }
+      zoomCenter.current = {
+        x: (touch1.clientX + touch2.clientX) / 2,
+        y: (touch1.clientY + touch2.clientY) / 2
+      };
     }
   }, []);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (isPinching && e.touches.length === 2) {
-      e.preventDefault();
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const distance = Math.sqrt(
-        Math.pow(touch2.clientX - touch1.clientX, 2) +
-        Math.pow(touch2.clientY - touch1.clientY, 2)
-      );
-      
-      if (lastPinchDistance.current > 0) {
-        const scale = distance / lastPinchDistance.current;
-        const deltaZoom = (scale - 1) * 50; // Sensitivity adjustment
-        handleZoomChange(zoom + deltaZoom, zoomCenter.current);
+    if (e.touches.length === 2 && isPinching) {
+      const currentDistance = getTouchDistance(e.touches);
+      if (lastTouchDistance.current > 0) {
+        const scale = currentDistance / lastTouchDistance.current;
+        setZoom(zoom * scale);
       }
-      
-      lastPinchDistance.current = distance;
+      lastTouchDistance.current = currentDistance;
     }
-  }, [isPinching, zoom, handleZoomChange]);
+  }, [isPinching, zoom, setZoom]);
 
   const handleTouchEnd = useCallback(() => {
     setIsPinching(false);
-    lastPinchDistance.current = 0;
+    lastTouchDistance.current = 0;
   }, []);
 
-  // Zoom control functions
-  const zoomIn = useCallback(() => handleZoomChange(zoom + 25), [zoom, handleZoomChange]);
-  const zoomOut = useCallback(() => handleZoomChange(zoom - 25), [zoom, handleZoomChange]);
-  const resetZoom = useCallback(() => handleZoomChange(100), [handleZoomChange]);
-  const fitToScreen = useCallback(() => handleZoomChange(75), [handleZoomChange]);
+  const canZoomIn = zoom < maxZoom;
+  const canZoomOut = zoom > minZoom;
 
   return {
     zoom,
     isPinching,
-    zoomCenter: zoomCenter.current,
-    setZoom: handleZoomChange,
     zoomIn,
     zoomOut,
     resetZoom,
-    fitToScreen,
-    // Event handlers for canvas
     handleWheelZoom,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
-    // Utility functions
-    canZoomIn: zoom < maxZoom,
-    canZoomOut: zoom > minZoom,
-    isAtDefault: zoom === 100
+    canZoomIn,
+    canZoomOut,
+    setZoom
   };
 };

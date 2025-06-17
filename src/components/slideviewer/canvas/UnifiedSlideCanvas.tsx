@@ -5,8 +5,8 @@ import { useCanvasShortcuts } from "@/hooks/slideviewer/canvas/useCanvasShortcut
 import { useCanvasState } from "@/hooks/slideviewer/canvas/useCanvasState";
 import { useCanvasConfig } from "@/hooks/slideviewer/canvas/useCanvasConfig";
 import { useCustomZoom } from "@/hooks/slideviewer/canvas/useCustomZoom";
-import { renderElementsWithEmptyState } from "@/utils/slideCanvas/enhancedElementRenderer";
-import TouchOptimizedCanvas from "@/features/slideviewer/components/canvas/TouchOptimizedCanvas";
+import { renderElementsWithEmptyState } from "@/utils/slideviewer/enhancedElementRenderer";
+import TouchOptimizedCanvas from "./TouchOptimizedCanvas";
 import CanvasContainer from "./CanvasContainer";
 import CanvasHeader from "./CanvasHeader";
 import CanvasInfoBar from "./CanvasInfoBar";

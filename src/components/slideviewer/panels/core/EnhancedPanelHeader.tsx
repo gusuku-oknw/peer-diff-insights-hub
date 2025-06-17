@@ -83,13 +83,13 @@ const EnhancedPanelHeader: React.FC<EnhancedPanelHeaderProps> = ({
         
         {onClose && (
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={onClose}
-            className={`${isCompact ? 'h-6 w-6 p-0' : 'h-7 w-7 p-0'} flex-shrink-0 hover:bg-white/70 transition-all duration-200`}
+            className={`${isCompact ? 'h-9 w-9 sm:h-7 sm:w-7 p-0' : 'h-10 w-10 sm:h-8 sm:w-8 p-0'} flex-shrink-0 hover:bg-red-50 hover:border-red-200 transition-all duration-200 shadow-sm hover:shadow-md bg-white/90 border-gray-300 touch-manipulation`}
             title="パネルを閉じる (ESC)"
           >
-            <X className={`${isCompact ? 'h-3 w-3' : 'h-4 w-4'} text-gray-600`} />
+            <X className={`${isCompact ? 'h-4 w-4 sm:h-3 sm:w-3' : 'h-5 w-5 sm:h-4 sm:w-4'} text-gray-600 hover:text-red-600 transition-colors`} />
           </Button>
         )}
       </div>

@@ -1,8 +1,7 @@
 
 import { useCallback } from 'react';
+import { Canvas, FabricText, Rect, Circle } from 'fabric';
 import { useSlideStore } from '@/stores/slide.store';
-import { IText, Rect, Circle } from 'fabric';
-import { Canvas } from 'fabric';
 import type { SlideElement } from '@/types/slide.types';
 
 interface UseCanvasActionsProps {
@@ -11,16 +10,16 @@ interface UseCanvasActionsProps {
 }
 
 export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps) => {
-  const { addSlideElement } = useSlideStore();
+  const { addSlideElement, updateSlideElement, removeSlideElement } = useSlideStore();
 
   const addText = useCallback(() => {
     if (!canvas) return;
 
-    const text = new IText('Click to edit', {
+    const text = new FabricText('テキストを入力', {
       left: 100,
       top: 100,
       fontFamily: 'Arial',
-      fontSize: 20,
+      fontSize: 16,
       fill: '#000000',
     });
 
@@ -31,10 +30,10 @@ export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps
       id: `text-${Date.now()}`,
       type: 'text',
       position: { x: 100, y: 100 },
-      size: { width: 120, height: 25 },
+      size: { width: 120, height: 20 },
       props: {
-        content: 'Click to edit',
-        fontSize: 20,
+        content: 'テキストを入力',
+        fontSize: 16,
         fontFamily: 'Arial',
         color: '#000000'
       }
@@ -46,18 +45,15 @@ export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps
   const addRectangle = useCallback(() => {
     if (!canvas) return;
 
-    const rect = new Rect({
+    const shape = new Rect({
       left: 100,
       top: 100,
       width: 100,
       height: 100,
-      fill: 'blue',
-      stroke: 'darkblue',
+      fill: '#3b82f6',
+      stroke: '#1e40af',
       strokeWidth: 2,
     });
-
-    canvas.add(rect);
-    canvas.setActiveObject(rect);
 
     const element: SlideElement = {
       id: `rect-${Date.now()}`,
@@ -65,29 +61,28 @@ export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps
       position: { x: 100, y: 100 },
       size: { width: 100, height: 100 },
       props: {
-        fill: 'blue',
-        stroke: 'darkblue',
+        fill: '#3b82f6',
+        stroke: '#1e40af',
         strokeWidth: 2
       }
     };
 
+    canvas.add(shape);
+    canvas.setActiveObject(shape);
     addSlideElement(currentSlide, element);
   }, [canvas, currentSlide, addSlideElement]);
 
   const addCircle = useCallback(() => {
     if (!canvas) return;
 
-    const circle = new Circle({
+    const shape = new Circle({
       left: 100,
       top: 100,
       radius: 50,
-      fill: 'green',
-      stroke: 'darkgreen',
+      fill: '#3b82f6',
+      stroke: '#1e40af',
       strokeWidth: 2,
     });
-
-    canvas.add(circle);
-    canvas.setActiveObject(circle);
 
     const element: SlideElement = {
       id: `circle-${Date.now()}`,
@@ -96,12 +91,14 @@ export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps
       size: { width: 100, height: 100 },
       props: {
         radius: 50,
-        fill: 'green',
-        stroke: 'darkgreen',
+        fill: '#3b82f6',
+        stroke: '#1e40af',
         strokeWidth: 2
       }
     };
 
+    canvas.add(shape);
+    canvas.setActiveObject(shape);
     addSlideElement(currentSlide, element);
   }, [canvas, currentSlide, addSlideElement]);
 
@@ -112,15 +109,30 @@ export const useCanvasActions = ({ canvas, currentSlide }: UseCanvasActionsProps
 
   // Add image method for compatibility
   const addImage = useCallback(() => {
-    // Simple placeholder implementation
     console.log('Add image functionality not implemented yet');
   }, []);
+
+  const deleteSelected = useCallback(() => {
+    if (!canvas) return;
+
+    const activeObject = canvas.getActiveObject();
+    if (activeObject) {
+      canvas.remove(activeObject);
+    }
+  }, [canvas]);
+
+  const clearCanvas = useCallback(() => {
+    if (!canvas) return;
+    canvas.clear();
+  }, [canvas]);
 
   return {
     addText,
     addRectangle,
     addCircle,
     addShape,
-    addImage
+    addImage,
+    deleteSelected,
+    clearCanvas
   };
 };

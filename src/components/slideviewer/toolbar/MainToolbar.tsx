@@ -11,7 +11,7 @@ import {
   Maximize
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip.tsx";
-import { useIsMobile } from "@/hooks/use-mobile.tsx";
+import { useIsMobile } from "@/hooks/common/use-mobile.tsx";
 import ModeSelector from "@/components/slideviewer/toolbar/ModeSelector.tsx";
 import ModeSpecificActions from "@/components/slideviewer/toolbar/ModeSpecificActions.tsx";
 
