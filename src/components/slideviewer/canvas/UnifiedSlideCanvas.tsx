@@ -10,6 +10,7 @@ import TouchOptimizedCanvas from "./TouchOptimizedCanvas";
 import CanvasContainer from "./CanvasContainer";
 import CanvasHeader from "./CanvasHeader";
 import CanvasInfoBar from "./CanvasInfoBar";
+import SlideHTMLRenderer from "./SlideHTMLRenderer";
 
 interface UnifiedSlideCanvasProps {
   currentSlide: number;
@@ -57,7 +58,13 @@ const UnifiedSlideCanvas = React.memo(({
     enablePerformanceMode
   });
 
-  // Custom zoom implementation with hybrid approach - this now handles zoom automatically
+  // Get current slide data including HTML content
+  const currentSlideData = slides[currentSlide - 1];
+  const slideHtml = currentSlideData?.html || currentSlideData?.content;
+  const hasHtml = !!slideHtml;
+  const hasElements = elements && elements.length > 0;
+
+  // Custom zoom implementation with hybrid approach
   const { resetZoom } = useCustomZoom({
     canvas: fabricCanvasRef.current,
     isReady,
@@ -65,7 +72,7 @@ const UnifiedSlideCanvas = React.memo(({
     zoomLevel
   });
 
-  // Canvas state management
+  // Canvas state management - update isEmpty logic
   const {
     showGuide,
     selectedObject,
@@ -78,7 +85,7 @@ const UnifiedSlideCanvas = React.memo(({
     containerWidth,
     editable,
     isReady,
-    isEmpty: elements.length === 0,
+    isEmpty: !hasElements && !hasHtml, // Updated isEmpty logic
     enablePerformanceMode
   });
 
@@ -161,7 +168,7 @@ const UnifiedSlideCanvas = React.memo(({
     }
   }, [onZoomChange]);
 
-  // Simplified element rendering
+  // Updated element rendering with HTML support
   const handleRenderElements = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas || !isReady || !canvasConfig) return;
@@ -175,14 +182,15 @@ const UnifiedSlideCanvas = React.memo(({
         currentSlide,
         handleAddText,
         handleAddShape,
-        handleAddImage
+        handleAddImage,
+        slideHtml // Pass HTML content
       );
       
-      console.log(`✅ Canvas rendered ${elements.length} elements`);
+      console.log(`✅ Canvas rendered ${elements.length} elements, HTML: ${hasHtml}`);
     } catch (err) {
       console.error('❌ Canvas rendering failed:', err);
     }
-  }, [elements, currentSlide, editable, isReady, canvasConfig, handleAddText, handleAddShape, handleAddImage, fabricCanvasRef.current]);
+  }, [elements, currentSlide, editable, isReady, canvasConfig, slideHtml, hasHtml, handleAddText, handleAddShape, handleAddImage, fabricCanvasRef.current]);
   
   useEffect(() => {
     if (isReady && canvasConfig) {
@@ -247,31 +255,46 @@ const UnifiedSlideCanvas = React.memo(({
 
         {/* Zoom container for CSS transform */}
         <div className="zoom-container w-full h-full flex items-center justify-center">
-          <CanvasContainer
-            canvasRef={canvasRef}
-            canvasConfig={canvasConfig}
-            zoomLevel={zoomLevel}
-            selectedObject={selectedObject}
-            isEmpty={elements.length === 0}
-            isReady={isReady}
-            error={error}
-            editable={editable}
-            currentSlide={currentSlide}
-            performance={performance}
-            onCopy={copySelected}
-            onPaste={paste}
-            onDelete={deleteSelected}
-            onBringToFront={bringToFront}
-            onSendToBack={sendToBack}
-            onDuplicate={duplicate}
-            onRotate={() => rotateObject()}
-            onAddText={handleAddText}
-            onAddShape={handleAddShape}
-            onAddImage={handleAddImage}
-            onRetry={handleRetry}
-            onReset={handleReset}
-            hasClipboard={hasClipboard}
-          />
+          {/* HTML Content Layer - Behind Canvas */}
+          {hasHtml && (
+            <div className="absolute inset-0 flex items-center justify-center z-0">
+              <SlideHTMLRenderer
+                html={slideHtml}
+                width={canvasConfig.displayWidth}
+                height={canvasConfig.displayHeight}
+                zoomLevel={zoomLevel}
+              />
+            </div>
+          )}
+
+          {/* Canvas Layer - Above HTML */}
+          <div className={`relative ${hasHtml ? 'z-10' : 'z-0'}`}>
+            <CanvasContainer
+              canvasRef={canvasRef}
+              canvasConfig={canvasConfig}
+              zoomLevel={zoomLevel}
+              selectedObject={selectedObject}
+              isEmpty={!hasElements && !hasHtml}
+              isReady={isReady}
+              error={error}
+              editable={editable}
+              currentSlide={currentSlide}
+              performance={performance}
+              onCopy={copySelected}
+              onPaste={paste}
+              onDelete={deleteSelected}
+              onBringToFront={bringToFront}
+              onSendToBack={sendToBack}
+              onDuplicate={duplicate}
+              onRotate={() => rotateObject()}
+              onAddText={handleAddText}
+              onAddShape={handleAddShape}
+              onAddImage={handleAddImage}
+              onRetry={handleRetry}
+              onReset={handleReset}
+              hasClipboard={hasClipboard}
+            />
+          </div>
         </div>
       </div>
 
