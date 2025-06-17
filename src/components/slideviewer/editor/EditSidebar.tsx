@@ -5,7 +5,7 @@ import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { PanelLeftClose, Type, Square, Circle, Image } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useSlideStore } from "@/stores/slide.store";
+import { useSlideStore } from "@/stores/slideStore";
 
 import ElementsPanel from "./sidebar/ElementsPanel";
 import TextPropertiesPanel from "./sidebar/TextPropertiesPanel";

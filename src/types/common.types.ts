@@ -1,6 +1,8 @@
 
-// Common types used across the application
-export type UserRole = "student" | "business" | "debugger" | "guest";
+// アプリ全体で使用される共通型定義
+
+export type UserRole = "student" | "enterprise";
+
 export type ViewerMode = "presentation" | "edit" | "review";
 
 export interface User {
@@ -24,16 +26,4 @@ export interface PaginationInfo {
 export interface DisplayInfo {
   count: number;
   isFullScreen: boolean;
-}
-
-// Layout related types
-export interface LayoutDimensions {
-  width: number;
-  height: number;
-}
-
-export interface ResizableConfig {
-  minWidth?: number;
-  maxWidth?: number;
-  initialWidth?: number;
 }

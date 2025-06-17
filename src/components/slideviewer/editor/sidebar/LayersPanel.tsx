@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowBigUp, ArrowBigDown, Layers, Type, Square, Circle, Image } from "lucide-react";
-import { SlideElement } from "@/types/slide.types";
+import { SlideElement } from "@/stores/slideStore";
 
 interface LayersPanelProps {
   elements: SlideElement[];

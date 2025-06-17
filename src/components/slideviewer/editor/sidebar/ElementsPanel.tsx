@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Type, Square, Circle, Image, Layers, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { SlideElement } from "@/types/slide.types";
+import { SlideElement } from "@/stores/slideStore";
 
 interface ElementsPanelProps {
   elements: SlideElement[];

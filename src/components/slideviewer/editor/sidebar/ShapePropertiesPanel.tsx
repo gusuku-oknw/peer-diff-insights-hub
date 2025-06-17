@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import ColorPicker from "@/components/slideviewer/editor/ColorPicker";
-import { SlideElement } from "@/types/slide.types";
+import { SlideElement } from "@/stores/slideStore";
 
 interface ShapePropertiesPanelProps {
   element: SlideElement;

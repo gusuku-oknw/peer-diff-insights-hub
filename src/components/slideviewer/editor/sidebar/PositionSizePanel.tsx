@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { AlignCenter, AlignHorizontalJustifyCenter, AlignVerticalJustifyCenter } from "lucide-react";
-import { SlideElement } from "@/types/slide.types";
+import { SlideElement } from "@/stores/slideStore";
 
 interface PositionSizePanelProps {
   element: SlideElement;

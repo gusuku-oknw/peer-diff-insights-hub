@@ -1,5 +1,6 @@
+
 import { useState, useCallback, useEffect } from "react";
-import { useSlideStore } from "@/stores/slide.store";
+import { useSlideStore } from "@/stores/slideStore";
 
 export const usePresentationMode = () => {
   const isFullScreen = useSlideStore(state => state.isFullScreen);
@@ -31,45 +32,23 @@ export const usePresentationMode = () => {
   }, [presentationStartTime]);
 
   // フルスクリーンの切り替え
-  const toggleFullScreenWithEffects = useCallback(async () => {
-    try {
-      if (!document.fullscreenElement) {
-        // フルスクリーンに入る
-        const docElement = document.documentElement;
-        
-        if (docElement.requestFullscreen) {
-          await docElement.requestFullscreen();
-        } else if ((docElement as any).webkitRequestFullscreen) {
-          await (docElement as any).webkitRequestFullscreen();
-        } else if ((docElement as any).msRequestFullscreen) {
-          await (docElement as any).msRequestFullscreen();
-        } else if ((docElement as any).mozRequestFullScreen) {
-          await (docElement as any).mozRequestFullScreen();
-        }
-        
-        toggleFullScreen();
-        
-        // プレゼンテーション開始時の処理
-        if (!presentationStartTime) {
-          startPresentation();
-          setViewerMode("presentation");
-        }
-      } else {
-        // フルスクリーンから出る
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        } else if ((document as any).webkitExitFullscreen) {
-          await (document as any).webkitExitFullscreen();
-        } else if ((document as any).msExitFullscreen) {
-          await (document as any).msExitFullscreen();
-        } else if ((document as any).mozCancelFullScreen) {
-          await (document as any).mozCancelFullScreen();
-        }
-        
+  const toggleFullScreenWithEffects = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(e => {
+        console.error(`Error attempting to enable full-screen mode: ${e.message}`);
+      });
+      toggleFullScreen();
+      
+      // プレゼンテーション開始時の処理
+      if (!presentationStartTime) {
+        startPresentation();
+        setViewerMode("presentation");
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
         toggleFullScreen();
       }
-    } catch (error) {
-      console.error(`Error toggling fullscreen: ${error}`);
     }
   }, [presentationStartTime, toggleFullScreen, startPresentation, setViewerMode]);
 

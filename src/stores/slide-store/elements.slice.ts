@@ -1,16 +1,14 @@
 
 import type { StateCreator } from 'zustand';
 import type { SlideStore } from './types';
-import type { SlideElement } from '@/types/slide.types';
+import type { SlideElement } from '@/types/slide-viewer/slide.types';
 
 export interface ElementsSlice {
   selectedElementId: string | null;
   
   setSelectedElementId: (id: string | null) => void;
   updateSlideElement: (slideId: number, elementId: string, updates: Partial<SlideElement>) => void;
-  updateElement: (slideId: number, elementId: string, updates: Partial<SlideElement>) => void; // Alias for compatibility
   addSlideElement: (slideId: number, element: SlideElement) => void;
-  addElement: (slideId: number, element: SlideElement) => void; // Alias for compatibility
   removeSlideElement: (slideId: number, elementId: string) => void;
 }
 
@@ -44,12 +42,6 @@ export const createElementsSlice: StateCreator<
     }));
   },
   
-  // Alias for backward compatibility
-  updateElement: (slideId: number, elementId: string, updates: Partial<SlideElement>) => {
-    const { updateSlideElement } = get();
-    updateSlideElement(slideId, elementId, updates);
-  },
-  
   addSlideElement: (slideId: number, element: SlideElement) => {
     set((state) => ({
       slides: state.slides.map(slide => {
@@ -62,12 +54,6 @@ export const createElementsSlice: StateCreator<
         return slide;
       })
     }));
-  },
-  
-  // Alias for backward compatibility
-  addElement: (slideId: number, element: SlideElement) => {
-    const { addSlideElement } = get();
-    addSlideElement(slideId, element);
   },
   
   removeSlideElement: (slideId: number, elementId: string) => {

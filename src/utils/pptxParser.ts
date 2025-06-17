@@ -1,7 +1,7 @@
-import { xml2js } from 'xml-js';
+
 import JSZip from 'jszip';
-import { useSlideStore } from '@/stores/slide.store'; // Fix import path
-import type { Slide, SlideElement } from '@/types/slide.types';
+import { Slide } from '@/stores/slideStore';
+import { xml2js } from 'xml-js';
 
 // Parse a PPTX file and extract slides
 export async function parsePPTX(buffer: ArrayBuffer): Promise<any[]> {
@@ -199,7 +199,7 @@ function findAllElements(data: any, name: string): any[] {
 // Convert parsed PPTX data to our application's slide format
 export function convertPPTXToSlides(pptxSlides: any[]): Slide[] {
   return pptxSlides.map((pptxSlide, index) => {
-    const slideElements: SlideElement[] = [];
+    const slideElements = [];
     
     // Convert texts to slide elements
     if (pptxSlide.content && pptxSlide.content.texts) {

@@ -71,44 +71,8 @@
   * {
     @apply border-border;
   }
-  html, body {
+  body {
     @apply bg-background text-foreground;
-    height: 100vh; /* Full viewport height */
-    margin: 0;
-    padding: 0;
-  }
-  #root {
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-  }
-  /* Slide viewer specific overflow control - for all screen sizes and user types */
-  .slide-viewer-container {
-    overflow: hidden !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100vw !important;
-    max-width: 100vw !important;
-    z-index: 10 !important;
-  }
-  
-  /* Additional safeguards for student accounts */
-  .slide-viewer-container * {
-    max-height: 100vh !important;
-    overflow-x: hidden !important;
-  }
-  
-  /* Prevent zoom-induced scrolling for all user types */
-  .slide-viewer-container .canvas-container,
-  .slide-viewer-container .modern-canvas-container {
-    overflow: hidden !important;
-    max-width: 100% !important;
-    max-height: 100% !important;
   }
 }
 
@@ -136,33 +100,6 @@
   50% { background-position: 100% 50%; }
 }
 
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
@@ -174,22 +111,6 @@
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradient-shift 4s ease infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 2s infinite;
-}
-
-.animate-fadeInUp {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-.animate-scaleIn {
-  animation: scaleIn 0.3s ease-out;
-}
-
-.animate-reverse {
-  animation-direction: reverse;
 }
 
 /* Custom scrollbar hide for toolbar */
@@ -214,45 +135,6 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   contain: layout paint size;
-  overflow: hidden; /* Prevent canvas scrolling */
-}
-
-/* モダンなキャンバスコンテナ */
-.modern-canvas-container {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  position: relative;
-  overflow: hidden; /* Prevent scrolling */
-}
-
-.modern-canvas-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.canvas-wrapper {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.canvas-wrapper:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-/* グリッドパターン */
-.grid-pattern {
-  background-image: 
-    linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
 }
 
 /* GPUレンダリングの最適化 */
@@ -288,192 +170,6 @@ canvas:focus {
   outline: none;
 }
 
-/* モダンツールバースタイル */
-.modern-toolbar {
-  backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom: 1px solid rgba(229, 231, 235, 0.8);
-  overflow-x: hidden; /* Prevent horizontal scrolling */
-  min-height: 64px; /* Ensure minimum toolbar height */
-}
-
-.modern-button {
-  border-radius: 8px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  font-weight: 500;
-  backdrop-filter: blur(4px);
-  min-width: 32px; /* Ensure minimum button width */
-  min-height: 32px; /* Ensure minimum button height */
-}
-
-.modern-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.modern-button:active {
-  transform: translateY(0);
-}
-
-.mode-button {
-  min-width: 100px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.slide-counter {
-  font-variant-numeric: tabular-nums;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid rgba(229, 231, 235, 0.8);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.zoom-controls {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid rgba(229, 231, 235, 0.8);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.zoom-slider .bg-primary {
-  background: linear-gradient(90deg, #3b82f6, #2563eb) !important;
-}
-
-/* Enhanced zoom slider styling */
-.zoom-slider-enhanced [data-orientation="horizontal"] {
-  height: 6px;
-  background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 100%);
-  border-radius: 3px;
-}
-
-.zoom-slider-enhanced .bg-primary {
-  background: linear-gradient(90deg, #3b82f6, #2563eb) !important;
-  border-radius: 3px;
-  height: 6px;
-}
-
-.zoom-slider-enhanced [role="slider"] {
-  width: 18px;
-  height: 18px;
-  background: white;
-  border: 2px solid #3b82f6;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-.zoom-slider-enhanced [role="slider"]:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-}
-
-.zoom-slider-enhanced [role="slider"]:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Zoom level indicator animations */
-.zoom-level-indicator {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.zoom-level-indicator:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Zoom button enhancements */
-.zoom-button {
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.zoom-button:hover {
-  transform: translateY(-1px);
-}
-
-.zoom-button:active {
-  transform: translateY(0);
-}
-
-.zoom-button::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transition: width 0.3s, height 0.3s, transform 0.3s;
-  transform: translate(-50%, -50%);
-}
-
-.zoom-button:active::before {
-  width: 100px;
-  height: 100px;
-}
-
-.action-button {
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  min-width: 120px;
-}
-
-/* モダンサムネイルスタイル - 横スクロール対応 */
-.modern-thumbnails {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  overflow: hidden; /* Prevent scrolling */
-}
-
-.thumbnail-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
-  border: 1px solid rgba(229, 231, 235, 0.6);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  min-width: 160px; /* 横スクロール用の最小幅 */
-}
-
-.thumbnail-card:hover {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  border-color: rgba(59, 130, 246, 0.3);
-}
-
-/* Main layout containers */
-.main-layout-container {
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* タイムライン用スタイル */
-.timeline-item {
-  position: relative;
-}
-
-.timeline-item::before {
-  content: '';
-  position: absolute;
-  left: 11px;
-  top: 20px;
-  bottom: -16px;
-  width: 2px;
-  background: linear-gradient(to bottom, #e5e7eb, #f3f4f6);
-}
-
-.timeline-item:last-child::before {
-  display: none;
-}
-
-/* コミット履歴のホバー効果 */
-.commit-item {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.commit-item:hover {
-  transform: translateX(2px);
-}
-
 /* レスポンシブレイアウト改善 */
 @media (max-width: 768px) {
   .side-panel-container {
@@ -481,26 +177,10 @@ canvas:focus {
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 50;
-    width: 100%;
-    max-width: 320px;
+    z-index: 50; /* サイドパネルを前面に */
+    width: 100%; /* モバイルでは全幅 */
+    max-width: 320px; /* 最大幅を制限 */
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-  }
-
-  .modern-toolbar {
-    padding: 0.5rem;
-    height: 3.5rem;
-    overflow-x: hidden;
-  }
-
-  .mode-button {
-    min-width: 80px;
-    font-size: 0.875rem;
-  }
-
-  .thumbnail-card {
-    min-width: 120px;
   }
 }
 
@@ -510,53 +190,4 @@ canvas:focus {
   max-width: 320px;
   height: 100%;
   overflow: hidden;
-}
-
-/* パフォーマンス最適化のための新しいスタイル */
-.optimized-render {
-  contain: layout style paint;
-  will-change: transform;
-}
-
-/* アクセシビリティ改善 */
-@media (prefers-reduced-motion: reduce) {
-  .modern-button,
-  .thumbnail-card,
-  .canvas-wrapper,
-  .commit-item {
-    transition: none;
-  }
-  
-  .animate-float,
-  .animate-pulse-soft,
-  .animate-gradient,
-  .animate-shimmer,
-  .animate-fadeInUp,
-  .animate-scaleIn {
-    animation: none;
-  }
-}
-
-/* フォーカス表示の改善 */
-.modern-button:focus-visible,
-.thumbnail-card:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* ダークモードサポート */
-@media (prefers-color-scheme: dark) {
-  .modern-toolbar {
-    background: rgba(17, 24, 39, 0.95);
-    border-bottom-color: rgba(55, 65, 81, 0.8);
-  }
-  
-  .modern-canvas-container {
-    background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-  }
-  
-  .canvas-wrapper {
-    background: #1f2937;
-    border-color: rgba(55, 65, 81, 0.6);
-  }
 }

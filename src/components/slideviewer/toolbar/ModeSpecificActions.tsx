@@ -1,83 +1,95 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { useSlideStore } from '@/stores/slide.store';
+import { Button } from "@/components/ui/button";
+import { ViewerMode } from "@/stores/slideStore";
+import { Save, Filter, Presentation, Play } from "lucide-react";
 
 interface ModeSpecificActionsProps {
-  mode?: "presentation" | "edit" | "review";
-  displayCount?: number;
-  isFullScreen?: boolean;
-  showPresenterNotes?: boolean;
-  userType?: "student" | "enterprise";
-  onSaveChanges?: () => void;
-  onShowPresenterNotesToggle?: () => void;
-  onStartPresentation?: () => void;
-  leftSidebarOpen?: boolean;
-  onLeftSidebarToggle?: () => void;
+  mode: ViewerMode;
+  displayCount: number;
+  isFullScreen: boolean;
+  showPresenterNotes: boolean;
+  onSaveChanges: () => void;
+  onShowPresenterNotesToggle: () => void;
+  onStartPresentation: () => void;
+  onSendFeedback?: () => void;
 }
 
-const ModeSpecificActions: React.FC<ModeSpecificActionsProps> = ({ 
+const ModeSpecificActions = ({
   mode,
   displayCount,
   isFullScreen,
   showPresenterNotes,
-  userType,
   onSaveChanges,
   onShowPresenterNotesToggle,
   onStartPresentation,
-  leftSidebarOpen = false, 
-  onLeftSidebarToggle = () => {} 
-}) => {
-  const viewerMode = useSlideStore(state => state.viewerMode);
-  const setViewerMode = useSlideStore(state => state.setViewerMode);
-
-  const currentMode = mode || viewerMode;
-
-  const handleModeToggle = () => {
-    const nextMode = currentMode === 'presentation' ? 'edit' : 'presentation';
-    setViewerMode(nextMode);
-  };
-
-  // Show save button for edit mode
-  if (currentMode === 'edit' && onSaveChanges) {
-    return (
-      <div className="flex items-center space-x-2">
-        <Button variant="outline" size="sm" onClick={onSaveChanges}>
-          保存
-        </Button>
-      </div>
-    );
+  onSendFeedback
+}: ModeSpecificActionsProps) => {
+  
+  switch (mode) {
+    case "edit":
+      return (
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="bg-green-600 hover:bg-green-700 text-white" 
+            onClick={onSaveChanges}
+          >
+            <Save className="h-4 w-4 mr-2 hidden sm:inline" />
+            保存
+          </Button>
+        </div>
+      );
+    case "review":
+      return (
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1 sm:gap-2 p-1 sm:p-2"
+          >
+            <Filter className="h-4 w-4" />
+            <span className="hidden md:inline">フィルター</span>
+          </Button>
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="bg-purple-600 hover:bg-purple-700 text-white p-1 sm:p-2" 
+            onClick={onSendFeedback}
+          >
+            <span className="text-xs sm:text-sm">フィードバック送信</span>
+          </Button>
+        </div>
+      );
+    case "presentation":
+      return (
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1 sm:gap-2 p-1 sm:p-2" 
+            onClick={onShowPresenterNotesToggle} 
+            disabled={displayCount < 2 && isFullScreen}
+          >
+            <Presentation className="h-4 w-4" />
+            <span className="hidden md:inline">
+              発表者メモ {showPresenterNotes ? '非表示' : '表示'}
+            </span>
+          </Button>
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="bg-blue-600 hover:bg-blue-700 text-white p-1 sm:p-2" 
+            onClick={onStartPresentation}
+          >
+            <Play className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">プレゼン開始</span>
+          </Button>
+        </div>
+      );
+    default:
+      return null;
   }
-
-  // Show presentation controls for presentation mode
-  if (currentMode === 'presentation' && onStartPresentation) {
-    return (
-      <div className="flex items-center space-x-2">
-        <Button variant="outline" size="sm" onClick={onStartPresentation}>
-          プレゼンテーション開始
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center space-x-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleModeToggle}
-      >
-        {currentMode === 'presentation' ? '編集モード' : 'プレゼンテーションモード'}
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onLeftSidebarToggle}
-      >
-        {leftSidebarOpen ? '閉じる' : '開く'}
-      </Button>
-    </div>
-  );
 };
 
 export default ModeSpecificActions;
