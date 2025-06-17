@@ -18,7 +18,8 @@ export interface BaseSlideStore {
   thumbnails: Record<number, string>;
   
   // Methods
-  generateThumbnails: () => void;
+  generateThumbnails: () => Promise<void>;
+  updateThumbnail: (slideId: number, thumbnail: string) => void;
   setSlides: (slides: Slide[]) => void;
   addSlide: (slide: Slide) => void;
   removeSlide: (slideId: number) => void;

@@ -5,7 +5,7 @@ import { useCanvasShortcuts } from "@/hooks/slideviewer/canvas/useCanvasShortcut
 import { useCanvasState } from "@/hooks/slideviewer/canvas/useCanvasState";
 import { useCanvasConfig } from "@/hooks/slideviewer/canvas/useCanvasConfig";
 import { useCustomZoom } from "@/hooks/slideviewer/canvas/useCustomZoom";
-import { renderElementsWithEmptyState } from "@/utils/slideviewer/enhancedElementRenderer";
+import { renderElementsWithEmptyState } from "@/utils/slideviewer/rendering/enhancedElementRenderer";
 import TouchOptimizedCanvas from "./TouchOptimizedCanvas";
 import CanvasContainer from "./CanvasContainer";
 import CanvasHeader from "./CanvasHeader";
@@ -233,9 +233,9 @@ const UnifiedSlideCanvas = React.memo(({
   }
   
   return (
-    <div className="w-full h-full flex flex-col bg-gray-50 overflow-hidden relative">
+    <div className="w-full h-full flex flex-col bg-gray-50 relative">
       {/* Canvas Container */}
-      <div className="flex-1 flex items-center justify-center p-4 relative">
+      <div className="flex-1 flex items-center justify-center relative">
         <CanvasHeader
           showGuide={showGuide}
           editable={editable}
@@ -246,7 +246,7 @@ const UnifiedSlideCanvas = React.memo(({
         />
 
         {/* Zoom container for CSS transform */}
-        <div className="zoom-container">
+        <div className="zoom-container w-full h-full flex items-center justify-center">
           <CanvasContainer
             canvasRef={canvasRef}
             canvasConfig={canvasConfig}

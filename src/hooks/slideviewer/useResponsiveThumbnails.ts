@@ -29,16 +29,16 @@ export const useResponsiveThumbnails = ({
     } else {
       if (mobile) {
         // Mobile: Smaller thumbnails for better fit
-        return Math.max(120, Math.min(160, effectiveWidth * 0.35));
+        return Math.max(140, Math.min(180, effectiveWidth * 0.4));
       } else if (tablet) {
         // Tablet: Medium-sized thumbnails
-        return Math.max(140, Math.min(200, effectiveWidth * 0.25));
+        return Math.max(160, Math.min(220, effectiveWidth * 0.3));
       } else if (desktop) {
         // Desktop: Standard size
-        return Math.max(160, Math.min(240, effectiveWidth * 0.2));
+        return Math.max(180, Math.min(260, effectiveWidth * 0.22));
       } else {
         // Large screens: Can use bigger thumbnails
-        return Math.max(180, Math.min(280, effectiveWidth * 0.18));
+        return Math.max(200, Math.min(300, effectiveWidth * 0.2));
       }
     }
   }, [containerWidth, contentAreaDimensions.availableWidth, isPopupMode, mobile, tablet, desktop, large]);
@@ -58,10 +58,10 @@ export const useResponsiveThumbnails = ({
 
   // Optimal height based on screen size
   const optimalHeight = useMemo(() => {
-    if (mobile) return 120;
-    if (tablet) return 160;
-    if (desktop) return 200;
-    return 220; // large screens
+    if (mobile) return 140;
+    if (tablet) return 180;
+    if (desktop) return 220;
+    return 240; // large screens
   }, [mobile, tablet, desktop]);
 
   const result = {

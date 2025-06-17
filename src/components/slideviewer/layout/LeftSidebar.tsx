@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { History, X } from "lucide-react";
 import { useSlideStore } from "@/stores/slide.store";
-import HistorySidebar from "../HistorySidebar";
+import HistorySidebar from "../history/HistorySidebar";
 
 interface LeftSidebarProps {
   isOpen: boolean;

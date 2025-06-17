@@ -67,6 +67,37 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Quick Login Options for Demo */}
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h3 className="text-sm font-medium text-blue-800 mb-3">クイックログイン（デモ用）</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setEmail("student@demo.com");
+                    setPassword("demo123");
+                    setRole("student");
+                  }}
+                  className="text-xs"
+                >
+                  学生ログイン
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setEmail("business@demo.com");
+                    setPassword("demo123");
+                    setRole("business");
+                  }}
+                  className="text-xs"
+                >
+                  企業ログイン
+                </Button>
+              </div>
+            </div>
+
             <Tabs value={authMode} onValueChange={(v) => setAuthMode(v as "sign-in" | "sign-up")}>
               <TabsList className="grid w-full grid-cols-2 mb-8">
                 <TabsTrigger value="sign-in" className="text-base">

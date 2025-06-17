@@ -1,9 +1,9 @@
 
 import React from "react";
-import BranchSelector from "../../shared/components/branch-selector";
-import CommitHistory from "../../shared/components/commit-history";
-import LeftPanelHeader from "../panels/components/left-panel-header";
-import { useIsMobile } from "@/hooks/common/use-mobile";
+import BranchSelector from "./BranchSelector";
+import CommitHistory from "../history/CommitHistory";
+import LeftPanelHeader from "../panels/components/LeftPanelHeader";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LeftSidebarCoreProps {
   leftSidebarOpen: boolean;

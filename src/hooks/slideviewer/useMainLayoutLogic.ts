@@ -1,6 +1,6 @@
 
 import { useMemo } from "react";
-import { useIsMobile } from "@/hooks/common/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useSlideStore } from "@/stores/slide.store";
 
 export const useMainLayoutLogic = (

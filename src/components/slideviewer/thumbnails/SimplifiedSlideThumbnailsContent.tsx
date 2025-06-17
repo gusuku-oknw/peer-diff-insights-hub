@@ -65,7 +65,7 @@ const SimplifiedSlideThumbnailsContent = ({
       {/* スクロール可能なサムネイル一覧 */}
       <div
         ref={scrollContainerRef}
-        className="flex items-center h-full px-8 py-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 transition-all duration-300 ease-in-out scroll-smooth"
+        className="flex items-center h-full px-8 py-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 transition-all duration-300 ease-in-out scroll-smooth"
         style={{ gap: `${gap}px` }}
         role="tablist"
         aria-label="スライドサムネイル"

@@ -76,7 +76,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   const presentationStartTimeNumber = presentationStartTime ? presentationStartTime.getTime() : null;
 
   return (
-    <div className="h-full flex bg-gray-50 relative">
+    <div className="h-full flex bg-gray-50 relative overflow-hidden">
       {/* Left Sidebar */}
       <LeftSidebar 
         isOpen={leftSidebarOpen}

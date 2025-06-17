@@ -77,8 +77,19 @@ export const useSlideViewerLogic = () => {
   }, [elapsedTime]);
 
   const handleZoomChange = (newZoom: number) => {
-    if (newZoom >= 50 && newZoom <= 200) {
+    // Restrict zoom for student accounts to prevent scroll issues
+    const maxZoom = userType === "student" ? 100 : 200;
+    const minZoom = 25;
+    
+    if (newZoom >= minZoom && newZoom <= maxZoom) {
       setZoom(newZoom);
+    } else if (newZoom > maxZoom && userType === "student") {
+      toast({
+        title: "ズーム制限",
+        description: "学生アカウントはスクロール問題防止のため100%までに制限されています",
+        variant: "default"
+      });
+      setZoom(maxZoom);
     }
   };
 

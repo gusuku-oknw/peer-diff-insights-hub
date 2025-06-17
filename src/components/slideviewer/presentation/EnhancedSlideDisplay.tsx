@@ -50,7 +50,7 @@ const EnhancedSlideDisplay: React.FC<EnhancedSlideDisplayProps> = ({
       duration: 1000
     });
   }, [onZoomChange, toast]);
-  return <div className="relative w-full h-full flex flex-col">
+  return <div className="relative w-full h-full flex flex-col overflow-hidden">
       {/* Zoom Controls */}
       <div className="absolute top-4 right-4 z-10 flex gap-2">
         
@@ -61,7 +61,7 @@ const EnhancedSlideDisplay: React.FC<EnhancedSlideDisplayProps> = ({
       </div>
 
       {/* Unified Canvas Container with zoom level */}
-      <div className="flex-1 flex items-center justify-center p-4">
+      <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
         <UnifiedSlideCanvas currentSlide={currentSlide} zoomLevel={zoomLevel} editable={editable} userType={userType} containerWidth={containerWidth} containerHeight={containerHeight} enablePerformanceMode={true} onZoomChange={onZoomChange} />
       </div>
     </div>;

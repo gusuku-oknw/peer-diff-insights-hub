@@ -23,3 +23,14 @@ export interface ThumbnailSizeInfo {
   isMedium: boolean;
   isLarge: boolean;
 }
+
+export interface BaseThumbnailProps {
+  currentSlide: number;
+  onSlideClick: (slideIndex: number) => void;
+  onOpenOverallReview?: () => void;
+  containerWidth: number;
+  userType?: "student" | "enterprise";
+  enhanced?: boolean;
+  showAsPopup?: boolean;
+  useImprovedUI?: boolean;
+}

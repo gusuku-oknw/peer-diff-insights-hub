@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, Building, GraduationCap, Play, FileText, ArrowRight, Monitor, Edit3, MessageSquare } from "lucide-react";
-import { toast } from "@/hooks/common/use-toast";
+import { Check, Building, GraduationCap, Play, FileText, ArrowRight, Monitor, Edit3, MessageSquare, Upload } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
+import { PPTXUploader } from "@/components/pptx/PPTXUploader";
 const DemoPage = () => {
   const [activeTab, setActiveTab] = useState<"business" | "student">("business");
   const handleStartTrial = () => {
@@ -35,10 +36,26 @@ const DemoPage = () => {
           </Link>
         </div>
 
+        {/* PPTX変換セクション */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-center mb-8">PPTX → HTML 変換ツール</h2>
+          <PPTXUploader />
+        </div>
+
         {/* 機能デモセクション */}
         <div className="mb-12">
           <h2 className="text-2xl font-bold text-center mb-8">主要機能のデモ</h2>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-4 gap-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+              <div className="bg-orange-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                <Upload className="h-6 w-6 text-orange-600" />
+              </div>
+              <h3 className="font-bold mb-2">PPTX変換</h3>
+              <p className="text-gray-600 text-sm mb-4">PowerPointファイルをHTMLに変換してプレビュー</p>
+              <Button variant="outline" size="sm" className="w-full" onClick={() => document.querySelector('.pptx-uploader')?.scrollIntoView({ behavior: 'smooth' })}>
+                試してみる
+              </Button>
+            </div>
             <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
               <div className="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
                 <Monitor className="h-6 w-6 text-blue-600" />
