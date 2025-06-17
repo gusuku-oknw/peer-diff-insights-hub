@@ -1,7 +1,6 @@
+
 import { useCallback, useMemo, useRef } from 'react';
 import { Canvas } from 'fabric';
-// Temporary fix - use the correct path
-import { optimizeCanvasPerformance } from '@/utils/slideviewer/canvas/canvasOptimizer';
 
 export interface PerformanceMetrics {
   renderTime: number;
@@ -15,6 +14,25 @@ interface UsePerformanceOptimizationProps {
   canvas: Canvas | null;
   enabled: boolean;
 }
+
+// Basic canvas optimization function
+const optimizeCanvasPerformance = (canvas: Canvas) => {
+  if (!canvas) return;
+  
+  // Basic optimization: Set rendering modes
+  canvas.renderOnAddRemove = false;
+  canvas.skipTargetFind = true;
+  
+  // Enable caching for better performance
+  canvas.getObjects().forEach(obj => {
+    obj.set('objectCaching', true);
+  });
+  
+  // Re-enable rendering
+  canvas.renderOnAddRemove = true;
+  canvas.skipTargetFind = false;
+  canvas.requestRenderAll();
+};
 
 export const usePerformanceOptimization = ({ canvas, enabled }: UsePerformanceOptimizationProps) => {
   const performanceDataRef = useRef<PerformanceMetrics>({

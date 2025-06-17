@@ -1,6 +1,13 @@
+
 import { useMemo } from 'react';
-// Fix the import path
-import { STANDARD_SLIDE_SIZES, type StandardSlideSize } from '@/utils/slideviewer/canvas/standardSlideSizes';
+import { STANDARD_SLIDE_SIZES } from '@/utils/slideviewer/canvas/standardSlideSizes';
+
+interface StandardSlideSize {
+  width: number;
+  height: number;
+  ratio: number;
+  name: string;
+}
 
 /**
  * Calculate the optimal slide size based on container dimensions
@@ -32,10 +39,18 @@ export const useStandardSlideSize = (
     const availableHeight = containerHeight - padding * 2;
     const containerRatio = availableWidth / availableHeight;
 
+    // Convert STANDARD_SLIDE_SIZES object to array for find operation
+    const sizesArray = Object.values(STANDARD_SLIDE_SIZES).map(size => ({
+      width: size.width,
+      height: size.height,
+      ratio: size.aspectRatio,
+      name: size.name
+    }));
+
     // Find the closest standard size by aspect ratio
-    let bestMatch: StandardSlideSize = STANDARD_SLIDE_SIZES.find(
+    let bestMatch: StandardSlideSize = sizesArray.find(
       size => Math.abs(size.ratio - containerRatio) < 0.1
-    ) || STANDARD_SLIDE_SIZES[0]; // Default to first size if no match
+    ) || sizesArray[0]; // Default to first size if no match
 
     // Calculate scale to fit the container
     const scaleX = availableWidth / bestMatch.width;

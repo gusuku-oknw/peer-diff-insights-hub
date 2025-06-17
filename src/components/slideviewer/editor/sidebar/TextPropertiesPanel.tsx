@@ -6,7 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import ColorPicker from "@/components/slideviewer/editor/ColorPicker";
-import { SlideElement } from "@/stores/slideStore";
+import { SlideElement } from "@/types/slide.types";
 
 interface TextPropertiesPanelProps {
   element: SlideElement;

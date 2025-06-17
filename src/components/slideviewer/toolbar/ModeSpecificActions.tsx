@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useSlideStore } from '@/stores/slide.store'; // Fix import path
+import { useSlideStore } from '@/stores/slide.store';
 
 interface ModeSpecificActionsProps {
   leftSidebarOpen: boolean;
@@ -9,10 +10,11 @@ interface ModeSpecificActionsProps {
 
 const ModeSpecificActions: React.FC<ModeSpecificActionsProps> = ({ leftSidebarOpen, onLeftSidebarToggle }) => {
   const viewerMode = useSlideStore(state => state.viewerMode);
-  const toggleViewerMode = useSlideStore(state => state.toggleViewerMode);
+  const setViewerMode = useSlideStore(state => state.setViewerMode);
 
   const handleModeToggle = () => {
-    toggleViewerMode();
+    const nextMode = viewerMode === 'presentation' ? 'edit' : 'presentation';
+    setViewerMode(nextMode);
   };
 
   return (
