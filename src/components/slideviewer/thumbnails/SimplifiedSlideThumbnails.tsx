@@ -4,9 +4,13 @@ import { useSimplifiedThumbnails } from "@/hooks/slideviewer/useSimplifiedThumbn
 import SimplifiedSlideThumbnailsHeader from "./SimplifiedSlideThumbnailsHeader";
 import SimplifiedSlideThumbnailsContent from "./SimplifiedSlideThumbnailsContent";
 import SimplifiedSlideThumbnailsDialog from "./SimplifiedSlideThumbnailsDialog";
-import type { BaseThumbnailProps } from "@/types/slideviewer/thumbnail-common.types";
 
-interface SimplifiedSlideThumbnailsProps extends BaseThumbnailProps {
+interface SimplifiedSlideThumbnailsProps {
+  currentSlide: number;
+  onSlideClick: (slideIndex: number) => void;
+  onOpenOverallReview: () => void;
+  containerWidth: number;
+  userType?: "student" | "enterprise";
   isOpen: boolean;
   onClose: () => void;
 }

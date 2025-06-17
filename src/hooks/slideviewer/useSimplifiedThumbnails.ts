@@ -1,23 +1,16 @@
 
-import { useRef, useEffect } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { useSlideStore } from '@/stores/slide.store';
-import { useSmoothScroll } from './useSmoothScroll';
-import { useResponsiveThumbnails } from './useResponsiveThumbnails';
-import type { UserType } from '@/types/slideviewer/thumbnail-common.types';
 
 interface UseSimplifiedThumbnailsProps {
   currentSlide: number;
   containerWidth: number;
-  userType: UserType;
+  userType: "student" | "enterprise";
   isOpen: boolean;
   onSlideClick: (slideIndex: number) => void;
   onClose: () => void;
 }
 
-/**
- * SimplifiedSlideThumbnailsのロジックを管理するカスタムフック
- * スライドデータの変換、スクロール機能、キーボードナビゲーションを提供
- */
 export const useSimplifiedThumbnails = ({
   currentSlide,
   containerWidth,
@@ -26,70 +19,63 @@ export const useSimplifiedThumbnails = ({
   onSlideClick,
   onClose
 }: UseSimplifiedThumbnailsProps) => {
-  const { slides } = useSlideStore();
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const slides = useSlideStore(state => state.slides);
   
-  // レスポンシブなサムネイルサイズの計算
-  const { 
-    thumbnailWidth, 
-    gap, 
-    isMobile,
-    isTablet 
-  } = useResponsiveThumbnails({
-    containerWidth,
-    isPopupMode: true
-  });
-
-  // 企業ユーザーのみスライド追加可能
+  // Basic responsive calculations
+  const isMobile = containerWidth < 768;
+  const isTablet = containerWidth >= 768 && containerWidth < 1024;
+  
+  // Thumbnail sizing
+  const thumbnailWidth = useMemo(() => {
+    if (isMobile) return 120;
+    if (isTablet) return 160;
+    return 200;
+  }, [isMobile, isTablet]);
+  
+  const gap = isMobile ? 8 : 12;
+  
+  // Convert slides to slide data format
+  const slideData = useMemo(() => {
+    return slides.map(slide => ({
+      id: slide.id,
+      title: slide.title || `スライド ${slide.id}`,
+      thumbnail: slide.thumbnail,
+      hasComments: false,
+      commentCount: 0,
+      isReviewed: false,
+      progress: 0,
+      isImportant: false,
+      lastUpdated: slide.updatedAt || new Date().toISOString()
+    }));
+  }, [slides]);
+  
+  // Show add slide button for enterprise users
   const showAddSlide = userType === "enterprise";
   
-  // スムーズスクロール機能
-  const {
-    scrollContainerRef,
-    scrollToItem,
-    scrollByDirection,
-    handleKeyboardNavigation,
-  } = useSmoothScroll({ itemWidth: thumbnailWidth, gap });
-  
-  // スライドデータの変換
-  const slideData = slides.map((slide, index) => ({
-    id: slide.id,
-    title: slide.title || `スライド ${index + 1}`,
-    thumbnail: slide.thumbnail,
-    elements: slide.elements || [],
-    hasComments: (slide as any).comments?.length > 0 || false,
-    isReviewed: (slide as any).isReviewed || false
-  }));
-
-  // スライドクリック時の処理（ダイアログを閉じる）
-  const handleSlideClick = (slideIndex: number) => {
+  // Handle slide click
+  const handleSlideClick = useCallback((slideIndex: number) => {
     onSlideClick(slideIndex);
     onClose();
-  };
-
-  // ダイアログ開閉時の現在スライドへのスクロール
-  useEffect(() => {
-    if (isOpen) {
-      scrollToItem(currentSlide);
-    }
-  }, [currentSlide, scrollToItem, isOpen]);
-
-  // キーボードナビゲーション（ESCキーでダイアログを閉じる）
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (isOpen && containerRef.current?.contains(event.target as Node)) {
-        handleKeyboardNavigation(event, currentSlide, slides.length, handleSlideClick);
-        
-        if (event.key === 'Escape') {
-          onClose();
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [currentSlide, slides.length, handleSlideClick, handleKeyboardNavigation, isOpen, onClose]);
-
+  }, [onSlideClick, onClose]);
+  
+  // Scroll functions
+  const scrollByDirection = useCallback((direction: 'left' | 'right') => {
+    if (!scrollContainerRef.current) return;
+    
+    const scrollAmount = thumbnailWidth + gap;
+    const currentScroll = scrollContainerRef.current.scrollLeft;
+    const newScroll = direction === 'left' 
+      ? currentScroll - scrollAmount 
+      : currentScroll + scrollAmount;
+    
+    scrollContainerRef.current.scrollTo({
+      left: newScroll,
+      behavior: 'smooth'
+    });
+  }, [thumbnailWidth, gap]);
+  
   return {
     containerRef,
     slideData,

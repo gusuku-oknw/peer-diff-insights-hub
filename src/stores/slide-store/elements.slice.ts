@@ -10,6 +10,7 @@ export interface ElementsSlice {
   updateSlideElement: (slideId: number, elementId: string, updates: Partial<SlideElement>) => void;
   updateElement: (slideId: number, elementId: string, updates: Partial<SlideElement>) => void; // Alias for compatibility
   addSlideElement: (slideId: number, element: SlideElement) => void;
+  addElement: (slideId: number, element: SlideElement) => void; // Alias for compatibility
   removeSlideElement: (slideId: number, elementId: string) => void;
 }
 
@@ -61,6 +62,12 @@ export const createElementsSlice: StateCreator<
         return slide;
       })
     }));
+  },
+  
+  // Alias for backward compatibility
+  addElement: (slideId: number, element: SlideElement) => {
+    const { addSlideElement } = get();
+    addSlideElement(slideId, element);
   },
   
   removeSlideElement: (slideId: number, elementId: string) => {

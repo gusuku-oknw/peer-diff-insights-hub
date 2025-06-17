@@ -1,22 +1,27 @@
-import React, { useRef, useEffect, useState } from "react";
-import { useSlideStore } from "@/stores/slide.store";
-import { useSmoothScroll } from "@/hooks/slideviewer/useSmoothScroll";
-import { useResponsiveThumbnails } from "@/hooks/slideviewer/useResponsiveThumbnails";
-import { useEnhancedThumbnailUI } from "@/hooks/slideviewer/useEnhancedThumbnailUI";
-import { useThumbnailInit } from "@/hooks/slideviewer/useThumbnailInit";
-import UnifiedSlideThumbnailsContainer from "./UnifiedSlideThumbnailsContainer";
-import SimplifiedSlideThumbnailsContent from "./SimplifiedSlideThumbnailsContent";
-import SimplifiedSlideThumbnailsHeader from "./SimplifiedSlideThumbnailsHeader";
-import type { BaseThumbnailProps } from "@/types/slideviewer/thumbnail.types";
 
-interface UnifiedSlideThumbnailsProps extends BaseThumbnailProps {
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { useSlideStore } from '@/stores/slide.store';
+import { useResponsiveLayout } from '@/hooks/slideviewer/useResponsiveLayout';
+import { useSmoothScroll } from '@/hooks/slideviewer/useSmoothScroll';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import ThumbnailCard from './ThumbnailCard';
+import AddSlideCard from './AddSlideCard';
+import EvaluationCard from './EvaluationCard';
+import SimplifiedSlideThumbnailsHeader from './SimplifiedSlideThumbnailsHeader';
+
+interface UnifiedSlideThumbnailsProps {
+  currentSlide: number;
+  onSlideClick: (slideIndex: number) => void;
+  onOpenOverallReview: () => void;
   height: number;
+  containerWidth: number;
+  userType?: "student" | "enterprise";
 }
 
 /**
- * 固定モード用のスライドサムネイル表示コンポーネント
- * デスクトップなど、画面幅に余裕がある環境で使用
- * 折りたたみ機能付き
+ * 統合されたスライドサムネイル表示コンポーネント
+ * デスクトップとモバイルの両方に対応し、レスポンシブなレイアウトを提供
  */
 const UnifiedSlideThumbnails = ({
   currentSlide,
@@ -26,121 +31,168 @@ const UnifiedSlideThumbnails = ({
   containerWidth,
   userType = "enterprise"
 }: UnifiedSlideThumbnailsProps) => {
-  const { slides, thumbnails } = useSlideStore();
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showScrollButtons, setShowScrollButtons] = useState(false);
   
-  // サムネイル初期化
-  const { isGenerating } = useThumbnailInit();
+  const { slides } = useSlideStore();
+  const { contentAreaDimensions } = useResponsiveLayout();
   
-  // Enhanced UI state management
-  const {
-    isCollapsed,
-    toggleCollapse,
-    handleMouseEnter,
-    handleMouseLeave,
-    updateLastInteraction
-  } = useEnhancedThumbnailUI({
-    initialCollapsed: false,
-    autoCollapseDelay: 3000
+  // スムーススクロール機能
+  const { scrollToSlide, scrollByDirection } = useSmoothScroll({
+    containerRef: scrollContainerRef,
+    slideCount: slides.length,
+    currentSlide
   });
-  
+
   // レスポンシブなサムネイルサイズの計算
-  const { 
-    thumbnailWidth, 
-    gap 
-  } = useResponsiveThumbnails({
-    containerWidth,
-    isPopupMode: false
-  });
+  const { thumbnailWidth, gap, columnsCount } = useMemo(() => {
+    const availableWidth = containerWidth - 32; // パディングを考慮
+    const baseWidth = contentAreaDimensions.isMobile ? 120 : 160;
+    const gapSize = contentAreaDimensions.isMobile ? 8 : 12;
+    
+    // 利用可能な幅に基づいてカラム数を計算
+    const maxColumns = Math.floor((availableWidth + gapSize) / (baseWidth + gapSize));
+    const actualColumns = Math.max(1, Math.min(maxColumns, slides.length + 2)); // +2 for add slide and evaluation
+    
+    // 実際のサムネイル幅を計算
+    const actualThumbnailWidth = Math.floor((availableWidth - (actualColumns - 1) * gapSize) / actualColumns);
+    
+    return {
+      thumbnailWidth: Math.max(100, actualThumbnailWidth),
+      gap: gapSize,
+      columnsCount: actualColumns
+    };
+  }, [containerWidth, contentAreaDimensions.isMobile, slides.length]);
 
-  const showAddSlide = userType === "enterprise";
-  
-  // スムーズスクロール機能
-  const {
-    scrollContainerRef,
-    scrollToItem,
-    scrollByDirection,
-    handleKeyboardNavigation,
-  } = useSmoothScroll({ itemWidth: thumbnailWidth, gap });
-  
-  // スライドデータの変換（生成されたサムネイルを含む）
-  const slideData = slides.map((slide, index) => ({
-    id: slide.id,
-    title: slide.title || `スライド ${index + 1}`,
-    thumbnail: thumbnails[slide.id] || slide.thumbnail,
-    html: slide.html, // Now properly typed
-    elements: slide.elements || [],
-    hasComments: (slide as any).comments?.length > 0 || false,
-    isReviewed: (slide as any).isReviewed || false
-  }));
+  // スライドデータの準備
+  const slideData = useMemo(() => {
+    return slides.map(slide => ({
+      id: slide.id,
+      title: slide.title || `スライド ${slide.id}`,
+      thumbnail: slide.thumbnail,
+      hasComments: slide.comments && slide.comments.length > 0,
+      commentCount: slide.comments?.length || 0,
+      isReviewed: slide.isReviewed || false,
+      progress: slide.progress || 0,
+      isImportant: slide.isImportant || false,
+      lastUpdated: slide.updatedAt || new Date().toISOString()
+    }));
+  }, [slides]);
 
-  // 折りたたみ時の高さ
-  const collapsedHeight = 24;
-  const currentHeight = isCollapsed ? collapsedHeight : height;
-
-  // 現在のスライドへの自動スクロール
+  // スクロール可能性をチェック
   useEffect(() => {
-    if (!isCollapsed) {
-      scrollToItem(currentSlide);
-    }
-  }, [currentSlide, scrollToItem, isCollapsed]);
-
-  // Enhanced keyboard navigation with space bar toggle
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (containerRef.current?.contains(event.target as Node)) {
-        // Space bar to toggle collapse
-        if (event.code === 'Space' && !event.ctrlKey && !event.shiftKey && !event.altKey) {
-          event.preventDefault();
-          toggleCollapse();
-          updateLastInteraction();
-          return;
-        }
-        
-        handleKeyboardNavigation(event, currentSlide, slides.length, onSlideClick);
+    const checkScrollability = () => {
+      if (scrollContainerRef.current) {
+        const { scrollWidth, clientWidth } = scrollContainerRef.current;
+        setShowScrollButtons(scrollWidth > clientWidth);
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [currentSlide, slides.length, onSlideClick, handleKeyboardNavigation, toggleCollapse, updateLastInteraction]);
+    checkScrollability();
+    window.addEventListener('resize', checkScrollability);
+    return () => window.removeEventListener('resize', checkScrollability);
+  }, [slides.length, thumbnailWidth]);
+
+  // 現在のスライドにスクロール
+  useEffect(() => {
+    if (currentSlide && scrollContainerRef.current) {
+      scrollToSlide(currentSlide);
+    }
+  }, [currentSlide, scrollToSlide]);
+
+  const handleSlideClick = useCallback((slideIndex: number) => {
+    onSlideClick(slideIndex);
+  }, [onSlideClick]);
+
+  const showAddSlide = userType === "enterprise";
 
   return (
-    <div
+    <div 
       ref={containerRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className="h-full flex flex-col bg-white border-t border-gray-200"
+      style={{ height: `${height}px` }}
     >
-      <UnifiedSlideThumbnailsContainer
-        currentHeight={currentHeight}
-        isCollapsed={isCollapsed}
-        onToggleCollapse={toggleCollapse}
-      >
-        {!isCollapsed && (
-          <>
-            {/* ヘッダー部分 */}
-            <SimplifiedSlideThumbnailsHeader
-              slidesCount={slides.length} // Fix prop name
-              userType={userType}
-            />
-            
-            {/* メインコンテンツ部分 */}
-            <SimplifiedSlideThumbnailsContent
-              slideData={slideData}
-              currentSlide={currentSlide}
-              thumbnailWidth={thumbnailWidth}
-              gap={gap}
-              showAddSlide={showAddSlide}
-              userType={userType}
-              onSlideClick={onSlideClick}
-              onOpenOverallReview={onOpenOverallReview}
-              onScrollLeft={() => scrollByDirection('left')}
-              onScrollRight={() => scrollByDirection('right')}
-              scrollContainerRef={scrollContainerRef}
-            />
-          </>
+      {/* ヘッダー部分（モバイル時のみ表示） */}
+      {contentAreaDimensions.isMobile && (
+        <SimplifiedSlideThumbnailsHeader
+          slidesCount={slides.length}
+          currentSlide={currentSlide}
+          onClose={() => {}}
+        />
+      )}
+      
+      {/* メインコンテンツエリア */}
+      <div className="flex-1 relative overflow-hidden">
+        {/* 左スクロールボタン */}
+        {showScrollButtons && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 h-8 w-8 p-0 bg-white/95 shadow-lg hover:bg-white hover:shadow-xl transition-all duration-200"
+            onClick={() => scrollByDirection('left')}
+            aria-label="前のスライドへスクロール"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
         )}
-      </UnifiedSlideThumbnailsContainer>
+        
+        {/* 右スクロールボタン */}
+        {showScrollButtons && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 h-8 w-8 p-0 bg-white/95 shadow-lg hover:bg-white hover:shadow-xl transition-all duration-200"
+            onClick={() => scrollByDirection('right')}
+            aria-label="次のスライドへスクロール"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
+        
+        {/* サムネイル一覧 */}
+        <div
+          ref={scrollContainerRef}
+          className="flex items-center h-full px-4 py-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 scroll-smooth"
+          style={{ gap: `${gap}px` }}
+          role="tablist"
+          aria-label="スライドサムネイル"
+        >
+          {/* スライドサムネイル */}
+          {slideData.map((slide, index) => (
+            <div 
+              key={slide.id} 
+              className="flex-shrink-0"
+              role="tab"
+              aria-selected={currentSlide === index + 1}
+            >
+              <ThumbnailCard
+                slide={slide}
+                slideIndex={index + 1}
+                isActive={currentSlide === index + 1}
+                thumbnailWidth={thumbnailWidth}
+                onClick={handleSlideClick}
+                userType={userType}
+              />
+            </div>
+          ))}
+          
+          {/* 新しいスライド追加カード（企業ユーザーのみ） */}
+          {showAddSlide && (
+            <div className="flex-shrink-0">
+              <AddSlideCard thumbnailWidth={thumbnailWidth} />
+            </div>
+          )}
+          
+          {/* 全体評価カード */}
+          <div className="flex-shrink-0">
+            <EvaluationCard 
+              thumbnailWidth={thumbnailWidth}
+              onOpenOverallReview={onOpenOverallReview}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

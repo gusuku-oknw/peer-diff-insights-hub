@@ -68,7 +68,7 @@ export const usePerformanceOptimization = ({ canvas, enabled }: UsePerformanceOp
     };
   }, [canvas]);
 
-  const performance = useMemo(() => performanceDataRef.current, [performanceDataRef.current.lastUpdate]);
+  const performanceMetrics = useMemo(() => performanceDataRef.current, [performanceDataRef.current.lastUpdate]);
 
-  return { optimize, performance };
+  return { optimize, performance: performanceMetrics };
 };
